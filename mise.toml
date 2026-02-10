@@ -37,7 +37,8 @@ env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+usage = 'arg "[args]" var=#true help="Extra Maven arguments (e.g. -pl prometheus-metrics-model)"'
+run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn ${usage_args:-}"
 
 [tasks.test-all]
 description = "run all tests"

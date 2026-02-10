@@ -27,6 +27,7 @@ public class PrometheusRegistry {
       new ConcurrentHashMap<>();
   private final ConcurrentHashMap<MultiCollector, List<MultiCollectorRegistration>>
       multiCollectorMetadata = new ConcurrentHashMap<>();
+  private @Nullable Predicate<String> metricFilter;
 
   /** Stores the registration details for a Collector at registration time. */
   private static class CollectorRegistration {
@@ -302,11 +303,44 @@ public class PrometheusRegistry {
     multiCollectorMetadata.clear();
   }
 
+  /**
+   * Sets a registry-level metric name filter. When set, only metrics whose names match the
+   * predicate will be included in scrape results. This filter is AND-combined with any scrape-time
+   * {@code includedNames} predicate.
+   *
+   * @param metricFilter the filter predicate, or {@code null} to remove the filter
+   */
+  public void setMetricFilter(@Nullable Predicate<String> metricFilter) {
+    this.metricFilter = metricFilter;
+  }
+
+  /** Returns the current registry-level metric name filter, or {@code null} if none is set. */
+  @Nullable
+  public Predicate<String> getMetricFilter() {
+    return metricFilter;
+  }
+
+  @Nullable
+  private Predicate<String> effectiveFilter(@Nullable Predicate<String> includedNames) {
+    Predicate<String> registryFilter = this.metricFilter;
+    if (registryFilter != null && includedNames != null) {
+      return registryFilter.and(includedNames);
+    } else if (registryFilter != null) {
+      return registryFilter;
+    } else {
+      return includedNames;
+    }
+  }
+
   public MetricSnapshots scrape() {
     return scrape((PrometheusScrapeRequest) null);
   }
 
   public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
+    Predicate<String> filter = effectiveFilter(null);
+    if (filter != null) {
+      return scrape(filter, scrapeRequest);
+    }
     List<MetricSnapshot> allSnapshots = new ArrayList<>();
     for (Collector collector : collectors) {
       MetricSnapshot snapshot =
@@ -331,15 +365,17 @@ public class PrometheusRegistry {
   }
 
   public MetricSnapshots scrape(Predicate<String> includedNames) {
-    if (includedNames == null) {
-      return scrape();
+    Predicate<String> filter = effectiveFilter(includedNames);
+    if (filter == null) {
+      return scrape((PrometheusScrapeRequest) null);
     }
-    return scrape(includedNames, null);
+    return scrape(filter, null);
   }
 
   public MetricSnapshots scrape(
       Predicate<String> includedNames, @Nullable PrometheusScrapeRequest scrapeRequest) {
-    if (includedNames == null) {
+    Predicate<String> filter = effectiveFilter(includedNames);
+    if (filter == null) {
       return scrape(scrapeRequest);
     }
     List<MetricSnapshot> allSnapshots = new ArrayList<>();
@@ -347,11 +383,11 @@ public class PrometheusRegistry {
       String prometheusName = collector.getPrometheusName();
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
       // prometheusName != null means we can skip the scrape if the name is excluded.
-      if (prometheusName == null || includedNames.test(prometheusName)) {
+      if (prometheusName == null || filter.test(prometheusName)) {
         MetricSnapshot snapshot =
             scrapeRequest == null
-                ? collector.collect(includedNames)
-                : collector.collect(includedNames, scrapeRequest);
+                ? collector.collect(filter)
+                : collector.collect(filter, scrapeRequest);
         if (snapshot != null) {
           allSnapshots.add(snapshot);
         }
@@ -365,7 +401,7 @@ public class PrometheusRegistry {
       // the filter.
       boolean excluded = !prometheusNames.isEmpty();
       for (String prometheusName : prometheusNames) {
-        if (includedNames.test(prometheusName)) {
+        if (filter.test(prometheusName)) {
           excluded = false;
           break;
         }
@@ -373,8 +409,8 @@ public class PrometheusRegistry {
       if (!excluded) {
         MetricSnapshots snapshots =
             scrapeRequest == null
-                ? collector.collect(includedNames)
-                : collector.collect(includedNames, scrapeRequest);
+                ? collector.collect(filter)
+                : collector.collect(filter, scrapeRequest);
         for (MetricSnapshot snapshot : snapshots) {
           if (snapshot != null) {
             allSnapshots.add(snapshot);

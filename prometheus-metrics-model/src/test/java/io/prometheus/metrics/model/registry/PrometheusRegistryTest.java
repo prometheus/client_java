@@ -315,7 +315,7 @@ class PrometheusRegistryTest {
         .hasMessageContaining("duplicate metric name with identical label schema");
 
     // Only the first collector should be in the registry; counter2 was removed on rollback.
-    assertThat(registry.scrape().size()).isEqualTo(1);
+    assertThat(registry.scrape().size()).isOne();
   }
 
   @Test
@@ -999,12 +999,12 @@ class PrometheusRegistryTest {
     // Unregister first collector - name should still be registered
     registry.unregister(counter1);
     MetricSnapshots snapshots = registry.scrape();
-    assertThat(snapshots.size()).isEqualTo(1);
+    assertThat(snapshots.size()).isOne();
 
     // Unregister second collector - name should be removed
     registry.unregister(counter2);
     snapshots = registry.scrape();
-    assertThat(snapshots.size()).isEqualTo(0);
+    assertThat(snapshots.size()).isZero();
 
     // Should be able to register again with same name
     assertThatCode(() -> registry.register(counter1)).doesNotThrowAnyException();
@@ -1038,7 +1038,7 @@ class PrometheusRegistryTest {
     assertThat(registry.scrape().size()).isEqualTo(2);
 
     registry.unregister(multi);
-    assertThat(registry.scrape().size()).isEqualTo(0);
+    assertThat(registry.scrape().size()).isZero();
 
     // Should be able to register collectors with same names again
     Collector counter =
@@ -1063,6 +1063,98 @@ class PrometheusRegistryTest {
   }
 
   @Test
+  void metricFilter_filtersOnScrape() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(counterB);
+    registry.register(gaugeA);
+
+    registry.setMetricFilter(name -> name.startsWith("counter"));
+
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isEqualTo(2);
+  }
+
+  @Test
+  void metricFilter_combinedWithScrapeTimeFilter() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(counterB);
+    registry.register(gaugeA);
+
+    registry.setMetricFilter(name -> name.startsWith("counter"));
+    MetricSnapshots snapshots = registry.scrape(name -> name.equals("counter_a"));
+    assertThat(snapshots.size()).isOne();
+  }
+
+  @Test
+  void metricFilter_nullClearsFilter() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(counterB);
+    registry.register(gaugeA);
+
+    registry.setMetricFilter(name -> name.startsWith("counter"));
+    assertThat(registry.scrape().size()).isEqualTo(2);
+
+    registry.setMetricFilter(null);
+    assertThat(registry.scrape().size()).isEqualTo(3);
+  }
+
+  @Test
+  void metricFilter_appliedToScrapeWithScrapeRequest() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(counterB);
+    registry.register(gaugeA);
+
+    registry.setMetricFilter(name -> name.startsWith("counter"));
+
+    MetricSnapshots snapshots = registry.scrape((PrometheusScrapeRequest) null);
+    assertThat(snapshots.size()).isEqualTo(2);
+  }
+
+  @Test
+  void metricFilter_appliedToMultiCollector() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(multiCollector);
+
+    registry.setMetricFilter(name -> name.equals("counter_a"));
+
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isOne();
+  }
+
+  @Test
+  void metricFilter_noNameCollector_alwaysScraped() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(noName);
+    registry.register(counterA1);
+
+    // Filter matches both "counter_a" and "no_name_gauge" (the snapshot name of noName).
+    // noName has null getPrometheusName(), so the registry always calls collect(filter) on it.
+    // The collector's own collect(Predicate) then tests the snapshot name against the filter.
+    registry.setMetricFilter(name -> name.equals("counter_a") || name.equals("no_name_gauge"));
+
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isEqualTo(2);
+  }
+
+  @Test
+  void metricFilter_excludesAll() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counterA1);
+    registry.register(counterB);
+    registry.register(gaugeA);
+
+    registry.setMetricFilter(name -> false);
+
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isZero();
+  }
+
+  @Test
   void unregister_legacyCollector_noErrors() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
@@ -1081,10 +1173,10 @@ class PrometheusRegistryTest {
         };
 
     registry.register(legacy);
-    assertThat(registry.scrape().size()).isEqualTo(1);
+    assertThat(registry.scrape().size()).isOne();
 
     // Unregister should work without errors even for legacy collectors
     assertThatCode(() -> registry.unregister(legacy)).doesNotThrowAnyException();
-    assertThat(registry.scrape().size()).isEqualTo(0);
+    assertThat(registry.scrape().size()).isZero();
   }
 }
