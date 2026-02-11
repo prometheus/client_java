@@ -96,9 +96,11 @@ OpenTelemetrySdk openTelemetry =
 RuntimeMetrics runtimeMetrics =
     RuntimeMetrics.builder(openTelemetry).build();
 
-// Close on shutdown to stop JMX metric collection
-Runtime.getRuntime()
-    .addShutdownHook(new Thread(runtimeMetrics::close));
+// Close on shutdown to stop metric collection and server
+Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+  runtimeMetrics.close();
+  prometheusServer.close();
+}));
 
 // Scrape at http://localhost:9464/metrics
 ```

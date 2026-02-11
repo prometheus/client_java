@@ -22,9 +22,10 @@ jobs:
       - name: Remap main branch URLs to PR branch for link checking
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
-          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/blob/main/(.*) https://github.com/prometheus/client_java/blob/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
-          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/tree/main/(.*) https://github.com/prometheus/client_java/tree/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
+          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/blob/main/(.*) https://github.com/${PR_HEAD_REPO}/blob/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
+          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/tree/main/(.*) https://github.com/${PR_HEAD_REPO}/tree/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
 
       - name: Lint for pull requests
         env:

@@ -22,7 +22,7 @@
       <dependency>
         <groupId>io.opentelemetry.instrumentation</groupId>
         <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
-        <version>2.24.0-alpha</version>
+        <version>${otel.instrumentation.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
