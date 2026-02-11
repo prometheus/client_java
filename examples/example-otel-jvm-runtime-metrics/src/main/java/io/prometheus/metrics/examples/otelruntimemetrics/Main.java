@@ -53,11 +53,14 @@ public class Main {
     RuntimeMetrics runtimeMetrics =
         RuntimeMetrics.builder(openTelemetry).captureGcCause().emitExperimentalTelemetry().build();
 
-    // 5. Close RuntimeMetrics on shutdown to stop JMX metric collection.
-    Runtime.getRuntime().addShutdownHook(new Thread(runtimeMetrics::close));
-
-    // 6. Expose both Prometheus and OTel metrics on a single endpoint.
+    // 5. Expose both Prometheus and OTel metrics on a single endpoint.
     HTTPServer server = HTTPServer.builder().port(9400).registry(registry).buildAndStart();
+
+    // 6. Close RuntimeMetrics and server on shutdown to stop JMX metric collection.
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        runtimeMetrics.close();
+        server.close();
+    }));
 
     System.out.println(
         "HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
