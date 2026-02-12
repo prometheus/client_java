@@ -4,34 +4,39 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>io.prometheus</groupId>
-    <artifactId>examples</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
-  </parent>
-
+  <groupId>io.prometheus</groupId>
   <artifactId>example-exporter-multi-target</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
   <name>Example - HTTPServer Exporter Multi Target</name>
   <description>
     Prometheus Metrics Example for multi-target pattern implementation
   </description>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>prometheus-metrics-bom</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

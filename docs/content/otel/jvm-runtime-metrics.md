@@ -24,12 +24,15 @@ OTel SDK wiring shown below.
 
 ## Dependencies
 
+Use the [OTel Support]({{< relref "support.md" >}}) module
+to pull in the OTel SDK and Prometheus exporter, then add
+the runtime-telemetry instrumentation:
+
 {{< tabs "jvm-runtime-deps" >}}
 {{< tab "Gradle" >}}
 
 ```groovy
-implementation 'io.opentelemetry:opentelemetry-sdk'
-implementation 'io.opentelemetry:opentelemetry-exporter-prometheus'
+implementation platform('io.prometheus:prometheus-metrics-otel-support:$version')
 
 // Pick ONE of the following:
 // Java 8+:
@@ -43,12 +46,10 @@ implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry
 
 ```xml
 <dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-sdk</artifactId>
-</dependency>
-<dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-exporter-prometheus</artifactId>
+    <groupId>io.prometheus</groupId>
+    <artifactId>prometheus-metrics-otel-support</artifactId>
+    <version>$version</version>
+    <type>pom</type>
 </dependency>
 
 <!-- Pick ONE of the following -->
