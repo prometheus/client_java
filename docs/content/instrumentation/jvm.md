@@ -3,6 +3,16 @@ title: JVM
 weight: 1
 ---
 
+{{< hint type=note >}}
+
+Looking for JVM metrics that follow OTel semantic
+conventions? See
+[OTel JVM Runtime Metrics]({{< relref "../otel/jvm-runtime-metrics.md" >}})
+for an alternative based on OpenTelemetry's
+runtime-telemetry module.
+
+{{< /hint >}}
+
 The JVM instrumentation module provides a variety of out-of-the-box JVM and process metrics. To use
 it, add the following dependency:
 
