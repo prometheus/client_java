@@ -57,10 +57,13 @@ public class Main {
     HTTPServer server = HTTPServer.builder().port(9400).registry(registry).buildAndStart();
 
     // 6. Close RuntimeMetrics and server on shutdown to stop JMX metric collection.
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        runtimeMetrics.close();
-        server.close();
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  runtimeMetrics.close();
+                  server.close();
+                }));
 
     System.out.println(
         "HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
