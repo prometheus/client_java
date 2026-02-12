@@ -60,6 +60,7 @@
     <module>prometheus-metrics-instrumentation-dropwizard</module>
     <module>prometheus-metrics-instrumentation-guava</module>
     <module>prometheus-metrics-simpleclient-bridge</module>
+    <module>prometheus-metrics-otel-support</module>
   </modules>
 
   <dependencies>
