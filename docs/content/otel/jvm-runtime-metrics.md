@@ -24,18 +24,21 @@ OTel SDK wiring shown below.
 
 ## Dependencies
 
+Use the [OTel Support]({{< relref "support.md" >}}) module
+to pull in the OTel SDK and Prometheus exporter, then add
+the runtime-telemetry instrumentation:
+
 {{< tabs "jvm-runtime-deps" >}}
 {{< tab "Gradle" >}}
 
 ```groovy
-implementation 'io.opentelemetry:opentelemetry-sdk'
-implementation 'io.opentelemetry:opentelemetry-exporter-prometheus'
+implementation 'io.prometheus:prometheus-metrics-otel-support:$version'
 
-// Pick ONE of the following:
-// Java 8+:
-implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8'
-// Java 17+ (adds JFR-based metrics):
-// implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java17'
+// Use opentelemetry-runtime-telemetry-java8 (Java 8+)
+// or opentelemetry-runtime-telemetry-java17 (Java 17+, JFR-based)
+implementation(
+    'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:$otelVersion-alpha'
+)
 ```
 
 {{< /tab >}}
@@ -43,12 +46,10 @@ implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry
 
 ```xml
 <dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-sdk</artifactId>
-</dependency>
-<dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-exporter-prometheus</artifactId>
+    <groupId>io.prometheus</groupId>
+    <artifactId>prometheus-metrics-otel-support</artifactId>
+    <version>$version</version>
+    <type>pom</type>
 </dependency>
 
 <!-- Pick ONE of the following -->
@@ -56,12 +57,14 @@ implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry
 <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
     <artifactId>opentelemetry-runtime-telemetry-java8</artifactId>
+    <version>$otelVersion-alpha</version>
 </dependency>
 <!-- Java 17+ (adds JFR-based metrics) -->
 <!--
 <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
     <artifactId>opentelemetry-runtime-telemetry-java17</artifactId>
+    <version>$otelVersion-alpha</version>
 </dependency>
 -->
 ```

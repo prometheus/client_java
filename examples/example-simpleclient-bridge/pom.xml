@@ -3,18 +3,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>io.prometheus</groupId>
-    <artifactId>examples</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
-  </parent>
-
+  <groupId>io.prometheus</groupId>
   <artifactId>example-simpleclient-bridge</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.release>8</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <name>Example - Simpleclient Bridge</name>
   <description>
     Prometheus Metrics Example of the Simpleclient Backwards Compatibility module
   </description>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>prometheus-metrics-bom</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
@@ -25,12 +38,10 @@
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-simpleclient-bridge</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

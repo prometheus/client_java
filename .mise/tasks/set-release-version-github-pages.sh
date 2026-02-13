@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-#MISE description="Set release version in GitHub Pages quickstart.md"
+#MISE description="Set release version in all GitHub Pages docs"
 
 set -euox pipefail
 
 version=$(git tag -l | grep 'v' | sort | tail -1 | sed 's/v//')
-marker="\$version"
-sed -i "s/$marker/$version/g" docs/content/getting-started/quickstart.md
+otelVersion=$(grep -oP '<otel.instrumentation.version>\K[^<]+' pom.xml | sed 's/-alpha$//')
+
+find ./docs/content -name '*.md' \
+	-exec sed -i "s/\$version/$version/g" {} + \
+	-exec sed -i "s/\$otelVersion/$otelVersion/g" {} +
