@@ -22,7 +22,7 @@
       <dependency>
         <groupId>io.prometheus</groupId>
         <artifactId>prometheus-metrics-bom</artifactId>
-        <version>1.5.0-SNAPSHOT</version>
+        <version>1.5.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
