@@ -123,7 +123,7 @@ mise run lint:super-linter
 
 - Docs live under `docs/content/` and use `$version` as a placeholder for the library version
 - When publishing GitHub Pages, `mise run set-release-version-github-pages` replaces `$version` with the latest git tag across all `docs/content/**/*.md` files (the published site is not versioned)
-- When writing docs, always use `$version` for the Prometheus client version — never hardcode it
+- Use `$version` for the Prometheus client version and `$otelVersion-alpha` for the OTel instrumentation version — never hardcode them
 
 ## Java Version
 

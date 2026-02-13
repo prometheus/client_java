@@ -36,7 +36,9 @@ implementation 'io.prometheus:prometheus-metrics-otel-support:$version'
 
 // Use opentelemetry-runtime-telemetry-java8 (Java 8+)
 // or opentelemetry-runtime-telemetry-java17 (Java 17+, JFR-based)
-implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:2.24.0-alpha'
+implementation(
+    'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:$otelVersion-alpha'
+)
 ```
 
 {{< /tab >}}
@@ -55,14 +57,14 @@ implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry
 <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
     <artifactId>opentelemetry-runtime-telemetry-java8</artifactId>
-    <version>2.24.0-alpha</version>
+    <version>$otelVersion-alpha</version>
 </dependency>
 <!-- Java 17+ (adds JFR-based metrics) -->
 <!--
 <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
     <artifactId>opentelemetry-runtime-telemetry-java17</artifactId>
-    <version>2.24.0-alpha</version>
+    <version>$otelVersion-alpha</version>
 </dependency>
 -->
 ```
