@@ -2,7 +2,7 @@
 "go:github.com/gohugoio/hugo" = "v0.155.3"
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.2+10.0.LTS"
-lychee = "0.22.0"
+lychee = "0.23.0"
 protoc = "33.5"
 
 [env]
