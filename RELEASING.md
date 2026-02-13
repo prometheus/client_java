@@ -19,11 +19,16 @@ mise run update-benchmarks
 
 ## Major or minor release
 
-After the release is created, do a text replace everywhere in the repository to update the
-snapshot version in the `pom.xml` files (and some other files) to the next version.
-For example, if the last release was `1.4.0`, the next snapshot version should be `1.5.0-SNAPSHOT`.
+After the release is created, bump the snapshot version in all
+`pom.xml` files:
 
-Replace `1.4.0-SNAPSHOT` with `1.5.0-SNAPSHOT` in all following files.
+```shell
+# Auto-increment the minor version (e.g. 1.5.0-SNAPSHOT -> 1.6.0-SNAPSHOT)
+mise run bump-snapshot
+
+# Or specify an explicit version (e.g. for a major bump)
+mise run bump-snapshot 2.0.0-SNAPSHOT
+```
 
 ## If the GPG key expired
 
