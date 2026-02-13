@@ -30,7 +30,6 @@ run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=tru
 [tasks.generate]
 description = "bare compile, ignoring formatting and linters"
 run = [
-  "mise use --pin protoc@latest",
   "./mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 ]
 env.PROTO_GENERATION = "true"
