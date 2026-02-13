@@ -58,10 +58,23 @@ mise run compile
 
 ## Updating the Protobuf Java Classes
 
+The generated protobuf `Metrics.java` lives in a versioned package
+(e.g., `...generated.com_google_protobuf_4_33_5`) that changes with each
+protobuf release. A stable extending class at
+`...generated/Metrics.java` reexports all types so that consumer code
+only imports from the version-free package. On protobuf upgrades only
+the `extends` clause in the stable class changes.
+
 In the failing PR from renovate, run:
 
 ```shell
 mise run generate
 ```
 
-Add the new `Metrics.java` to Git and commit it.
+The script will:
+
+1. Re-generate the protobuf sources with the new version.
+2. Update the versioned package name in all Java files
+   (including the stable `Metrics.java` extends clause).
+
+Add the updated files to Git and commit them.
