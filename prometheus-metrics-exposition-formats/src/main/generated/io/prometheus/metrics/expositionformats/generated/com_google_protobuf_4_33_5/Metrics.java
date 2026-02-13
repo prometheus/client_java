@@ -7,8 +7,8 @@
 package io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_5;
 
 @com.google.protobuf.Generated
-public final class Metrics extends com.google.protobuf.GeneratedFile {
-  private Metrics() {}
+public class Metrics extends com.google.protobuf.GeneratedFile {
+  protected Metrics() {}
   static {
     com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
       com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,

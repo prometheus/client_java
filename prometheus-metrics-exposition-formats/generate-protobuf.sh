@@ -18,7 +18,7 @@ mkdir -p "$TARGET_DIR"
 rm -rf $PROTO_DIR || true
 mkdir -p $PROTO_DIR
 
-OLD_PACKAGE=$(sed -nE 's/import (io.prometheus.metrics.expositionformats.generated.*).Metrics;/\1/p' src/main/java/io/prometheus/metrics/expositionformats/internal/PrometheusProtobufWriterImpl.java)
+OLD_PACKAGE=$(sed -nE 's/.*extends (io\.prometheus\.metrics\.expositionformats\.generated\.[^ ]*?)\.Metrics.*/\1/p' src/main/java/io/prometheus/metrics/expositionformats/generated/Metrics.java)
 PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}"
 
 if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then
@@ -32,6 +32,10 @@ sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" 
 protoc --java_out "$TARGET_DIR" $PROTO_DIR/metrics.proto
 sed -i '1 i\//CHECKSTYLE:OFF: checkstyle' "$(find src/main/generated/io -type f)"
 sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$(find src/main/generated/io -type f)"
+
+GENERATED_FILE="$TARGET_DIR/${PACKAGE//\.//}/Metrics.java"
+sed -i 's/public final class Metrics/public class Metrics/' "$GENERATED_FILE"
+sed -i 's/private Metrics() {}/protected Metrics() {}/' "$GENERATED_FILE"
 
 GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 

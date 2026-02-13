@@ -7,7 +7,7 @@ import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.TextFormatUtil;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_5.Metrics;
+import io.prometheus.metrics.expositionformats.generated.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import javax.annotation.Nullable;
 
+@SuppressWarnings("NonCanonicalType")
 public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   @Override
