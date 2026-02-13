@@ -30,7 +30,7 @@
       <dependency>
         <groupId>io.opentelemetry.instrumentation</groupId>
         <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
-        <version>2.24.0-alpha</version>
+        <version>2.25.0-alpha</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
