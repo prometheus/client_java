@@ -7,6 +7,11 @@
   <artifactId>example-prometheus-properties</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <maven.compiler.release>8</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <name>Example - prometheus.properties</name>
   <description>
     Example of runtime configuration with prometheus.properties

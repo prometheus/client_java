@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#MISE description="Set release version in GitHub Pages quickstart.md"
+#MISE description="Set release version in all GitHub Pages docs"
 
 set -euox pipefail
 

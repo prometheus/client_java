@@ -8,6 +8,11 @@
   <artifactId>example-otel-jvm-runtime-metrics</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <maven.compiler.release>8</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <name>Example - OTel JVM Runtime Metrics</name>
   <description>
     Example of combining Prometheus metrics with OpenTelemetry JVM runtime metrics on one endpoint

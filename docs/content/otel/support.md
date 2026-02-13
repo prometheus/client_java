@@ -5,8 +5,7 @@ weight: 2
 
 The `prometheus-metrics-otel-support` module bundles the
 OpenTelemetry SDK and the Prometheus exporter into a single
-POM dependency. It also imports the OTel instrumentation BOM
-so that version management is handled automatically.
+POM dependency.
 
 Use this module when you want to combine OpenTelemetry
 instrumentations (e.g. JVM runtime metrics) with the
@@ -18,7 +17,7 @@ Prometheus Java client on one `/metrics` endpoint.
 {{< tab "Gradle" >}}
 
 ```groovy
-implementation platform('io.prometheus:prometheus-metrics-otel-support:$version')
+implementation 'io.prometheus:prometheus-metrics-otel-support:$version'
 ```
 
 {{< /tab >}}
@@ -40,11 +39,6 @@ This single dependency replaces:
 
 - `io.opentelemetry:opentelemetry-sdk`
 - `io.opentelemetry:opentelemetry-exporter-prometheus`
-
-It also imports the `opentelemetry-instrumentation-bom-alpha`
-so you can add OTel instrumentation modules (like
-`opentelemetry-runtime-telemetry-java8`) without specifying
-their version.
 
 ## Use Cases
 

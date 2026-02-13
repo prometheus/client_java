@@ -119,6 +119,12 @@ mise run lint:super-linter
 - Integration tests are in `integration-tests/` and run during `verify` phase
 - Acceptance tests use OATs framework: `mise run acceptance-test`
 
+## Documentation
+
+- Docs live under `docs/content/` and use `$version` as a placeholder for the library version
+- When publishing GitHub Pages, `mise run set-release-version-github-pages` replaces `$version` with the latest git tag across all `docs/content/**/*.md` files (the published site is not versioned)
+- When writing docs, always use `$version` for the Prometheus client version — never hardcode it
+
 ## Java Version
 
 Source compatibility: Java 8. Tests run on Java 25 (configured in `mise.toml`).

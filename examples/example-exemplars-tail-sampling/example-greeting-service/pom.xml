@@ -8,6 +8,11 @@
   <artifactId>example-greeting-service</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <name>Example - OpenTelemetry Exemplars - Greeting Service</name>
   <description>
     Part of a distributed "Hello, World" REST service to show Exemplars with OpenTelemetry's distributed

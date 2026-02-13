@@ -7,6 +7,11 @@
   <artifactId>example-exporter-servlet-tomcat</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <name>Example - Servlet Exporter with Tomcat</name>
   <description>
     Prometheus Metrics Example using Embedded Tomcat and the Exporter Servlet
