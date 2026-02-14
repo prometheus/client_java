@@ -49,7 +49,7 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks."lint:super-linter"]
 description = "Run Super-Linter with auto-fix on the repository"
-file = "https://raw.githubusercontent.com/grafana/docker-otel-lgtm/main/.mise/tasks/lint/super-linter.sh"
+file = "https://raw.githubusercontent.com/grafana/docker-otel-lgtm/f5d39ffaf01b5bbe815b3821e4e3257db32f49e7/.mise/tasks/lint/super-linter.sh"
 
 [tasks."lint:links"]
 file = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/refs/heads/main/.mise/tasks/lint/links.sh"
