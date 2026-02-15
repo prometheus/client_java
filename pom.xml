@@ -24,7 +24,7 @@
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
     <protobuf-java.version>4.33.5</protobuf-java.version>
     <guava.version>33.5.0-jre</guava.version>
-    <junit-jupiter.version>6.0.2</junit-jupiter.version>
+    <junit-jupiter.version>6.0.3</junit-jupiter.version>
     <otel.instrumentation.version>2.25.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
