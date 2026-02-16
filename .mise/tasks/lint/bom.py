@@ -36,7 +36,6 @@ def add_dir(dir_path: Path, want: List[str]):
         raise FileNotFoundError(f"Directory {dir_path} does not exist.")
 
     if any(dir_path.name == ig for ig in IGNORE_DIRS):
-        print(f"Skipping {dir_path}")
         return
 
     pom = dir_path / "pom.xml"
@@ -47,7 +46,6 @@ def add_dir(dir_path: Path, want: List[str]):
     if not artifact_id:
         raise RuntimeError(f"No artifactId found in {pom}")
 
-    print(f"Found artifactId '{artifact_id}' in {pom}")
     want.append(artifact_id)
 
 
@@ -108,7 +106,6 @@ def main() -> int:
             sys.stdout.writelines(diff)
             return 1
         else:
-            print("BOM file is up to date.")
             return 0
 
     except Exception as e:
