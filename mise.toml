@@ -3,9 +3,12 @@
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.23.0"
+node = "24.13.1"
+"npm:renovate" = "43.8.5"
 protoc = "33.5"
 
 [env]
+RENOVATE_TRACKED_DEPS_EXCLUDE="github-actions,github-runners"
 # renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
 SUPER_LINTER_VERSION="v8.5.0@sha256:6831c0a801d353b510e4e468a3209a8a48bf0102e193d5c7e94e57667fdf64eb"
 
@@ -50,15 +53,19 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 # Shared lint tasks from flint (https://github.com/grafana/flint)
 [tasks."lint:super-linter"]
 description = "Run Super-Linter on the repository"
-file = "https://raw.githubusercontent.com/grafana/flint/d51085d44d29d60914eaf1d353a45a68bfccf352/tasks/lint/super-linter.sh" # v0.2.0
+file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/super-linter.sh" # v0.4.0
 
 [tasks."lint:links"]
 description = "Lint links"
-file = "https://raw.githubusercontent.com/grafana/flint/d51085d44d29d60914eaf1d353a45a68bfccf352/tasks/lint/links.sh" # v0.2.0
+file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/links.sh" # v0.4.0
+
+[tasks."lint:renovate-deps"]
+description = "Verify renovate-tracked-deps.json is up to date"
+file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/renovate-deps.py" # v0.4.0
 
 [tasks."lint"]
 description = "Run all lints"
-depends = ["lint:super-linter", "lint:links", "lint:bom"]
+depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:renovate-deps"]
 
 [tasks.fix]
 description = "Auto-fix lint issues"

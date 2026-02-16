@@ -18,27 +18,14 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          fetch-depth: 0 # needed for merge-base used in lint:links-in-modified-files
+          fetch-depth: 0 # needed for git diff --merge-base in lint:links
 
       - name: Setup mise
         uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
-
-      - name: Remap main branch URLs to PR branch for link checking
-        env:
-          GITHUB_HEAD_REF: ${{ github.head_ref }}
-          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-        run: |
-          REPO="prometheus/client_java"
-          BASE="https://github.com"
-          CFG=".github/config/lychee.toml"
-          for T in blob tree; do
-            FROM="${BASE}/${REPO}/${T}/main/(.*)"
-            TO="${BASE}/${PR_HEAD_REPO}/${T}/${GITHUB_HEAD_REF}/\$1"
-            sed -i "/^remap = \[$/a\  \"${FROM} ${TO}\"," "${CFG}"
-          done
 
       - name: Lint
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: mise run lint

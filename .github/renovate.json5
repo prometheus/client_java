@@ -1,6 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "config:recommended"],
+  extends: ["config:best-practices", "config:recommended", "github>grafana/flint"],
   platformCommit: "enabled",
   automerge: true,
   ignorePaths: [
@@ -33,19 +33,5 @@
       matchPackageNames: ["/^io\\.prometheus:(examples|example-.+|integration-tests|it-.+)$/"],
     },
   ],
-  customManagers: [
-    {
-      customType: "regex",
-      description: "Update _VERSION variables in mise.toml",
-      managerFilePatterns: ["/^mise\\.toml$/"],
-      matchStrings: ['# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION="?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s'],
-    },
-    {
-      customType: "regex",
-      description: "Update flint version in raw.githubusercontent.com URLs (pinned to SHA)",
-      managerFilePatterns: ["/^mise\\.toml$/"],
-      matchStrings: ["https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentDigest>[a-f0-9]{40})/.*#\\s*(?<currentValue>v\\S+)"],
-      datasourceTemplate: "github-tags",
-    },
-  ],
+  customManagers: [],
 }

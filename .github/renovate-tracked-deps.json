@@ -1,12 +1,560 @@
 {
+  ".github/renovate.json5": {
+    "renovate-config-presets": ["grafana/flint"]
+  },
+  ".mise/envs/native/mise.toml": {
+    "mise": ["java"]
+  },
+  ".mvn/wrapper/maven-wrapper.properties": {
+    "maven-wrapper": ["maven"]
+  },
+  "benchmarks/pom.xml": {
+    "maven": [
+      "com.codahale.metrics:metrics-core",
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exposition-textformats",
+      "io.prometheus:simpleclient",
+      "org.openjdk.jmh:jmh-core",
+      "org.openjdk.jmh:jmh-generator-annprocess"
+    ]
+  },
+  "integration-tests/it-common/pom.xml": {
+    "maven": [
+      "io.prometheus:integration-tests",
+      "io.prometheus:prometheus-metrics-exposition-formats"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-duplicate-metrics-sample/pom.xml": {
+    "maven": [
+      "io.prometheus:it-exporter",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-httpserver-sample/pom.xml": {
+    "maven": [
+      "io.prometheus:it-exporter",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-no-protobuf/pom.xml": {
+    "maven": [
+      "io.prometheus:it-exporter",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-servlet-jetty-sample/pom.xml": {
+    "maven": [
+      "io.prometheus:it-exporter",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-servlet-jakarta",
+      "org.eclipse.jetty.ee10:jetty-ee10-servlet",
+      "org.eclipse.jetty:jetty-server"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-servlet-tomcat-sample/pom.xml": {
+    "maven": [
+      "io.prometheus:it-exporter",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-servlet-jakarta",
+      "org.apache.tomcat.embed:tomcat-embed-core"
+    ]
+  },
+  "integration-tests/it-exporter/it-exporter-test/pom.xml": {
+    "maven": ["io.prometheus:it-common", "io.prometheus:it-exporter"]
+  },
+  "integration-tests/it-exporter/it-no-protobuf-test/pom.xml": {
+    "maven": ["io.prometheus:it-common", "io.prometheus:it-exporter"]
+  },
+  "integration-tests/it-exporter/pom.xml": {
+    "maven": ["io.prometheus:integration-tests"]
+  },
+  "integration-tests/it-pushgateway/pom.xml": {
+    "maven": [
+      "com.jayway.jsonpath:json-path",
+      "com.squareup.okhttp:okhttp",
+      "io.prometheus:integration-tests",
+      "io.prometheus:it-common",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-pushgateway"
+    ]
+  },
+  "integration-tests/it-spring-boot-smoke-test/pom.xml": {
+    "maven": [
+      "com.diffplug.spotless:spotless-maven-plugin",
+      "io.prometheus:it-common",
+      "io.prometheus:prometheus-metrics-bom",
+      "org.junit:junit-bom",
+      "org.springframework.boot:spring-boot-starter-parent"
+    ]
+  },
+  "integration-tests/pom.xml": {
+    "maven": [
+      "commons-io:commons-io",
+      "io.prometheus:client_java",
+      "org.testcontainers:junit-jupiter"
+    ]
+  },
   "mise.toml": {
     "mise": [
       "go:github.com/gohugoio/hugo",
       "go:github.com/grafana/oats",
       "java",
       "lychee",
+      "node",
+      "npm:renovate",
       "protoc"
     ],
     "regex": ["ghcr.io/super-linter/super-linter", "grafana/flint"]
+  },
+  "mvnw": {
+    "maven-wrapper": ["maven-wrapper"]
+  },
+  "mvnw.cmd": {
+    "maven-wrapper": ["maven-wrapper"]
+  },
+  "pom.xml": {
+    "maven": [
+      "com.google.code.findbugs:jsr305",
+      "com.google.errorprone:error_prone_core",
+      "com.google.guava:guava",
+      "com.google.protobuf:protobuf-java",
+      "com.uber.nullaway:nullaway",
+      "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
+      "io.opentelemetry:opentelemetry-proto",
+      "io.prometheus:client_java_parent",
+      "org.apache.felix:maven-bundle-plugin",
+      "org.apache.maven.plugins:maven-checkstyle-plugin",
+      "org.apache.maven.plugins:maven-clean-plugin",
+      "org.apache.maven.plugins:maven-compiler-plugin",
+      "org.apache.maven.plugins:maven-dependency-plugin",
+      "org.apache.maven.plugins:maven-deploy-plugin",
+      "org.apache.maven.plugins:maven-enforcer-plugin",
+      "org.apache.maven.plugins:maven-failsafe-plugin",
+      "org.apache.maven.plugins:maven-install-plugin",
+      "org.apache.maven.plugins:maven-jar-plugin",
+      "org.apache.maven.plugins:maven-javadoc-plugin",
+      "org.apache.maven.plugins:maven-resources-plugin",
+      "org.apache.maven.plugins:maven-shade-plugin",
+      "org.apache.maven.plugins:maven-site-plugin",
+      "org.apache.maven.plugins:maven-surefire-plugin",
+      "org.assertj:assertj-core",
+      "org.awaitility:awaitility",
+      "org.codehaus.mojo:build-helper-maven-plugin",
+      "org.codehaus.mojo:exec-maven-plugin",
+      "org.codehaus.mojo:versions-maven-plugin",
+      "org.jacoco:jacoco-maven-plugin",
+      "org.junit-pioneer:junit-pioneer",
+      "org.junit.jupiter:junit-jupiter",
+      "org.junit.jupiter:junit-jupiter-params",
+      "org.junit:junit-bom",
+      "org.mockito:mockito-core",
+      "org.slf4j:slf4j-simple",
+      "org.wiremock:wiremock"
+    ]
+  },
+  "prometheus-metrics-bom/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java_parent",
+      "io.prometheus:prometheus-metrics-config",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-common",
+      "io.prometheus:prometheus-metrics-exporter-httpserver",
+      "io.prometheus:prometheus-metrics-exporter-opentelemetry",
+      "io.prometheus:prometheus-metrics-exporter-opentelemetry-no-otel",
+      "io.prometheus:prometheus-metrics-exporter-opentelemetry-otel-agent-resources",
+      "io.prometheus:prometheus-metrics-exporter-pushgateway",
+      "io.prometheus:prometheus-metrics-exporter-servlet-jakarta",
+      "io.prometheus:prometheus-metrics-exporter-servlet-javax",
+      "io.prometheus:prometheus-metrics-exposition-formats",
+      "io.prometheus:prometheus-metrics-exposition-formats-no-protobuf",
+      "io.prometheus:prometheus-metrics-exposition-textformats",
+      "io.prometheus:prometheus-metrics-instrumentation-caffeine",
+      "io.prometheus:prometheus-metrics-instrumentation-dropwizard",
+      "io.prometheus:prometheus-metrics-instrumentation-dropwizard5",
+      "io.prometheus:prometheus-metrics-instrumentation-guava",
+      "io.prometheus:prometheus-metrics-instrumentation-jvm",
+      "io.prometheus:prometheus-metrics-model",
+      "io.prometheus:prometheus-metrics-otel-support",
+      "io.prometheus:prometheus-metrics-simpleclient-bridge",
+      "io.prometheus:prometheus-metrics-tracer",
+      "io.prometheus:prometheus-metrics-tracer-common",
+      "io.prometheus:prometheus-metrics-tracer-initializer",
+      "io.prometheus:prometheus-metrics-tracer-otel",
+      "io.prometheus:prometheus-metrics-tracer-otel-agent"
+    ]
+  },
+  "prometheus-metrics-config/pom.xml": {
+    "maven": ["io.prometheus:client_java"]
+  },
+  "prometheus-metrics-core/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-config",
+      "io.prometheus:prometheus-metrics-exposition-formats-no-protobuf",
+      "io.prometheus:prometheus-metrics-model",
+      "io.prometheus:prometheus-metrics-tracer-initializer",
+      "org.apache.commons:commons-math3"
+    ]
+  },
+  "prometheus-metrics-exporter-common/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exposition-formats",
+      "io.prometheus:prometheus-metrics-exposition-textformats",
+      "io.prometheus:prometheus-metrics-model"
+    ]
+  },
+  "prometheus-metrics-exporter-httpserver/pom.xml": {
+    "maven": ["io.prometheus:client_java", "io.prometheus:prometheus-metrics-exporter-common"]
+  },
+  "prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml": {
+    "maven": [
+      "io.opentelemetry:opentelemetry-api",
+      "io.opentelemetry:opentelemetry-context",
+      "io.prometheus:client_java"
+    ]
+  },
+  "prometheus-metrics-exporter-opentelemetry-shaded/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-opentelemetry-otel-agent-resources"
+    ]
+  },
+  "prometheus-metrics-exporter-opentelemetry/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-opentelemetry-otel-agent-resources"
+    ]
+  },
+  "prometheus-metrics-exporter-pushgateway/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-common",
+      "org.mock-server:mockserver-netty-no-dependencies"
+    ]
+  },
+  "prometheus-metrics-exporter-servlet-jakarta/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-common",
+      "jakarta.servlet:jakarta.servlet-api"
+    ]
+  },
+  "prometheus-metrics-exporter-servlet-javax/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-common",
+      "javax.servlet:javax.servlet-api"
+    ]
+  },
+  "prometheus-metrics-exposition-formats-shaded/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-exposition-formats/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-exposition-textformats/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-config",
+      "io.prometheus:prometheus-metrics-model"
+    ]
+  },
+  "prometheus-metrics-instrumentation-caffeine/pom.xml": {
+    "maven": [
+      "com.github.ben-manes.caffeine:caffeine",
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-instrumentation-dropwizard/pom.xml": {
+    "maven": [
+      "io.dropwizard.metrics:metrics-core",
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver",
+      "io.prometheus:prometheus-metrics-exposition-textformats",
+      "io.prometheus:prometheus-metrics-instrumentation-dropwizard5"
+    ]
+  },
+  "prometheus-metrics-instrumentation-dropwizard5/pom.xml": {
+    "maven": [
+      "io.dropwizard.metrics5:metrics-core",
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-instrumentation-guava/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-instrumentation-jvm/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-core",
+      "io.prometheus:prometheus-metrics-exporter-httpserver",
+      "io.prometheus:prometheus-metrics-exposition-textformats"
+    ]
+  },
+  "prometheus-metrics-model/pom.xml": {
+    "maven": ["io.prometheus:client_java", "io.prometheus:prometheus-metrics-config"]
+  },
+  "prometheus-metrics-otel-support/pom.xml": {
+    "maven": ["io.prometheus:client_java"]
+  },
+  "prometheus-metrics-parent/pom.xml": {
+    "maven": [
+      "com.diffplug.spotless:spotless-maven-plugin",
+      "org.apache.maven.plugins:maven-gpg-plugin",
+      "org.apache.maven.plugins:maven-source-plugin",
+      "org.sonatype.central:central-publishing-maven-plugin"
+    ]
+  },
+  "prometheus-metrics-simpleclient-bridge/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:prometheus-metrics-config",
+      "io.prometheus:prometheus-metrics-exposition-textformats",
+      "io.prometheus:prometheus-metrics-model",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common"
+    ]
+  },
+  "prometheus-metrics-tracer/pom.xml": {
+    "maven": ["io.prometheus:client_java"]
+  },
+  "prometheus-metrics-tracer/prometheus-metrics-tracer-common/pom.xml": {
+    "maven": ["io.prometheus:prometheus-metrics-tracer"]
+  },
+  "prometheus-metrics-tracer/prometheus-metrics-tracer-initializer/pom.xml": {
+    "maven": [
+      "io.prometheus:prometheus-metrics-tracer",
+      "io.prometheus:prometheus-metrics-tracer-common",
+      "io.prometheus:prometheus-metrics-tracer-otel",
+      "io.prometheus:prometheus-metrics-tracer-otel-agent"
+    ]
+  },
+  "prometheus-metrics-tracer/prometheus-metrics-tracer-otel-agent/pom.xml": {
+    "maven": [
+      "io.prometheus:prometheus-metrics-tracer",
+      "io.prometheus:prometheus-metrics-tracer-common"
+    ]
+  },
+  "prometheus-metrics-tracer/prometheus-metrics-tracer-otel/pom.xml": {
+    "maven": [
+      "io.prometheus:prometheus-metrics-tracer",
+      "io.prometheus:prometheus-metrics-tracer-common"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_common/pom.xml": {
+    "maven": ["io.prometheus:integration_tests"]
+  },
+  "simpleclient-archive/integration_tests/it_exemplars_otel_agent/pom.xml": {
+    "maven": [
+      "ch.qos.logback:logback-classic",
+      "io.prometheus:integration_tests",
+      "io.prometheus:it_common",
+      "io.prometheus:simpleclient_bom",
+      "io.prometheus:simpleclient_hotspot",
+      "io.prometheus:simpleclient_servlet",
+      "org.springframework.boot:spring-boot-dependencies",
+      "org.springframework.boot:spring-boot-maven-plugin"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_exemplars_otel_sdk/pom.xml": {
+    "maven": [
+      "io.opentelemetry:opentelemetry-api",
+      "io.opentelemetry:opentelemetry-sdk",
+      "io.prometheus:integration_tests",
+      "io.prometheus:it_common",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_httpserver"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_java_versions/pom.xml": {
+    "maven": [
+      "io.prometheus:integration_tests",
+      "io.prometheus:it_common",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_hotspot",
+      "io.prometheus:simpleclient_httpserver"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_log4j2/pom.xml": {
+    "maven": [
+      "io.prometheus:integration_tests",
+      "io.prometheus:it_common",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_httpserver",
+      "io.prometheus:simpleclient_log4j2",
+      "org.apache.logging.log4j:log4j-api",
+      "org.apache.logging.log4j:log4j-core"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_pushgateway/pom.xml": {
+    "maven": [
+      "ch.qos.logback:logback-classic",
+      "com.squareup.okhttp3:okhttp",
+      "io.prometheus:integration_tests",
+      "io.prometheus:it_common",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_pushgateway"
+    ]
+  },
+  "simpleclient-archive/integration_tests/it_servlet_jakarta_exporter_webxml/pom.xml": {
+    "maven": [
+      "ch.qos.logback:logback-classic",
+      "com.squareup.okhttp3:okhttp",
+      "io.prometheus:integration_tests",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_hotspot",
+      "io.prometheus:simpleclient_servlet_jakarta",
+      "jakarta.servlet:jakarta.servlet-api",
+      "org.apache.maven.plugins:maven-war-plugin"
+    ]
+  },
+  "simpleclient-archive/integration_tests/pom.xml": {
+    "maven": [
+      "ch.qos.logback:logback-classic",
+      "com.squareup.okhttp3:okhttp",
+      "io.prometheus:client_java",
+      "org.testcontainers:testcontainers"
+    ]
+  },
+  "simpleclient-archive/simpleclient_graphite_bridge/pom.xml": {
+    "maven": ["io.prometheus:client_java", "io.prometheus:simpleclient"]
+  },
+  "simpleclient-archive/simpleclient_hibernate/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "org.hibernate:hibernate-core"
+    ]
+  },
+  "simpleclient-archive/simpleclient_httpserver/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "javax.xml.bind:jaxb-api"
+    ]
+  },
+  "simpleclient-archive/simpleclient_jetty/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "org.eclipse.jetty:jetty-server",
+      "org.eclipse.jetty:jetty-servlet",
+      "org.hamcrest:hamcrest-all"
+    ]
+  },
+  "simpleclient-archive/simpleclient_jetty_jdk8/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "org.eclipse.jetty:jetty-server",
+      "org.eclipse.jetty:jetty-servlet",
+      "org.hamcrest:hamcrest-all"
+    ]
+  },
+  "simpleclient-archive/simpleclient_log4j/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "org.apache.logging.log4j:log4j-1.2-api",
+      "org.apache.logging.log4j:log4j-core"
+    ]
+  },
+  "simpleclient-archive/simpleclient_log4j2/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "org.apache.logging.log4j:log4j-core"
+    ]
+  },
+  "simpleclient-archive/simpleclient_logback/pom.xml": {
+    "maven": [
+      "ch.qos.logback:logback-classic",
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient"
+    ]
+  },
+  "simpleclient-archive/simpleclient_servlet/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "io.prometheus:simpleclient_servlet_common",
+      "javax.servlet:javax.servlet-api",
+      "org.eclipse.jetty:jetty-servlet"
+    ]
+  },
+  "simpleclient-archive/simpleclient_servlet_common/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common"
+    ]
+  },
+  "simpleclient-archive/simpleclient_servlet_jakarta/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "io.prometheus:simpleclient_servlet_common",
+      "jakarta.servlet:jakarta.servlet-api",
+      "org.eclipse.jetty:jetty-servlet"
+    ]
+  },
+  "simpleclient-archive/simpleclient_spring_web/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "org.apache.commons:commons-lang3",
+      "org.aspectj:aspectjweaver",
+      "org.springframework:spring-aop",
+      "org.springframework:spring-context",
+      "org.springframework:spring-test",
+      "org.springframework:spring-web"
+    ]
+  },
+  "simpleclient-archive/simpleclient_vertx/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "io.vertx:vertx-web"
+    ]
+  },
+  "simpleclient-archive/simpleclient_vertx4/pom.xml": {
+    "maven": [
+      "io.prometheus:client_java",
+      "io.prometheus:simpleclient",
+      "io.prometheus:simpleclient_common",
+      "io.vertx:vertx-web"
+    ]
   }
 }
