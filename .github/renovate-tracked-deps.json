@@ -7,9 +7,6 @@
       "lychee",
       "protoc"
     ],
-    "regex": [
-      "ghcr.io/super-linter/super-linter",
-      "grafana/flint"
-    ]
+    "regex": ["ghcr.io/super-linter/super-linter", "grafana/flint"]
   }
 }
