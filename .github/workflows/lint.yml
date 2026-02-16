@@ -28,8 +28,14 @@ jobs:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
           PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
-          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/blob/main/(.*) https://github.com/${PR_HEAD_REPO}/blob/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
-          sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/tree/main/(.*) https://github.com/${PR_HEAD_REPO}/tree/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
+          REPO="prometheus/client_java"
+          BASE="https://github.com"
+          CFG=".github/config/lychee.toml"
+          for T in blob tree; do
+            FROM="${BASE}/${REPO}/${T}/main/(.*)"
+            TO="${BASE}/${PR_HEAD_REPO}/${T}/${GITHUB_HEAD_REF}/\$1"
+            sed -i "/^remap = \[$/a\  \"${FROM} ${TO}\"," "${CFG}"
+          done
 
       - name: Lint
         env:
