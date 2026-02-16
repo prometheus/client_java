@@ -5,17 +5,18 @@
 
 set -euo pipefail
 
-# shellcheck disable=SC2154 # is set by mise
-if [[ -z "${usage_tag:-}" ]]; then
-	PARENT_POM="prometheus-metrics-parent/pom.xml"
-	usage_tag=$(sed -n 's/.*<version>\(.*-SNAPSHOT\)<\/version>.*/\1/p' "$PARENT_POM" | head -1)
-	if [[ -z "$usage_tag" ]]; then
-		echo "ERROR: could not find SNAPSHOT version in $PARENT_POM" >&2
-		exit 1
-	fi
+PARENT_POM="prometheus-metrics-parent/pom.xml"
+CURRENT_VERSION=$(sed -n 's/.*<version>\(.*-SNAPSHOT\)<\/version>.*/\1/p' "$PARENT_POM" | head -1)
+
+if [[ -z "$CURRENT_VERSION" ]]; then
+	echo "ERROR: could not find SNAPSHOT version in $PARENT_POM" >&2
+	exit 1
 fi
 
-VERSION=${usage_tag#v}
+# shellcheck disable=SC2154 # is set by mise
+VERSION=${usage_tag:-$CURRENT_VERSION}
+VERSION=${VERSION#v}
 
-mise run set-version "$VERSION"
+find . -name 'pom.xml' -exec \
+	sed -i "s/<version>${CURRENT_VERSION}<\/version>/<version>${VERSION}<\/version>/g" {} +
 mvn -B package -P 'release,!default,!examples-and-integration-tests' -Dmaven.test.skip=true -Dgpg.skip=true
