@@ -1,0 +1,15 @@
+{
+  "mise.toml": {
+    "mise": [
+      "go:github.com/gohugoio/hugo",
+      "go:github.com/grafana/oats",
+      "java",
+      "lychee",
+      "protoc"
+    ],
+    "regex": [
+      "ghcr.io/super-linter/super-linter",
+      "grafana/flint"
+    ]
+  }
+}
