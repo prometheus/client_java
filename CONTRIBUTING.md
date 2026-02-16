@@ -21,7 +21,11 @@ Run `./mvnw spotless:apply` to format the code (only changed files) before commi
 
 Or run all the linters:
 
-`mise run lint:super-linter`
+`mise run lint`
+
+To autofix linting issues:
+
+`mise run fix`
 
 ## Running Tests
 

@@ -1,5 +1,5 @@
 ---
-name: Lint What Super Linter Can't
+name: Lint
 
 on:
   pull_request:
@@ -8,16 +8,20 @@ permissions: {}
 
 jobs:
   lint:
+    runs-on: ubuntu-24.04
+
     permissions:
       contents: read
-    runs-on: ubuntu-24.04
+
     steps:
-      - name: Check out
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          fetch-depth: 0 # needed for merge-base used in lint:links-in-modified-files
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
 
       - name: Remap main branch URLs to PR branch for link checking
         env:
@@ -27,8 +31,8 @@ jobs:
           sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/blob/main/(.*) https://github.com/${PR_HEAD_REPO}/blob/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
           sed -i "/^remap = \[$/a\  \"https://github.com/prometheus/client_java/tree/main/(.*) https://github.com/${PR_HEAD_REPO}/tree/${GITHUB_HEAD_REF}/\$1\"," .github/config/lychee.toml
 
-      - name: Lint for pull requests
+      - name: Lint
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: mise run lint:rest-ci
+        run: mise run lint

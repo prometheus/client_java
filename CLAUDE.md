@@ -91,7 +91,9 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
 
 ### Non-Java Files (Markdown, YAML, JSON, shell scripts, etc.)
 
-- **ALWAYS** run `mise run lint:super-linter` after modifying non-Java files
+- **ALWAYS** run `mise run lint` after modifying non-Java files
+  (runs super-linter + link checking + BOM check)
+- `mise run fix` auto-fixes lint issues
 - Super-linter will **auto-fix** many issues (formatting, trailing whitespace, etc.)
 - It only reports ERROR-level issues (configured via `LOG_LEVEL=ERROR` in `.github/super-linter.env`)
 - Common issues caught:
@@ -107,7 +109,8 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
 mise run build
 
 # After modifying non-Java files (run BEFORE committing)
-mise run lint:super-linter
+mise run lint
+# or to auto-fix: mise run fix
 ```
 
 ## Testing

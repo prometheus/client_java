@@ -40,5 +40,12 @@
       managerFilePatterns: ["/^mise\\.toml$/"],
       matchStrings: ['# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION="?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s'],
     },
+    {
+      customType: "regex",
+      description: "Update flint version in raw.githubusercontent.com URLs (pinned to SHA)",
+      managerFilePatterns: ["/^mise\\.toml$/"],
+      matchStrings: ["https://raw\\.githubusercontent\\.com/(?<depName>[^/]+/[^/]+)/(?<currentDigest>[a-f0-9]{40})/.*#\\s*(?<currentValue>v\\S+)"],
+      datasourceTemplate: "github-tags",
+    },
   ],
 }
