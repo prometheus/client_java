@@ -68,7 +68,7 @@ services:
       - ./config/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/grafana-dashboards.yaml
       - ./config/grafana-example-dashboard.json:/etc/grafana/example-dashboard.json
   k6:
-    image: grafana/k6@sha256:1d0ddceb1550725105e39d246a383a247b8607372ed63d2046cf9d6976487a85
+    image: grafana/k6@sha256:5e937f439684142ba7803722b42e3c9ac9233cfa01d561de0596c1c2794fd680
     network_mode: host
     volumes:
       - ./config/k6-script.js:/k6-script.js
