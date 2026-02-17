@@ -32,6 +32,3 @@ jobs:
           BASE_URL: "/client_java"
       - name: Build release version
         run: mise run build-release
-        env:
-          # don't use the current snapshot version, to test a more realistic release
-          TAG: ${{ github.run_number }}
