@@ -53,15 +53,15 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 # Shared lint tasks from flint (https://github.com/grafana/flint)
 [tasks."lint:super-linter"]
 description = "Run Super-Linter on the repository"
-file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/super-linter.sh" # v0.4.0
+file = "https://raw.githubusercontent.com/grafana/flint/79215390bdc8aa92f2c01e350062aa4bbbbf1858/tasks/lint/super-linter.sh" # v0.5.0
 
 [tasks."lint:links"]
 description = "Lint links"
-file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/links.sh" # v0.4.0
+file = "https://raw.githubusercontent.com/grafana/flint/79215390bdc8aa92f2c01e350062aa4bbbbf1858/tasks/lint/links.sh" # v0.5.0
 
 [tasks."lint:renovate-deps"]
 description = "Verify renovate-tracked-deps.json is up to date"
-file = "https://raw.githubusercontent.com/grafana/flint/986a4ca33894e67ac54363fe9c814432ffd6dd9b/tasks/lint/renovate-deps.py" # v0.4.0
+file = "https://raw.githubusercontent.com/grafana/flint/79215390bdc8aa92f2c01e350062aa4bbbbf1858/tasks/lint/renovate-deps.py" # v0.5.0
 
 [tasks."lint"]
 description = "Run all lints"
