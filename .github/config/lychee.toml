@@ -12,11 +12,6 @@ include_fragments = true
 base_url = "https://prometheus.github.io"
 exclude_path = ["docs/themes"]
 
-remap = [
-  # workaround for https://github.com/lycheeverse/lychee/issues/1729
-  "https://github.com/(.*?)/(.*?)/blob/(.*?)/(.*#.*)$ https://raw.githubusercontent.com/$1/$2/$3/$4"
-]
-
 exclude = [
   # excluding links to pull requests and issues is done for performance
   "^https://github.com/prometheus/client_java/(issues|pull)/\\d+$",
