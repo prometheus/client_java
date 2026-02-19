@@ -312,6 +312,7 @@ class ExportTest {
     Counter.builder().name("counter_no_data").labelNames("pool").register(registry);
     Gauge.builder().name("gauge_no_data").labelNames("pool").register(registry);
     Summary.builder().name("summary_no_data").labelNames("pool").register(registry);
+    Histogram.builder().name("histogram_no_data").labelNames("pool").register(registry);
     StateSet.builder()
         .name("stateset_no_data")
         .states("state")
