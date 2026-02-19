@@ -33,7 +33,8 @@ class ExportTest {
 
   private static final Attributes ATTRIBUTES =
       Attributes.of(AttributeKey.stringKey("label"), "val", AttributeKey.stringKey("key"), "value");
-  @RegisterExtension OpenTelemetryExtension testing = OpenTelemetryExtension.create();
+  @RegisterExtension
+  static OpenTelemetryExtension testing = OpenTelemetryExtension.create();
 
   private final PrometheusRegistry registry = new PrometheusRegistry();
 
@@ -302,6 +303,25 @@ class ExportTest {
                             .hasValue(1.0)
                             .hasExemplars()
                             .hasAttributes(Attributes.of(AttributeKey.stringKey("label"), "val"))));
+  }
+
+  @Test
+  void metricsWithoutDataPointsAreNotExported() {
+    // Register metrics with labels but don't create any data points
+    // This simulates the jvm_memory_pool_allocated_bytes scenario where a metric
+    // is registered with label names, but no data points are created until GC happens
+    Counter.builder().name("counter_no_data").labelNames("pool").register(registry);
+    Gauge.builder().name("gauge_no_data").labelNames("pool").register(registry);
+    Summary.builder().name("summary_no_data").labelNames("pool").register(registry);
+    StateSet.builder()
+        .name("stateset_no_data")
+        .states("state")
+        .labelNames("pool")
+        .register(registry);
+    Info.builder().name("info_no_data").labelNames("pool").register(registry);
+
+    List<MetricData> metrics = testing.getMetrics();
+    assertThat(metrics).isEmpty();
   }
 
   private MetricAssert metricAssert() {

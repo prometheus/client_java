@@ -27,7 +27,11 @@ public class MetricDataFactory {
     this.currentTimeMillis = currentTimeMillis;
   }
 
+  @Nullable
   public MetricData create(CounterSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusCounter(snapshot, currentTimeMillis),
@@ -35,7 +39,11 @@ public class MetricDataFactory {
         resource);
   }
 
+  @Nullable
   public MetricData create(GaugeSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusGauge(snapshot, currentTimeMillis),
@@ -64,7 +72,11 @@ public class MetricDataFactory {
     return null;
   }
 
+  @Nullable
   public MetricData create(SummarySnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusSummary(snapshot, currentTimeMillis),
@@ -72,7 +84,11 @@ public class MetricDataFactory {
         resource);
   }
 
+  @Nullable
   public MetricData create(InfoSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusInfo(snapshot, currentTimeMillis),
@@ -80,7 +96,11 @@ public class MetricDataFactory {
         resource);
   }
 
+  @Nullable
   public MetricData create(StateSetSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusStateSet(snapshot, currentTimeMillis),
@@ -88,7 +108,11 @@ public class MetricDataFactory {
         resource);
   }
 
+  @Nullable
   public MetricData create(UnknownSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
     return new PrometheusMetricData<>(
         snapshot.getMetadata(),
         new PrometheusUnknown(snapshot, currentTimeMillis),
