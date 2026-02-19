@@ -33,8 +33,7 @@ class ExportTest {
 
   private static final Attributes ATTRIBUTES =
       Attributes.of(AttributeKey.stringKey("label"), "val", AttributeKey.stringKey("key"), "value");
-  @RegisterExtension
-  static OpenTelemetryExtension testing = OpenTelemetryExtension.create();
+  @RegisterExtension static OpenTelemetryExtension testing = OpenTelemetryExtension.create();
 
   private final PrometheusRegistry registry = new PrometheusRegistry();
 
