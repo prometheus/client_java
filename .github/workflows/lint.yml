@@ -22,6 +22,9 @@ jobs:
 
       - name: Setup mise
         uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+        with:
+          version: v2026.2.11
+          sha256: 3e1baedb9284124b770d2d561a04a98c343d05967c83deb8b35c7c941f8d9c9a
 
       - name: Lint
         env:
