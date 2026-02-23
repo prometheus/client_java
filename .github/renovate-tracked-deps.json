@@ -1,63 +1,39 @@
 {
   ".github/renovate.json5": {
-    "renovate-config-presets": [
-      "grafana/flint"
-    ]
+    "renovate-config-presets": ["grafana/flint"]
   },
   ".github/workflows/acceptance-tests.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/build.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/github-pages.yaml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/java-version-matrix-tests.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/lint.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/native-tests.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/nightly-benchmarks.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/release.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".github/workflows/test-release-build.yml": {
-    "regex": [
-      "mise"
-    ]
+    "regex": ["mise"]
   },
   ".mise/envs/native/mise.toml": {
-    "mise": [
-      "java"
-    ]
+    "mise": ["java"]
   },
   ".mvn/wrapper/maven-wrapper.properties": {
-    "maven-wrapper": [
-      "maven"
-    ]
+    "maven-wrapper": ["maven"]
   },
   "benchmarks/pom.xml": {
     "maven": [
@@ -115,21 +91,13 @@
     ]
   },
   "integration-tests/it-exporter/it-exporter-test/pom.xml": {
-    "maven": [
-      "io.prometheus:it-common",
-      "io.prometheus:it-exporter"
-    ]
+    "maven": ["io.prometheus:it-common", "io.prometheus:it-exporter"]
   },
   "integration-tests/it-exporter/it-no-protobuf-test/pom.xml": {
-    "maven": [
-      "io.prometheus:it-common",
-      "io.prometheus:it-exporter"
-    ]
+    "maven": ["io.prometheus:it-common", "io.prometheus:it-exporter"]
   },
   "integration-tests/it-exporter/pom.xml": {
-    "maven": [
-      "io.prometheus:integration-tests"
-    ]
+    "maven": ["io.prometheus:integration-tests"]
   },
   "integration-tests/it-pushgateway/pom.xml": {
     "maven": [
@@ -167,20 +135,13 @@
       "npm:renovate",
       "protoc"
     ],
-    "regex": [
-      "ghcr.io/super-linter/super-linter",
-      "grafana/flint"
-    ]
+    "regex": ["ghcr.io/super-linter/super-linter", "grafana/flint"]
   },
   "mvnw": {
-    "maven-wrapper": [
-      "maven-wrapper"
-    ]
+    "maven-wrapper": ["maven-wrapper"]
   },
   "mvnw.cmd": {
-    "maven-wrapper": [
-      "maven-wrapper"
-    ]
+    "maven-wrapper": ["maven-wrapper"]
   },
   "pom.xml": {
     "maven": [
@@ -254,9 +215,7 @@
     ]
   },
   "prometheus-metrics-config/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java"
-    ]
+    "maven": ["io.prometheus:client_java"]
   },
   "prometheus-metrics-core/pom.xml": {
     "maven": [
@@ -278,10 +237,7 @@
     ]
   },
   "prometheus-metrics-exporter-httpserver/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java",
-      "io.prometheus:prometheus-metrics-exporter-common"
-    ]
+    "maven": ["io.prometheus:client_java", "io.prometheus:prometheus-metrics-exporter-common"]
   },
   "prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml": {
     "maven": [
@@ -390,15 +346,10 @@
     ]
   },
   "prometheus-metrics-model/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java",
-      "io.prometheus:prometheus-metrics-config"
-    ]
+    "maven": ["io.prometheus:client_java", "io.prometheus:prometheus-metrics-config"]
   },
   "prometheus-metrics-otel-support/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java"
-    ]
+    "maven": ["io.prometheus:client_java"]
   },
   "prometheus-metrics-parent/pom.xml": {
     "maven": [
@@ -419,14 +370,10 @@
     ]
   },
   "prometheus-metrics-tracer/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java"
-    ]
+    "maven": ["io.prometheus:client_java"]
   },
   "prometheus-metrics-tracer/prometheus-metrics-tracer-common/pom.xml": {
-    "maven": [
-      "io.prometheus:prometheus-metrics-tracer"
-    ]
+    "maven": ["io.prometheus:prometheus-metrics-tracer"]
   },
   "prometheus-metrics-tracer/prometheus-metrics-tracer-initializer/pom.xml": {
     "maven": [
@@ -449,9 +396,7 @@
     ]
   },
   "simpleclient-archive/integration_tests/it_common/pom.xml": {
-    "maven": [
-      "io.prometheus:integration_tests"
-    ]
+    "maven": ["io.prometheus:integration_tests"]
   },
   "simpleclient-archive/integration_tests/it_exemplars_otel_agent/pom.xml": {
     "maven": [
@@ -526,10 +471,7 @@
     ]
   },
   "simpleclient-archive/simpleclient_graphite_bridge/pom.xml": {
-    "maven": [
-      "io.prometheus:client_java",
-      "io.prometheus:simpleclient"
-    ]
+    "maven": ["io.prometheus:client_java", "io.prometheus:simpleclient"]
   },
   "simpleclient-archive/simpleclient_hibernate/pom.xml": {
     "maven": [
