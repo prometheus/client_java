@@ -14,6 +14,9 @@ public class ProtobufUtil {
   }
 
   public static String shortDebugString(MessageOrBuilder protobufData) {
-    return TextFormat.printer().emittingSingleLine(true).printToString(protobufData);
+    return TextFormat.printer()
+        .emittingSingleLine(true)
+        .printingZeroFields(true)
+        .printToString(protobufData);
   }
 }
