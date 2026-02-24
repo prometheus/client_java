@@ -3,7 +3,7 @@
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.23.0"
-node = "24.13.1"
+node = "24.14.0"
 "npm:renovate" = "43.26.4"
 protoc = "33.5"
 
