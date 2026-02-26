@@ -2,6 +2,33 @@
   ".github/renovate.json5": {
     "renovate-config-presets": ["grafana/flint"]
   },
+  ".github/workflows/acceptance-tests.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/build.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/github-pages.yaml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/java-version-matrix-tests.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/lint.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/native-tests.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/nightly-benchmarks.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/release.yml": {
+    "regex": ["mise"]
+  },
+  ".github/workflows/test-release-build.yml": {
+    "regex": ["mise"]
+  },
   ".mise/envs/native/mise.toml": {
     "mise": ["java"]
   },
