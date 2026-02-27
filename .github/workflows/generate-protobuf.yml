@@ -44,8 +44,9 @@ jobs:
             echo "$UNEXPECTED"
             exit 1
           fi
-          # TODO: verify whether GITHUB_TOKEN can push to Renovate branches,
-          #       or if we need a PAT / GitHub App token (ask Martin)
+          # Note: GITHUB_TOKEN pushes don't trigger CI re-runs.
+          # Close and reopen the PR to trigger CI after this commit.
+          # TODO: switch to PROMBOT_GITHUB_TOKEN once it's added to this repo.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add '*.java' mise.toml
