@@ -48,7 +48,7 @@ jobs:
       - name: Commit and push generated sources
         run: |
           git diff --quiet && exit 0
-          UNEXPECTED=$(git diff --name-only | grep -v '\.java$' | grep -v '^mise\.toml$' || true)
+          UNEXPECTED=$(git diff --name-only | grep -v '\.java$' || true)
           if [[ -n "$UNEXPECTED" ]]; then
             echo "::error::Unexpected files changed:"
             echo "$UNEXPECTED"
@@ -59,6 +59,6 @@ jobs:
           # TODO: switch to PROMBOT_GITHUB_TOKEN once it's added to this repo.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add '*.java' mise.toml
+          git add '*.java'
           git commit -m "chore: regenerate protobuf sources"
           git push
