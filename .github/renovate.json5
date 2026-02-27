@@ -32,6 +32,12 @@
       description: "Ignore internal project modules",
       matchPackageNames: ["/^io\\.prometheus:(examples|example-.+|integration-tests|it-.+)$/"],
     },
+    {
+      description: "Group protobuf-java and protoc together so generated code can be updated in one PR",
+      matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
+      groupName: "protobuf",
+      separateMajorMinor: false,
+    },
   ],
   customManagers: [],
 }
