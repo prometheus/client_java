@@ -8,6 +8,9 @@
   ".github/workflows/build.yml": {
     "regex": ["mise"]
   },
+  ".github/workflows/generate-protobuf.yml": {
+    "regex": ["mise"]
+  },
   ".github/workflows/github-pages.yaml": {
     "regex": ["mise"]
   },

@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.ref }}
+          # zizmor: ignore[artipacked] -- needs credentials to push
+          persist-credentials: true
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
           version: v2026.2.11
@@ -31,8 +33,16 @@ jobs:
       - name: Verify both protobuf deps are updated
         run: |
           git fetch origin main
-          git diff origin/main -- pom.xml | grep -q 'protobuf-java.version' || { echo "::error::protobuf-java not updated in pom.xml — waiting for Renovate"; exit 1; }
-          git diff origin/main -- mise.toml | grep -q 'protoc' || { echo "::error::protoc not updated in mise.toml — waiting for Renovate"; exit 1; }
+          DIFF_POM=$(git diff origin/main -- pom.xml)
+          DIFF_MISE=$(git diff origin/main -- mise.toml)
+          if ! echo "$DIFF_POM" | grep -q 'protobuf-java.version'; then
+            echo "::error::protobuf-java not updated in pom.xml"
+            exit 1
+          fi
+          if ! echo "$DIFF_MISE" | grep -q 'protoc'; then
+            echo "::error::protoc not updated in mise.toml"
+            exit 1
+          fi
       - name: Generate protobuf sources
         run: mise run generate
       - name: Commit and push generated sources
