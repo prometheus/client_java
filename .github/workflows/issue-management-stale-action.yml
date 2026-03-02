@@ -1,3 +1,4 @@
+---
 name: Issue management - run stale action
 
 on:
@@ -6,8 +7,11 @@ on:
     - cron: "23 * * * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
+
+concurrency:
+  group: "stale-issues-and-prs"
+  cancel-in-progress: false
 
 jobs:
   stale:
@@ -50,6 +54,6 @@ jobs:
             This issue has been marked as stale due to 12 months of inactivity.
             It will be automatically closed if there is no further activity over the next 30 days.
           close-issue-message: >
-            This issue was automatically closed due to lack of activity after being marked stale. Feel
-            free to reopen if you would like to continue working on it.
+            This issue was automatically closed due to lack of activity after being marked stale.
+            Feel free to reopen if you would like to continue working on it.
           operations-per-run: 1000
