@@ -46,9 +46,7 @@ def format_task_excludes_examples() -> bool:
     mise_toml = ROOT / "mise.toml"
     text = mise_toml.read_text(encoding="utf-8")
     # Look for the format task run command
-    match = re.search(
-        r'\[tasks\.format\].*?run\s*=\s*"([^"]*)"', text, re.DOTALL
-    )
+    match = re.search(r'\[tasks\.format\].*?run\s*=\s*"([^"]*)"', text, re.DOTALL)
     if not match:
         return False
     run_cmd = match.group(1)
