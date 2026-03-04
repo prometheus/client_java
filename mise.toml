@@ -4,7 +4,7 @@
 java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.23.0"
 node = "24.14.0"
-"npm:renovate" = "43.26.4"
+"npm:renovate" = "43.45.1"
 protoc = "33.5"
 
 [env]
@@ -20,7 +20,9 @@ env.PROTO_GENERATION = "true"
 
 [tasks.format]
 description = "format source code"
-run = "./mvnw spotless:apply"
+# Use fully-qualified plugin goal and deactivate the examples-and-integration-tests
+# profile because standalone example modules don't inherit the spotless plugin.
+run = "./mvnw com.diffplug.spotless:spotless-maven-plugin:apply -P '!examples-and-integration-tests'"
 
 [tasks.clean]
 description = "clean all modules"
@@ -53,19 +55,19 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 # Shared lint tasks from flint (https://github.com/grafana/flint)
 [tasks."lint:super-linter"]
 description = "Run Super-Linter on the repository"
-file = "https://raw.githubusercontent.com/grafana/flint/8822bdc543f28f2c7dd1f697af4df6d89768c507/tasks/lint/super-linter.sh" # v0.7.0
+file = "https://raw.githubusercontent.com/grafana/flint/0ac131d7832bd8964f6ca9e5af73207dca6a85ba/tasks/lint/super-linter.sh" # v0.7.1
 
 [tasks."lint:links"]
 description = "Lint links"
-file = "https://raw.githubusercontent.com/grafana/flint/8822bdc543f28f2c7dd1f697af4df6d89768c507/tasks/lint/links.sh" # v0.7.0
+file = "https://raw.githubusercontent.com/grafana/flint/0ac131d7832bd8964f6ca9e5af73207dca6a85ba/tasks/lint/links.sh" # v0.7.1
 
 [tasks."lint:renovate-deps"]
 description = "Verify renovate-tracked-deps.json is up to date"
-file = "https://raw.githubusercontent.com/grafana/flint/8822bdc543f28f2c7dd1f697af4df6d89768c507/tasks/lint/renovate-deps.py" # v0.7.0
+file = "https://raw.githubusercontent.com/grafana/flint/0ac131d7832bd8964f6ca9e5af73207dca6a85ba/tasks/lint/renovate-deps.py" # v0.7.1
 
 [tasks."lint"]
 description = "Run all lints"
-depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:renovate-deps"]
+depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:renovate-deps"]
 
 [tasks.fix]
 description = "Auto-fix lint issues"

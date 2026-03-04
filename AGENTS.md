@@ -23,7 +23,6 @@ mise run test-all
 
 # Format code with Google Java Format
 mise run format
-# or directly: ./mvnw spotless:apply
 
 # Run a single test class
 ./mvnw test -Dtest=CounterTest \
@@ -142,6 +141,12 @@ mise run build
 mise run lint
 # or to autofix: mise run fix
 ```
+
+### Before Pushing
+
+**ALWAYS** run `mise run lint` before pushing to verify
+all lints pass. CI runs the same checks and will fail
+if any lint is violated.
 
 ## Testing
 
