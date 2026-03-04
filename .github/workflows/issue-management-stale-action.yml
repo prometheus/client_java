@@ -4,7 +4,7 @@ name: Issue management - run stale action
 on:
   schedule:
     # hourly at minute 23
-    - cron: "23 * * * *"
+    - cron: "23 6 * * *"
   workflow_dispatch:
 
 permissions: {}
