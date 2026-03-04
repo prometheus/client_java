@@ -20,7 +20,9 @@ env.PROTO_GENERATION = "true"
 
 [tasks.format]
 description = "format source code"
-run = "./mvnw spotless:apply"
+# Use fully-qualified plugin goal and deactivate the examples-and-integration-tests
+# profile because standalone example modules don't inherit the spotless plugin.
+run = "./mvnw com.diffplug.spotless:spotless-maven-plugin:apply -P '!examples-and-integration-tests'"
 
 [tasks.clean]
 description = "clean all modules"
@@ -65,7 +67,7 @@ file = "https://raw.githubusercontent.com/grafana/flint/0ac131d7832bd8964f6ca9e5
 
 [tasks."lint"]
 description = "Run all lints"
-depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:renovate-deps"]
+depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:renovate-deps"]
 
 [tasks.fix]
 description = "Auto-fix lint issues"
