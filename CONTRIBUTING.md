@@ -23,8 +23,13 @@ Sign off each commit by passing `--signoff` (or `-s`) to `git commit`:
 git commit --signoff -m "Your commit message"
 ```
 
-If you have already created commits without a sign-off, you can retroactively
-add it by rebasing (replace `N` with the number of commits to sign off):
+To sign off only the most recent commit, use `--amend`:
+
+```bash
+git commit --amend --signoff --no-edit
+```
+
+To sign off multiple commits, rebase (replace `N` with the number of commits):
 
 ```bash
 git rebase --signoff HEAD~N
