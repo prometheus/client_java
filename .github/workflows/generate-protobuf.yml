@@ -1,0 +1,64 @@
+---
+name: Generate Protobuf
+
+on:
+  push:
+    branches:
+      - "renovate/protobuf"
+
+permissions: {}
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.ref }}
+          # zizmor: ignore[artipacked] -- needs credentials to push
+          persist-credentials: true
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+        with:
+          version: v2026.2.11
+          sha256: 3e1baedb9284124b770d2d561a04a98c343d05967c83deb8b35c7c941f8d9c9a
+      - name: Cache local Maven repository
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Verify both protobuf deps are updated
+        run: |
+          git fetch origin main
+          DIFF_POM=$(git diff origin/main -- pom.xml)
+          DIFF_MISE=$(git diff origin/main -- mise.toml)
+          if ! echo "$DIFF_POM" | grep -q 'protobuf-java.version'; then
+            echo "::error::protobuf-java not updated in pom.xml"
+            exit 1
+          fi
+          if ! echo "$DIFF_MISE" | grep -q 'protoc'; then
+            echo "::error::protoc not updated in mise.toml"
+            exit 1
+          fi
+      - name: Generate protobuf sources
+        run: mise run generate
+      - name: Commit and push generated sources
+        run: |
+          git diff --quiet && exit 0
+          UNEXPECTED=$(git diff --name-only | grep -v '\.java$' || true)
+          if [[ -n "$UNEXPECTED" ]]; then
+            echo "::error::Unexpected files changed:"
+            echo "$UNEXPECTED"
+            exit 1
+          fi
+          # Note: GITHUB_TOKEN pushes don't trigger CI re-runs.
+          # Close and reopen the PR to trigger CI after this commit.
+          # TODO: switch to PROMBOT_GITHUB_TOKEN once it's added to this repo.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add '*.java'
+          git commit -m "chore: regenerate protobuf sources"
+          git push
