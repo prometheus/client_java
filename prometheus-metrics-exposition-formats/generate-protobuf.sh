@@ -21,9 +21,10 @@ mkdir -p $PROTO_DIR
 OLD_PACKAGE=$(sed -nE 's/.*extends (io\.prometheus\.metrics\.expositionformats\.generated\.[^ ]*?)\.Metrics.*/\1/p' src/main/java/io/prometheus/metrics/expositionformats/generated/Metrics.java)
 PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}"
 
+SUPERCLASS_FILE="src/main/java/io/prometheus/metrics/expositionformats/generated/Metrics.java"
 if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then
-	echo "Replacing package $OLD_PACKAGE with $PACKAGE in all java files"
-	find .. -type f -name "*.java" -exec sed -i "s/$OLD_PACKAGE/$PACKAGE/g" {} +
+	echo "Replacing package $OLD_PACKAGE with $PACKAGE in $SUPERCLASS_FILE"
+	sed -i "s/$OLD_PACKAGE/$PACKAGE/g" "$SUPERCLASS_FILE"
 fi
 
 curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
