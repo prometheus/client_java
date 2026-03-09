@@ -12,6 +12,35 @@ Prometheus uses GitHub to manage reviews of pull requests.
   This will avoid unnecessary work and surely give you and us a good deal
   of inspiration.
 
+## Signing Off Commits
+
+Every commit must include a `Signed-off-by` line, as required by the
+[Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+
+Sign off each commit by passing `--signoff` (or `-s`) to `git commit`:
+
+```bash
+git commit --signoff -m "Your commit message"
+```
+
+To sign off only the most recent commit, use `--amend`:
+
+```bash
+git commit --amend --signoff --no-edit
+```
+
+To sign off multiple commits, rebase (replace `N` with the number of commits):
+
+```bash
+git rebase --signoff HEAD~N
+```
+
+Then force-push the branch:
+
+```bash
+git push --force-with-lease
+```
+
 ## Formatting
 
 This repository uses [Google Java Format](https://github.com/google/google-java-format) to format
