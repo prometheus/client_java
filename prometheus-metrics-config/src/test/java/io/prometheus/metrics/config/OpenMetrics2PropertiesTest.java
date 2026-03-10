@@ -15,18 +15,15 @@ class OpenMetrics2PropertiesTest {
         load(
             new HashMap<>(
                 Map.of(
-                    "io.prometheus.open_metrics2.content_negotiation",
+                    "io.prometheus.openmetrics2.content_negotiation",
                     "true",
-                    "io.prometheus.open_metrics2.disable_suffix_appending",
+                    "io.prometheus.openmetrics2.composite_values",
                     "true",
-                    "io.prometheus.open_metrics2.composite_values",
+                    "io.prometheus.openmetrics2.exemplar_compliance",
                     "true",
-                    "io.prometheus.open_metrics2.exemplar_compliance",
-                    "true",
-                    "io.prometheus.open_metrics2.native_histograms",
+                    "io.prometheus.openmetrics2.native_histograms",
                     "true")));
     assertThat(properties.getContentNegotiation()).isTrue();
-    assertThat(properties.getDisableSuffixAppending()).isTrue();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isTrue();
@@ -39,45 +36,36 @@ class OpenMetrics2PropertiesTest {
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.open_metrics2.content_negotiation", "invalid"))))
+                        Map.of("io.prometheus.openmetrics2.content_negotiation", "invalid"))))
         .withMessage(
-            "io.prometheus.open_metrics2.content_negotiation: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.openmetrics2.content_negotiation: Expecting 'true' or 'false'. Found:"
                 + " invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.open_metrics2.disable_suffix_appending", "invalid"))))
+                        Map.of("io.prometheus.openmetrics2.composite_values", "invalid"))))
         .withMessage(
-            "io.prometheus.open_metrics2.disable_suffix_appending: Expecting 'true' or 'false'."
-                + " Found: invalid");
-    assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () ->
-                load(
-                    new HashMap<>(
-                        Map.of("io.prometheus.open_metrics2.composite_values", "invalid"))))
-        .withMessage(
-            "io.prometheus.open_metrics2.composite_values: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.openmetrics2.composite_values: Expecting 'true' or 'false'. Found:"
                 + " invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.open_metrics2.exemplar_compliance", "invalid"))))
+                        Map.of("io.prometheus.openmetrics2.exemplar_compliance", "invalid"))))
         .withMessage(
-            "io.prometheus.open_metrics2.exemplar_compliance: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.openmetrics2.exemplar_compliance: Expecting 'true' or 'false'. Found:"
                 + " invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.open_metrics2.native_histograms", "invalid"))))
+                        Map.of("io.prometheus.openmetrics2.native_histograms", "invalid"))))
         .withMessage(
-            "io.prometheus.open_metrics2.native_histograms: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.openmetrics2.native_histograms: Expecting 'true' or 'false'. Found:"
                 + " invalid");
   }
 
@@ -92,13 +80,11 @@ class OpenMetrics2PropertiesTest {
     OpenMetrics2Properties properties =
         OpenMetrics2Properties.builder()
             .contentNegotiation(true)
-            .disableSuffixAppending(true)
             .compositeValues(false)
             .exemplarCompliance(true)
             .nativeHistograms(false)
             .build();
     assertThat(properties.getContentNegotiation()).isTrue();
-    assertThat(properties.getDisableSuffixAppending()).isTrue();
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isFalse();
@@ -108,7 +94,6 @@ class OpenMetrics2PropertiesTest {
   void builderEnableAll() {
     OpenMetrics2Properties properties = OpenMetrics2Properties.builder().enableAll().build();
     assertThat(properties.getContentNegotiation()).isTrue();
-    assertThat(properties.getDisableSuffixAppending()).isTrue();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isTrue();
@@ -118,7 +103,6 @@ class OpenMetrics2PropertiesTest {
   void defaultValues() {
     OpenMetrics2Properties properties = OpenMetrics2Properties.builder().build();
     assertThat(properties.getContentNegotiation()).isFalse();
-    assertThat(properties.getDisableSuffixAppending()).isFalse();
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();
@@ -129,7 +113,6 @@ class OpenMetrics2PropertiesTest {
     OpenMetrics2Properties properties =
         OpenMetrics2Properties.builder().contentNegotiation(true).compositeValues(true).build();
     assertThat(properties.getContentNegotiation()).isTrue();
-    assertThat(properties.getDisableSuffixAppending()).isFalse();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();

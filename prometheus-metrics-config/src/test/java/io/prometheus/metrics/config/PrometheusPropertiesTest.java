@@ -133,14 +133,9 @@ class PrometheusPropertiesTest {
   void testOpenMetrics2ConsumerPattern() {
     PrometheusProperties config =
         PrometheusProperties.builder()
-            .enableOpenMetrics2(
-                om2 ->
-                    om2.contentNegotiation(true)
-                        .disableSuffixAppending(true)
-                        .compositeValues(false))
+            .enableOpenMetrics2(om2 -> om2.contentNegotiation(true).compositeValues(false))
             .build();
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
-    assertThat(config.getOpenMetrics2Properties().getDisableSuffixAppending()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isFalse();
@@ -149,9 +144,10 @@ class PrometheusPropertiesTest {
   @Test
   void testOpenMetrics2EnableAll() {
     PrometheusProperties config =
-        PrometheusProperties.builder().enableOpenMetrics2(om2 -> om2.enableAll()).build();
+        PrometheusProperties.builder()
+            .enableOpenMetrics2(OpenMetrics2Properties.Builder::enableAll)
+            .build();
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
-    assertThat(config.getOpenMetrics2Properties().getDisableSuffixAppending()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isTrue();
@@ -164,7 +160,6 @@ class PrometheusPropertiesTest {
     PrometheusProperties config =
         PrometheusProperties.builder().openMetrics2Properties(om2Props).build();
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
-    assertThat(config.getOpenMetrics2Properties().getDisableSuffixAppending()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isTrue();
@@ -174,7 +169,6 @@ class PrometheusPropertiesTest {
   void testOpenMetrics2Defaults() {
     PrometheusProperties config = PrometheusProperties.builder().build();
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isFalse();
-    assertThat(config.getOpenMetrics2Properties().getDisableSuffixAppending()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isFalse();
@@ -183,14 +177,12 @@ class PrometheusPropertiesTest {
   @Test
   void testOpenMetrics2PropertiesLoading() {
     Map<Object, Object> properties = new HashMap<>();
-    properties.put("io.prometheus.open_metrics2.content_negotiation", "true");
-    properties.put("io.prometheus.open_metrics2.disable_suffix_appending", "true");
-    properties.put("io.prometheus.open_metrics2.composite_values", "false");
-    properties.put("io.prometheus.open_metrics2.exemplar_compliance", "true");
-    properties.put("io.prometheus.open_metrics2.native_histograms", "false");
+    properties.put("io.prometheus.openmetrics2.content_negotiation", "true");
+    properties.put("io.prometheus.openmetrics2.composite_values", "false");
+    properties.put("io.prometheus.openmetrics2.exemplar_compliance", "true");
+    properties.put("io.prometheus.openmetrics2.native_histograms", "false");
     PrometheusProperties config = PrometheusPropertiesLoader.load(properties);
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
-    assertThat(config.getOpenMetrics2Properties().getDisableSuffixAppending()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isFalse();
