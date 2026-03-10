@@ -2,8 +2,8 @@
 # See https://lychee.cli.rs/config/
 
 timeout = 30
-retry_wait_time = 5
-max_retries = 6
+retry_wait_time = 10
+max_retries = 2
 max_concurrency = 4
 
 # Check link anchors
