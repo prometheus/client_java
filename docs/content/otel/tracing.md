@@ -56,7 +56,7 @@ Exemplars are only selected every
 [`minRetentionPeriodSeconds`]({{< relref "../config/config.md#exemplar-properties" >}}) seconds.
 
 Here's an example of how to configure OpenTelemetry's
-[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/) <!-- editorconfig-checker-disable-line -->
+[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor/) <!-- editorconfig-checker-disable-line -->
 to sample all Spans marked with `exemplar="true"`, and then discard 90% of the traces:
 
 ```yaml
