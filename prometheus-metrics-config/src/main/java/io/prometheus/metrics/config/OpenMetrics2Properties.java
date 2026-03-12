@@ -3,8 +3,9 @@ package io.prometheus.metrics.config;
 import javax.annotation.Nullable;
 
 /**
- * Properties starting with io.prometheus.openmetrics2. These properties are experimental and
- * subject to change.
+ * Properties starting with io.prometheus.openmetrics2.
+ *
+ * @apiNote These properties are experimental and subject to change.
  */
 public class OpenMetrics2Properties {
 
