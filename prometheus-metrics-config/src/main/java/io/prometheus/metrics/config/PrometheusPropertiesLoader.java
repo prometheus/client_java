@@ -40,6 +40,7 @@ public class PrometheusPropertiesLoader {
         ExporterPushgatewayProperties.load(propertySource);
     ExporterOpenTelemetryProperties exporterOpenTelemetryProperties =
         ExporterOpenTelemetryProperties.load(propertySource);
+    OpenMetrics2Properties openMetrics2Properties = OpenMetrics2Properties.load(propertySource);
     validateAllPropertiesProcessed(propertySource);
     return new PrometheusProperties(
         defaultMetricsProperties,
@@ -49,7 +50,8 @@ public class PrometheusPropertiesLoader {
         exporterFilterProperties,
         exporterHttpServerProperties,
         exporterPushgatewayProperties,
-        exporterOpenTelemetryProperties);
+        exporterOpenTelemetryProperties,
+        openMetrics2Properties);
   }
 
   // This will remove entries from propertySource when they are processed.

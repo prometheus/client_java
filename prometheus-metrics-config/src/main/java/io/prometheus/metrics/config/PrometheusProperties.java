@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 /**
@@ -21,6 +22,7 @@ public class PrometheusProperties {
   private final ExporterHttpServerProperties exporterHttpServerProperties;
   private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
   private final ExporterPushgatewayProperties exporterPushgatewayProperties;
+  private final OpenMetrics2Properties openMetrics2Properties;
 
   /**
    * Map that stores metric-specific properties keyed by metric name in exposition format
@@ -111,7 +113,8 @@ public class PrometheusProperties {
       ExporterFilterProperties exporterFilterProperties,
       ExporterHttpServerProperties httpServerConfig,
       ExporterPushgatewayProperties pushgatewayProperties,
-      ExporterOpenTelemetryProperties otelConfig) {
+      ExporterOpenTelemetryProperties otelConfig,
+      OpenMetrics2Properties openMetrics2Properties) {
     this.defaultMetricsProperties = defaultMetricsProperties;
     this.metricProperties = metricProperties;
     this.exemplarProperties = exemplarProperties;
@@ -120,6 +123,7 @@ public class PrometheusProperties {
     this.exporterHttpServerProperties = httpServerConfig;
     this.exporterPushgatewayProperties = pushgatewayProperties;
     this.exporterOpenTelemetryProperties = otelConfig;
+    this.openMetrics2Properties = openMetrics2Properties;
   }
 
   /**
@@ -167,6 +171,10 @@ public class PrometheusProperties {
     return exporterOpenTelemetryProperties;
   }
 
+  public OpenMetrics2Properties getOpenMetrics2Properties() {
+    return openMetrics2Properties;
+  }
+
   public static class Builder {
     private MetricsProperties defaultMetricsProperties = MetricsProperties.builder().build();
     private final MetricPropertiesMap metricProperties = new MetricPropertiesMap();
@@ -180,6 +188,8 @@ public class PrometheusProperties {
         ExporterPushgatewayProperties.builder().build();
     private ExporterOpenTelemetryProperties otelConfig =
         ExporterOpenTelemetryProperties.builder().build();
+    private OpenMetrics2Properties openMetrics2Properties =
+        OpenMetrics2Properties.builder().build();
 
     private Builder() {}
 
@@ -231,6 +241,18 @@ public class PrometheusProperties {
       return this;
     }
 
+    public Builder enableOpenMetrics2(Consumer<OpenMetrics2Properties.Builder> configurator) {
+      OpenMetrics2Properties.Builder openMetrics2Builder = OpenMetrics2Properties.builder();
+      configurator.accept(openMetrics2Builder);
+      this.openMetrics2Properties = openMetrics2Builder.build();
+      return this;
+    }
+
+    public Builder openMetrics2Properties(OpenMetrics2Properties openMetrics2Properties) {
+      this.openMetrics2Properties = openMetrics2Properties;
+      return this;
+    }
+
     public PrometheusProperties build() {
       return new PrometheusProperties(
           defaultMetricsProperties,
@@ -240,7 +262,8 @@ public class PrometheusProperties {
           exporterFilterProperties,
           exporterHttpServerProperties,
           pushgatewayProperties,
-          otelConfig);
+          otelConfig,
+          openMetrics2Properties);
     }
   }
 }
