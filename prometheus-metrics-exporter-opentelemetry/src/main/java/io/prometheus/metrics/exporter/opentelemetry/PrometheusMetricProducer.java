@@ -29,14 +29,17 @@ class PrometheusMetricProducer implements CollectionRegistration {
   private final PrometheusRegistry registry;
   private final Resource resource;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
+  private final boolean preserveNames;
 
   public PrometheusMetricProducer(
       PrometheusRegistry registry,
       InstrumentationScopeInfo instrumentationScopeInfo,
-      Resource resource) {
+      Resource resource,
+      boolean preserveNames) {
     this.registry = registry;
     this.instrumentationScopeInfo = instrumentationScopeInfo;
     this.resource = resource;
+    this.preserveNames = preserveNames;
   }
 
   @Override
@@ -57,7 +60,8 @@ class PrometheusMetricProducer implements CollectionRegistration {
         new MetricDataFactory(
             resourceWithTargetInfo,
             scopeFromInfo != null ? scopeFromInfo : instrumentationScopeInfo,
-            System.currentTimeMillis());
+            System.currentTimeMillis(),
+            preserveNames);
     for (MetricSnapshot snapshot : snapshots) {
       if (snapshot instanceof CounterSnapshot) {
         addUnlessNull(result, factory.create((CounterSnapshot) snapshot));
