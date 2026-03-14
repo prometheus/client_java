@@ -22,13 +22,14 @@ class PrometheusNamingTest {
 
   @Test
   void testSanitizeMetricName() {
-    assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter");
-    assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
-    assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm");
-    assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
+    assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter_total");
+    assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm.info");
+    assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm_info");
     assertThat(sanitizeMetricName("a.b")).isEqualTo("a.b");
-    assertThat(sanitizeMetricName("_total")).isEqualTo("total");
+    assertThat(sanitizeMetricName("_total")).isEqualTo("_total");
     assertThat(sanitizeMetricName("total")).isEqualTo("total");
+    assertThat(sanitizeMetricName("my_events_created")).isEqualTo("my_events_created");
+    assertThat(sanitizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram_bucket");
   }
 
   @Test
@@ -36,9 +37,9 @@ class PrometheusNamingTest {
     assertThat(prometheusName(sanitizeMetricName("def", Unit.RATIO)))
         .isEqualTo("def_" + Unit.RATIO);
     assertThat(prometheusName(sanitizeMetricName("my_counter_total", Unit.RATIO)))
-        .isEqualTo("my_counter_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
+        .isEqualTo("my_counter_total_" + Unit.RATIO);
+    assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm.info_" + Unit.RATIO);
+    assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("_total_" + Unit.RATIO);
     assertThat(sanitizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
   }
 
@@ -55,40 +56,29 @@ class PrometheusNamingTest {
 
   @Test
   void testValidateUnitName() {
-    assertThat(validateUnitName("secondstotal")).isNotNull();
-    assertThat(validateUnitName("total")).isNotNull();
-    assertThat(validateUnitName("seconds_total")).isNotNull();
-    assertThat(validateUnitName("_total")).isNotNull();
     assertThat(validateUnitName("")).isNotNull();
 
     assertThat(validateUnitName("seconds")).isNull();
     assertThat(validateUnitName("2")).isNull();
+    assertThat(validateUnitName("total")).isNull();
+    assertThat(validateUnitName("info")).isNull();
+    assertThat(validateUnitName("created")).isNull();
+    assertThat(validateUnitName("bucket")).isNull();
   }
 
   @Test
   void testSanitizeUnitName() {
     assertThat(sanitizeUnitName("seconds")).isEqualTo("seconds");
-    assertThat(sanitizeUnitName("seconds_total")).isEqualTo("seconds");
-    assertThat(sanitizeUnitName("seconds_total_total")).isEqualTo("seconds");
     assertThat(sanitizeUnitName("m/s")).isEqualTo("m_s");
-    assertThat(sanitizeUnitName("secondstotal")).isEqualTo("seconds");
     assertThat(sanitizeUnitName("2")).isEqualTo("2");
+    assertThat(sanitizeUnitName("total")).isEqualTo("total");
+    assertThat(sanitizeUnitName("info")).isEqualTo("info");
+    assertThat(sanitizeUnitName("created")).isEqualTo("created");
+    assertThat(sanitizeUnitName("bucket")).isEqualTo("bucket");
   }
 
   @Test
-  void testInvalidUnitName1() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> sanitizeUnitName("total"));
-  }
-
-  @Test
-  void testInvalidUnitName2() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> sanitizeUnitName("_total"));
-  }
-
-  @Test
-  void testInvalidUnitName3() {
+  void testInvalidUnitName_percent() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> sanitizeUnitName("%"));
   }

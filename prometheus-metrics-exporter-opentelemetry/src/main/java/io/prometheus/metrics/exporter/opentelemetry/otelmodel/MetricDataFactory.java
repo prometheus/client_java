@@ -17,14 +17,17 @@ public class MetricDataFactory {
   private final Resource resource;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
   private final long currentTimeMillis;
+  private final boolean preserveNames;
 
   public MetricDataFactory(
       Resource resource,
       InstrumentationScopeInfo instrumentationScopeInfo,
-      long currentTimeMillis) {
+      long currentTimeMillis,
+      boolean preserveNames) {
     this.resource = resource;
     this.instrumentationScopeInfo = instrumentationScopeInfo;
     this.currentTimeMillis = currentTimeMillis;
+    this.preserveNames = preserveNames;
   }
 
   @Nullable
@@ -36,7 +39,8 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusCounter(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 
   @Nullable
@@ -48,7 +52,8 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusGauge(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 
   @Nullable
@@ -60,13 +65,15 @@ public class MetricDataFactory {
             snapshot.getMetadata(),
             new PrometheusNativeHistogram(snapshot, currentTimeMillis),
             instrumentationScopeInfo,
-            resource);
+            resource,
+            preserveNames);
       } else if (firstDataPoint.hasClassicHistogramData()) {
         return new PrometheusMetricData<>(
             snapshot.getMetadata(),
             new PrometheusClassicHistogram(snapshot, currentTimeMillis),
             instrumentationScopeInfo,
-            resource);
+            resource,
+            preserveNames);
       }
     }
     return null;
@@ -81,7 +88,8 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusSummary(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 
   @Nullable
@@ -93,7 +101,8 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusInfo(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 
   @Nullable
@@ -105,7 +114,8 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusStateSet(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 
   @Nullable
@@ -117,6 +127,7 @@ public class MetricDataFactory {
         snapshot.getMetadata(),
         new PrometheusUnknown(snapshot, currentTimeMillis),
         instrumentationScopeInfo,
-        resource);
+        resource,
+        preserveNames);
   }
 }

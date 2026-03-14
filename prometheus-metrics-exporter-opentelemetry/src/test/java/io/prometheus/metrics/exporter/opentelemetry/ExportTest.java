@@ -47,7 +47,8 @@ class ExportTest {
         new PrometheusMetricProducer(
             registry,
             InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()));
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            false);
 
     reader.register(prometheusMetricProducer);
   }
@@ -322,6 +323,69 @@ class ExportTest {
 
     List<MetricData> metrics = testing.getMetrics();
     assertThat(metrics).isEmpty();
+  }
+
+  @Test
+  void preserveNamesWithUnit() throws NoSuchFieldException, IllegalAccessException {
+    PrometheusRegistry preserveRegistry = new PrometheusRegistry();
+    Field field = testing.getClass().getDeclaredField("metricReader");
+    field.setAccessible(true);
+    MetricReader reader = (MetricReader) field.get(testing);
+    PrometheusMetricProducer preserveProducer =
+        new PrometheusMetricProducer(
+            preserveRegistry,
+            InstrumentationScopeInfo.create("test"),
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            true);
+    reader.register(preserveProducer);
+
+    Counter.builder().name("req").unit(Unit.BYTES).register(preserveRegistry).inc();
+
+    List<MetricData> metrics = testing.getMetrics();
+    assertThat(metrics).hasSize(1);
+    OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("req").hasUnit("By");
+  }
+
+  @Test
+  void preserveNamesWithUnitAlreadyInName() throws NoSuchFieldException, IllegalAccessException {
+    PrometheusRegistry preserveRegistry = new PrometheusRegistry();
+    Field field = testing.getClass().getDeclaredField("metricReader");
+    field.setAccessible(true);
+    MetricReader reader = (MetricReader) field.get(testing);
+    PrometheusMetricProducer preserveProducer =
+        new PrometheusMetricProducer(
+            preserveRegistry,
+            InstrumentationScopeInfo.create("test"),
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            true);
+    reader.register(preserveProducer);
+
+    Counter.builder().name("req_bytes").unit(Unit.BYTES).register(preserveRegistry).inc();
+
+    List<MetricData> metrics = testing.getMetrics();
+    assertThat(metrics).hasSize(1);
+    OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("req_bytes").hasUnit("By");
+  }
+
+  @Test
+  void preserveNamesWithoutUnit() throws NoSuchFieldException, IllegalAccessException {
+    PrometheusRegistry preserveRegistry = new PrometheusRegistry();
+    Field field = testing.getClass().getDeclaredField("metricReader");
+    field.setAccessible(true);
+    MetricReader reader = (MetricReader) field.get(testing);
+    PrometheusMetricProducer preserveProducer =
+        new PrometheusMetricProducer(
+            preserveRegistry,
+            InstrumentationScopeInfo.create("test"),
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            true);
+    reader.register(preserveProducer);
+
+    Counter.builder().name("events_total").register(preserveRegistry).inc();
+
+    List<MetricData> metrics = testing.getMetrics();
+    assertThat(metrics).hasSize(1);
+    OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("events_total");
   }
 
   private MetricAssert metricAssert() {

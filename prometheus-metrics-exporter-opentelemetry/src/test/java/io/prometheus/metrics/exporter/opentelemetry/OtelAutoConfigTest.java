@@ -8,6 +8,7 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesLoader;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.assertj.core.api.AbstractStringAssert;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -287,6 +289,31 @@ class OtelAutoConfigTest {
     } finally {
       testCase.systemProperties.keySet().forEach(System::clearProperty);
     }
+  }
+
+  @Test
+  void resolvePreserveNamesFromBuilder() {
+    OpenTelemetryExporter.Builder builder = OpenTelemetryExporter.builder();
+    builder.preserveNames(true);
+    PrometheusProperties config = PrometheusProperties.get();
+    assertThat(OtelAutoConfig.resolvePreserveNames(builder, config)).isTrue();
+  }
+
+  @Test
+  void resolvePreserveNamesDefault() {
+    OpenTelemetryExporter.Builder builder = OpenTelemetryExporter.builder();
+    PrometheusProperties config = PrometheusProperties.get();
+    assertThat(OtelAutoConfig.resolvePreserveNames(builder, config)).isFalse();
+  }
+
+  @Test
+  void resolvePreserveNamesFromConfig() {
+    OpenTelemetryExporter.Builder builder = OpenTelemetryExporter.builder();
+    ExporterOpenTelemetryProperties otelProps =
+        ExporterOpenTelemetryProperties.builder().preserveNames(true).build();
+    PrometheusProperties config =
+        PrometheusProperties.builder().exporterOpenTelemetryProperties(otelProps).build();
+    assertThat(OtelAutoConfig.resolvePreserveNames(builder, config)).isTrue();
   }
 
   private static ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties(

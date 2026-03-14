@@ -25,8 +25,14 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
   protected MetricWithFixedMetadata(Builder<?, ?> builder) {
     super(builder);
+    String name = makeName(builder.name, builder.unit);
+    if (builder.originalName == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
+    String originalName = builder.originalName;
+    String expositionBaseName = makeExpositionBaseName(originalName, builder.unit);
     this.metadata =
-        new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.unit);
+        new MetricMetadata(name, expositionBaseName, originalName, builder.help, builder.unit);
     this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
   }
 
@@ -45,6 +51,18 @@ public abstract class MetricWithFixedMetadata extends Metric {
       }
     }
     return name;
+  }
+
+  private String makeExpositionBaseName(@Nullable String expositionBaseName, @Nullable Unit unit) {
+    if (expositionBaseName == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
+    if (unit != null) {
+      if (!expositionBaseName.endsWith("_" + unit) && !expositionBaseName.endsWith("." + unit)) {
+        expositionBaseName += "_" + unit;
+      }
+    }
+    return expositionBaseName;
   }
 
   @Override
@@ -68,6 +86,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
       extends Metric.Builder<B, M> {
 
     @Nullable private String name;
+    @Nullable private String originalName;
     @Nullable private Unit unit;
     @Nullable private String help;
     private String[] labelNames = new String[0];
@@ -82,6 +101,25 @@ public abstract class MetricWithFixedMetadata extends Metric {
         throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
       }
       this.name = name;
+      this.originalName = name;
+      return self();
+    }
+
+    /**
+     * Set the metric name and original name separately. Used by Counter and Info builders which
+     * strip type suffixes from the name but preserve the original for exposition.
+     */
+    protected B nameWithOriginal(String name, String originalName) {
+      String error = PrometheusNaming.validateMetricName(name);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
+      }
+      error = PrometheusNaming.validateMetricName(originalName);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + originalName + "': Illegal metric name: " + error);
+      }
+      this.name = name;
+      this.originalName = originalName;
       return self();
     }
 
