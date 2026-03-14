@@ -34,21 +34,27 @@ class MetricMetadataTest {
   }
 
   @Test
-  void testSanitizationCounter() {
+  void testNameWithTotalSuffix() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_total"));
-    assertThat(metadata.getName()).isEqualTo("my_events");
+    assertThat(metadata.getName()).isEqualTo("my_events_total");
   }
 
   @Test
-  void testSanitizationInfo() {
+  void testNameWithInfoSuffix() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("target_info"));
-    assertThat(metadata.getName()).isEqualTo("target");
+    assertThat(metadata.getName()).isEqualTo("target_info");
   }
 
   @Test
-  void testSanitizationWeirdCornerCase() {
-    MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("_total_created"));
-    assertThat(metadata.getName()).isEqualTo("total");
+  void testNameWithCreatedSuffix() {
+    MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_created"));
+    assertThat(metadata.getName()).isEqualTo("my_events_created");
+  }
+
+  @Test
+  void testNameWithBucketSuffix() {
+    MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_histogram_bucket"));
+    assertThat(metadata.getName()).isEqualTo("my_histogram_bucket");
   }
 
   @Test
@@ -71,5 +77,30 @@ class MetricMetadataTest {
   @Test
   void testUnitNotDuplicated() {
     assertThat(sanitizeMetricName("my_counter_bytes", Unit.BYTES)).isEqualTo("my_counter_bytes");
+  }
+
+  @Test
+  void testFiveArgConstructor() {
+    MetricMetadata metadata =
+        new MetricMetadata("req_bytes", "req_bytes", "req", "help", Unit.BYTES);
+    assertThat(metadata.getName()).isEqualTo("req_bytes");
+    assertThat(metadata.getExpositionBaseName()).isEqualTo("req_bytes");
+    assertThat(metadata.getOriginalName()).isEqualTo("req");
+    assertThat(metadata.getHelp()).isEqualTo("help");
+    assertThat(metadata.getUnit()).isEqualTo(Unit.BYTES);
+  }
+
+  @Test
+  void testFourArgConstructorDefaultsOriginalName() {
+    MetricMetadata metadata = new MetricMetadata("req_bytes", "req_bytes", "help", Unit.BYTES);
+    assertThat(metadata.getOriginalName()).isEqualTo("req_bytes");
+    assertThat(metadata.getExpositionBaseName()).isEqualTo("req_bytes");
+  }
+
+  @Test
+  void testThreeArgConstructorDefaultsOriginalName() {
+    MetricMetadata metadata = new MetricMetadata("req_bytes", "help", Unit.BYTES);
+    assertThat(metadata.getOriginalName()).isEqualTo("req_bytes");
+    assertThat(metadata.getExpositionBaseName()).isEqualTo("req_bytes");
   }
 }

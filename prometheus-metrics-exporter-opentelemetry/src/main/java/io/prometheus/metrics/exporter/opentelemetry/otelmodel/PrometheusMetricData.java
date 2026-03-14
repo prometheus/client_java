@@ -23,10 +23,12 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
       MetricMetadata metricMetadata,
       T data,
       InstrumentationScopeInfo instrumentationScopeInfo,
-      Resource resource) {
+      Resource resource,
+      boolean preserveNames) {
     this.instrumentationScopeInfo = instrumentationScopeInfo;
     this.resource = resource;
-    this.name = getNameWithoutUnit(metricMetadata);
+    this.name =
+        preserveNames ? metricMetadata.getOriginalName() : getNameWithoutUnit(metricMetadata);
     this.description = metricMetadata.getHelp();
     this.unit = convertUnit(metricMetadata.getUnit());
     this.data = data;

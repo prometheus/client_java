@@ -38,8 +38,10 @@ public class OtelAutoConfig {
             instrumentationScopeInfo);
 
     MetricReader reader = requireNonNull(readerRef.get());
+    boolean preserveNames = resolvePreserveNames(builder, config);
     reader.register(
-        new PrometheusMetricProducer(registry, instrumentationScopeInfo, getResourceField(sdk)));
+        new PrometheusMetricProducer(
+            registry, instrumentationScopeInfo, getResourceField(sdk), preserveNames));
     return reader;
   }
 
@@ -105,6 +107,15 @@ public class OtelAutoConfig {
       builder.put(SERVICE_INSTANCE_ID, id);
     }
     return builder.build();
+  }
+
+  static boolean resolvePreserveNames(
+      OpenTelemetryExporter.Builder builder, PrometheusProperties config) {
+    if (builder.preserveNames != null) {
+      return builder.preserveNames;
+    }
+    Boolean fromConfig = config.getExporterOpenTelemetryProperties().getPreserveNames();
+    return fromConfig != null && fromConfig;
   }
 
   static Resource getResourceField(AutoConfiguredOpenTelemetrySdk sdk) {

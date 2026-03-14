@@ -34,7 +34,8 @@ public interface Collector {
   @Nullable
   default MetricSnapshot collect(Predicate<String> includedNames) {
     MetricSnapshot result = collect();
-    if (includedNames.test(result.getMetadata().getPrometheusName())) {
+    if (includedNames.test(result.getMetadata().getPrometheusName())
+        || includedNames.test(result.getMetadata().getExpositionBasePrometheusName())) {
       return result;
     } else {
       return null;
@@ -51,7 +52,8 @@ public interface Collector {
   default MetricSnapshot collect(
       Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshot result = collect(scrapeRequest);
-    if (includedNames.test(result.getMetadata().getPrometheusName())) {
+    if (includedNames.test(result.getMetadata().getPrometheusName())
+        || includedNames.test(result.getMetadata().getExpositionBasePrometheusName())) {
       return result;
     } else {
       return null;

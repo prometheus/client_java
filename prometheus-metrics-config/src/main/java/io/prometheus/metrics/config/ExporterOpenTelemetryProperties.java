@@ -46,6 +46,7 @@ public class ExporterOpenTelemetryProperties {
   private static final String SERVICE_VERSION = "service_version";
   private static final String RESOURCE_ATTRIBUTES =
       "resource_attributes"; // otel.resource.attributes
+  private static final String PRESERVE_NAMES = "preserve_names";
   private static final String PREFIX = "io.prometheus.exporter.opentelemetry";
 
   @Nullable private final String endpoint;
@@ -58,6 +59,7 @@ public class ExporterOpenTelemetryProperties {
   @Nullable private final String serviceInstanceId;
   @Nullable private final String serviceVersion;
   private final Map<String, String> resourceAttributes;
+  @Nullable private final Boolean preserveNames;
 
   private ExporterOpenTelemetryProperties(
       @Nullable String protocol,
@@ -69,7 +71,8 @@ public class ExporterOpenTelemetryProperties {
       @Nullable String serviceNamespace,
       @Nullable String serviceInstanceId,
       @Nullable String serviceVersion,
-      Map<String, String> resourceAttributes) {
+      Map<String, String> resourceAttributes,
+      @Nullable Boolean preserveNames) {
     this.protocol = protocol;
     this.endpoint = endpoint;
     this.headers = headers;
@@ -80,6 +83,7 @@ public class ExporterOpenTelemetryProperties {
     this.serviceInstanceId = serviceInstanceId;
     this.serviceVersion = serviceVersion;
     this.resourceAttributes = resourceAttributes;
+    this.preserveNames = preserveNames;
   }
 
   @Nullable
@@ -131,6 +135,16 @@ public class ExporterOpenTelemetryProperties {
   }
 
   /**
+   * When {@code true}, metric names are preserved as-is (including suffixes like {@code _total}).
+   * When {@code false} (default), standard OTel name normalization is applied (stripping unit
+   * suffix).
+   */
+  @Nullable
+  public Boolean getPreserveNames() {
+    return preserveNames;
+  }
+
+  /**
    * Note that this will remove entries from {@code propertySource}. This is because we want to know
    * if there are unused properties remaining after all properties have been loaded.
    */
@@ -147,6 +161,7 @@ public class ExporterOpenTelemetryProperties {
     String serviceVersion = Util.loadString(PREFIX, SERVICE_VERSION, propertySource);
     Map<String, String> resourceAttributes =
         Util.loadMap(PREFIX, RESOURCE_ATTRIBUTES, propertySource);
+    Boolean preserveNames = Util.loadBoolean(PREFIX, PRESERVE_NAMES, propertySource);
     return new ExporterOpenTelemetryProperties(
         protocol,
         endpoint,
@@ -157,7 +172,8 @@ public class ExporterOpenTelemetryProperties {
         serviceNamespace,
         serviceInstanceId,
         serviceVersion,
-        resourceAttributes);
+        resourceAttributes,
+        preserveNames);
   }
 
   public static Builder builder() {
@@ -176,6 +192,7 @@ public class ExporterOpenTelemetryProperties {
     @Nullable private String serviceInstanceId;
     @Nullable private String serviceVersion;
     private final Map<String, String> resourceAttributes = new HashMap<>();
+    @Nullable private Boolean preserveNames;
 
     private Builder() {}
 
@@ -318,6 +335,15 @@ public class ExporterOpenTelemetryProperties {
       return this;
     }
 
+    /**
+     * When {@code true}, metric names are preserved as-is (including suffixes like {@code _total}).
+     * When {@code false} (default), standard OTel name normalization is applied.
+     */
+    public Builder preserveNames(boolean preserveNames) {
+      this.preserveNames = preserveNames;
+      return this;
+    }
+
     public ExporterOpenTelemetryProperties build() {
       return new ExporterOpenTelemetryProperties(
           protocol,
@@ -329,7 +355,8 @@ public class ExporterOpenTelemetryProperties {
           serviceNamespace,
           serviceInstanceId,
           serviceVersion,
-          resourceAttributes);
+          resourceAttributes,
+          preserveNames);
     }
   }
 }
