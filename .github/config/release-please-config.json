@@ -5,7 +5,6 @@
   "packages": {
     ".": {
       "release-type": "java",
-      "versioning": "always-bump-patch",
       "extra-files": [
         "prometheus-metrics-parent/pom.xml",
         "integration-tests/it-spring-boot-smoke-test/pom.xml"
