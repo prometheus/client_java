@@ -5,6 +5,6 @@
 - Gregor Zeitlinger <gregor.zeitlinger@grafana.com> @zeitlinger
 - Jay DeLuca <jaydeluca4@gmail.com> @jaydeluca
 
-# Emeritus
+## Emeritus
 
 - Tom Wilkie <tom@grafana.com> @tomwilkie
