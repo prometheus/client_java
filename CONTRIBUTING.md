@@ -56,6 +56,10 @@ To autofix linting issues:
 
 `mise run fix`
 
+### Pre-commit Hook (Optional)
+
+Run `mise run setup:pre-commit-hook` to install a git pre-commit hook that auto-lints changed files before each commit. This requires native lint tools, which you can install with `mise run setup:native-lint-tools`. These are optional but catch formatting and lint issues before CI.
+
 ## Running Tests
 
 If you're getting errors when running tests:
