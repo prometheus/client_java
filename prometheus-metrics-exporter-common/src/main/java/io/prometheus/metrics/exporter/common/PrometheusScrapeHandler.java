@@ -44,7 +44,7 @@ public class PrometheusScrapeHandler {
   }
 
   public PrometheusScrapeHandler(PrometheusProperties config, PrometheusRegistry registry) {
-    this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
+    this.expositionFormats = ExpositionFormats.init(config);
     this.preferUncompressedResponse =
         config.getExporterHttpServerProperties().isPreferUncompressedResponse();
     this.registry = registry;

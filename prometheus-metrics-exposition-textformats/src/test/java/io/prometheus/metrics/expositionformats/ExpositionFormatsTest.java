@@ -4,6 +4,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.config.EscapingScheme;
+import io.prometheus.metrics.config.OpenMetrics2Properties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -106,6 +108,95 @@ class ExpositionFormatsTest {
     assertThat(formats.getOpenMetricsTextFormatWriter()).isNotNull();
     assertThat(formats.getPrometheusProtobufWriter()).isNotNull();
     assertThat(formats.getPrometheusTextFormatWriter()).isNotNull();
+    assertThat(formats.getOpenMetrics2TextFormatWriter()).isNotNull();
+  }
+
+  @Test
+  void testOM2DisabledByDefault() {
+    ExpositionFormats formats = ExpositionFormats.init();
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    assertThat(writer).isInstanceOf(OpenMetricsTextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2EnabledWithContentNegotiation() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    // When contentNegotiation is enabled, should return OM2 writer
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2EnabledWithCompositeValues() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(OpenMetrics2Properties.builder().compositeValues(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2EnabledWithExemplarCompliance() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().exemplarCompliance(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    // When exemplarCompliance is enabled, should return OM2 writer
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2EnabledWithNativeHistograms() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(OpenMetrics2Properties.builder().nativeHistograms(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    // When nativeHistograms is enabled, should return OM2 writer
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2EnabledWithMultipleFlags() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder()
+                    .contentNegotiation(true)
+                    .compositeValues(true)
+                    .nativeHistograms(true)
+                    .build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    // When multiple OM2 flags are enabled, should return OM2 writer
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testProtobufWriterTakesPrecedence() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter(
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily");
+    // Protobuf writer should take precedence even when OM2 is enabled
+    assertThat(writer).isInstanceOf(PrometheusProtobufWriter.class);
   }
 
   @Test
