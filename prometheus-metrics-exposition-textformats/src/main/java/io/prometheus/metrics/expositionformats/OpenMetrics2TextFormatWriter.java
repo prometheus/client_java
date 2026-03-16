@@ -131,7 +131,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     if (openMetrics2Properties.getContentNegotiation()) {
       return CONTENT_TYPE;
     } else {
-      return "application/openmetrics-text; version=1.0.0; charset=utf-8";
+      return OpenMetricsTextFormatWriter.CONTENT_TYPE;
     }
   }
 

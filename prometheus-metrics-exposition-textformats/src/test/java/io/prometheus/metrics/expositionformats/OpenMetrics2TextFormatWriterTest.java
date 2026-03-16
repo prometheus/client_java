@@ -16,6 +16,7 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class OpenMetrics2TextFormatWriterTest {
@@ -297,6 +298,6 @@ class OpenMetrics2TextFormatWriterTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
-    return out.toString();
+    return out.toString(StandardCharsets.UTF_8);
   }
 }
