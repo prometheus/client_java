@@ -41,6 +41,7 @@ public class OpenTelemetryExporter implements AutoCloseable {
     @Nullable String serviceInstanceId;
     @Nullable String serviceVersion;
     final Map<String, String> resourceAttributes = new HashMap<>();
+    @Nullable Boolean preserveNames;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -191,6 +192,15 @@ public class OpenTelemetryExporter implements AutoCloseable {
      */
     public Builder resourceAttribute(String name, String value) {
       this.resourceAttributes.put(name, value);
+      return this;
+    }
+
+    /**
+     * When {@code true}, metric names are preserved as-is (including suffixes like {@code _total}).
+     * When {@code false} (default), standard OTel name normalization is applied.
+     */
+    public Builder preserveNames(boolean preserveNames) {
+      this.preserveNames = preserveNames;
       return this;
     }
 
