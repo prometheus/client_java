@@ -296,7 +296,12 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     if (nameSuffix == null) {
       builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme));
     } else {
-      builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme) + nameSuffix);
+      String expositionBaseName = SnapshotEscaper.getExpositionBaseMetadataName(metadata, scheme);
+      if (expositionBaseName.endsWith(nameSuffix)) {
+        builder.setName(expositionBaseName);
+      } else {
+        builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme) + nameSuffix);
+      }
     }
     if (metadata.getHelp() != null) {
       builder.setHelp(metadata.getHelp());

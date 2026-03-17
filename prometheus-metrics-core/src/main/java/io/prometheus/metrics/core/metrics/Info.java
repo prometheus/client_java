@@ -146,7 +146,7 @@ public class Info extends MetricWithFixedMetadata {
      */
     @Override
     public Builder name(String name) {
-      return super.name(stripInfoSuffix(name));
+      return super.nameWithOriginal(stripInfoSuffix(name), name);
     }
 
     /** Throws an {@link UnsupportedOperationException} because Info metrics cannot have a unit. */

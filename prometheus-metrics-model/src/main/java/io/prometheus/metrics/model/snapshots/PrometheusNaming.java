@@ -18,34 +18,12 @@ import javax.annotation.Nullable;
 public class PrometheusNaming {
 
   /**
-   * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum})
-   * should also be reserved metric name suffixes. However, popular instrumentation libraries have
-   * Gauges with names ending in {@code _count}. Examples:
+   * Test if a metric name is valid. Any non-empty valid UTF-8 string is accepted.
    *
-   * <ul>
-   *   <li>Micrometer: {@code jvm_buffer_count}
-   *   <li>OpenTelemetry: {@code process_runtime_jvm_buffer_count}
-   * </ul>
-   *
-   * <p>We do not treat {@code _count} and {@code _sum} as reserved suffixes here for compatibility
-   * with these libraries. However, there is a risk of name conflict if someone creates a gauge
-   * named {@code my_data_count} and a histogram or summary named {@code my_data}, because the
-   * histogram or summary will implicitly have a sample named {@code my_data_count}.
-   */
-  private static final String[] RESERVED_METRIC_NAME_SUFFIXES = {
-    "_total", "_created", "_bucket", "_info",
-    ".total", ".created", ".bucket", ".info"
-  };
-
-  /**
-   * Test if a metric name is valid. Rules:
-   *
-   * <ul>
-   *   <li>The name must match <a
-   *       href="https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels">Metric
-   *       names</a>.
-   *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
-   * </ul>
+   * <p>Collision detection for suffixes like {@code _total}, {@code _info}, {@code _bucket}, etc.
+   * is handled at registration time by the {@link
+   * io.prometheus.metrics.model.registry.PrometheusRegistry PrometheusRegistry}, not by name
+   * validation.
    *
    * <p>If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix. Note
    * that <a href="https://openmetrics.io/">OpenMetrics</a> requires metric names to have their unit
@@ -70,11 +48,6 @@ public class PrometheusNaming {
    */
   @Nullable
   public static String validateMetricName(String name) {
-    for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-      if (name.endsWith(reservedSuffix)) {
-        return "The metric name must not include the '" + reservedSuffix + "' suffix.";
-      }
-    }
     if (isValidUtf8(name)) {
       return null;
     }
@@ -141,10 +114,7 @@ public class PrometheusNaming {
     return true;
   }
 
-  /**
-   * Units may not have illegal characters, and they may not end with a reserved suffix like
-   * 'total'.
-   */
+  /** Units may not have illegal characters. */
   public static boolean isValidUnitName(String name) {
     return validateUnitName(name) == null;
   }
@@ -154,12 +124,6 @@ public class PrometheusNaming {
   public static String validateUnitName(String name) {
     if (name.isEmpty()) {
       return "The unit name must not be empty.";
-    }
-    for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-      String suffixName = reservedSuffix.substring(1);
-      if (name.endsWith(suffixName)) {
-        return suffixName + " is a reserved suffix in Prometheus";
-      }
     }
     // Check if all characters are [a-zA-Z0-9_.:]+
     for (int i = 0; i < name.length(); i++) {
@@ -189,31 +153,16 @@ public class PrometheusNaming {
   }
 
   /**
-   * Convert an arbitrary string to a name where {@link #isValidMetricName(String)
-   * isValidMetricName(name)} is true.
+   * Convert an arbitrary string to a valid metric name. Since any non-empty valid UTF-8 string is a
+   * valid metric name, this simply returns the input unchanged.
+   *
+   * @throws IllegalArgumentException if the input is empty
    */
   public static String sanitizeMetricName(String metricName) {
     if (metricName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
     }
-    String sanitizedName = metricName;
-    boolean modified = true;
-    while (modified) {
-      modified = false;
-      for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-        if (sanitizedName.equals(reservedSuffix)) {
-          // This is for the corner case when you call sanitizeMetricName("_total").
-          // In that case the result will be "total".
-          return reservedSuffix.substring(1);
-        }
-        if (sanitizedName.endsWith(reservedSuffix)) {
-          sanitizedName =
-              sanitizedName.substring(0, sanitizedName.length() - reservedSuffix.length());
-          modified = true;
-        }
-      }
-    }
-    return sanitizedName;
+    return metricName;
   }
 
   /**
@@ -249,11 +198,10 @@ public class PrometheusNaming {
   }
 
   /**
-   * Convert an arbitrary string to a name where {@link #validateUnitName(String)} is {@code null}
-   * (i.e. the name is valid).
+   * Convert an arbitrary string to a valid unit name by replacing illegal characters.
    *
-   * @throws IllegalArgumentException if the {@code unitName} cannot be converted, for example if
-   *     you call {@code sanitizeUnitName("total")} or {@code sanitizeUnitName("")}.
+   * @throws IllegalArgumentException if the {@code unitName} cannot be converted, e.g. if you call
+   *     {@code sanitizeUnitName("")}.
    * @throws NullPointerException if {@code unitName} is null.
    */
   public static String sanitizeUnitName(String unitName) {
@@ -261,24 +209,11 @@ public class PrometheusNaming {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid unit name.");
     }
     String sanitizedName = replaceIllegalCharsInUnitName(unitName);
-    boolean modified = true;
-    while (modified) {
-      modified = false;
-      while (sanitizedName.startsWith("_") || sanitizedName.startsWith(".")) {
-        sanitizedName = sanitizedName.substring(1);
-        modified = true;
-      }
-      while (sanitizedName.endsWith(".") || sanitizedName.endsWith("_")) {
-        sanitizedName = sanitizedName.substring(0, sanitizedName.length() - 1);
-        modified = true;
-      }
-      for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-        String suffixName = reservedSuffix.substring(1);
-        if (sanitizedName.endsWith(suffixName)) {
-          sanitizedName = sanitizedName.substring(0, sanitizedName.length() - suffixName.length());
-          modified = true;
-        }
-      }
+    while (sanitizedName.startsWith("_") || sanitizedName.startsWith(".")) {
+      sanitizedName = sanitizedName.substring(1);
+    }
+    while (sanitizedName.endsWith(".") || sanitizedName.endsWith("_")) {
+      sanitizedName = sanitizedName.substring(0, sanitizedName.length() - 1);
     }
     if (sanitizedName.isEmpty()) {
       throw new IllegalArgumentException(

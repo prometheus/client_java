@@ -241,7 +241,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
      */
     @Override
     public Builder name(String name) {
-      return super.name(stripTotalSuffix(name));
+      return super.nameWithOriginal(stripTotalSuffix(name), name);
     }
 
     @Override

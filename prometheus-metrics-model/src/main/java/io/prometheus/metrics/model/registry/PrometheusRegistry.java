@@ -28,13 +28,24 @@ public class PrometheusRegistry {
   private final ConcurrentHashMap<MultiCollector, List<MultiCollectorRegistration>>
       multiCollectorMetadata = new ConcurrentHashMap<>();
 
+  /**
+   * Maps exposition-level names (e.g. "events_total", "events_created") to the owning
+   * prometheusName (e.g. "events"). Used to detect cross-type collisions at registration time.
+   */
+  private final ConcurrentHashMap<String, String> expositionNameOwners = new ConcurrentHashMap<>();
+
   /** Stores the registration details for a Collector at registration time. */
   private static class CollectorRegistration {
     final String prometheusName;
+    @Nullable final String expositionBasePrometheusName;
     final Set<String> labelNames;
 
-    CollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
+    CollectorRegistration(
+        String prometheusName,
+        @Nullable String expositionBasePrometheusName,
+        @Nullable Set<String> labelNames) {
       this.prometheusName = prometheusName;
+      this.expositionBasePrometheusName = expositionBasePrometheusName;
       this.labelNames = immutableLabelNames(labelNames);
     }
   }
@@ -148,8 +159,43 @@ public class PrometheusRegistry {
   }
 
   /**
+   * Computes the set of exposition-level time series names that a metric with the given name and
+   * type will produce.
+   */
+  static Set<String> computeExpositionNames(String prometheusName, MetricType type) {
+    Set<String> names = new HashSet<>();
+    switch (type) {
+      case COUNTER:
+        names.add(prometheusName + "_total");
+        names.add(prometheusName + "_created");
+        break;
+      case INFO:
+        names.add(prometheusName + "_info");
+        break;
+      case HISTOGRAM:
+        names.add(prometheusName + "_bucket");
+        names.add(prometheusName + "_count");
+        names.add(prometheusName + "_sum");
+        names.add(prometheusName + "_created");
+        break;
+      case SUMMARY:
+        names.add(prometheusName + "_count");
+        names.add(prometheusName + "_sum");
+        names.add(prometheusName + "_created");
+        break;
+      case GAUGE:
+      case STATESET:
+      case UNKNOWN:
+      default:
+        names.add(prometheusName);
+        break;
+    }
+    return names;
+  }
+
+  /**
    * Validates the registration of a metric with the given parameters. Ensures type consistency,
-   * label schema uniqueness, and help/unit consistency.
+   * label schema uniqueness, help/unit consistency, and exposition name collision detection.
    */
   private void validateRegistration(
       String prometheusName,
@@ -161,6 +207,23 @@ public class PrometheusRegistry {
     final Set<String> names = normalizedLabels;
     final String helpForValidation = help;
     final Unit unitForValidation = unit;
+
+    // Check exposition name collisions before modifying any state.
+    Set<String> expositionNames = computeExpositionNames(prometheusName, type);
+    for (String expositionName : expositionNames) {
+      String owner = expositionNameOwners.get(expositionName);
+      if (owner != null && !owner.equals(prometheusName)) {
+        throw new IllegalArgumentException(
+            "'"
+                + prometheusName
+                + "' and '"
+                + owner
+                + "' have conflicting exposition name: '"
+                + expositionName
+                + "'");
+      }
+    }
+
     registered.compute(
         prometheusName,
         (n, existingInfo) -> {
@@ -190,6 +253,11 @@ public class PrometheusRegistry {
             return existingInfo;
           }
         });
+
+    // Registration succeeded — claim exposition names.
+    for (String expositionName : expositionNames) {
+      expositionNameOwners.put(expositionName, prometheusName);
+    }
   }
 
   public void register(Collector collector) {
@@ -208,8 +276,12 @@ public class PrometheusRegistry {
       // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
       if (prometheusName != null && metricType != null) {
         validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
+        String expositionBasePrometheusName =
+            metadata != null ? metadata.getExpositionBasePrometheusName() : null;
         collectorMetadata.put(
-            collector, new CollectorRegistration(prometheusName, normalizedLabels));
+            collector,
+            new CollectorRegistration(
+                prometheusName, expositionBasePrometheusName, normalizedLabels));
       }
       // Catch RuntimeException broadly because collector methods (getPrometheusName, getMetricType,
       // etc.) are user-implemented and could throw any RuntimeException. Ensures cleanup on
@@ -280,7 +352,7 @@ public class PrometheusRegistry {
 
   /**
    * Removes the label schema for the given metric name. If no label schemas remain for that name,
-   * removes the metric name entirely from the registry.
+   * removes the metric name entirely from the registry, including its exposition name reservations.
    */
   private void unregisterLabelSchema(String prometheusName, Set<String> labelNames) {
     registered.computeIfPresent(
@@ -288,6 +360,11 @@ public class PrometheusRegistry {
         (name, info) -> {
           info.removeLabelSet(labelNames);
           if (info.isEmpty()) {
+            // Remove exposition name reservations for this metric.
+            Set<String> expositionNames = computeExpositionNames(prometheusName, info.getType());
+            for (String expositionName : expositionNames) {
+              expositionNameOwners.remove(expositionName, prometheusName);
+            }
             return null;
           }
           return info;
@@ -300,6 +377,7 @@ public class PrometheusRegistry {
     registered.clear();
     collectorMetadata.clear();
     multiCollectorMetadata.clear();
+    expositionNameOwners.clear();
   }
 
   public MetricSnapshots scrape() {
@@ -347,7 +425,12 @@ public class PrometheusRegistry {
       String prometheusName = collector.getPrometheusName();
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
       // prometheusName != null means we can skip the scrape if the name is excluded.
-      if (prometheusName == null || includedNames.test(prometheusName)) {
+      // Also test the original name (e.g. "events_total" for a counter named "events").
+      CollectorRegistration reg = collectorMetadata.get(collector);
+      String expositionName = reg != null ? reg.expositionBasePrometheusName : null;
+      if (prometheusName == null
+          || includedNames.test(prometheusName)
+          || (expositionName != null && includedNames.test(expositionName))) {
         MetricSnapshot snapshot =
             scrapeRequest == null
                 ? collector.collect(includedNames)

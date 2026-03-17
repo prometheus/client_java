@@ -1087,4 +1087,193 @@ class PrometheusRegistryTest {
     assertThatCode(() -> registry.unregister(legacy)).doesNotThrowAnyException();
     assertThat(registry.scrape().size()).isEqualTo(0);
   }
+
+  @Test
+  void register_gaugeWithTotalSuffix_andCounter_collisionDetected() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    // Register a counter "events" — this claims exposition name "events_total"
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("events").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "events";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    // Register a gauge "events_total" — this claims exposition name "events_total"
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("events_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "events_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    registry.register(counter);
+    assertThatThrownBy(() -> registry.register(gauge))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("conflicting exposition name");
+  }
+
+  @Test
+  void register_gaugeWithCountSuffix_andHistogram_collisionDetected() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector histogram =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("foo").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "foo";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.HISTOGRAM;
+          }
+        };
+
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("foo_count").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "foo_count";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    registry.register(histogram);
+    assertThatThrownBy(() -> registry.register(gauge))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("conflicting exposition name");
+  }
+
+  @Test
+  void register_gaugeWithTotalSuffix_andHistogram_noCollision() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    // Histogram "foo" claims: foo_bucket, foo_count, foo_sum, foo_created
+    // Gauge "foo_total" claims: foo_total
+    // No overlap — should succeed.
+    Collector histogram =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("foo").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "foo";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.HISTOGRAM;
+          }
+        };
+
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("foo_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "foo_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    registry.register(histogram);
+    assertThatCode(() -> registry.register(gauge)).doesNotThrowAnyException();
+  }
+
+  @Test
+  void register_expositionCollision_unregisterAndReregister() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("events").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "events";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("events_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "events_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    registry.register(counter);
+    assertThatThrownBy(() -> registry.register(gauge)).isInstanceOf(IllegalArgumentException.class);
+
+    // After unregistering the counter, the gauge should succeed
+    registry.unregister(counter);
+    assertThatCode(() -> registry.register(gauge)).doesNotThrowAnyException();
+  }
 }

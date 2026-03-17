@@ -96,6 +96,15 @@ public class SnapshotEscaper {
     }
   }
 
+  public static String getExpositionBaseMetadataName(
+      MetricMetadata metadata, EscapingScheme scheme) {
+    if (scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
+      return metadata.getExpositionBasePrometheusName();
+    } else {
+      return metadata.getExpositionBaseName();
+    }
+  }
+
   public static Labels escapeLabels(Labels labels, EscapingScheme scheme) {
     Labels.Builder outLabelsBuilder = Labels.builder();
 

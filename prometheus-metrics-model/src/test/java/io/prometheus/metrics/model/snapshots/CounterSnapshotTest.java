@@ -92,8 +92,8 @@ class CounterSnapshotTest {
 
   @Test
   void testTotalSuffixPresent() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> CounterSnapshot.builder().name("test_total").build());
+    CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
   }
 
   @Test
