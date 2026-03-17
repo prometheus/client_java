@@ -119,7 +119,19 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  void testOM2EnabledWithContentNegotiation() {
+  void testOM2EnabledOnly() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(OpenMetrics2Properties.builder().enabled(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2NotEnabledByFeatureFlagAlone() {
+    // Feature flags without enabled=true should not activate the OM2 writer
     PrometheusProperties props =
         PrometheusProperties.builder()
             .openMetrics2Properties(
@@ -127,52 +139,16 @@ class ExpositionFormatsTest {
             .build();
     ExpositionFormats formats = ExpositionFormats.init(props);
     ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
-    // When contentNegotiation is enabled, should return OM2 writer
-    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+    assertThat(writer).isInstanceOf(OpenMetricsTextFormatWriter.class);
   }
 
   @Test
-  void testOM2EnabledWithCompositeValues() {
-    PrometheusProperties props =
-        PrometheusProperties.builder()
-            .openMetrics2Properties(OpenMetrics2Properties.builder().compositeValues(true).build())
-            .build();
-    ExpositionFormats formats = ExpositionFormats.init(props);
-    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
-    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
-  }
-
-  @Test
-  void testOM2EnabledWithExemplarCompliance() {
-    PrometheusProperties props =
-        PrometheusProperties.builder()
-            .openMetrics2Properties(
-                OpenMetrics2Properties.builder().exemplarCompliance(true).build())
-            .build();
-    ExpositionFormats formats = ExpositionFormats.init(props);
-    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
-    // When exemplarCompliance is enabled, should return OM2 writer
-    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
-  }
-
-  @Test
-  void testOM2EnabledWithNativeHistograms() {
-    PrometheusProperties props =
-        PrometheusProperties.builder()
-            .openMetrics2Properties(OpenMetrics2Properties.builder().nativeHistograms(true).build())
-            .build();
-    ExpositionFormats formats = ExpositionFormats.init(props);
-    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
-    // When nativeHistograms is enabled, should return OM2 writer
-    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
-  }
-
-  @Test
-  void testOM2EnabledWithMultipleFlags() {
+  void testOM2EnabledWithFeatureFlags() {
     PrometheusProperties props =
         PrometheusProperties.builder()
             .openMetrics2Properties(
                 OpenMetrics2Properties.builder()
+                    .enabled(true)
                     .contentNegotiation(true)
                     .compositeValues(true)
                     .nativeHistograms(true)
@@ -180,7 +156,6 @@ class ExpositionFormatsTest {
             .build();
     ExpositionFormats formats = ExpositionFormats.init(props);
     ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
-    // When multiple OM2 flags are enabled, should return OM2 writer
     assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
   }
 
@@ -188,8 +163,7 @@ class ExpositionFormatsTest {
   void testProtobufWriterTakesPrecedence() {
     PrometheusProperties props =
         PrometheusProperties.builder()
-            .openMetrics2Properties(
-                OpenMetrics2Properties.builder().contentNegotiation(true).build())
+            .openMetrics2Properties(OpenMetrics2Properties.builder().enabled(true).build())
             .build();
     ExpositionFormats formats = ExpositionFormats.init(props);
     ExpositionFormatWriter writer =

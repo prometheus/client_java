@@ -15,6 +15,8 @@ class OpenMetrics2PropertiesTest {
         load(
             new HashMap<>(
                 Map.of(
+                    "io.prometheus.openmetrics2.enabled",
+                    "true",
                     "io.prometheus.openmetrics2.content_negotiation",
                     "true",
                     "io.prometheus.openmetrics2.composite_values",
@@ -23,6 +25,7 @@ class OpenMetrics2PropertiesTest {
                     "true",
                     "io.prometheus.openmetrics2.native_histograms",
                     "true")));
+    assertThat(properties.getEnabled()).isTrue();
     assertThat(properties.getContentNegotiation()).isTrue();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
@@ -31,6 +34,11 @@ class OpenMetrics2PropertiesTest {
 
   @Test
   void loadInvalidValue() {
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () -> load(new HashMap<>(Map.of("io.prometheus.openmetrics2.enabled", "invalid"))))
+        .withMessage(
+            "io.prometheus.openmetrics2.enabled: Expecting 'true' or 'false'. Found: invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -79,11 +87,13 @@ class OpenMetrics2PropertiesTest {
   void builder() {
     OpenMetrics2Properties properties =
         OpenMetrics2Properties.builder()
+            .enabled(true)
             .contentNegotiation(true)
             .compositeValues(false)
             .exemplarCompliance(true)
             .nativeHistograms(false)
             .build();
+    assertThat(properties.getEnabled()).isTrue();
     assertThat(properties.getContentNegotiation()).isTrue();
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isTrue();
@@ -93,6 +103,7 @@ class OpenMetrics2PropertiesTest {
   @Test
   void builderEnableAll() {
     OpenMetrics2Properties properties = OpenMetrics2Properties.builder().enableAll().build();
+    assertThat(properties.getEnabled()).isTrue();
     assertThat(properties.getContentNegotiation()).isTrue();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
@@ -102,6 +113,7 @@ class OpenMetrics2PropertiesTest {
   @Test
   void defaultValues() {
     OpenMetrics2Properties properties = OpenMetrics2Properties.builder().build();
+    assertThat(properties.getEnabled()).isFalse();
     assertThat(properties.getContentNegotiation()).isFalse();
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isFalse();

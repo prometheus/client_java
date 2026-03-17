@@ -76,11 +76,7 @@ public class ExpositionFormats {
   }
 
   private boolean isOpenMetrics2Enabled() {
-    OpenMetrics2Properties props = openMetrics2TextFormatWriter.getOpenMetrics2Properties();
-    return props.getContentNegotiation()
-        || props.getCompositeValues()
-        || props.getExemplarCompliance()
-        || props.getNativeHistograms();
+    return openMetrics2TextFormatWriter.getOpenMetrics2Properties().getEnabled();
   }
 
   public PrometheusProtobufWriter getPrometheusProtobufWriter() {

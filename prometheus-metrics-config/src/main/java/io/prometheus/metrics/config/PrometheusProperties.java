@@ -242,7 +242,8 @@ public class PrometheusProperties {
     }
 
     public Builder enableOpenMetrics2(Consumer<OpenMetrics2Properties.Builder> configurator) {
-      OpenMetrics2Properties.Builder openMetrics2Builder = OpenMetrics2Properties.builder();
+      OpenMetrics2Properties.Builder openMetrics2Builder =
+          OpenMetrics2Properties.builder().enabled(true);
       configurator.accept(openMetrics2Builder);
       this.openMetrics2Properties = openMetrics2Builder.build();
       return this;
