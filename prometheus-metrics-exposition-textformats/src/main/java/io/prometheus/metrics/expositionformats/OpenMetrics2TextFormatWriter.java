@@ -6,7 +6,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
-import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getExpositionBaseMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
 import io.prometheus.metrics.config.EscapingScheme;
@@ -40,9 +40,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * Write the OpenMetrics 2.0 text format. This is currently a skeleton implementation that produces
- * identical output to OpenMetrics 1.0, with infrastructure for future OM2 features. This is
- * experimental and subject to change as the <a
+ * Write the OpenMetrics 2.0 text format. Unlike the OM1 writer, this writer outputs metric names as
+ * provided by the user — no {@code _total} or unit suffix appending. The {@code _info} suffix is
+ * enforced per the OM2 spec (MUST). This is experimental and subject to change as the <a
  * href="https://github.com/prometheus/docs/blob/main/docs/specs/om/open_metrics_spec_2_0.md">OpenMetrics
  * 2.0 specification</a> evolves.
  */
@@ -171,22 +171,24 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeCounter(Writer writer, CounterSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "counter", metadata, scheme);
+    // OM2: use the name as provided by the user, no _total appending
+    String counterName = getExpositionBaseMetadataName(metadata, scheme);
+    writeMetadataWithName(writer, counterName, "counter", metadata);
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(
-          writer, getMetadataName(metadata, scheme), "_total", data.getLabels(), scheme);
+      writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
-      writeCreated(writer, metadata, data, scheme);
+      writeCreated(writer, counterName, data, scheme);
     }
   }
 
   private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "gauge", metadata, scheme);
+    String name = getExpositionBaseMetadataName(metadata, scheme);
+    writeMetadataWithName(writer, name, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, getMetadataName(metadata, scheme), null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
@@ -199,20 +201,21 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
+    String name = getExpositionBaseMetadataName(metadata, scheme);
     if (snapshot.isGaugeHistogram()) {
-      writeMetadata(writer, "gaugehistogram", metadata, scheme);
+      writeMetadataWithName(writer, name, "gaugehistogram", metadata);
       writeClassicHistogramBuckets(
-          writer, metadata, "_gcount", "_gsum", snapshot.getDataPoints(), scheme);
+          writer, name, "_gcount", "_gsum", snapshot.getDataPoints(), scheme);
     } else {
-      writeMetadata(writer, "histogram", metadata, scheme);
+      writeMetadataWithName(writer, name, "histogram", metadata);
       writeClassicHistogramBuckets(
-          writer, metadata, "_count", "_sum", snapshot.getDataPoints(), scheme);
+          writer, name, "_count", "_sum", snapshot.getDataPoints(), scheme);
     }
   }
 
   private void writeClassicHistogramBuckets(
       Writer writer,
-      MetricMetadata metadata,
+      String name,
       String countSuffix,
       String sumSuffix,
       List<HistogramSnapshot.HistogramDataPointSnapshot> dataList,
@@ -225,13 +228,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       for (int i = 0; i < buckets.size(); i++) {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
-            writer,
-            getMetadataName(metadata, scheme),
-            "_bucket",
-            data.getLabels(),
-            scheme,
-            "le",
-            buckets.getUpperBound(i));
+            writer, name, "_bucket", data.getLabels(), scheme, "le", buckets.getUpperBound(i));
         writeLong(writer, cumulativeCount);
         Exemplar exemplar;
         if (i == 0) {
@@ -243,9 +240,9 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       }
       // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
       if (data.hasCount() && data.hasSum()) {
-        writeCountAndSum(writer, metadata, data, countSuffix, sumSuffix, exemplars, scheme);
+        writeCountAndSum(writer, name, data, countSuffix, sumSuffix, exemplars, scheme);
       }
-      writeCreated(writer, metadata, data, scheme);
+      writeCreated(writer, name, data, scheme);
     }
   }
 
@@ -263,12 +260,13 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
+    String name = getExpositionBaseMetadataName(metadata, scheme);
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
         continue;
       }
       if (!metadataWritten) {
-        writeMetadata(writer, "summary", metadata, scheme);
+        writeMetadataWithName(writer, name, "summary", metadata);
         metadataWritten = true;
       }
       Exemplars exemplars = data.getExemplars();
@@ -280,13 +278,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       int exemplarIndex = 1;
       for (Quantile quantile : data.getQuantiles()) {
         writeNameAndLabels(
-            writer,
-            getMetadataName(metadata, scheme),
-            null,
-            data.getLabels(),
-            scheme,
-            "quantile",
-            quantile.getQuantile());
+            writer, name, null, data.getLabels(), scheme, "quantile", quantile.getQuantile());
         writeDouble(writer, quantile.getValue());
         if (exemplars.size() > 0 && exemplarsOnAllMetricTypesEnabled) {
           exemplarIndex = (exemplarIndex + 1) % exemplars.size();
@@ -296,18 +288,20 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
         }
       }
       // Unlike histograms, summaries can have only a count or only a sum according to OpenMetrics.
-      writeCountAndSum(writer, metadata, data, "_count", "_sum", exemplars, scheme);
-      writeCreated(writer, metadata, data, scheme);
+      writeCountAndSum(writer, name, data, "_count", "_sum", exemplars, scheme);
+      writeCreated(writer, name, data, scheme);
     }
   }
 
   private void writeInfo(Writer writer, InfoSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "info", metadata, scheme);
+    // OM2 spec: Info MetricFamily name MUST end in _info
+    String infoName = ensureSuffix(getExpositionBaseMetadataName(metadata, scheme), "_info");
+    String baseName = removeSuffix(infoName, "_info");
+    writeMetadataWithName(writer, baseName, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(
-          writer, getMetadataName(metadata, scheme), "_info", data.getLabels(), scheme);
+      writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme);
       writer.write("1");
       writeScrapeTimestampAndExemplar(writer, data, null, scheme);
     }
@@ -316,10 +310,11 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeStateSet(Writer writer, StateSetSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "stateset", metadata, scheme);
+    String name = getExpositionBaseMetadataName(metadata, scheme);
+    writeMetadataWithName(writer, name, "stateset", metadata);
     for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getDataPoints()) {
       for (int i = 0; i < data.size(); i++) {
-        writer.write(getMetadataName(metadata, scheme));
+        writer.write(name);
         writer.write('{');
         Labels labels = data.getLabels();
         for (int j = 0; j < labels.size(); j++) {
@@ -334,7 +329,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
         if (!labels.isEmpty()) {
           writer.write(",");
         }
-        writer.write(getMetadataName(metadata, scheme));
+        writer.write(name);
         writer.write("=\"");
         writeEscapedString(writer, data.getName(i));
         writer.write("\"} ");
@@ -351,9 +346,10 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeUnknown(Writer writer, UnknownSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "unknown", metadata, scheme);
+    String name = getExpositionBaseMetadataName(metadata, scheme);
+    writeMetadataWithName(writer, name, "unknown", metadata);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, getMetadataName(metadata, scheme), null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
@@ -365,7 +361,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   private void writeCountAndSum(
       Writer writer,
-      MetricMetadata metadata,
+      String name,
       DistributionDataPointSnapshot data,
       String countSuffix,
       String sumSuffix,
@@ -373,8 +369,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       EscapingScheme scheme)
       throws IOException {
     if (data.hasCount()) {
-      writeNameAndLabels(
-          writer, getMetadataName(metadata, scheme), countSuffix, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, countSuffix, data.getLabels(), scheme);
       writeLong(writer, data.getCount());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, exemplars.getLatest(), scheme);
@@ -383,19 +378,17 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       }
     }
     if (data.hasSum()) {
-      writeNameAndLabels(
-          writer, getMetadataName(metadata, scheme), sumSuffix, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, sumSuffix, data.getLabels(), scheme);
       writeDouble(writer, data.getSum());
       writeScrapeTimestampAndExemplar(writer, data, null, scheme);
     }
   }
 
   private void writeCreated(
-      Writer writer, MetricMetadata metadata, DataPointSnapshot data, EscapingScheme scheme)
+      Writer writer, String name, DataPointSnapshot data, EscapingScheme scheme)
       throws IOException {
     if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-      writeNameAndLabels(
-          writer, getMetadataName(metadata, scheme), "_created", data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, "_created", data.getLabels(), scheme);
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
       if (data.hasScrapeTimestamp()) {
         writer.write(' ');
@@ -466,27 +459,40 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writer.write('\n');
   }
 
-  private void writeMetadata(
-      Writer writer, String typeName, MetricMetadata metadata, EscapingScheme scheme)
-      throws IOException {
+  private void writeMetadataWithName(
+      Writer writer, String name, String typeName, MetricMetadata metadata) throws IOException {
     writer.write("# TYPE ");
-    writeName(writer, getMetadataName(metadata, scheme), NameType.Metric);
+    writeName(writer, name, NameType.Metric);
     writer.write(' ');
     writer.write(typeName);
     writer.write('\n');
     if (metadata.getUnit() != null) {
       writer.write("# UNIT ");
-      writeName(writer, getMetadataName(metadata, scheme), NameType.Metric);
+      writeName(writer, name, NameType.Metric);
       writer.write(' ');
       writeEscapedString(writer, metadata.getUnit().toString());
       writer.write('\n');
     }
     if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
       writer.write("# HELP ");
-      writeName(writer, getMetadataName(metadata, scheme), NameType.Metric);
+      writeName(writer, name, NameType.Metric);
       writer.write(' ');
       writeEscapedString(writer, metadata.getHelp());
       writer.write('\n');
     }
+  }
+
+  private static String ensureSuffix(String name, String suffix) {
+    if (name.endsWith(suffix)) {
+      return name;
+    }
+    return name + suffix;
+  }
+
+  private static String removeSuffix(String name, String suffix) {
+    if (name.endsWith(suffix)) {
+      return name.substring(0, name.length() - suffix.length());
+    }
+    return name;
   }
 }

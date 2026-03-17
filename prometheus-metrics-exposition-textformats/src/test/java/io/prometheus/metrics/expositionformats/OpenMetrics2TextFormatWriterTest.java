@@ -87,7 +87,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testOutputIdenticalToOM1ForCounter() throws IOException {
+  void testCounterNoTotalSuffix() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             CounterSnapshot.builder()
@@ -101,10 +101,37 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    String om1Output = writeWithOM1(snapshots);
     String om2Output = writeWithOM2(snapshots);
 
-    assertThat(om2Output).isEqualTo(om1Output);
+    // OM2: name as provided, no _total appending
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE my_counter_seconds counter\n"
+                + "# UNIT my_counter_seconds seconds\n"
+                + "# HELP my_counter_seconds Test counter\n"
+                + "my_counter_seconds{method=\"GET\"} 42.0\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCounterWithTotalSuffix() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            CounterSnapshot.builder()
+                .name("requests_total")
+                .help("Total requests")
+                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(100.0).build())
+                .build());
+
+    String om2Output = writeWithOM2(snapshots);
+
+    // OM2: preserves _total if user provided it
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE requests_total counter\n"
+                + "# HELP requests_total Total requests\n"
+                + "requests_total 100.0\n"
+                + "# EOF\n");
   }
 
   @Test
@@ -220,7 +247,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testOutputIdenticalToOM1WithExemplars() throws IOException {
+  void testCounterWithExemplars() throws IOException {
     Exemplar exemplar =
         Exemplar.builder()
             .value(100.0)
@@ -241,14 +268,20 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    String om1Output = writeWithOM1(snapshots);
     String om2Output = writeWithOM2(snapshots);
 
-    assertThat(om2Output).isEqualTo(om1Output);
+    // OM2: no _total, but exemplar is preserved
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE requests counter\n"
+                + "# HELP requests Total requests\n"
+                + "requests 1000.0 # {span_id=\"12345\",trace_id=\"abcde\"}"
+                + " 100.0 1672850685.829\n"
+                + "# EOF\n");
   }
 
   @Test
-  void testOutputIdenticalToOM1WithCreatedTimestamps() throws IOException {
+  void testCounterWithCreatedTimestamps() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             CounterSnapshot.builder()
@@ -261,16 +294,19 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    OpenMetricsTextFormatWriter om1Writer =
-        OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-
     OpenMetrics2TextFormatWriter om2Writer =
         OpenMetrics2TextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
 
-    String om1Output = write(snapshots, om1Writer);
     String om2Output = write(snapshots, om2Writer);
 
-    assertThat(om2Output).isEqualTo(om1Output);
+    // OM2: no _total, _created uses the counter name directly
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE my_counter counter\n"
+                + "# HELP my_counter Test counter\n"
+                + "my_counter 42.0\n"
+                + "my_counter_created 1672850385.800\n"
+                + "# EOF\n");
   }
 
   @Test
