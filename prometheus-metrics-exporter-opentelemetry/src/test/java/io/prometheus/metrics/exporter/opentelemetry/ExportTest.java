@@ -8,6 +8,7 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.sdk.testing.assertj.MetricAssert;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
@@ -23,6 +24,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -326,64 +328,55 @@ class ExportTest {
   }
 
   @Test
-  void preserveNamesWithUnit() throws NoSuchFieldException, IllegalAccessException {
+  void preserveNamesWithUnit() {
+    InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
-    Field field = testing.getClass().getDeclaredField("metricReader");
-    field.setAccessible(true);
-    MetricReader reader = (MetricReader) field.get(testing);
-    PrometheusMetricProducer preserveProducer =
+    reader.register(
         new PrometheusMetricProducer(
             preserveRegistry,
             InstrumentationScopeInfo.create("test"),
             Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true);
-    reader.register(preserveProducer);
+            true));
 
     Counter.builder().name("req").unit(Unit.BYTES).register(preserveRegistry).inc();
 
-    List<MetricData> metrics = testing.getMetrics();
+    List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
     assertThat(metrics).hasSize(1);
     OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("req").hasUnit("By");
   }
 
   @Test
-  void preserveNamesWithUnitAlreadyInName() throws NoSuchFieldException, IllegalAccessException {
+  void preserveNamesWithUnitAlreadyInName() {
+    InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
-    Field field = testing.getClass().getDeclaredField("metricReader");
-    field.setAccessible(true);
-    MetricReader reader = (MetricReader) field.get(testing);
-    PrometheusMetricProducer preserveProducer =
+    reader.register(
         new PrometheusMetricProducer(
             preserveRegistry,
             InstrumentationScopeInfo.create("test"),
             Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true);
-    reader.register(preserveProducer);
+            true));
 
     Counter.builder().name("req_bytes").unit(Unit.BYTES).register(preserveRegistry).inc();
 
-    List<MetricData> metrics = testing.getMetrics();
+    List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
     assertThat(metrics).hasSize(1);
     OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("req_bytes").hasUnit("By");
   }
 
   @Test
-  void preserveNamesWithoutUnit() throws NoSuchFieldException, IllegalAccessException {
+  void preserveNamesWithoutUnit() {
+    InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
-    Field field = testing.getClass().getDeclaredField("metricReader");
-    field.setAccessible(true);
-    MetricReader reader = (MetricReader) field.get(testing);
-    PrometheusMetricProducer preserveProducer =
+    reader.register(
         new PrometheusMetricProducer(
             preserveRegistry,
             InstrumentationScopeInfo.create("test"),
             Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true);
-    reader.register(preserveProducer);
+            true));
 
     Counter.builder().name("events_total").register(preserveRegistry).inc();
 
-    List<MetricData> metrics = testing.getMetrics();
+    List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
     assertThat(metrics).hasSize(1);
     OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("events_total");
   }
