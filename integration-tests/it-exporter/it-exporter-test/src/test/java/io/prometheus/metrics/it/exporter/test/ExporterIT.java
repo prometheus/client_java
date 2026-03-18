@@ -113,8 +113,7 @@ abstract class ExporterIT extends ExporterTest {
       // Protobuf text format omits fields with value 0, so nanos may be absent.
       // Replace the nanos placeholder with a regex-friendly marker before quoting.
       String withOptionalNanos =
-          expectedResponse.replace(
-              "\n      nanos: <CREATED_TIMESTAMP_NANOS>", "<OPTIONAL_NANOS>");
+          expectedResponse.replace("\n      nanos: <CREATED_TIMESTAMP_NANOS>", "<OPTIONAL_NANOS>");
       String pattern =
           Pattern.quote(withOptionalNanos)
               .replace("<CREATED_TIMESTAMP_SECONDS>", "\\E\\d+\\Q")
