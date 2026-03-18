@@ -208,55 +208,78 @@ public class PrometheusRegistry {
     final String helpForValidation = help;
     final Unit unitForValidation = unit;
 
-    // Check exposition name collisions before modifying any state.
     Set<String> expositionNames = computeExpositionNames(prometheusName, type);
-    for (String expositionName : expositionNames) {
-      String owner = expositionNameOwners.get(expositionName);
-      if (owner != null && !owner.equals(prometheusName)) {
-        throw new IllegalArgumentException(
-            "'"
-                + prometheusName
-                + "' and '"
-                + owner
-                + "' have conflicting exposition name: '"
-                + expositionName
-                + "'");
-      }
+    String claimError = claimExpositionNames(expositionNames, prometheusName);
+    if (claimError != null) {
+      throw new IllegalArgumentException(claimError);
     }
 
-    registered.compute(
-        prometheusName,
-        (n, existingInfo) -> {
-          if (existingInfo == null) {
-            return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
-          } else {
-            if (existingInfo.getType() != type) {
-              throw new IllegalArgumentException(
-                  prometheusName
-                      + ": Conflicting metric types. Existing: "
-                      + existingInfo.getType()
-                      + ", new: "
-                      + type);
+    boolean success = false;
+    try {
+      registered.compute(
+          prometheusName,
+          (n, existingInfo) -> {
+            if (existingInfo == null) {
+              return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
+            } else {
+              if (existingInfo.getType() != type) {
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": Conflicting metric types. Existing: "
+                        + existingInfo.getType()
+                        + ", new: "
+                        + type);
+              }
+              // Check label set first; only mutate help/unit after validation passes.
+              if (!existingInfo.addLabelSet(names)) {
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": duplicate metric name with identical label schema "
+                        + names);
+              }
+              // Roll back label schema if metadata validation fails
+              try {
+                existingInfo.validateMetadata(helpForValidation, unitForValidation);
+              } catch (IllegalArgumentException e) {
+                existingInfo.removeLabelSet(names);
+                throw e;
+              }
+              return existingInfo;
             }
-            // Check label set first; only mutate help/unit after validation passes.
-            if (!existingInfo.addLabelSet(names)) {
-              throw new IllegalArgumentException(
-                  prometheusName + ": duplicate metric name with identical label schema " + names);
-            }
-            // Roll back label schema if metadata validation fails
-            try {
-              existingInfo.validateMetadata(helpForValidation, unitForValidation);
-            } catch (IllegalArgumentException e) {
-              existingInfo.removeLabelSet(names);
-              throw e;
-            }
-            return existingInfo;
-          }
-        });
+          });
+      success = true;
+    } finally {
+      if (!success) {
+        releaseExpositionNames(expositionNames, prometheusName);
+      }
+    }
+  }
 
-    // Registration succeeded — claim exposition names.
+  /**
+   * Atomically claims exposition names for the given metric. Returns null on success, or an error
+   * message on conflict. Rolls back any partially claimed names on failure.
+   */
+  @Nullable
+  private String claimExpositionNames(Set<String> expositionNames, String prometheusName) {
     for (String expositionName : expositionNames) {
-      expositionNameOwners.put(expositionName, prometheusName);
+      String existingOwner = expositionNameOwners.putIfAbsent(expositionName, prometheusName);
+      if (existingOwner != null && !existingOwner.equals(prometheusName)) {
+        releaseExpositionNames(expositionNames, prometheusName);
+        return "'"
+            + prometheusName
+            + "' and '"
+            + existingOwner
+            + "' have conflicting exposition name: '"
+            + expositionName
+            + "'";
+      }
+    }
+    return null;
+  }
+
+  private void releaseExpositionNames(Set<String> expositionNames, String owner) {
+    for (String expositionName : expositionNames) {
+      expositionNameOwners.remove(expositionName, owner);
     }
   }
 
