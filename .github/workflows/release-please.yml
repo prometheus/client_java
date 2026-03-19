@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 jobs:
@@ -21,3 +22,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/config/release-please-config.json
           manifest-file: .github/config/.release-please-manifest.json
+          release-type: maven
