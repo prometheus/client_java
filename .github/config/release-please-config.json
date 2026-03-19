@@ -5,9 +5,7 @@
   "packages": {
     ".": {
       "release-type": "maven",
-      "extra-files": [
-        "integration-tests/it-spring-boot-smoke-test/pom.xml"
-      ]
+      "extra-files": ["integration-tests/it-spring-boot-smoke-test/pom.xml"]
     }
   }
 }
