@@ -10,7 +10,7 @@ max_concurrency = 4
 include_fragments = true
 
 base_url = "https://prometheus.github.io"
-exclude_path = ["docs/themes"]
+exclude_path = ["docs/themes", "CHANGELOG.md"]
 
 exclude = [
   # excluding links to pull requests and issues is done for performance
