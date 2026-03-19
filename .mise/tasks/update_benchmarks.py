@@ -53,7 +53,7 @@ def run_cmd(cmd: List[str], cwd: Optional[str] = None) -> str:
         # Stream lines as they appear and capture them for returning
         for line in proc.stdout:
             # Print immediately so callers (and CI) can observe progress
-            print(line, end="")
+            print(line, end="", flush=True)
             output_lines.append(line)
         proc.wait()
     except KeyboardInterrupt:

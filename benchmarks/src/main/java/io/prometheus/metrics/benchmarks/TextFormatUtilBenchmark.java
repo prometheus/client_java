@@ -24,10 +24,10 @@ import org.openjdk.jmh.annotations.State;
  *
  * <pre>
  * Benchmark                                             Mode  Cnt       Score       Error  Units
- * TextFormatUtilBenchmark.openMetricsWriteToByteArray  thrpt   25  826847.708 ± 10941.611  ops/s
- * TextFormatUtilBenchmark.openMetricsWriteToNull       thrpt   25  847756.101 ±  5299.128  ops/s
- * TextFormatUtilBenchmark.prometheusWriteToByteArray   thrpt   25  874804.601 ±  9730.060  ops/s
- * TextFormatUtilBenchmark.prometheusWriteToNull        thrpt   25  910782.719 ± 17617.167  ops/s
+ * TextFormatUtilBenchmark.openMetricsWriteToByteArray  thrpt   25  748557.302 ± 22925.735  ops/s
+ * TextFormatUtilBenchmark.openMetricsWriteToNull       thrpt   25  727876.401 ± 31520.283  ops/s
+ * TextFormatUtilBenchmark.prometheusWriteToByteArray   thrpt   25  768419.214 ± 22785.134  ops/s
+ * TextFormatUtilBenchmark.prometheusWriteToNull        thrpt   25  796486.637 ± 11456.297  ops/s
  * </pre>
  */
 public class TextFormatUtilBenchmark {
