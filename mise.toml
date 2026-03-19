@@ -50,6 +50,7 @@ description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 # Shared lint tasks from flint (https://github.com/grafana/flint)
+# TODO: update SHA after grafana/flint#107 and grafana/flint#112 merge
 [tasks."lint:super-linter"]
 description = "Run Super-Linter on the repository"
 file = "https://raw.githubusercontent.com/grafana/flint/84e2d760286dead4e503315f9483a44fe872ee85/tasks/lint/super-linter.sh" # v0.8.0
@@ -65,21 +66,37 @@ file = "https://raw.githubusercontent.com/grafana/flint/84e2d760286dead4e503315f
 [tasks."setup:native-lint-tools"]
 description = "Install native lint tools matching the pinned super-linter version"
 file = "https://raw.githubusercontent.com/grafana/flint/84e2d760286dead4e503315f9483a44fe872ee85/tasks/setup/native-lint-tools.sh" # v0.8.0
-[tasks.pre-commit]
-description = "Pre-commit hook: native lint with autofix"
-depends = ["setup:native-lint-tools"]
-run = "mise run lint:super-linter -- --native --autofix"
-[tasks."setup:pre-commit-hook"]
-description = "Install git pre-commit hook that runs native linting"
-run = "mise generate git-pre-commit --write --task=pre-commit"
+
+[tasks."lint:spotless"]
+description = "Check Java formatting with Spotless"
+# examples don't have the spotless plugin, so we exclude them via the profile.
+# integration-tests are covered by the CI build task.
+run = "./mvnw com.diffplug.spotless:spotless-maven-plugin:check -P '!examples-and-integration-tests' -q"
+
+[tasks."lint:fast"]
+description = "Run fast lints (no Renovate)"
+depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:spotless"]
 
 [tasks."lint"]
 description = "Run all lints"
-depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:renovate-deps"]
+depends = ["lint:fast", "lint:renovate-deps"]
 
 [tasks.fix]
 description = "Auto-fix lint issues"
 run = "AUTOFIX=true mise run lint"
+
+[tasks.native-lint]
+description = "Run lints natively (no container)"
+run = "NATIVE=true mise run lint:fast"
+
+[tasks.pre-commit]
+description = "Pre-commit hook: native lint"
+depends = ["setup:native-lint-tools"]
+run = "NATIVE=true mise run lint:fast"
+
+[tasks."setup:pre-commit-hook"]
+description = "Install git pre-commit hook that runs native linting"
+run = "mise generate git-pre-commit --write --task=pre-commit"
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
