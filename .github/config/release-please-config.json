@@ -4,9 +4,8 @@
   "pull-request-footer": "> [!IMPORTANT]\n> Close and reopen this PR to trigger CI checks.",
   "packages": {
     ".": {
-      "release-type": "java",
+      "release-type": "maven",
       "extra-files": [
-        "prometheus-metrics-parent/pom.xml",
         "integration-tests/it-spring-boot-smoke-test/pom.xml"
       ]
     }
