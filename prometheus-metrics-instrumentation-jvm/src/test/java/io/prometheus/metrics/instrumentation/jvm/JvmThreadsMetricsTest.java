@@ -118,11 +118,8 @@ jvm_threads_state{state="WAITING"} 0.0
     // Number of threads to create with invalid thread ids
     int numberOfInvalidThreadIds = 2;
 
-    Map<String, Double> expected = getCountByState(registry.scrape());
-    expected.compute(
-        "UNKNOWN",
-        (key, oldValue) ->
-            oldValue == null ? numberOfInvalidThreadIds : oldValue + numberOfInvalidThreadIds);
+    Map<String, Double> before = getCountByState(registry.scrape());
+    double unknownBefore = before.getOrDefault("UNKNOWN", 0.0);
 
     final CountDownLatch countDownLatch = new CountDownLatch(numberOfInvalidThreadIds);
 
@@ -132,12 +129,12 @@ jvm_threads_state{state="WAITING"} 0.0
         new ThreadWithInvalidId(-i, new TestRunnable(countDownLatch)).start();
       }
 
-      Map<String, Double> actual = getCountByState(registry.scrape());
+      Map<String, Double> after = getCountByState(registry.scrape());
+      double unknownAfter = after.getOrDefault("UNKNOWN", 0.0);
 
-      assertThat(actual).hasSameSizeAs(expected);
-      for (String threadState : expected.keySet()) {
-        assertThat(actual.get(threadState)).isEqualTo(expected.get(threadState));
-      }
+      // The UNKNOWN count should increase by exactly the number of invalid thread ids.
+      // Other states may change due to background threads, so we only assert on UNKNOWN.
+      assertThat(unknownAfter - unknownBefore).isEqualTo((double) numberOfInvalidThreadIds);
     } finally {
       for (int i = 0; i < numberOfInvalidThreadIds; i++) {
         countDownLatch.countDown();
