@@ -207,7 +207,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testOutputIdenticalToOM1ForInfo() throws IOException {
+  void testInfoHelpNameMatchesMeterName() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             InfoSnapshot.builder()
@@ -219,10 +219,15 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    String om1Output = writeWithOM1(snapshots);
     String om2Output = writeWithOM2(snapshots);
 
-    assertThat(om2Output).isEqualTo(om1Output);
+    // OM2: TYPE/HELP use the full name including _info (help name == meter name)
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE my_info info\n"
+                + "# HELP my_info Test info\n"
+                + "my_info{platform=\"linux\",version=\"1.0\"} 1\n"
+                + "# EOF\n");
   }
 
   @Test

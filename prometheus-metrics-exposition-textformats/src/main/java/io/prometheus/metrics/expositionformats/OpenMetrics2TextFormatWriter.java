@@ -296,10 +296,10 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeInfo(Writer writer, InfoSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    // OM2 spec: Info MetricFamily name MUST end in _info
+    // OM2 spec: Info MetricFamily name MUST end in _info.
+    // In OM2, TYPE/HELP use the same name as the data lines.
     String infoName = ensureSuffix(getExpositionBaseMetadataName(metadata, scheme), "_info");
-    String baseName = removeSuffix(infoName, "_info");
-    writeMetadataWithName(writer, baseName, "info", metadata);
+    writeMetadataWithName(writer, infoName, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme);
       writer.write("1");
@@ -487,12 +487,5 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       return name;
     }
     return name + suffix;
-  }
-
-  private static String removeSuffix(String name, String suffix) {
-    if (name.endsWith(suffix)) {
-      return name.substring(0, name.length() - suffix.length());
-    }
-    return name;
   }
 }
