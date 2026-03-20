@@ -30,4 +30,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           gh workflow run release.yml
-          --ref ${{ steps.release-please.outputs.tag_name }}
+          -f tag=${{ steps.release-please.outputs.tag_name }}

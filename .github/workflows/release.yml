@@ -2,7 +2,11 @@
 name: Deploy to Maven Central
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy (e.g. v1.5.1)"
+        required: true
 
 jobs:
   deploy:
@@ -20,6 +24,7 @@ jobs:
       - name: Checkout Plugin Repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          ref: ${{ inputs.tag }}
           persist-credentials: false
 
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
