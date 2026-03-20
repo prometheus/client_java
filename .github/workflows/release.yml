@@ -2,12 +2,7 @@
 name: Deploy to Maven Central
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
-  release:
-    types:
-      - published
+  workflow_dispatch: {}
 
 jobs:
   deploy:

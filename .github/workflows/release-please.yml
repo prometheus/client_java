@@ -7,6 +7,7 @@ on:
       - main
 
 permissions:
+  actions: write
   contents: write
   issues: write
   pull-requests: write
@@ -22,3 +23,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/config/release-please-config.json
           manifest-file: .github/config/.release-please-manifest.json
+
+      - name: Trigger deploy to Maven Central
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh workflow run release.yml
+          --ref ${{ steps.release-please.outputs.tag_name }}
