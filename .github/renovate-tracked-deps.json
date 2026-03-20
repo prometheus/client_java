@@ -136,7 +136,8 @@
       "lychee",
       "node",
       "npm:renovate",
-      "protoc"
+      "protoc",
+      "ubi:google/google-java-format"
     ],
     "regex": ["ghcr.io/super-linter/super-linter", "grafana/flint"]
   },

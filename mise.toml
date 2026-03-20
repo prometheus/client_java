@@ -6,6 +6,7 @@ lychee = "0.23.0"
 node = "24.14.0"
 "npm:renovate" = "43.45.1"
 protoc = "34.0"
+"ubi:google/google-java-format" = "1.34.1"
 
 [env]
 RENOVATE_TRACKED_DEPS_EXCLUDE="github-actions,github-runners"
@@ -66,15 +67,17 @@ file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b2
 description = "Install native lint tools matching the pinned super-linter version"
 file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/setup/native-lint-tools.sh" # v0.9.1
 
-[tasks."lint:spotless"]
-description = "Check Java formatting with Spotless"
-# examples don't have the spotless plugin, so we exclude them via the profile.
-# integration-tests are covered by the CI build task.
-run = "./mvnw com.diffplug.spotless:spotless-maven-plugin:check -P '!examples-and-integration-tests' -q"
+[tasks."lint:java"]
+description = "Check Java formatting (changed files only)"
+run = """
+files=$(git diff --name-only --diff-filter=d origin/main...HEAD -- '*.java')
+[ -z "$files" ] && exit 0
+google-java-format --dry-run --set-exit-if-changed $files
+"""
 
 [tasks."lint:fast"]
 description = "Run fast lints (no Renovate)"
-depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:spotless"]
+depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:java"]
 
 [tasks."lint"]
 description = "Run all lints"
@@ -82,7 +85,11 @@ depends = ["lint:fast", "lint:renovate-deps"]
 
 [tasks.fix]
 description = "Auto-fix lint issues"
-run = "AUTOFIX=true mise run lint"
+run = """
+files=$(git diff --name-only --diff-filter=d origin/main...HEAD -- '*.java')
+[ -n "$files" ] && google-java-format -i $files
+AUTOFIX=true mise run lint
+"""
 
 [tasks.native-lint]
 description = "Run lints natively (no container)"
