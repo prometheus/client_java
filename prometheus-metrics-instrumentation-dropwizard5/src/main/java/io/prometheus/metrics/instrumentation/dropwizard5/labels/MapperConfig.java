@@ -16,11 +16,14 @@ import javax.annotation.Nullable;
  * and new labels based on this config.
  */
 public final class MapperConfig {
-  // each part of the metric name between dots
-  private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9](-?[a-zA-Z0-9_])+";
-  // Simplified GLOB: we can have "*." at the beginning and "*" only at the end
+  // Each part of the metric name between dots. Accepts letters, digits, underscores, hyphens,
+  // colons, and glob wildcards (*) to support a broad range of metric naming conventions.
+  private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9*][a-zA-Z0-9_:\\-*]*";
+  // Simplified GLOB: accepts single-level names, dot-separated names, and glob patterns with '*'.
+  // The pattern requires at least one non-empty segment and does not allow empty segments (double
+  // dots) or empty/whitespace-only strings. The '**' glob is rejected separately in validateMatch.
   static final String METRIC_GLOB_REGEX =
-      "^(\\*\\.|" + METRIC_PART_REGEX + "\\.)+(\\*|" + METRIC_PART_REGEX + ")$";
+      "^(" + METRIC_PART_REGEX + ")(\\." + METRIC_PART_REGEX + ")*$";
   // Labels validation.
   private static final String LABEL_REGEX = "^[a-zA-Z_][a-zA-Z0-9_]+$";
   private static final Pattern MATCH_EXPRESSION_PATTERN = Pattern.compile(METRIC_GLOB_REGEX);
@@ -109,6 +112,10 @@ public final class MapperConfig {
   }
 
   private void validateMatch(String match) {
+    if (match.contains("**")) {
+      throw new IllegalArgumentException(
+          String.format("Match expression [%s] must not contain '**' (double-star glob)", match));
+    }
     if (!MATCH_EXPRESSION_PATTERN.matcher(match).matches()) {
       throw new IllegalArgumentException(
           String.format(

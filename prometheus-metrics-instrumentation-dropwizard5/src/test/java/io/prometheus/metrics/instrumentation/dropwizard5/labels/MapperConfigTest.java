@@ -42,6 +42,52 @@ class MapperConfigTest {
   }
 
   @Test
+  void setMatch_WHEN_SingleLevelName_AllGood() {
+    final MapperConfig mapperConfig = new MapperConfig();
+    mapperConfig.setMatch("app_metric_some_count");
+    assertThat(mapperConfig.getMatch()).isEqualTo("app_metric_some_count");
+  }
+
+  @Test
+  void setMatch_WHEN_NameWithColons_AllGood() {
+    final MapperConfig mapperConfig = new MapperConfig();
+    mapperConfig.setMatch("my:metric:name");
+    assertThat(mapperConfig.getMatch()).isEqualTo("my:metric:name");
+  }
+
+  @Test
+  void setMatch_WHEN_EmbeddedGlobInSegment_AllGood() {
+    final MapperConfig mapperConfig = new MapperConfig();
+    mapperConfig.setMatch("io.dropwizard.jetty.MutableServletContextHandler.*-requests");
+    assertThat(mapperConfig.getMatch())
+        .isEqualTo("io.dropwizard.jetty.MutableServletContextHandler.*-requests");
+  }
+
+  @Test
+  void setMatch_WHEN_DoubleStarGlob_ThrowException() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MapperConfig().setMatch("org.**"));
+  }
+
+  @Test
+  void setMatch_WHEN_EmptyString_ThrowException() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MapperConfig().setMatch(""));
+  }
+
+  @Test
+  void setMatch_WHEN_TrailingDot_ThrowException() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MapperConfig().setMatch("org.company."));
+  }
+
+  @Test
+  void setMatch_WHEN_DoubleDot_ThrowException() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MapperConfig().setMatch("org..company"));
+  }
+
+  @Test
   void toString_WHEN_EmptyConfig_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();
     assertThat(mapperConfig).hasToString("MapperConfig{match=null, name=null, labels={}}");

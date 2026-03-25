@@ -17,18 +17,12 @@ class GraphiteNamePatternTest {
     List<String> invalidPatterns =
         Arrays.asList(
             "",
-            "a",
-            "1org",
             "1org.",
             "org.",
             "org.**",
-            "org.**",
-            "org.company-",
             "org.company-.",
-            "org.company-*",
             "org.company.**",
             "org.company.**-",
-            "org.com*pany.*",
             "org.test.contr.oller.gather.status..400",
             "org.test.controller.gather.status..400");
     for (String pattern : invalidPatterns) {
@@ -47,7 +41,22 @@ class GraphiteNamePatternTest {
             "org.test.controller.*.status.*",
             "*.test.controller.*.status.*",
             "*.test.controller-1.*.status.*",
-            "*.amazing-test.controller-1.*.status.*");
+            "*.amazing-test.controller-1.*.status.*",
+            // Single-level names (previously rejected, fixes #461)
+            "a",
+            "1org",
+            "app_metric_some_count",
+            // Names with colons (fixes #645)
+            "my:metric:name",
+            "org.company:metric.*",
+            // Names with hyphens at boundaries
+            "org.company-",
+            "org.company-*",
+            // Embedded glob in segment (fixes #518)
+            "org.com*pany.*",
+            "io.dropwizard.jetty.MutableServletContextHandler.*-requests",
+            // Standalone glob
+            "*");
     for (String pattern : validPatterns) {
       new GraphiteNamePattern(pattern);
     }

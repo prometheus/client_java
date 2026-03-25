@@ -9,13 +9,16 @@ import java.util.regex.Pattern;
 
 /**
  * GraphiteNamePattern is initialised with a simplified glob pattern that only allows '*' as special
- * character. Examples of valid patterns:
+ * character. Accepts a broad range of metric name patterns including single-level names, names with
+ * underscores, hyphens, and colons. Examples of valid patterns:
  *
  * <ul>
  *   <li>org.test.controller.gather.status.400
  *   <li>org.test.controller.gather.status.*
  *   <li>org.test.controller.*.status.*
  *   <li>*.test.controller.*.status.*
+ *   <li>app_metric_some_count
+ *   <li>io.dropwizard.jetty.MutableServletContextHandler.*-requests
  * </ul>
  *
  * <p>It contains logic to match a metric name and to extract named parameters from it.
@@ -32,6 +35,10 @@ class GraphiteNamePattern {
    * @param pattern The glob style pattern to be used.
    */
   GraphiteNamePattern(String pattern) throws IllegalArgumentException {
+    if (pattern.contains("**")) {
+      throw new IllegalArgumentException(
+          String.format("Provided pattern [%s] must not contain '**' (double-star glob)", pattern));
+    }
     if (!VALIDATION_PATTERN.matcher(pattern).matches()) {
       throw new IllegalArgumentException(
           String.format("Provided pattern [%s] does not matches [%s]", pattern, METRIC_GLOB_REGEX));
