@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 public final class MapperConfig {
   // Each part of the metric name between dots. Accepts letters, digits, underscores, hyphens,
   // colons, and glob wildcards (*) to support a broad range of metric naming conventions.
-  private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9*][a-zA-Z0-9_:\\-*]*";
+  private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9*][a-zA-Z0-9_:*-]*";
   // Simplified GLOB: accepts single-level names, dot-separated names, and glob patterns with '*'.
   // The pattern requires at least one non-empty segment and does not allow empty segments (double
   // dots) or empty/whitespace-only strings. The '**' glob is rejected separately in validateMatch.
