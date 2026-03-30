@@ -108,14 +108,19 @@ public class ExpositionFormats {
     if (acceptHeader == null) {
       return null;
     }
-    for (String mediaType : acceptHeader.split(";")) {
-      String[] tokens = mediaType.split("=");
-      if (tokens.length == 2) {
-        String key = tokens[0].trim();
-        String value = tokens[1].trim();
-        if (key.equals("version")) {
-          return value;
+    for (String mediaType : acceptHeader.split(",")) {
+      if (mediaType.contains("application/openmetrics-text")) {
+        for (String param : mediaType.split(";")) {
+          String[] tokens = param.split("=");
+          if (tokens.length == 2) {
+            String key = tokens[0].trim();
+            String value = tokens[1].trim();
+            if (key.equals("version")) {
+              return value;
+            }
+          }
         }
+        return null;
       }
     }
     return null;
