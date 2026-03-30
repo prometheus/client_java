@@ -63,9 +63,17 @@ public class ExpositionFormats {
       return prometheusProtobufWriter;
     }
 
-    // Prefer OM2 over OM1 when any OM2 feature is enabled
     if (isOpenMetrics2Enabled() && openMetrics2TextFormatWriter.accepts(acceptHeader)) {
-      return openMetrics2TextFormatWriter;
+      if (openMetrics2TextFormatWriter.getOpenMetrics2Properties().getContentNegotiation()) {
+        String version = parseOpenMetricsVersion(acceptHeader);
+        if ("2.0.0".equals(version)) {
+          return openMetrics2TextFormatWriter;
+        }
+        // version=1.0.0 or no version: fall through to OM1
+      } else {
+        // contentNegotiation=false: OM2 handles all OpenMetrics requests
+        return openMetrics2TextFormatWriter;
+      }
     }
 
     if (openMetricsTextFormatWriter.accepts(acceptHeader)) {
@@ -93,5 +101,23 @@ public class ExpositionFormats {
 
   public OpenMetrics2TextFormatWriter getOpenMetrics2TextFormatWriter() {
     return openMetrics2TextFormatWriter;
+  }
+
+  @Nullable
+  private static String parseOpenMetricsVersion(@Nullable String acceptHeader) {
+    if (acceptHeader == null) {
+      return null;
+    }
+    for (String mediaType : acceptHeader.split(";")) {
+      String[] tokens = mediaType.split("=");
+      if (tokens.length == 2) {
+        String key = tokens[0].trim();
+        String value = tokens[1].trim();
+        if (key.equals("version")) {
+          return value;
+        }
+      }
+    }
+    return null;
   }
 }

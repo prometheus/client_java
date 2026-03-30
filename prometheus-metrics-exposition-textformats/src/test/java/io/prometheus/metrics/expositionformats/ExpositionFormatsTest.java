@@ -155,7 +155,8 @@ class ExpositionFormatsTest {
                     .build())
             .build();
     ExpositionFormats formats = ExpositionFormats.init(props);
-    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    ExpositionFormatWriter writer =
+        formats.findWriter("application/openmetrics-text; version=2.0.0");
     assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
   }
 
@@ -171,6 +172,63 @@ class ExpositionFormatsTest {
             "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily");
     // Protobuf writer should take precedence even when OM2 is enabled
     assertThat(writer).isInstanceOf(PrometheusProtobufWriter.class);
+  }
+
+  @Test
+  void testOM2ContentNegotiationWithVersion2() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter("application/openmetrics-text; version=2.0.0");
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2ContentNegotiationWithVersion1() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter("application/openmetrics-text; version=1.0.0");
+    assertThat(writer).isInstanceOf(OpenMetricsTextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2ContentNegotiationWithNoVersion() {
+    // When contentNegotiation=true and Accept header has no version, use OM1 writer
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer = formats.findWriter("application/openmetrics-text");
+    assertThat(writer).isInstanceOf(OpenMetricsTextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2ContentNegotiationDisabled() {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(false).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer1 = formats.findWriter("application/openmetrics-text");
+    ExpositionFormatWriter writer2 =
+        formats.findWriter("application/openmetrics-text; version=1.0.0");
+    ExpositionFormatWriter writer3 =
+        formats.findWriter("application/openmetrics-text; version=2.0.0");
+    assertThat(writer1).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+    assertThat(writer2).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+    assertThat(writer3).isInstanceOf(OpenMetrics2TextFormatWriter.class);
   }
 
   @Test
