@@ -2035,14 +2035,14 @@ class ExpositionFormatsTest {
   void testClassicHistogramWithDots() throws IOException {
     String openMetricsText =
         """
-      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
-      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
-      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
-      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 130 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
-      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 130
-      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.01
-      # EOF
-      """;
+        # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+        # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+        # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+        U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 130 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+        U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 130
+        U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.01
+        # EOF
+        """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2456,14 +2456,14 @@ class ExpositionFormatsTest {
   void testNativeHistogramWithDots() throws IOException {
     String openMetricsText =
         """
-      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
-      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
-      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
-      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 4 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
-      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 4
-      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 3.2
-      # EOF
-      """;
+        # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+        # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+        # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+        U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 4 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+        U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 4
+        U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 3.2
+        # EOF
+        """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2934,12 +2934,19 @@ class ExpositionFormatsTest {
 
   @ParameterizedTest
   @CsvSource({
-    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=underscores'",
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited',"
+        + " 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+        + " encoding=delimited; escaping=underscores'",
     "'text/plain;version=0.0.4', 'text/plain; version=0.0.4; charset=utf-8; escaping=underscores'",
-    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8'",
-    "'application/openmetrics-text', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
-    "'application/openmetrics-text;version=0.0.1; escaping=underscores', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
-    "'text/plain;version=0.0.4; escaping=allow-utf-8', 'text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8'"
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited;"
+        + " escaping=allow-utf-8', 'application/vnd.google.protobuf;"
+        + " proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8'",
+    "'application/openmetrics-text', 'application/openmetrics-text; version=1.0.0; charset=utf-8;"
+        + " escaping=underscores'",
+    "'application/openmetrics-text;version=0.0.1; escaping=underscores',"
+        + " 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
+    "'text/plain;version=0.0.4; escaping=allow-utf-8', 'text/plain; version=0.0.4; charset=utf-8;"
+        + " escaping=allow-utf-8'"
   })
   public void testFindWriter(String acceptHeaderValue, String expectedFmt) {
     ExpositionFormats expositionFormats = ExpositionFormats.init();
@@ -2968,9 +2975,9 @@ class ExpositionFormatsTest {
 
     String expected =
         """
-      # TYPE foo_metric untyped
-      foo_metric 1.234
-      """;
+        # TYPE foo_metric untyped
+        foo_metric 1.234
+        """;
 
     assertThat(new String(out, UTF_8)).hasToString(expected);
   }
