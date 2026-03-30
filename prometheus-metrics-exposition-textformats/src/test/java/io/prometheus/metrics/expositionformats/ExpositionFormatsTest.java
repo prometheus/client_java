@@ -232,6 +232,37 @@ class ExpositionFormatsTest {
   }
 
   @Test
+  void testOM2ContentNegotiationMultiTypeAcceptHeaderWithoutOMVersion() {
+    // When the Accept header has multiple media types and only text/plain has a version,
+    // the openmetrics type should be treated as having no version (use OM1).
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter("application/openmetrics-text, text/plain; version=0.0.4");
+    assertThat(writer).isInstanceOf(OpenMetricsTextFormatWriter.class);
+  }
+
+  @Test
+  void testOM2ContentNegotiationMultiTypeAcceptHeaderWithOMVersion() {
+    // When the Accept header has multiple media types and openmetrics has version=2.0.0,
+    // the OM2 writer should be selected.
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter(
+            "application/openmetrics-text; version=2.0.0, text/plain; version=0.0.4");
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @Test
   void testCounterComplete() throws IOException {
     String openMetricsText =
         "# TYPE service:time_seconds counter\n"
