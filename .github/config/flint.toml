@@ -3,6 +3,7 @@ exclude = "src/main/generated"
 exclude_paths = [
     "docs/themes/",
     "mvnw",
+    "simpleclient-archive/",
 ]
 
 [checks.renovate-deps]

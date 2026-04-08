@@ -7,7 +7,7 @@ indent_size = 2
 [{version-rules.xml,maven-wrapper.properties,checkstyle.xml,docker-compose.yaml,docker-compose.yml,Dockerfile,example_target_info.json,mise.toml,mvnm,mvnw.cmd,generate-protobuf.sh,.gitleaksignore,prometheus.properties}]
 max_line_length = 200
 
-[{grafana-dashboard-*.json,.editorconfig,super-linter.env,lychee.toml,renovate.json5}]
+[{grafana-dashboard-*.json,.editorconfig,super-linter.env,lychee.toml,renovate.json5,CODE_OF_CONDUCT.md}]
 max_line_length = 300
 
 [pom.xml]
@@ -18,5 +18,5 @@ max_line_length = 210
 indent_size = 4
 max_line_length = 120
 
-[{.mise/tasks/build-release.sh,.github/workflows/multi-version-test.yml}]
-max_line_length = 200
+[{.mise/tasks/build-release.sh,.github/workflows/*.yml}]
+max_line_length = 300

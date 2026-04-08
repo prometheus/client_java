@@ -4,11 +4,11 @@ name: Integration Tests - Java Version Compatibility Matrix
 on:
   pull_request:
     paths:
-      - 'integration-tests/**'
-      - 'prometheus-metrics-core/**'
-      - 'prometheus-metrics-exporter-*/**'
-      - 'prometheus-metrics-exposition-*/**'
-      - '.github/workflows/java-version-matrix-tests.yml'
+      - "integration-tests/**"
+      - "prometheus-metrics-core/**"
+      - "prometheus-metrics-exporter-*/**"
+      - "prometheus-metrics-exposition-*/**"
+      - ".github/workflows/java-version-matrix-tests.yml"
   push:
     branches:
       - main

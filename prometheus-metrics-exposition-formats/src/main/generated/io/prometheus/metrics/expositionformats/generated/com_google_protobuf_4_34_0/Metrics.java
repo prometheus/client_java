@@ -15081,7 +15081,7 @@ public class Metrics extends com.google.protobuf.GeneratedFile {
       "\n\037src/main/protobuf/metrics.proto\022\024io.pr" +
       "ometheus.client\032\037google/protobuf/timesta" +
       "mp.proto\"(\n\tLabelPair\022\014\n\004name\030\001 \001(\t\022\r\n\005v" +
-      "alue\030\002 \001(\t\"\026\n\005Gauge\022\r\n\005value\030\001 \001(\001\"\201\001\n\007C" +
+      "value\030\002 \001(\t\"\026\n\005Gauge\022\r\n\005value\030\001 \001(\001\"\201\001\n\007C" +
       "ounter\022\r\n\005value\030\001 \001(\001\0220\n\010exemplar\030\002 \001(\0132" +
       "\036.io.prometheus.client.Exemplar\0225\n\021creat" +
       "ed_timestamp\030\003 \001(\0132\032.google.protobuf.Tim" +
@@ -15113,13 +15113,13 @@ public class Metrics extends com.google.protobuf.GeneratedFile {
       "ient.LabelPair\022\r\n\005value\030\002 \001(\001\022-\n\ttimesta" +
       "mp\030\003 \001(\0132\032.google.protobuf.Timestamp\"\276\002\n" +
       "\006Metric\022.\n\005label\030\001 \003(\0132\037.io.prometheus.c" +
-      "lient.LabelPair\022*\n\005gauge\030\002 \001(\0132\033.io.prom" +
+      "client.LabelPair\022*\n\005gauge\030\002 \001(\0132\033.io.prom" +
       "etheus.client.Gauge\022.\n\007counter\030\003 \001(\0132\035.i" +
       "o.prometheus.client.Counter\022.\n\007summary\030\004" +
       " \001(\0132\035.io.prometheus.client.Summary\022.\n\007u" +
       "ntyped\030\005 \001(\0132\035.io.prometheus.client.Unty" +
       "ped\0222\n\thistogram\030\007 \001(\0132\037.io.prometheus.c" +
-      "lient.Histogram\022\024\n\014timestamp_ms\030\006 \001(\003\"\226\001" +
+      "client.Histogram\022\024\n\014timestamp_ms\030\006 \001(\003\"\226\001" +
       "\n\014MetricFamily\022\014\n\004name\030\001 \001(\t\022\014\n\004help\030\002 \001" +
       "(\t\022.\n\004type\030\003 \001(\0162 .io.prometheus.client." +
       "MetricType\022,\n\006metric\030\004 \003(\0132\034.io.promethe" +

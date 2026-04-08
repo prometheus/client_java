@@ -1,5 +1,6 @@
 [codespell]
-# Ignore words that are valid technical terms:
-# - vertx: Vert.x reactive framework
-# - errorprone: Error Prone static analysis tool
-ignore-words-list = vertx,errorprone
+# nd: legitimate variable name in quantile algorithms
+# atmost: AssertJ atMost() matcher
+# re-use: hyphenated form used in comments
+# errorprone: Google ErrorProne tool name
+ignore-words-list = nd,atmost,re-use,errorprone
