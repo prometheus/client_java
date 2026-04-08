@@ -1,0 +1,9 @@
+[settings]
+exclude_paths = [
+    "docs/themes/",
+    "src/main/generated/",
+    "mvnw",
+]
+
+[checks.renovate-deps]
+exclude_managers = ["github-actions", "github-runners"]

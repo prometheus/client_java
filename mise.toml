@@ -1,19 +1,27 @@
 [tools]
+"cargo:https://github.com/grafana/flint" = "branch:feat/flint-v2"
 "go:github.com/gohugoio/hugo" = "v0.157.0"
 "go:github.com/grafana/oats" = "0.6.1"
+actionlint = "1.7.10"
+"cargo:xmloxide" = "0.4.1"
+editorconfig-checker = "v3.6.1"
+"github:google/google-java-format" = "1.26.0"
 java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.23.0"
 node = "24.14.0"
+"npm:markdownlint-cli2" = "0.17.2"
+"npm:prettier" = "3.8.1"
 "npm:renovate" = "43.45.1"
+"pipx:codespell" = "2.4.1"
+"pipx:ruff" = "0.15.0"
 protoc = "34.0"
-"ubi:google/google-java-format" = "1.34.1"
+shellcheck = "v0.11.0"
+shfmt = "v3.12.0"
 
 [env]
-RENOVATE_TRACKED_DEPS_EXCLUDE="github-actions,github-runners"
-# renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
-SUPER_LINTER_VERSION="slim-v8.5.0@sha256:857dcc3f0bf5dd065fdeed1ace63394bb2004238a5ef02910ea23d9bcd8fd2b8"
+FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION="0.7.2"
+LGTM_VERSION = "0.7.2"
 
 [tasks.ci]
 description = "CI Build"
@@ -52,59 +60,22 @@ run = "./mvnw verify"
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
-# Shared lint tasks from flint (https://github.com/grafana/flint)
-[tasks."lint:super-linter"]
-description = "Run Super-Linter on the repository"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/super-linter.sh" # v0.9.1
-
-[tasks."lint:links"]
-description = "Lint links"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/links.sh" # v0.9.1
-
-[tasks."lint:renovate-deps"]
-description = "Verify renovate-tracked-deps.json is up to date"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/renovate-deps.py" # v0.9.1
-
-[tasks."setup:native-lint-tools"]
-description = "Install native lint tools matching the pinned super-linter version"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/setup/native-lint-tools.sh" # v0.9.1
-
-[tasks."lint:java"]
-description = "Check Java formatting (changed files only)"
-run = """
-files=$(git diff --name-only --diff-filter=d origin/main...HEAD -- '*.java')
-[ -z "$files" ] && exit 0
-google-java-format --dry-run --set-exit-if-changed $files
-"""
-
-[tasks."lint:fast"]
-description = "Run fast lints (no Renovate)"
-depends = ["lint:super-linter", "lint:links", "lint:bom", "lint:example-poms", "lint:java"]
-
 [tasks."lint"]
 description = "Run all lints"
-depends = ["lint:fast", "lint:renovate-deps"]
+depends = ["lint:bom", "lint:example-poms"]
+run = "flint run"
+
+[tasks."lint:fix"]
+description = "Auto-fix lint issues"
+run = "flint run --fix"
+
+[tasks."lint:pre-commit"]
+description = "Fast auto-fix lint pass — intended for pre-commit/pre-push hooks"
+run = "flint run --fix --fast-only"
 
 [tasks.fix]
 description = "Auto-fix lint issues"
-run = """
-files=$(git diff --name-only --diff-filter=d origin/main...HEAD -- '*.java')
-[ -n "$files" ] && google-java-format -i $files
-AUTOFIX=true mise run lint
-"""
-
-[tasks.native-lint]
-description = "Run lints natively (no container)"
-run = "NATIVE=true mise run lint:fast"
-
-[tasks.pre-commit]
-description = "Pre-commit hook: native lint"
-depends = ["setup:native-lint-tools"]
-run = "NATIVE=true mise run lint:fast"
-
-[tasks."setup:pre-commit-hook"]
-description = "Install git pre-commit hook that runs native linting"
-run = "mise generate git-pre-commit --write --task=pre-commit"
+run = "flint run --fix"
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
