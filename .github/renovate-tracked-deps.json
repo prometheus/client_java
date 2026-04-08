@@ -148,7 +148,6 @@
   },
   "integration-tests/it-spring-boot-smoke-test/pom.xml": {
     "maven": [
-      "com.diffplug.spotless:spotless-maven-plugin",
       "io.prometheus:it-common",
       "io.prometheus:prometheus-metrics-bom",
       "org.junit:junit-bom",
@@ -413,7 +412,6 @@
   },
   "prometheus-metrics-parent/pom.xml": {
     "maven": [
-      "com.diffplug.spotless:spotless-maven-plugin",
       "org.apache.maven.plugins:maven-gpg-plugin",
       "org.apache.maven.plugins:maven-source-plugin",
       "org.sonatype.central:central-publishing-maven-plugin"

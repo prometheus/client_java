@@ -51,10 +51,9 @@ jobs:
       - name: Install parent POMs
         run: |
           cd integration-tests
-          mise exec -- ../mvnw clean install -N -Dspotless.skip=true
+          mise exec -- ../mvnw clean install -N
           cd it-exporter
-          mise exec -- ../../mvnw install -N -Dspotless.skip=true
-
+          mise exec -- ../../mvnw install -N
       - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
         run: |
           cd integration-tests
