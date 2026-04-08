@@ -1,10 +1,6 @@
 {
   // Line length — pre-existing across docs, README, benchmarks
   "MD013": false,
-  // Fenced code blocks without surrounding blank lines — pre-existing
-  "MD031": false,
   // Inline HTML — needed for badge images in README
-  "MD033": false,
-  // Emphasis used as heading — pre-existing in docs/content
-  "MD036": false
+  "MD033": false
 }

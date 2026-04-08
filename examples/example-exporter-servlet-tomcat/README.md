@@ -66,12 +66,15 @@ browser:
    from [https://github.com/prometheus/prometheus/releases](https://github.com/prometheus/prometheus/releases). <!-- editorconfig-checker-disable-line -->
 2. Extract the archive
 3. Edit `prometheus.yml` and append the following snippet at the end:
+
    ```yaml
    job_name: "tomcat-servlet-example"
    static_configs:
      - targets: ["localhost:8080"]
    ```
+
 4. Run with native histograms and exemplars enabled:
+
    ```shell
    ./prometheus --enable-feature=native-histograms --enable-feature=exemplar-storage
    ```
