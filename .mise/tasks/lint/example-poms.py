@@ -6,11 +6,12 @@
 
 Example modules are intentionally standalone (no <parent> from the project)
 so users can copy them. But they're included in the Maven reactor via the
-examples-and-integration-tests profile. If 'mise run format' doesn't
-exclude them, spotless:apply fails because the plugin isn't declared.
+examples-and-integration-tests profile. If 'mise run format' uses spotless
+and doesn't exclude them, spotless:apply fails because the plugin isn't
+declared in standalone example POMs.
 
-This lint verifies that every standalone example POM is excluded from
-the format task in mise.toml.
+This lint verifies that when a spotless-based format task exists, it
+excludes the examples-and-integration-tests profile.
 """
 
 import re
@@ -41,16 +42,20 @@ def find_standalone_example_poms() -> list[Path]:
     return standalone
 
 
-def format_task_excludes_examples() -> bool:
-    """Check that the format task in mise.toml excludes standalone examples."""
+def spotless_format_task_excludes_examples() -> bool:
+    """Check that the spotless-based format task (if any) excludes standalone examples."""
     mise_toml = ROOT / "mise.toml"
     text = mise_toml.read_text(encoding="utf-8")
     # Look for the format task run command
     match = re.search(r'\[tasks\.format\].*?run\s*=\s*"([^"]*)"', text, re.DOTALL)
     if not match:
-        return False
+        # No format task — nothing to check
+        return True
     run_cmd = match.group(1)
-    # The command should deactivate the examples-and-integration-tests profile
+    # If the format task doesn't use spotless, standalone examples can't break it
+    if "spotless" not in run_cmd:
+        return True
+    # The spotless command should deactivate the examples-and-integration-tests profile
     return "!examples-and-integration-tests" in run_cmd
 
 
@@ -59,7 +64,7 @@ def main() -> int:
     if not standalone:
         return 0
 
-    if format_task_excludes_examples():
+    if spotless_format_task_excludes_examples():
         return 0
 
     print("ERROR: Standalone example POMs found but 'mise run format'")
