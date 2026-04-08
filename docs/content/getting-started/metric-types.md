@@ -127,7 +127,8 @@ The default bucket boundaries are designed for measuring request durations in se
 use cases, you may want to define custom bucket boundaries. The histogram builder provides three
 methods for this:
 
-<!-- markdownlint-disable-next-line MD036 -->
+<!-- markdownlint-disable MD036 -->
+
 **1. Arbitrary Custom Boundaries**
 
 Use `classicUpperBounds(...)` to specify arbitrary bucket boundaries:
@@ -140,7 +141,6 @@ Histogram responseSize = Histogram.builder()
     .register();
 ```
 
-<!-- markdownlint-disable-next-line MD036 -->
 **2. Linear Boundaries**
 
 Use `classicLinearUpperBounds(start, width, count)` for equal-width buckets:
@@ -153,8 +153,9 @@ Histogram queueSize = Histogram.builder()
     .register();
 ```
 
-<!-- markdownlint-disable-next-line MD036 -->
 **3. Exponential Boundaries**
+
+<!-- markdownlint-enable MD036 -->
 
 Use `classicExponentialUpperBounds(start, factor, count)` for exponential growth:
 

@@ -167,6 +167,7 @@
       "actionlint",
       "cargo:https://github.com/grafana/flint",
       "editorconfig-checker",
+      "github:google/google-java-format",
       "go:github.com/gohugoio/hugo",
       "go:github.com/grafana/oats",
       "java",
@@ -179,8 +180,7 @@
       "pipx:ruff",
       "protoc",
       "shellcheck",
-      "shfmt",
-      "ubi:google/google-java-format"
+      "shfmt"
     ]
   },
   "mvnw": {

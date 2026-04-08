@@ -92,8 +92,11 @@ When the same property is defined in multiple sources, the following precedence 
 
 <!-- editorconfig-checker-enable -->
 
-<!-- markdownlint-disable-next-line MD036 -->
+<!-- markdownlint-disable MD036 -->
+
 **Notes**
+
+<!-- markdownlint-enable MD036 -->
 
 (1) _withExemplars()_ and _withoutExemplars()_ are available for all metric types,
 not just for counters<br>

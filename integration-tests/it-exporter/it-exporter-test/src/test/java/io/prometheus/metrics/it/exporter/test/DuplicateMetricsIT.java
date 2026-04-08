@@ -25,23 +25,23 @@ class DuplicateMetricsIT extends ExporterTest {
 
     String expected =
         """
-    # HELP active_connections Active connections
-    # TYPE active_connections gauge
-    active_connections{pool="primary",type="read"} 30.0
-    active_connections{pool="replica",type="write"} 10.0
-    active_connections{protocol="http",region="us-east"} 42.0
-    active_connections{protocol="http",region="us-west"} 38.0
-    active_connections{protocol="https",region="eu-west"} 55.0
-    # HELP http_requests_total Total HTTP requests by status
-    # TYPE http_requests_total counter
-    http_requests_total{endpoint="/api",status="error"} 5.0
-    http_requests_total{endpoint="/health",status="error"} 2.0
-    http_requests_total{method="GET",status="success"} 150.0
-    http_requests_total{method="POST",status="success"} 45.0
-    # HELP unique_metric_bytes_total A unique metric for reference
-    # TYPE unique_metric_bytes_total counter
-    unique_metric_bytes_total 1024.0
-    """;
+        # HELP active_connections Active connections
+        # TYPE active_connections gauge
+        active_connections{pool="primary",type="read"} 30.0
+        active_connections{pool="replica",type="write"} 10.0
+        active_connections{protocol="http",region="us-east"} 42.0
+        active_connections{protocol="http",region="us-west"} 38.0
+        active_connections{protocol="https",region="eu-west"} 55.0
+        # HELP http_requests_total Total HTTP requests by status
+        # TYPE http_requests_total counter
+        http_requests_total{endpoint="/api",status="error"} 5.0
+        http_requests_total{endpoint="/health",status="error"} 2.0
+        http_requests_total{method="GET",status="success"} 150.0
+        http_requests_total{method="POST",status="success"} 45.0
+        # HELP unique_metric_bytes_total A unique metric for reference
+        # TYPE unique_metric_bytes_total counter
+        unique_metric_bytes_total 1024.0
+        """;
 
     assertThat(response.stringBody()).isEqualTo(expected);
   }
@@ -59,25 +59,25 @@ class DuplicateMetricsIT extends ExporterTest {
     // OpenMetrics format should have UNIT for unique_metric_bytes (base name without _total)
     String expected =
         """
-    # TYPE active_connections gauge
-    # HELP active_connections Active connections
-    active_connections{pool="primary",type="read"} 30.0
-    active_connections{pool="replica",type="write"} 10.0
-    active_connections{protocol="http",region="us-east"} 42.0
-    active_connections{protocol="http",region="us-west"} 38.0
-    active_connections{protocol="https",region="eu-west"} 55.0
-    # TYPE http_requests counter
-    # HELP http_requests Total HTTP requests by status
-    http_requests_total{endpoint="/api",status="error"} 5.0
-    http_requests_total{endpoint="/health",status="error"} 2.0
-    http_requests_total{method="GET",status="success"} 150.0
-    http_requests_total{method="POST",status="success"} 45.0
-    # TYPE unique_metric_bytes counter
-    # UNIT unique_metric_bytes bytes
-    # HELP unique_metric_bytes A unique metric for reference
-    unique_metric_bytes_total 1024.0
-    # EOF
-    """;
+        # TYPE active_connections gauge
+        # HELP active_connections Active connections
+        active_connections{pool="primary",type="read"} 30.0
+        active_connections{pool="replica",type="write"} 10.0
+        active_connections{protocol="http",region="us-east"} 42.0
+        active_connections{protocol="http",region="us-west"} 38.0
+        active_connections{protocol="https",region="eu-west"} 55.0
+        # TYPE http_requests counter
+        # HELP http_requests Total HTTP requests by status
+        http_requests_total{endpoint="/api",status="error"} 5.0
+        http_requests_total{endpoint="/health",status="error"} 2.0
+        http_requests_total{method="GET",status="success"} 150.0
+        http_requests_total{method="POST",status="success"} 45.0
+        # TYPE unique_metric_bytes counter
+        # UNIT unique_metric_bytes bytes
+        # HELP unique_metric_bytes A unique metric for reference
+        unique_metric_bytes_total 1024.0
+        # EOF
+        """;
 
     assertThat(response.stringBody()).isEqualTo(expected);
   }

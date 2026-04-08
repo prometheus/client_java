@@ -122,7 +122,8 @@ class CounterTest {
         new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
     assertThat(ProtobufUtil.shortDebugString(protobufData))
         .matches(
-            "^name: \"my_counter_seconds_total\" type: COUNTER metric \\{ counter \\{ value: 0.0 created_timestamp \\{ seconds: \\d+ nanos: \\d+ } } }$");
+            "^name: \"my_counter_seconds_total\" type: COUNTER metric \\{ counter \\{ value: 0.0"
+                + " created_timestamp \\{ seconds: \\d+ nanos: \\d+ } } }$");
   }
 
   @Test

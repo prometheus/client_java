@@ -13,14 +13,14 @@ The main new features of the 1.0.0 release are:
 - **Runtime configuration:** Configure metrics, exporters, and more at runtime using a properties
   file or system properties.
 
-<!-- markdownlint-disable-next-line MD036 -->
+<!-- markdownlint-disable MD036 -->
+
 **Documentation and Examples**
 
 In addition to this documentation page we created an
 [examples/](https://github.com/prometheus/client_java/tree/main/examples) directory with end-to-end
 scenarios (Docker compose) illustrating new features.
 
-<!-- markdownlint-disable-next-line MD036 -->
 **Performance Benchmarks**
 
 Initial performance benchmarks are looking great: All core metric types (including native
@@ -29,7 +29,6 @@ that utilizes all processor cores in parallel the metrics library will not intro
 synchronization. See Javadoc comments in
 [benchmarks/](https://github.com/prometheus/client_java/tree/main/benchmarks) for benchmark results.
 
-<!-- markdownlint-disable-next-line MD036 -->
 **More Info**
 
 The Grafana Labs Blog has a post
@@ -40,8 +39,9 @@ There will also be a presentation at the [PromCon](https://promcon.io) conferenc
 Tune in to the live stream on [https://promcon.io](https://promcon.io)
 or watch the recording on YouTube.
 
-<!-- markdownlint-disable-next-line MD036 -->
 **For users of the 0.16.0 version and older**
+
+<!-- markdownlint-enable MD036 -->
 
 Updating to the 1.0.0 version is a breaking change. However, there's a
 `prometheus-metrics-simpleclient-bridge` module available that allows you to use your existing
