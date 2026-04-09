@@ -1,9 +1,9 @@
 [settings]
-exclude = "src/main/generated"
-exclude_paths = [
-    "docs/themes/",
+exclude = [
+    "src/main/generated/**",
+    "docs/themes/**",
     "mvnw",
-    "simpleclient-archive/",
+    "simpleclient-archive/**",
 ]
 
 [checks.renovate-deps]

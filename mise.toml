@@ -2,6 +2,7 @@
 "cargo:https://github.com/grafana/flint" = "branch:feat/flint-v2"
 "go:github.com/gohugoio/hugo" = "v0.157.0"
 "go:github.com/grafana/oats" = "0.6.1"
+"cargo:xmloxide" = "0.4.1"
 "github:google/google-java-format" = "1.26.0"
 actionlint = "1.7.10"
 "cargo:xmloxide" = "0.4.1"

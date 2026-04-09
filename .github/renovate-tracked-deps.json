@@ -165,6 +165,7 @@
     "mise": [
       "actionlint",
       "cargo:https://github.com/grafana/flint",
+      "cargo:xmloxide",
       "editorconfig-checker",
       "github:google/google-java-format",
       "go:github.com/gohugoio/hugo",
