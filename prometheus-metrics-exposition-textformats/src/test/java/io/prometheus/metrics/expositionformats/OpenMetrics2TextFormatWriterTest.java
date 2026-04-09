@@ -4,13 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.OpenMetrics2Properties;
+import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
@@ -323,6 +326,236 @@ class OpenMetrics2TextFormatWriterTest {
 
     assertThat(om2Output).isEqualTo(om1Output);
     assertThat(om2Output).isEqualTo("# EOF\n");
+  }
+
+  @Test
+  void testCompositeHistogram() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("http_request_duration_seconds")
+                .help("Request duration")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(324789.3)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(0.1, 8)
+                                .bucket(0.25, 2)
+                                .bucket(0.5, 1)
+                                .bucket(1.0, 3)
+                                .bucket(Double.POSITIVE_INFINITY, 3)
+                                .build())
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE http_request_duration_seconds histogram\n"
+                + "# HELP http_request_duration_seconds Request duration\n"
+                + "http_request_duration_seconds"
+                + " {count:17,sum:324789.3,bucket:[0.1:8,0.25:10,0.5:11,1.0:14,+Inf:17]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCompositeHistogramWithLabelsTimestampAndCreated() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("foo")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .labels(Labels.of("method", "GET"))
+                        .sum(324789.3)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(0.1, 8)
+                                .bucket(Double.POSITIVE_INFINITY, 9)
+                                .build())
+                        .createdTimestampMillis(1520430000123L)
+                        .scrapeTimestampMillis(1520879607789L)
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE foo histogram\n"
+                + "foo{method=\"GET\"} {count:17,sum:324789.3,bucket:[0.1:8,+Inf:17]}"
+                + " 1520879607.789 st@1520430000.123\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCompositeHistogramWithExemplar() throws IOException {
+    Exemplar exemplar =
+        Exemplar.builder().value(0.67).traceId("shaZ8oxi").timestampMillis(1520879607789L).build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("foo")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(1.5)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(1.0, 1)
+                                .bucket(Double.POSITIVE_INFINITY, 0)
+                                .build())
+                        .exemplars(Exemplars.of(exemplar))
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE foo histogram\n"
+                + "foo {count:1,sum:1.5,bucket:[1.0:1,+Inf:1]}"
+                + " # {trace_id=\"shaZ8oxi\"} 0.67 1520879607.789\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCompositeGaugeHistogram() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("queue_size")
+                .gaugeHistogram(true)
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(3289.3)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(0.1, 20)
+                                .bucket(1.0, 14)
+                                .bucket(Double.POSITIVE_INFINITY, 8)
+                                .build())
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    // GaugeHistogram uses gcount/gsum per spec
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE queue_size gaugehistogram\n"
+                + "queue_size {gcount:42,gsum:3289.3,bucket:[0.1:20,1.0:34,+Inf:42]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCompositeSummary() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            SummarySnapshot.builder()
+                .name("rpc_duration_seconds")
+                .help("RPC duration")
+                .dataPoint(
+                    SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .count(17)
+                        .sum(324789.3)
+                        .quantiles(
+                            Quantiles.builder().quantile(0.95, 123.7).quantile(0.99, 150.0).build())
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE rpc_duration_seconds summary\n"
+                + "# HELP rpc_duration_seconds RPC duration\n"
+                + "rpc_duration_seconds"
+                + " {count:17,sum:324789.3,quantile:[0.95:123.7,0.99:150.0]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testCompositeSummaryWithCreatedAndExemplar() throws IOException {
+    Exemplar exemplar =
+        Exemplar.builder().value(0.5).traceId("abc123").timestampMillis(1520879607000L).build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            SummarySnapshot.builder()
+                .name("rpc_duration_seconds")
+                .dataPoint(
+                    SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .count(10)
+                        .sum(100.0)
+                        .createdTimestampMillis(1520430000000L)
+                        .exemplars(Exemplars.of(exemplar))
+                        .build())
+                .build());
+
+    String output = writeWithCompositeValues(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE rpc_duration_seconds summary\n"
+                + "rpc_duration_seconds {count:10,sum:100.0} st@1520430000.000"
+                + " # {trace_id=\"abc123\"} 0.5 1520879607.000\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testExemplarComplianceSkipsExemplarWithoutTimestamp() throws IOException {
+    Exemplar exemplarWithTs =
+        Exemplar.builder().value(1.0).traceId("aaa").timestampMillis(1672850685829L).build();
+    Exemplar exemplarWithoutTs = Exemplar.builder().value(2.0).traceId("bbb").build();
+
+    OpenMetrics2TextFormatWriter complianceWriter =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().exemplarCompliance(true).build())
+            .build();
+    OpenMetrics2TextFormatWriter defaultWriter = OpenMetrics2TextFormatWriter.create();
+
+    MetricSnapshots withTs =
+        MetricSnapshots.of(
+            CounterSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .value(1.0)
+                        .exemplar(exemplarWithTs)
+                        .build())
+                .build());
+    MetricSnapshots withoutTs =
+        MetricSnapshots.of(
+            CounterSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .value(1.0)
+                        .exemplar(exemplarWithoutTs)
+                        .build())
+                .build());
+
+    // Compliance mode: exemplar WITH timestamp is emitted
+    assertThat(write(withTs, complianceWriter)).contains("# {trace_id=\"aaa\"} 1.0 1672850685.829");
+
+    // Compliance mode: exemplar WITHOUT timestamp is skipped
+    assertThat(write(withoutTs, complianceWriter)).doesNotContain("# {");
+
+    // Default mode: exemplar without timestamp is still emitted (just no timestamp)
+    assertThat(write(withoutTs, defaultWriter)).contains("# {trace_id=\"bbb\"} 2.0\n");
+  }
+
+  private String writeWithCompositeValues(MetricSnapshots snapshots) throws IOException {
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().compositeValues(true).build())
+            .build();
+    return write(snapshots, writer);
   }
 
   private String writeWithOM1(MetricSnapshots snapshots) throws IOException {
