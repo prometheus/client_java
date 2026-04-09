@@ -1,6 +1,6 @@
 [settings]
 exclude = [
-    "src/main/generated/**",
+    "**/src/main/generated/**",
     "docs/themes/**",
     "mvnw",
     "simpleclient-archive/**",
