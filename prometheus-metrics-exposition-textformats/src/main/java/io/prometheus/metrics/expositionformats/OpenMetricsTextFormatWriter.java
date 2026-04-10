@@ -424,7 +424,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     writer.write(' ');
   }
 
-  private void writeScrapeTimestampAndExemplar(
+  void writeScrapeTimestampAndExemplar(
       Writer writer, DataPointSnapshot data, @Nullable Exemplar exemplar, EscapingScheme scheme)
       throws IOException {
     if (data.hasScrapeTimestamp()) {
@@ -432,16 +432,20 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
     }
     if (exemplar != null) {
-      writer.write(" # ");
-      writeLabels(writer, exemplar.getLabels(), null, 0, false, scheme);
-      writer.write(' ');
-      writeDouble(writer, exemplar.getValue());
-      if (exemplar.hasTimestamp()) {
-        writer.write(' ');
-        writeOpenMetricsTimestamp(writer, exemplar.getTimestampMillis());
-      }
+      writeExemplar(writer, exemplar, scheme);
     }
     writer.write('\n');
+  }
+
+  void writeExemplar(Writer writer, Exemplar exemplar, EscapingScheme scheme) throws IOException {
+    writer.write(" # ");
+    writeLabels(writer, exemplar.getLabels(), null, 0, false, scheme);
+    writer.write(' ');
+    writeDouble(writer, exemplar.getValue());
+    if (exemplar.hasTimestamp()) {
+      writer.write(' ');
+      writeOpenMetricsTimestamp(writer, exemplar.getTimestampMillis());
+    }
   }
 
   /**

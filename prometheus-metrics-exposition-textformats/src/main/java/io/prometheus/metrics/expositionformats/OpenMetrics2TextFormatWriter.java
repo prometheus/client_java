@@ -257,7 +257,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writer.write(" st@");
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
     }
-    writeExemplarIfAllowed(writer, data.getExemplars().getLatest(), scheme);
+    writeExemplar(writer, data.getExemplars().getLatest(), scheme);
     writer.write('\n');
   }
 
@@ -339,7 +339,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writer.write(" st@");
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
     }
-    writeExemplarIfAllowed(writer, data.getExemplars().getLatest(), scheme);
+    writeExemplar(writer, data.getExemplars().getLatest(), scheme);
     writer.write('\n');
   }
 
@@ -467,30 +467,30 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeScrapeTimestampAndExemplar(
       Writer writer, DataPointSnapshot data, @Nullable Exemplar exemplar, EscapingScheme scheme)
       throws IOException {
+    if (!openMetrics2Properties.getExemplarCompliance()) {
+      om1Writer.writeScrapeTimestampAndExemplar(writer, data, exemplar, scheme);
+      return;
+    }
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
       writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
     }
-    writeExemplarIfAllowed(writer, exemplar, scheme);
+    writeExemplar(writer, exemplar, scheme);
     writer.write('\n');
   }
 
-  private void writeExemplarIfAllowed(
-      Writer writer, @Nullable Exemplar exemplar, EscapingScheme scheme) throws IOException {
+  private void writeExemplar(Writer writer, @Nullable Exemplar exemplar, EscapingScheme scheme)
+      throws IOException {
     if (exemplar == null) {
       return;
     }
-    // In exemplarCompliance mode, exemplars MUST have a timestamp per the OM2 spec.
-    if (openMetrics2Properties.getExemplarCompliance() && !exemplar.hasTimestamp()) {
+    if (!openMetrics2Properties.getExemplarCompliance()) {
+      om1Writer.writeExemplar(writer, exemplar, scheme);
       return;
     }
-    writer.write(" # ");
-    writeLabels(writer, exemplar.getLabels(), null, 0, false, scheme);
-    writer.write(' ');
-    writeDouble(writer, exemplar.getValue());
+    // exemplarCompliance=true: exemplars MUST have a timestamp per the OM2 spec.
     if (exemplar.hasTimestamp()) {
-      writer.write(' ');
-      writeOpenMetricsTimestamp(writer, exemplar.getTimestampMillis());
+      om1Writer.writeExemplar(writer, exemplar, scheme);
     }
   }
 
