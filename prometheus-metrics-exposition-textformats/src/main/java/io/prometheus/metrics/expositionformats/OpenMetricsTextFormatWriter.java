@@ -168,7 +168,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
+  void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     if (snapshot.isGaugeHistogram()) {
@@ -231,7 +231,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
+  void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
