@@ -139,7 +139,7 @@
       "protoc",
       "ubi:google/google-java-format"
     ],
-    "regex": ["ghcr.io/super-linter/super-linter", "grafana/flint"]
+    "regex": ["ghcr.io/super-linter/super-linter", "grafana/docker-otel-lgtm", "grafana/flint"]
   },
   "mvnw": {
     "maven-wrapper": ["maven-wrapper"]
