@@ -34,11 +34,6 @@
       "mise"
     ]
   },
-  ".github/workflows/native-tests.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
   ".github/workflows/nightly-benchmarks.yml": {
     "regex": [
       "mise"
