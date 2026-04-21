@@ -549,6 +549,58 @@ class OpenMetrics2TextFormatWriterTest {
     assertThat(write(withoutTs, defaultWriter)).contains("# {trace_id=\"bbb\"} 2.0\n");
   }
 
+  @Test
+  void testExemplarComplianceSkipsHistogramExemplarWithoutTimestamp() throws IOException {
+    Exemplar exemplarWithoutTs = Exemplar.builder().value(2.0).traceId("bbb").build();
+    OpenMetrics2TextFormatWriter complianceWriter =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().exemplarCompliance(true).build())
+            .build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(2.0)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(1.0, 1)
+                                .bucket(Double.POSITIVE_INFINITY, 1)
+                                .build())
+                        .exemplars(Exemplars.of(exemplarWithoutTs))
+                        .build())
+                .build());
+
+    assertThat(write(snapshots, complianceWriter)).doesNotContain("# {");
+  }
+
+  @Test
+  void testExemplarComplianceSkipsSummaryExemplarWithoutTimestamp() throws IOException {
+    Exemplar exemplarWithoutTs = Exemplar.builder().value(2.0).traceId("bbb").build();
+    OpenMetrics2TextFormatWriter complianceWriter =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().exemplarCompliance(true).build())
+            .build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            SummarySnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .count(1)
+                        .sum(2.0)
+                        .exemplars(Exemplars.of(exemplarWithoutTs))
+                        .build())
+                .build());
+
+    assertThat(write(snapshots, complianceWriter)).doesNotContain("# {");
+  }
+
   private String writeWithCompositeValues(MetricSnapshots snapshots) throws IOException {
     OpenMetrics2TextFormatWriter writer =
         OpenMetrics2TextFormatWriter.builder()

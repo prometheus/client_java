@@ -200,7 +200,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   private void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
-    if (!openMetrics2Properties.getCompositeValues()) {
+    if (!openMetrics2Properties.getCompositeValues()
+        && !openMetrics2Properties.getExemplarCompliance()) {
       om1Writer.writeHistogram(writer, snapshot, scheme);
       return;
     }
@@ -273,7 +274,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   private void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
       throws IOException {
-    if (!openMetrics2Properties.getCompositeValues()) {
+    if (!openMetrics2Properties.getCompositeValues()
+        && !openMetrics2Properties.getExemplarCompliance()) {
       om1Writer.writeSummary(writer, snapshot, scheme);
       return;
     }
