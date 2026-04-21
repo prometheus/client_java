@@ -43,12 +43,9 @@ git push --force-with-lease
 
 ## Formatting
 
-This repository uses [Google Java Format](https://github.com/google/google-java-format) to format
-the code.
+This repository uses flint to run formatting and lint checks.
 
-Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
-
-Or run all the linters:
+Run all the linters:
 
 `mise run lint`
 
@@ -79,7 +76,6 @@ mise --cd .mise/envs/native run native-test
 
 ### Avoid failures while running tests
 
-- Use `-Dspotless.check.skip=true` to skip the formatting check during development.
 - Use `-Dcoverage.skip=true` to skip the coverage check during development.
 - Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
@@ -87,7 +83,7 @@ mise --cd .mise/envs/native run native-test
 Combine all with
 
 ```shell
-./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true \
+./mvnw install -DskipTests -Dcoverage.skip=true \
   -Dcheckstyle.skip=true -Dwarnings=-nowarn
 ```
 

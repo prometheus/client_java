@@ -32,28 +32,22 @@ run = "./mvnw clean install"
 env.REQUIRE_PROTO_UP_TO_DATE = "true"
 env.PROTO_GENERATION = "true"
 
-[tasks.format]
-description = "format source code"
-# Use fully-qualified plugin goal and deactivate the examples-and-integration-tests
-# profile because standalone example modules don't inherit the spotless plugin.
-run = "./mvnw com.diffplug.spotless:spotless-maven-plugin:apply -P '!examples-and-integration-tests'"
-
 [tasks.clean]
 description = "clean all modules"
 run = "./mvnw clean"
 
 [tasks.compile]
 description = "bare compile, ignoring formatting and linters"
-run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 
 [tasks.generate]
 description = "regenerate protobuf sources"
-run = "./mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw test -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 
 [tasks.test-all]
 description = "run all tests"

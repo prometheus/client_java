@@ -29,7 +29,6 @@
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>
-    <spotless.skip>false</spotless.skip>
     <javadoc.skip>false</javadoc.skip>
     <warnings>-Werror</warnings>
   </properties>
