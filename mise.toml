@@ -1,7 +1,6 @@
 [tools]
 
 # Tools
-"github:grafana/flint" = "0.20.3"
 "go:github.com/gohugoio/hugo" = "v0.157.0"
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.2+10.0.LTS"
@@ -13,6 +12,7 @@ protoc = "34.0"
 actionlint = "1.7.10"
 "cargo:xmloxide" = "0.4.1"
 editorconfig-checker = "v3.6.1"
+"github:grafana/flint" = "0.20.3"
 "github:google/google-java-format" = "1.26.0"
 lychee = "0.23.0"
 "npm:@biomejs/biome" = "2.4.12"
