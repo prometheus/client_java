@@ -1,6 +1,0 @@
-{
-  // Line length — pre-existing across docs, README, benchmarks
-  "MD013": false,
-  // Inline HTML — needed for badge images in README
-  "MD033": false
-}
