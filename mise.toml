@@ -3,7 +3,6 @@
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.2+10.0.LTS"
 node = "24.14.0"
-"npm:renovate" = "43.45.1"
 protoc = "34.0"
 
 # Linters
@@ -16,6 +15,7 @@ lychee = "0.23.0"
 "npm:@biomejs/biome" = "2.4.12"
 "npm:markdownlint-cli2" = "0.17.2"
 "npm:prettier" = "3.8.1"
+"npm:renovate" = "43.45.1"
 "pipx:codespell" = "2.4.1"
 "pipx:ruff" = "0.15.0"
 shellcheck = "v0.11.0"
