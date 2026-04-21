@@ -99,6 +99,7 @@ When the same property is defined in multiple sources, the following precedence 
 <!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD033 -->
+
 (1) _withExemplars()_ and _withoutExemplars()_ are available for all metric types,
 not just for counters<br>
 (2) Boolean value. Format: `property=true` or `property=false`.<br>
@@ -106,6 +107,7 @@ not just for counters<br>
 (4) Comma-separated list. Example: `0.5, 0.95, 0.99`.<br>
 (5) Comma-separated list. If specified, the list must have the same length as
 `io.prometheus.metrics.summary_quantiles`. Example: `0.01, 0.005, 0.005`.
+
 <!-- markdownlint-enable MD033 -->
 
 There's one special feature about metric properties: You can set a property for one specific
@@ -165,11 +167,13 @@ This works for all Metrics properties.
 <!-- editorconfig-checker-enable -->
 
 <!-- markdownlint-disable MD033 -->
+
 (1) Comma separated list of allowed metric names. Only these metrics will be exposed.<br/>
 (2) Comma separated list of excluded metric names. These metrics will not be exposed.<br/>
 (3) Comma separated list of prefixes.
 Only metrics starting with these prefixes will be exposed.<br/>
 (4) Comma separated list of prefixes. Metrics starting with these prefixes will not be exposed.<br/>
+
 <!-- markdownlint-enable MD033 -->
 
 ## Exporter HTTPServer Properties
@@ -202,9 +206,11 @@ Only metrics starting with these prefixes will be exposed.<br/>
 <!-- editorconfig-checker-enable -->
 
 <!-- markdownlint-disable MD033 -->
+
 (1) Protocol can be `grpc` or `http/protobuf`.<br>
 (2) Format: `key1=value1,key2=value2`<br>
 (3) Format: `key1=value1,key2=value2`
+
 <!-- markdownlint-enable MD033 -->
 
 Many of these attributes can alternatively be configured via OpenTelemetry environment variables,
