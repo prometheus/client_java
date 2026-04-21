@@ -54,7 +54,7 @@ Or run all the linters:
 
 To autofix linting issues:
 
-`mise run fix`
+`mise run lint:fix`
 
 ### Pre-commit Hook (Optional)
 

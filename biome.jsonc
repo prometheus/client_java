@@ -1,0 +1,7 @@
+{
+  // Keep JSON formatting aligned with the repo's two-space style.
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}

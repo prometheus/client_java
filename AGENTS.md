@@ -119,7 +119,7 @@ commits. CI will fail if these checks fail.
 
 - **ALWAYS** run `mise run lint` after modifying non-Java
   files (runs super-linter + link checking + BOM check)
-- `mise run fix` autofixes linting issues
+- `mise run lint:fix` autofixes linting issues
 - Super-linter will **autofix** many issues
   (formatting, trailing whitespace, etc.)
 - It only reports ERROR-level issues
@@ -139,7 +139,7 @@ mise run build
 
 # After modifying non-Java files (run BEFORE committing)
 mise run lint
-# or to autofix: mise run fix
+# or to autofix: mise run lint:fix
 ```
 
 ### Before Pushing
