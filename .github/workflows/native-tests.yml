@@ -13,22 +13,11 @@ jobs:
         with:
           persist-credentials: false
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up GraalVM
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          distribution: "graalvm"
-          java-version: "25.0.1"
-
-      - name: Cache local Maven repository
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-native-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-native-
-            ${{ runner.os }}-maven-
-
+          version: v2026.2.24
+          sha256: c6e8b1abbd02d4beb7f38c98174e647b4ae40e89422465bc3b49e48c0bdf9ba9
+          working_directory: .mise/envs/native
       - name: Run native tests
-        working-directory: integration-tests/it-spring-boot-smoke-test
-        run: ../../mvnw test -PnativeTest
+        working-directory: .mise/envs/native
+        run: mise native-test
