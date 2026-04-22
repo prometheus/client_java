@@ -6,7 +6,7 @@ lychee = "0.23.0"
 node = "24.14.0"
 "npm:renovate" = "43.45.1"
 protoc = "34.0"
-"ubi:google/google-java-format" = "1.34.1"
+"ubi:google/google-java-format" = "1.35.0"
 
 [env]
 RENOVATE_TRACKED_DEPS_EXCLUDE="github-actions,github-runners"
