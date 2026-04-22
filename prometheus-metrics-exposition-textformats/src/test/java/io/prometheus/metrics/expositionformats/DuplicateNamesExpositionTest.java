@@ -75,11 +75,11 @@ class DuplicateNamesExpositionTest {
 
     String expected =
         """
-    # HELP api_responses_total API responses
-    # TYPE api_responses_total counter
-    api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
-    api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
-    """;
+        # HELP api_responses_total API responses
+        # TYPE api_responses_total counter
+        api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
+        api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
+        """;
 
     assertThat(output).isEqualTo(expected);
   }
@@ -150,13 +150,13 @@ class DuplicateNamesExpositionTest {
 
     String expected =
         """
-    # HELP api_responses_total API responses
-    # TYPE api_responses_total counter
-    api_responses_total{error="NOT_FOUND",outcome="FAILURE",uri="/world"} 5.0
-    api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
-    api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
-    api_responses_total{outcome="SUCCESS",uri="/world"} 200.0
-    """;
+        # HELP api_responses_total API responses
+        # TYPE api_responses_total counter
+        api_responses_total{error="NOT_FOUND",outcome="FAILURE",uri="/world"} 5.0
+        api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
+        api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
+        api_responses_total{outcome="SUCCESS",uri="/world"} 200.0
+        """;
     assertThat(output).isEqualTo(expected);
   }
 
@@ -172,12 +172,12 @@ class DuplicateNamesExpositionTest {
 
     String expected =
         """
-    # TYPE api_responses counter
-    # HELP api_responses API responses
-    api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
-    api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
-    # EOF
-    """;
+        # TYPE api_responses counter
+        # HELP api_responses API responses
+        api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
+        api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
+        # EOF
+        """;
     assertThat(output).isEqualTo(expected);
   }
 
@@ -243,15 +243,15 @@ class DuplicateNamesExpositionTest {
     // merged snapshots too, so single HELP/TYPE for _created and one _created line per label set.
     String expected =
         """
-    # HELP api_responses_total API responses
-    # TYPE api_responses_total counter
-    api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
-    api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
-    # HELP api_responses_created API responses
-    # TYPE api_responses_created gauge
-    api_responses_created{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 1672850386800
-    api_responses_created{outcome="SUCCESS",uri="/hello"} 1672850385800
-    """;
+        # HELP api_responses_total API responses
+        # TYPE api_responses_total counter
+        api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
+        api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
+        # HELP api_responses_created API responses
+        # TYPE api_responses_created gauge
+        api_responses_created{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 1672850386800
+        api_responses_created{outcome="SUCCESS",uri="/hello"} 1672850385800
+        """;
 
     assertThat(output).isEqualTo(expected);
   }

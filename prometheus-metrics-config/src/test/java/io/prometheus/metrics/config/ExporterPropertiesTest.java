@@ -36,8 +36,8 @@ class ExporterPropertiesTest {
                     new HashMap<>(
                         Map.of("io.prometheus.exporter.exemplars_on_all_metric_types", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.exemplars_on_all_metric_types: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+            "io.prometheus.exporter.exemplars_on_all_metric_types: Expecting 'true' or 'false'."
+                + " Found: invalid");
   }
 
   private static ExporterProperties load(Map<String, String> map) {
@@ -84,7 +84,7 @@ class ExporterPropertiesTest {
                     new HashMap<>(
                         Map.of("io.prometheus.exporter.prometheus_timestamps_in_ms", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.prometheus_timestamps_in_ms: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+            "io.prometheus.exporter.prometheus_timestamps_in_ms: Expecting 'true' or 'false'."
+                + " Found: invalid");
   }
 }
