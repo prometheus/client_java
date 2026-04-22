@@ -18,7 +18,7 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yml
   grafana:
-    image: grafana/grafana:12.4.0@sha256:b0ae311af06228bcfd4a620504b653db80f5b91e94dc3dc2a5b7dab202bcde20
+    image: grafana/grafana:13.0.1@sha256:0f86bada30d65ef9d0183b90c1e2682ac92d53d95da8bed322b984ea78a4a73a
     network_mode: host
     volumes:
       - ./docker-compose/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/grafana-datasources.yaml
