@@ -8,7 +8,7 @@ node = "24.15.0"
 protoc = "34.0"
 
 # Linters
-actionlint = "1.7.10"
+actionlint = "1.7.12"
 "cargo:xmloxide" = "0.4.1"
 editorconfig-checker = "v3.6.1"
 "github:grafana/flint" = "0.20.3"
