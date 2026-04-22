@@ -58,7 +58,7 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks."lint"]
 description = "Run all lints"
-raw_args = true
+raw = true
 depends = ["lint:bom"]
 run = "flint run"
 
