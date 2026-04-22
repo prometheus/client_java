@@ -4,7 +4,7 @@
 java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.23.0"
 node = "24.15.0"
-"npm:renovate" = "43.45.1"
+"npm:renovate" = "43.129.1"
 protoc = "34.0"
 "ubi:google/google-java-format" = "1.34.1"
 
