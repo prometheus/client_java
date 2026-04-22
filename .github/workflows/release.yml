@@ -30,7 +30,7 @@ jobs:
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
           version: v2026.4.16
-          sha256: b29c88b10e9818c71cc4dcf4dcb3947db8dfd3dddaad721664b159057fb0b9ce
+          sha256: 69d321fca47d6ece2924bd95ab2343e3e1c7704d6b6cb5de15e4f753d8c54be1
           cache: false
 
       - name: Build release version
