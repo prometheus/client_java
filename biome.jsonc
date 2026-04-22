@@ -1,3 +1,4 @@
+// Biome keeps the repo's JSON and JSONC files formatted consistently.
 {
   // Keep JSON formatting aligned with the repo's two-space style.
   "formatter": {

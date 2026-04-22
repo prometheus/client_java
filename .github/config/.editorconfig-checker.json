@@ -1,3 +1,4 @@
 {
+  "_comment": "Java files are handled by flint, so editorconfig-checker ignores them.",
   "Exclude": [".*\\.java$"]
 }

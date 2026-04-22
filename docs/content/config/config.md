@@ -92,11 +92,7 @@ When the same property is defined in multiple sources, the following precedence 
 
 <!-- editorconfig-checker-enable -->
 
-<!-- markdownlint-disable MD036 -->
-
-**Notes**
-
-<!-- markdownlint-enable MD036 -->
+### Notes
 
 <!-- markdownlint-disable MD033 -->
 
