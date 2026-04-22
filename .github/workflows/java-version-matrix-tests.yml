@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up mise
-        uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
           version: v2026.4.16
           sha256: 69d321fca47d6ece2924bd95ab2343e3e1c7704d6b6cb5de15e4f753d8c54be1
