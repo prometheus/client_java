@@ -24,7 +24,7 @@ shfmt = "v3.12.0"
 [env]
 FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION = "0.7.2"
+LGTM_VERSION = "0.25.0"
 
 [tasks.ci]
 description = "CI Build"
