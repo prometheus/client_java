@@ -23,7 +23,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Note: Java 8 runtime testing is skipped due to Spotless incompatibility
         java-version: [11, 17, 21, 25]
     steps:
       - name: Check out
@@ -46,7 +45,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build core library artifacts
-        run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
+        run: mise exec -- ./mvnw install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
 
       - name: Install parent POMs
         run: |
@@ -63,7 +62,7 @@ jobs:
           else
             MODULES="it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway"
           fi
-          mise exec -- ../mvnw clean install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+          mise exec -- ../mvnw clean install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
             -Djava.version=${{ matrix.java-version }} \
             -Dmaven.compiler.release=${{ matrix.java-version }} \
             -pl $MODULES
@@ -79,5 +78,5 @@ jobs:
           else
             TEST_MODULES="it-exporter/it-exporter-test,it-exporter/it-no-protobuf-test,it-pushgateway"
           fi
-          mise exec -- ../mvnw verify -T 2C -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+          mise exec -- ../mvnw verify -T 2C -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
             -pl $TEST_MODULES
