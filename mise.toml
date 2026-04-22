@@ -13,7 +13,7 @@ RENOVATE_TRACKED_DEPS_EXCLUDE="github-actions,github-runners"
 # renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
 SUPER_LINTER_VERSION="slim-v8.5.0@sha256:857dcc3f0bf5dd065fdeed1ace63394bb2004238a5ef02910ea23d9bcd8fd2b8"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION="0.7.2"
+LGTM_VERSION="0.25.0"
 
 [tasks.ci]
 description = "CI Build"
