@@ -21,8 +21,8 @@ jobs:
           persist-credentials: true
       - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          version: v2026.2.11
-          sha256: 3e1baedb9284124b770d2d561a04a98c343d05967c83deb8b35c7c941f8d9c9a
+          version: v2026.4.16
+          sha256: b29c88b10e9818c71cc4dcf4dcb3947db8dfd3dddaad721664b159057fb0b9ce
       - name: Cache local Maven repository
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:

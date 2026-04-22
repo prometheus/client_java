@@ -36,8 +36,8 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          version: v2026.2.24
-          sha256: c6e8b1abbd02d4beb7f38c98174e647b4ae40e89422465bc3b49e48c0bdf9ba9
+          version: v2026.4.16
+          sha256: b29c88b10e9818c71cc4dcf4dcb3947db8dfd3dddaad721664b159057fb0b9ce
 
       - name: Cache local Maven repository
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
