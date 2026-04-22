@@ -55,19 +55,19 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 # Shared lint tasks from flint (https://github.com/grafana/flint)
 [tasks."lint:super-linter"]
 description = "Run Super-Linter on the repository"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/super-linter.sh" # v0.9.1
+file = "https://raw.githubusercontent.com/grafana/flint/9de186b090a2ce39486ae3b1d3e696bd2e200d6a/tasks/lint/super-linter.sh" # v0.20.3
 
 [tasks."lint:links"]
 description = "Lint links"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/links.sh" # v0.9.1
+file = "https://raw.githubusercontent.com/grafana/flint/9de186b090a2ce39486ae3b1d3e696bd2e200d6a/tasks/lint/links.sh" # v0.20.3
 
 [tasks."lint:renovate-deps"]
 description = "Verify renovate-tracked-deps.json is up to date"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/lint/renovate-deps.py" # v0.9.1
+file = "https://raw.githubusercontent.com/grafana/flint/9de186b090a2ce39486ae3b1d3e696bd2e200d6a/tasks/lint/renovate-deps.py" # v0.20.3
 
 [tasks."setup:native-lint-tools"]
 description = "Install native lint tools matching the pinned super-linter version"
-file = "https://raw.githubusercontent.com/grafana/flint/8a39d96e17327c54974623b252eb5260d67ed68a/tasks/setup/native-lint-tools.sh" # v0.9.1
+file = "https://raw.githubusercontent.com/grafana/flint/9de186b090a2ce39486ae3b1d3e696bd2e200d6a/tasks/setup/native-lint-tools.sh" # v0.20.3
 
 [tasks."lint:java"]
 description = "Check Java formatting (changed files only)"
