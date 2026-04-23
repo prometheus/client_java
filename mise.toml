@@ -19,7 +19,7 @@ editorconfig-checker = "v3.6.1"
 "pipx:codespell" = "2.4.1"
 "pipx:ruff" = "0.15.0"
 shellcheck = "v0.11.0"
-shfmt = "v3.12.0"
+shfmt = "3.13.1"
 
 [env]
 FLINT_CONFIG_DIR = ".github/config"
