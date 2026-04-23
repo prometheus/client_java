@@ -1,23 +1,25 @@
 [tools]
+
+# Linters
+actionlint = "1.7.12"
+biome = "2.4.12"
+"cargo:xmloxide" = "0.4.1"
+"cargo:yaml-lint" = "0.1.0"
+editorconfig-checker = "v3.6.1"
+"github:google/google-java-format" = "1.35.0"
+"github:grafana/flint" = "0.20.4"
 "go:github.com/gohugoio/hugo" = "v0.160.1"
 "go:github.com/grafana/oats" = "0.6.1"
 java = "temurin-25.0.3+9.0.LTS"
 lychee = "0.23.0"
 node = "24.15.0"
-"npm:renovate" = "43.129.1"
-protoc = "34.1"
-
-# Linters
-actionlint = "1.7.12"
-"cargo:xmloxide" = "0.4.1"
-editorconfig-checker = "v3.6.1"
-"github:grafana/flint" = "0.20.3"
-"github:google/google-java-format" = "1.35.0"
-"npm:@biomejs/biome" = "2.4.12"
 "npm:markdownlint-cli2" = "0.22.0"
 "npm:prettier" = "3.8.3"
+"npm:renovate" = "43.129.1"
 "pipx:codespell" = "2.4.2"
 "pipx:ruff" = "0.15.11"
+protoc = "34.1"
+rumdl = "0.1.80"
 shellcheck = "v0.11.0"
 shfmt = "3.13.1"
 
@@ -115,3 +117,7 @@ java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.jso
 [tasks."benchmark:generate-summary"]
 description = "Generate summary from existing benchmark-results.json"
 run = "python3 ./.mise/tasks/generate_benchmark_summary.py"
+
+[tasks."lint:pre-commit"]
+description = "Fast auto-fix lint (skips slow checks) — for pre-commit/pre-push hooks"
+run = "flint run --fix --fast-only"
