@@ -67,7 +67,9 @@
   "mise.toml": {
     "mise": [
       "actionlint",
+      "biome",
       "cargo:xmloxide",
+      "cargo:yaml-lint",
       "editorconfig-checker",
       "github:google/google-java-format",
       "github:grafana/flint",
@@ -76,13 +78,12 @@
       "java",
       "lychee",
       "node",
-      "npm:@biomejs/biome",
-      "npm:markdownlint-cli2",
       "npm:prettier",
       "npm:renovate",
       "pipx:codespell",
       "pipx:ruff",
       "protoc",
+      "rumdl",
       "shellcheck",
       "shfmt"
     ]
