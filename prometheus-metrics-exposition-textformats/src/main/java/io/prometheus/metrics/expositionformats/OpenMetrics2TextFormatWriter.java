@@ -15,6 +15,7 @@ import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
@@ -22,6 +23,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
@@ -200,7 +202,9 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   private void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
-    if (!openMetrics2Properties.getCompositeValues()
+    boolean compositeHistogram =
+        openMetrics2Properties.getCompositeValues() || openMetrics2Properties.getNativeHistograms();
+    if (!compositeHistogram
         && !openMetrics2Properties.getExemplarCompliance()) {
       om1Writer.writeHistogram(writer, snapshot, scheme);
       return;
@@ -210,12 +214,20 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     if (snapshot.isGaugeHistogram()) {
       writeMetadataWithName(writer, name, "gaugehistogram", metadata);
       for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
-        writeCompositeHistogramDataPoint(writer, name, "gcount", "gsum", data, scheme);
+        if (openMetrics2Properties.getNativeHistograms() && data.hasNativeHistogramData()) {
+          writeNativeHistogramDataPoint(writer, name, "gcount", "gsum", data, scheme, false);
+        } else {
+          writeCompositeHistogramDataPoint(writer, name, "gcount", "gsum", data, scheme, false);
+        }
       }
     } else {
       writeMetadataWithName(writer, name, "histogram", metadata);
       for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
-        writeCompositeHistogramDataPoint(writer, name, "count", "sum", data, scheme);
+        if (openMetrics2Properties.getNativeHistograms() && data.hasNativeHistogramData()) {
+          writeNativeHistogramDataPoint(writer, name, "count", "sum", data, scheme, true);
+        } else {
+          writeCompositeHistogramDataPoint(writer, name, "count", "sum", data, scheme, true);
+        }
       }
     }
   }
@@ -226,7 +238,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       String countKey,
       String sumKey,
       HistogramSnapshot.HistogramDataPointSnapshot data,
-      EscapingScheme scheme)
+      EscapingScheme scheme,
+      boolean includeStartTimestamp)
       throws IOException {
     writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
     writer.write('{');
@@ -237,6 +250,74 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writer.write(sumKey);
     writer.write(':');
     writeDouble(writer, data.getSum());
+    writeClassicBucketsField(writer, data);
+    writer.write('}');
+    if (data.hasScrapeTimestamp()) {
+      writer.write(' ');
+      writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
+    }
+    if (includeStartTimestamp && data.hasCreatedTimestamp()) {
+      writer.write(" st@");
+      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
+    }
+    writeExemplars(writer, data.getExemplars(), scheme);
+    writer.write('\n');
+  }
+
+  private void writeNativeHistogramDataPoint(
+      Writer writer,
+      String name,
+      String countKey,
+      String sumKey,
+      HistogramSnapshot.HistogramDataPointSnapshot data,
+      EscapingScheme scheme,
+      boolean includeStartTimestamp)
+      throws IOException {
+    writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
+    writer.write('{');
+    writer.write(countKey);
+    writer.write(':');
+    writeLong(writer, data.getCount());
+    writer.write(',');
+    writer.write(sumKey);
+    writer.write(':');
+    writeDouble(writer, data.getSum());
+    writer.write(",schema:");
+    writer.write(Integer.toString(data.getNativeSchema()));
+    writer.write(",zero_threshold:");
+    writeDouble(writer, data.getNativeZeroThreshold());
+    writer.write(",zero_count:");
+    writeLong(writer, data.getNativeZeroCount());
+    writeNativeBucketFields(writer, "negative", data.getNativeBucketsForNegativeValues());
+    writeNativeBucketFields(writer, "positive", data.getNativeBucketsForPositiveValues());
+    if (data.hasClassicHistogramData()) {
+      writeClassicBucketsField(writer, data);
+    }
+    writer.write('}');
+    if (data.hasScrapeTimestamp()) {
+      writer.write(' ');
+      writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
+    }
+    if (includeStartTimestamp && data.hasCreatedTimestamp()) {
+      writer.write(" st@");
+      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
+    }
+    writeExemplars(writer, data.getExemplars(), scheme);
+    writer.write('\n');
+  }
+
+  private ClassicHistogramBuckets getClassicBuckets(
+      HistogramSnapshot.HistogramDataPointSnapshot data) {
+    if (data.getClassicBuckets().isEmpty()) {
+      return ClassicHistogramBuckets.of(
+          new double[] {Double.POSITIVE_INFINITY}, new long[] {data.getCount()});
+    } else {
+      return data.getClassicBuckets();
+    }
+  }
+
+  private void writeClassicBucketsField(
+      Writer writer, HistogramSnapshot.HistogramDataPointSnapshot data) throws IOException {
     writer.write(",bucket:[");
     ClassicHistogramBuckets buckets = getClassicBuckets(data);
     long cumulativeCount = 0;
@@ -249,27 +330,59 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writer.write(':');
       writeLong(writer, cumulativeCount);
     }
-    writer.write("]}");
-    if (data.hasScrapeTimestamp()) {
-      writer.write(' ');
-      writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
-    }
-    if (data.hasCreatedTimestamp()) {
-      writer.write(" st@");
-      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
-    }
-    writeExemplar(writer, data.getExemplars().getLatest(), scheme);
-    writer.write('\n');
+    writer.write(']');
   }
 
-  private ClassicHistogramBuckets getClassicBuckets(
-      HistogramSnapshot.HistogramDataPointSnapshot data) {
-    if (data.getClassicBuckets().isEmpty()) {
-      return ClassicHistogramBuckets.of(
-          new double[] {Double.POSITIVE_INFINITY}, new long[] {data.getCount()});
-    } else {
-      return data.getClassicBuckets();
+  private void writeNativeBucketFields(
+      Writer writer, String prefix, NativeHistogramBuckets buckets) throws IOException {
+    if (buckets.size() == 0) {
+      return;
     }
+    writer.write(',');
+    writer.write(prefix);
+    writer.write("_spans:[");
+    writeNativeBucketSpans(writer, buckets);
+    writer.write("],");
+    writer.write(prefix);
+    writer.write("_buckets:[");
+    for (int i = 0; i < buckets.size(); i++) {
+      if (i > 0) {
+        writer.write(',');
+      }
+      writeLong(writer, buckets.getCount(i));
+    }
+    writer.write(']');
+  }
+
+  private void writeNativeBucketSpans(Writer writer, NativeHistogramBuckets buckets)
+      throws IOException {
+    int spanOffset = buckets.getBucketIndex(0);
+    int spanLength = 1;
+    int previousIndex = buckets.getBucketIndex(0);
+    boolean firstSpan = true;
+    for (int i = 1; i < buckets.size(); i++) {
+      int bucketIndex = buckets.getBucketIndex(i);
+      if (bucketIndex == previousIndex + 1) {
+        spanLength++;
+      } else {
+        firstSpan = writeNativeBucketSpan(writer, spanOffset, spanLength, firstSpan);
+        spanOffset = bucketIndex - previousIndex - 1;
+        spanLength = 1;
+      }
+      previousIndex = bucketIndex;
+    }
+    writeNativeBucketSpan(writer, spanOffset, spanLength, firstSpan);
+  }
+
+  private boolean writeNativeBucketSpan(
+      Writer writer, int offset, int length, boolean firstSpan) throws IOException {
+    if (!firstSpan) {
+      writer.write(',');
+    }
+    writer.write(Integer.toString(offset));
+    writer.write(':');
+    writer.write(Integer.toString(length));
+    return false;
   }
 
   private void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
@@ -493,6 +606,13 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     // exemplarCompliance=true: exemplars MUST have a timestamp per the OM2 spec.
     if (exemplar.hasTimestamp()) {
       om1Writer.writeExemplar(writer, exemplar, scheme);
+    }
+  }
+
+  private void writeExemplars(Writer writer, Exemplars exemplars, EscapingScheme scheme)
+      throws IOException {
+    for (Exemplar exemplar : exemplars) {
+      writeExemplar(writer, exemplar, scheme);
     }
   }
 

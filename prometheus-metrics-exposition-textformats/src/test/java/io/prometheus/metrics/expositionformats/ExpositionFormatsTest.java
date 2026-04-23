@@ -161,6 +161,47 @@ class ExpositionFormatsTest {
   }
 
   @Test
+  void testOM2ContentNegotiationWithNativeHistogramOutput() throws IOException {
+    PrometheusProperties props =
+        PrometheusProperties.builder()
+            .openMetrics2Properties(
+                OpenMetrics2Properties.builder()
+                    .enabled(true)
+                    .contentNegotiation(true)
+                    .nativeHistograms(true)
+                    .build())
+            .build();
+    ExpositionFormats formats = ExpositionFormats.init(props);
+    ExpositionFormatWriter writer =
+        formats.findWriter("application/openmetrics-text; version=2.0.0");
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    writer.write(
+        out,
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("latency_seconds")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(1.5)
+                        .nativeSchema(5)
+                        .nativeZeroCount(1)
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder().bucket(2, 3).build())
+                        .build())
+                .build()),
+        EscapingScheme.ALLOW_UTF8);
+
+    assertThat(writer).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(
+            "# TYPE latency_seconds histogram\n"
+                + "latency_seconds {count:4,sum:1.5,schema:5,zero_threshold:0.0,zero_count:1,"
+                + "positive_spans:[2:1],positive_buckets:[3]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
   void testProtobufWriterTakesPrecedence() {
     PrometheusProperties props =
         PrometheusProperties.builder()
