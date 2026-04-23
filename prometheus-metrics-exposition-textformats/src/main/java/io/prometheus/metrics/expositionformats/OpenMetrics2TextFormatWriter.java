@@ -15,6 +15,7 @@ import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
@@ -62,7 +63,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     }
 
     /**
-     * @param createdTimestampsEnabled whether to include the _created timestamp in the output
+     * @param createdTimestampsEnabled whether to include the start timestamp in the output
      */
     public Builder setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
       this.createdTimestampsEnabled = createdTimestampsEnabled;
@@ -93,8 +94,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   /**
    * @param openMetrics2Properties OpenMetrics 2.0 feature flags
-   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
-   *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @param createdTimestampsEnabled whether to include the start timestamp in the output.
    * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars on all metric types
    */
   public OpenMetrics2TextFormatWriter(
@@ -177,8 +177,16 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
-      writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
-      writeCreated(writer, counterName, data, scheme);
+      if (data.hasScrapeTimestamp()) {
+        writer.write(' ');
+        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
+      }
+      if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
+        writer.write(" st@");
+        writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
+      }
+      writeExemplar(writer, data.getExemplar(), scheme);
+      writer.write('\n');
     }
   }
 
@@ -316,22 +324,20 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writeDouble(writer, data.getSum());
       first = false;
     }
-    if (data.getQuantiles().size() > 0) {
-      if (!first) {
+    if (!first) {
+      writer.write(',');
+    }
+    writer.write("quantile:[");
+    for (int i = 0; i < data.getQuantiles().size(); i++) {
+      if (i > 0) {
         writer.write(',');
       }
-      writer.write("quantile:[");
-      for (int i = 0; i < data.getQuantiles().size(); i++) {
-        if (i > 0) {
-          writer.write(',');
-        }
-        Quantile q = data.getQuantiles().get(i);
-        writeDouble(writer, q.getQuantile());
-        writer.write(':');
-        writeDouble(writer, q.getValue());
-      }
-      writer.write(']');
+      Quantile q = data.getQuantiles().get(i);
+      writeDouble(writer, q.getQuantile());
+      writer.write(':');
+      writeDouble(writer, q.getValue());
     }
+    writer.write(']');
     writer.write('}');
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
@@ -341,7 +347,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writer.write(" st@");
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
     }
-    writeExemplar(writer, data.getExemplars().getLatest(), scheme);
+    writeExemplars(writer, data.getExemplars(), scheme);
     writer.write('\n');
   }
 
@@ -408,20 +414,6 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       } else {
         writeScrapeTimestampAndExemplar(writer, data, null, scheme);
       }
-    }
-  }
-
-  private void writeCreated(
-      Writer writer, String name, DataPointSnapshot data, EscapingScheme scheme)
-      throws IOException {
-    if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-      writeNameAndLabels(writer, name, "_created", data.getLabels(), scheme);
-      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
-      if (data.hasScrapeTimestamp()) {
-        writer.write(' ');
-        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
-      }
-      writer.write('\n');
     }
   }
 
@@ -493,6 +485,13 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     // exemplarCompliance=true: exemplars MUST have a timestamp per the OM2 spec.
     if (exemplar.hasTimestamp()) {
       om1Writer.writeExemplar(writer, exemplar, scheme);
+    }
+  }
+
+  private void writeExemplars(Writer writer, Exemplars exemplars, EscapingScheme scheme)
+      throws IOException {
+    for (Exemplar exemplar : exemplars) {
+      writeExemplar(writer, exemplar, scheme);
     }
   }
 

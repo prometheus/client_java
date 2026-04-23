@@ -307,13 +307,12 @@ class OpenMetrics2TextFormatWriterTest {
 
     String om2Output = write(snapshots, om2Writer);
 
-    // OM2: no _total, _created uses the counter name directly
+    // OM2: no _total, start timestamp uses st@ inline.
     assertThat(om2Output)
         .isEqualTo(
             "# TYPE my_counter counter\n"
                 + "# HELP my_counter Test counter\n"
-                + "my_counter 42.0\n"
-                + "my_counter_created 1672850385.800\n"
+                + "my_counter 42.0 st@1672850385.800\n"
                 + "# EOF\n");
   }
 
@@ -479,8 +478,10 @@ class OpenMetrics2TextFormatWriterTest {
 
   @Test
   void testCompositeSummaryWithCreatedAndExemplar() throws IOException {
-    Exemplar exemplar =
+    Exemplar exemplar1 =
         Exemplar.builder().value(0.5).traceId("abc123").timestampMillis(1520879607000L).build();
+    Exemplar exemplar2 =
+        Exemplar.builder().value(1.5).traceId("def456").timestampMillis(1520879608000L).build();
 
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -491,7 +492,7 @@ class OpenMetrics2TextFormatWriterTest {
                         .count(10)
                         .sum(100.0)
                         .createdTimestampMillis(1520430000000L)
-                        .exemplars(Exemplars.of(exemplar))
+                        .exemplars(Exemplars.of(exemplar1, exemplar2))
                         .build())
                 .build());
 
@@ -500,8 +501,9 @@ class OpenMetrics2TextFormatWriterTest {
     assertThat(output)
         .isEqualTo(
             "# TYPE rpc_duration_seconds summary\n"
-                + "rpc_duration_seconds {count:10,sum:100.0} st@1520430000.000"
-                + " # {trace_id=\"abc123\"} 0.5 1520879607.000\n"
+                + "rpc_duration_seconds {count:10,sum:100.0,quantile:[]} st@1520430000.000"
+                + " # {trace_id=\"abc123\"} 0.5 1520879607.000"
+                + " # {trace_id=\"def456\"} 1.5 1520879608.000\n"
                 + "# EOF\n");
   }
 
