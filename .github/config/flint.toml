@@ -9,6 +9,4 @@ exclude = [
 ]
 
 [checks.renovate-deps]
-# This inventory is regenerated from the files flint still inspects, so
-# super-linter-era entries drop out when they are excluded or no longer used.
 exclude_managers = ["github-actions", "github-runners", "maven"]
