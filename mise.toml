@@ -17,7 +17,7 @@ editorconfig-checker = "v3.6.1"
 "npm:markdownlint-cli2" = "0.22.0"
 "npm:prettier" = "3.8.3"
 "pipx:codespell" = "2.4.2"
-"pipx:ruff" = "0.15.11"
+"pipx:ruff" = "0.15.12"
 shellcheck = "v0.11.0"
 shfmt = "3.13.1"
 
