@@ -128,8 +128,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   @Override
   public String getContentType() {
-    // When contentNegotiation=false (default), masquerade as OM1 for compatibility
-    // When contentNegotiation=true, use proper OM2 version
+    // When contentNegotiation=false (default), masquerade as OM1 for compatibility.
+    // When contentNegotiation=true, use proper OM2 version.
     if (openMetrics2Properties.getContentNegotiation()) {
       return CONTENT_TYPE;
     } else {
@@ -179,8 +179,16 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
-      writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
-      writeCreated(writer, counterName, data, scheme);
+      if (data.hasScrapeTimestamp()) {
+        writer.write(' ');
+        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
+      }
+      if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
+        writer.write(" st@");
+        writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
+      }
+      writeExemplar(writer, data.getExemplar(), scheme);
+      writer.write('\n');
     }
   }
 
@@ -204,7 +212,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     boolean compositeHistogram =
         openMetrics2Properties.getCompositeValues() || openMetrics2Properties.getNativeHistograms();
-    if (!compositeHistogram && !openMetrics2Properties.getExemplarCompliance()) {
+    if (!compositeHistogram
+        && !openMetrics2Properties.getExemplarCompliance()) {
       om1Writer.writeHistogram(writer, snapshot, scheme);
       return;
     }
@@ -332,8 +341,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writer.write(']');
   }
 
-  private void writeNativeBucketFields(Writer writer, String prefix, NativeHistogramBuckets buckets)
-      throws IOException {
+  private void writeNativeBucketFields(
+      Writer writer, String prefix, NativeHistogramBuckets buckets) throws IOException {
     if (buckets.size() == 0) {
       return;
     }
@@ -373,8 +382,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writeNativeBucketSpan(writer, spanOffset, spanLength, firstSpan);
   }
 
-  private boolean writeNativeBucketSpan(Writer writer, int offset, int length, boolean firstSpan)
-      throws IOException {
+  private boolean writeNativeBucketSpan(
+      Writer writer, int offset, int length, boolean firstSpan) throws IOException {
     if (!firstSpan) {
       writer.write(',');
     }
@@ -428,22 +437,20 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writeDouble(writer, data.getSum());
       first = false;
     }
-    if (data.getQuantiles().size() > 0) {
-      if (!first) {
+    if (!first) {
+      writer.write(',');
+    }
+    writer.write("quantile:[");
+    for (int i = 0; i < data.getQuantiles().size(); i++) {
+      if (i > 0) {
         writer.write(',');
       }
-      writer.write("quantile:[");
-      for (int i = 0; i < data.getQuantiles().size(); i++) {
-        if (i > 0) {
-          writer.write(',');
-        }
-        Quantile q = data.getQuantiles().get(i);
-        writeDouble(writer, q.getQuantile());
-        writer.write(':');
-        writeDouble(writer, q.getValue());
-      }
-      writer.write(']');
+      Quantile q = data.getQuantiles().get(i);
+      writeDouble(writer, q.getQuantile());
+      writer.write(':');
+      writeDouble(writer, q.getValue());
     }
+    writer.write(']');
     writer.write('}');
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
@@ -453,7 +460,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writer.write(" st@");
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
     }
-    writeExemplar(writer, data.getExemplars().getLatest(), scheme);
+    writeExemplars(writer, data.getExemplars(), scheme);
     writer.write('\n');
   }
 
@@ -520,20 +527,6 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       } else {
         writeScrapeTimestampAndExemplar(writer, data, null, scheme);
       }
-    }
-  }
-
-  private void writeCreated(
-      Writer writer, String name, DataPointSnapshot data, EscapingScheme scheme)
-      throws IOException {
-    if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-      writeNameAndLabels(writer, name, "_created", data.getLabels(), scheme);
-      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
-      if (data.hasScrapeTimestamp()) {
-        writer.write(' ');
-        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
-      }
-      writer.write('\n');
     }
   }
 
