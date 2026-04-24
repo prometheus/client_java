@@ -123,7 +123,7 @@ class CounterTest {
     assertThat(ProtobufUtil.shortDebugString(protobufData))
         .matches(
             "^name: \"my_counter_seconds_total\" type: COUNTER metric \\{ counter \\{ value: 0.0"
-                + " created_timestamp \\{ seconds: \\d+ nanos: \\d+ } } }$");
+                + " created_timestamp \\{ seconds: \\d+( nanos: \\d+)? } } }$");
   }
 
   @Test
