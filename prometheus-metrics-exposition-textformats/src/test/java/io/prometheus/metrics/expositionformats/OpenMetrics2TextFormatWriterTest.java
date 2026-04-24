@@ -288,7 +288,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testCounterWithCreatedTimestamps() throws IOException {
+  void testCounterStartTimestampWithDefaultWriter() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             CounterSnapshot.builder()
@@ -301,10 +301,7 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    OpenMetrics2TextFormatWriter om2Writer =
-        OpenMetrics2TextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-
-    String om2Output = write(snapshots, om2Writer);
+    String om2Output = writeWithOM2(snapshots);
 
     // OM2: no _total, start timestamp uses st@ inline.
     assertThat(om2Output)
@@ -313,6 +310,44 @@ class OpenMetrics2TextFormatWriterTest {
                 + "# HELP my_counter Test counter\n"
                 + "my_counter 42.0 st@1672850385.800\n"
                 + "# EOF\n");
+  }
+
+  @Test
+  void testCounterAndHistogramEmitStartTimestampConsistently() throws IOException {
+    long createdMs = 1672850385800L;
+    MetricSnapshots counterSnapshots =
+        MetricSnapshots.of(
+            CounterSnapshot.builder()
+                .name("my_counter")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .value(1.0)
+                        .createdTimestampMillis(createdMs)
+                        .build())
+                .build());
+    MetricSnapshots histogramSnapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("my_histogram")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(1.0)
+                        .createdTimestampMillis(createdMs)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(Double.POSITIVE_INFINITY, 1)
+                                .build())
+                        .build())
+                .build());
+
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().compositeValues(true).build())
+            .build();
+
+    assertThat(write(counterSnapshots, writer)).contains("st@1672850385.800");
+    assertThat(write(histogramSnapshots, writer)).contains("st@1672850385.800");
   }
 
   @Test

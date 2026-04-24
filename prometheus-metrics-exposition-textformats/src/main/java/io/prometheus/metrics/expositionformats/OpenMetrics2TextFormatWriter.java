@@ -64,7 +64,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     }
 
     /**
-     * @param createdTimestampsEnabled whether to include the _created timestamp in the output
+     * @param createdTimestampsEnabled whether delegated OM1 output includes _created metrics
      */
     public Builder setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
       this.createdTimestampsEnabled = createdTimestampsEnabled;
@@ -89,14 +89,12 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   public static final String CONTENT_TYPE =
       "application/openmetrics-text; version=2.0.0; charset=utf-8";
   private final OpenMetrics2Properties openMetrics2Properties;
-  private final boolean createdTimestampsEnabled;
   private final boolean exemplarsOnAllMetricTypesEnabled;
   private final OpenMetricsTextFormatWriter om1Writer;
 
   /**
    * @param openMetrics2Properties OpenMetrics 2.0 feature flags
-   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
-   *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @param createdTimestampsEnabled whether delegated OM1 output includes _created metrics
    * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars on all metric types
    */
   public OpenMetrics2TextFormatWriter(
@@ -104,7 +102,6 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       boolean createdTimestampsEnabled,
       boolean exemplarsOnAllMetricTypesEnabled) {
     this.openMetrics2Properties = openMetrics2Properties;
-    this.createdTimestampsEnabled = createdTimestampsEnabled;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
     this.om1Writer =
         new OpenMetricsTextFormatWriter(createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled);
@@ -183,7 +180,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
         writer.write(' ');
         writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
       }
-      if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
+      if (data.hasCreatedTimestamp()) {
         writer.write(" st@");
         writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
       }
