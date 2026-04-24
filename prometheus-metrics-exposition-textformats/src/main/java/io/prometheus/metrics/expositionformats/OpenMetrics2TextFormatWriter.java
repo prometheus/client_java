@@ -212,8 +212,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     boolean compositeHistogram =
         openMetrics2Properties.getCompositeValues() || openMetrics2Properties.getNativeHistograms();
-    if (!compositeHistogram
-        && !openMetrics2Properties.getExemplarCompliance()) {
+    if (!compositeHistogram && !openMetrics2Properties.getExemplarCompliance()) {
       om1Writer.writeHistogram(writer, snapshot, scheme);
       return;
     }
@@ -341,8 +340,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writer.write(']');
   }
 
-  private void writeNativeBucketFields(
-      Writer writer, String prefix, NativeHistogramBuckets buckets) throws IOException {
+  private void writeNativeBucketFields(Writer writer, String prefix, NativeHistogramBuckets buckets)
+      throws IOException {
     if (buckets.size() == 0) {
       return;
     }
@@ -382,8 +381,8 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     writeNativeBucketSpan(writer, spanOffset, spanLength, firstSpan);
   }
 
-  private boolean writeNativeBucketSpan(
-      Writer writer, int offset, int length, boolean firstSpan) throws IOException {
+  private boolean writeNativeBucketSpan(Writer writer, int offset, int length, boolean firstSpan)
+      throws IOException {
     if (!firstSpan) {
       writer.write(',');
     }
