@@ -20,3 +20,11 @@ max_line_length = 120
 
 [{.mise/tasks/build-release.sh,.github/workflows/*.yml}]
 max_line_length = 300
+
+[*.java]
+# Java line length is handled by google-java-format
+max_line_length = off
+
+[*.md]
+# Markdown line length is handled by rumdl
+max_line_length = off

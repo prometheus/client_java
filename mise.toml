@@ -3,7 +3,7 @@
 # Linters
 actionlint = "1.7.12"
 biome = "2.4.12"
-"cargo:https://github.com/grafana/flint" = "rev:64fe0a654ca3257f3ce80e05c493caf38e52f47c"
+"cargo:https://github.com/grafana/flint" = "rev:7034ab0ad72a34f9dd39388cf8c659f97517c744"
 editorconfig-checker = "v3.6.1"
 "github:google/google-java-format" = "1.35.0"
 "go:github.com/gohugoio/hugo" = "v0.160.1"
