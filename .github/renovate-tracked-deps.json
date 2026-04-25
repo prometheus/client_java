@@ -67,12 +67,12 @@
   "mise.toml": {
     "mise": [
       "actionlint",
+      "aqua:owenlamont/ryl",
       "biome",
-      "cargo:xmloxide",
-      "cargo:yaml-lint",
+      "cargo:https://github.com/grafana/flint",
       "editorconfig-checker",
       "github:google/google-java-format",
-      "github:grafana/flint",
+      "github:jonwiggins/xmloxide",
       "go:github.com/gohugoio/hugo",
       "go:github.com/grafana/oats",
       "java",
@@ -80,8 +80,8 @@
       "node",
       "npm:renovate",
       "pipx:codespell",
-      "pipx:ruff",
       "protoc",
+      "ruff",
       "rumdl",
       "shellcheck",
       "shfmt"
