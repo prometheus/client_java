@@ -97,4 +97,6 @@ Use the `histogram_quantile()` function to calculate quantiles from the native h
 histogram_quantile(0.95, rate(request_duration_seconds[10m]))
 ```
 
-![Screenshot showing the 95th Percentile Calculated from a Prometheus Native Histogram](https://github.com/prometheus/client_java/assets/330535/889fb769-9445-4f6f-8540-2b1ddffca55e) <!-- editorconfig-checker-disable-line -->
+![Screenshot showing the 95th Percentile Calculated from a Prometheus Native Histogram][native-histogram-quantile]
+
+[native-histogram-quantile]: https://github.com/prometheus/client_java/assets/330535/889fb769-9445-4f6f-8540-2b1ddffca55e

@@ -10,10 +10,11 @@ spec, and
 the [OpenTelemetryExporter](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.html) <!-- editorconfig-checker-disable-line -->
 implements that specification.
 
-The goal is, if you set up a pipeline as illustrated below, you will see the same metric names in
-the Prometheus server as if you had exposed Prometheus metrics directly.
+The goal is, if you set up a pipeline as illustrated below, you will see the same
+metric names in the Prometheus server as if you had exposed Prometheus metrics
+directly.
 
-![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/client_java/images/otel-pipeline.png) <!-- editorconfig-checker-disable-line -->
+![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector][otel-pipeline]
 
 The main steps when converting OpenTelemetry metric names to Prometheus metric names are:
 
@@ -34,3 +35,4 @@ Dots in metric and label names are now supported in the Prometheus Java client l
 described in [Unicode support].
 
 [Unicode support]: {{< relref "../exporters/unicode.md" >}}
+[otel-pipeline]: /client_java/images/otel-pipeline.png

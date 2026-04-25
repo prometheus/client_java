@@ -2,9 +2,14 @@
 
 <!-- markdownlint-disable MD033 -->
 
-[![Build](https://github.com/prometheus/client_java/actions/workflows/build.yml/badge.svg)](https://github.com/prometheus/client_java/actions/workflows/build.yml) <a href="#"><img src="https://img.shields.io/badge/JDK%20compatibility-8+-blue.svg" alt="java 8+"></a> <a href="#"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0"></a>
+[![Build][build-badge]][build-workflow]
+<a href="#"><img src="https://img.shields.io/badge/JDK%20compatibility-8+-blue.svg" alt="java 8+"></a>
+<a href="#"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0"></a>
 
 <!-- markdownlint-enable MD033 -->
+
+[build-badge]: https://github.com/prometheus/client_java/actions/workflows/build.yml/badge.svg
+[build-workflow]: https://github.com/prometheus/client_java/actions/workflows/build.yml
 
 ## Documentation
 

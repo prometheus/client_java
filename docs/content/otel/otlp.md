@@ -3,10 +3,10 @@ title: OTLP
 weight: 1
 ---
 
-The Prometheus Java client library allows you to push metrics to an OpenTelemetry endpoint using the
-OTLP protocol.
+The Prometheus Java client library allows you to push metrics to an
+OpenTelemetry endpoint using the OTLP protocol.
 
-![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/client_java/images/otel-pipeline.png) <!-- editorconfig-checker-disable-line -->
+![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector][otel-pipeline]
 
 To implement this, you need to include `prometheus-metrics-exporter` as a dependency
 
@@ -39,11 +39,10 @@ OpenTelemetryExporter.builder()
     .buildAndStart();
 ```
 
-By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to `localhost:4317` using
-`grpc` protocol. You can configure this in code using
-the [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html), <!-- editorconfig-checker-disable-line -->
-or at runtime via [`io.prometheus.exporter.opentelemetry.*`]({{< relref "../config/config.md#exporter-opentelemetry-properties" >}}) <!-- editorconfig-checker-disable-line -->
-properties.
+By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to
+`localhost:4317` using `grpc` protocol. You can configure this in code using
+the [OpenTelemetryExporter.Builder][builder-javadoc], or at runtime via
+[`io.prometheus.exporter.opentelemetry.*`][otel-properties] properties.
 
 In addition to the Prometheus Java client configuration, the exporter also recognizes standard
 OpenTelemetry configuration. For example, you can set
@@ -56,6 +55,11 @@ attach the
 for tracing, and use the Prometheus Java client for metrics, it is sufficient to configure the OTel
 agent because the Prometheus library will pick up the same configuration.
 
-The [examples/example-exporter-opentelemetry](https://github.com/prometheus/client_java/tree/main/examples/example-exporter-opentelemetry) <!-- editorconfig-checker-disable-line -->
-folder has a Docker compose with a complete end-to-end example, including a Java app, the OTel
-collector, and a Prometheus server.
+The [examples/example-exporter-opentelemetry][opentelemetry-example] folder has
+a Docker compose with a complete end-to-end example, including a Java app, the
+OTel collector, and a Prometheus server.
+
+[builder-javadoc]: /client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html
+[opentelemetry-example]: https://github.com/prometheus/client_java/tree/main/examples/example-exporter-opentelemetry
+[otel-pipeline]: /client_java/images/otel-pipeline.png
+[otel-properties]: {{< relref "../config/config.md#exporter-opentelemetry-properties" >}}

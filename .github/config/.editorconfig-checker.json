@@ -1,7 +1,4 @@
 {
-  "Exclude": [
-    ".*\\.java$",
-    ".*\\.md$"
-  ],
+  "Exclude": [".*\\.java$", ".*\\.md$"],
   "_comment": "Java files are handled by flint, so editorconfig-checker ignores them."
 }
