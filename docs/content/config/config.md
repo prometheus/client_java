@@ -72,7 +72,6 @@ When the same property is defined in multiple sources, the following precedence 
 
 ## Metrics Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                                          | Javadoc                                                                                                                                                                         | Note    |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
@@ -90,7 +89,6 @@ When the same property is defined in multiple sources, the following precedence 
 | io.prometheus.metrics.summary_max_age_seconds                 | [Summary.Builder.maxAgeSeconds()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)>)                                               |         |
 | io.prometheus.metrics.summary_number_of_age_buckets           | [Summary.Builder.numberOfAgeBuckets()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)>)                                      |         |
 
-<!-- editorconfig-checker-enable -->
 
 ### Notes
 
@@ -126,7 +124,6 @@ This works for all Metrics properties.
 
 ## Exemplar Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                                 | Javadoc                                                                                                                                                         | Note |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
@@ -134,24 +131,20 @@ This works for all Metrics properties.
 | io.prometheus.exemplars.max_retention_period_seconds | [ExemplarsProperties.getMaxRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMaxRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.sample_interval_milliseconds | [ExemplarsProperties.getSampleIntervalMilliseconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getSampleIntervalMilliseconds()>) |      |
 
-<!-- editorconfig-checker-enable -->
 
 ## Exporter Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                                 | Javadoc                                                                                                                                                     | Note |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.include_created_timestamps    | [ExporterProperties.getIncludeCreatedTimestamps()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()>)   | (1)  |
 | io.prometheus.exporter.exemplars_on_all_metric_types | [ExporterProperties.getExemplarsOnAllMetricTypes()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()>) | (1)  |
 
-<!-- editorconfig-checker-enable -->
 
 (1) Boolean value, `true` or `false`. Default see Javadoc.
 
 ## Exporter Filter Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                                           | Javadoc                                                                                                                                                                   | Note |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
@@ -160,7 +153,6 @@ This works for all Metrics properties.
 | io.prometheus.exporter.filter.metric_name_must_start_with      | [ExporterFilterProperties.getAllowedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNamePrefixes()>)   | (3)  |
 | io.prometheus.exporter.filter.metric_name_must_not_start_with  | [ExporterFilterProperties.getExcludedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNamePrefixes()>) | (4)  |
 
-<!-- editorconfig-checker-enable -->
 
 <!-- markdownlint-disable MD033 -->
 
@@ -174,17 +166,14 @@ Only metrics starting with these prefixes will be exposed.<br/>
 
 ## Exporter HTTPServer Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                    | Javadoc                                                                                                                     | Note |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.http_server.port | [HTTPServer.Builder.port()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#port(int)>) |      |
 
-<!-- editorconfig-checker-enable -->
 
 ## Exporter OpenTelemetry Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                                     | Javadoc                                                                                                                                                                                                       | Note |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
@@ -199,7 +188,6 @@ Only metrics starting with these prefixes will be exposed.<br/>
 | io.prometheus.exporter.opentelemetry.service_version     | [OpenTelemetryExporter.Builder.serviceVersion()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceVersion(java.lang.String)>)                         |      |
 | io.prometheus.exporter.opentelemetry.resource_attributes | [OpenTelemetryExporter.Builder.resourceAttributes()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#resourceAttribute(java.lang.String,java.lang.String)>) | (3)  |
 
-<!-- editorconfig-checker-enable -->
 
 <!-- markdownlint-disable MD033 -->
 
@@ -216,7 +204,6 @@ See Javadoc for details.
 
 ## Exporter PushGateway Properties
 
-<!-- editorconfig-checker-disable -->
 
 | Name                                               | Javadoc                                                                                                                                                                                    | Note |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
@@ -225,8 +212,7 @@ See Javadoc for details.
 | io.prometheus.exporter.pushgateway.job             | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)                                                  |      |
 | io.prometheus.exporter.pushgateway.escaping_scheme | [PushGateway.Builder.escapingScheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#escapingScheme(io.prometheus.metrics.config.EscapingScheme)>) | (1)  |
 
-<!-- editorconfig-checker-enable -->
 
 (1) Escaping scheme can be `allow-utf-8`, `underscores`, `dots`, or `values` as described in
-[escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes) <!-- editorconfig-checker-disable-line -->
+[escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes)
 and in the [Unicode documentation]({{< relref "../exporters/unicode.md" >}}).

@@ -46,9 +46,9 @@ the [OpenTelemetryExporter.Builder][builder-javadoc], or at runtime via
 
 In addition to the Prometheus Java client configuration, the exporter also recognizes standard
 OpenTelemetry configuration. For example, you can set
-the [OTEL_EXPORTER_OTLP_METRICS_ENDPOINT](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint) <!-- editorconfig-checker-disable-line -->
+the [OTEL_EXPORTER_OTLP_METRICS_ENDPOINT](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint)
 environment variable to configure the endpoint. The Javadoc
-for [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html) <!-- editorconfig-checker-disable-line -->
+for [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html)
 shows which settings have corresponding OTel configuration. The intended use case is that if you
 attach the
 [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/)

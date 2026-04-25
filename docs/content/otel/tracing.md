@@ -6,7 +6,7 @@ weight: 2
 OpenTelemetry’s
 [vision statement](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md)
 says that
-[telemetry should be loosely coupled](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md#telemetry-should-be-loosely-coupled), <!-- editorconfig-checker-disable-line -->
+[telemetry should be loosely coupled](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md#telemetry-should-be-loosely-coupled),
 allowing end users to pick and choose from the pieces they want without having to bring in the rest
 of the project, too. In that spirit, you might choose to instrument your Java application with the
 Prometheus Java client library for metrics, and attach the
@@ -56,7 +56,7 @@ Exemplars are only selected every
 [`minRetentionPeriodSeconds`]({{< relref "../config/config.md#exemplar-properties" >}}) seconds.
 
 Here's an example of how to configure OpenTelemetry's
-[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor/) <!-- editorconfig-checker-disable-line -->
+[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor/)
 to sample all Spans marked with `exemplar="true"`, and then discard 90% of the traces:
 
 ```yaml
@@ -71,7 +71,7 @@ policies:
   ]
 ```
 
-The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/client_java/tree/main/examples/example-exemplars-tail-sampling) <!-- editorconfig-checker-disable-line -->
+The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/client_java/tree/main/examples/example-exemplars-tail-sampling)
 directory has a complete end-to-end example, with a distributed Java application with two services,
 an OpenTelemetry collector, Prometheus, Tempo as a trace database, and Grafana dashboards. Use
 docker-compose as described in the example's readme to run the example and explore the results.

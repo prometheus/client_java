@@ -12,7 +12,7 @@ The Prometheus Java client library allows all Unicode characters, that can be en
 
 At scrape time, some characters are replaced based on the `encoding` header according
 to
-the [Escaping scheme](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md). <!-- editorconfig-checker-disable-line -->
+the [Escaping scheme](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md).
 
 For example, if you use the `underscores` escaping scheme, dots in metric and label names are
 replaced with underscores, so that the metric name `http.server.duration` becomes

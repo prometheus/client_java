@@ -115,7 +115,7 @@ PushGateway pushGateway = PushGateway.builder()
 However, this requires that the JVM can validate the server certificate.
 
 If you want to skip certificate verification, you need to provide your own
-[HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html). <!-- editorconfig-checker-disable-line -->
+[HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
 ## Configuration Properties

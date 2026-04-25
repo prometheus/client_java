@@ -28,7 +28,7 @@ invalid.
 
 The model is an internal library, implementing read-only immutable snapshots. These snapshots are
 returned by
-the [Collector.collect()](</client_java/api/io/prometheus/metrics/model/registry/Collector.html#collect()>) <!-- editorconfig-checker-disable-line -->
+the [Collector.collect()](</client_java/api/io/prometheus/metrics/model/registry/Collector.html#collect()>)
 method.
 
 There is no need for users to use `prometheus-metrics-model` directly. Users should use the API

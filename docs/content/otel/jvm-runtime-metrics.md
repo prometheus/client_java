@@ -4,7 +4,7 @@ weight: 4
 ---
 
 OpenTelemetry's
-[runtime-telemetry](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/runtime-telemetry) <!-- editorconfig-checker-disable-line -->
+[runtime-telemetry](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/runtime-telemetry)
 module is an alternative to
 [prometheus-metrics-instrumentation-jvm]({{< relref "../instrumentation/jvm.md" >}})
 for users who want JVM metrics following OTel semantic conventions.
@@ -12,7 +12,7 @@ for users who want JVM metrics following OTel semantic conventions.
 Key advantages:
 
 - Metric names follow
-  [OTel semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/) <!-- editorconfig-checker-disable-line -->
+  [OTel semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/)
 - Java 17+ JFR support (context switches, network I/O,
   lock contention, memory allocation)
 - Alignment with the broader OTel ecosystem
@@ -157,7 +157,7 @@ HTTPServer.builder()
     .buildAndStart();
 ```
 
-The [examples/example-otel-jvm-runtime-metrics](https://github.com/prometheus/client_java/tree/main/examples/example-otel-jvm-runtime-metrics) <!-- editorconfig-checker-disable-line -->
+The [examples/example-otel-jvm-runtime-metrics](https://github.com/prometheus/client_java/tree/main/examples/example-otel-jvm-runtime-metrics)
 directory has a complete runnable example.
 
 ## Configuration

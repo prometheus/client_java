@@ -150,4 +150,4 @@ Counter counter = Counter.builder()
 However, most use cases for `constLabels()` are better covered by target labels set by the scraping
 Prometheus server,
 or by one specific metric (e.g. a `build_info` or a `machine_role` metric). See also
-[target labels, not static scraped labels](https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels). <!-- editorconfig-checker-disable-line -->
+[target labels, not static scraped labels](https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels).

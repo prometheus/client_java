@@ -84,7 +84,7 @@ the Prometheus server.
   format and ingest both, the classic and the native flavor. This is great for migrating from
   classic histograms to native histograms.
 
-See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) <!-- editorconfig-checker-disable-line -->
+See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram)
 for an example.
 
 ```java
@@ -210,7 +210,7 @@ NHCB is useful when:
 - Exponential bucketing from standard native histograms isn't a good fit for your distribution
   {{< /hint >}}
 
-See [examples/example-custom-buckets](https://github.com/prometheus/client_java/tree/main/examples/example-custom-buckets) <!-- editorconfig-checker-disable-line -->
+See [examples/example-custom-buckets](https://github.com/prometheus/client_java/tree/main/examples/example-custom-buckets)
 for a complete example with Prometheus and Grafana.
 
 Histograms and summaries are both used for observing distributions. Therefore, the both implement
@@ -292,7 +292,7 @@ be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
 Some options can be configured at runtime, see [config]({{< relref "../config/config.md" >}}).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a
-function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) <!-- editorconfig-checker-disable-line -->
+function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
 for calculating quantiles from histograms. The advantage of query-time quantile calculation is that
 you can aggregate histograms before calculating the quantile. With summaries you must use the
 quantile with all its labels as it is.
@@ -318,7 +318,6 @@ info.setLabelValues(version, vendor, runtime);
 
 The info above looks as follows in OpenMetrics text format:
 
-<!-- editorconfig-checker-disable -->
 
 ```text
 # TYPE jvm_runtime info
@@ -326,7 +325,6 @@ The info above looks as follows in OpenMetrics text format:
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
 
-<!-- editorconfig-checker-enable -->
 
 The example is taken from the `prometheus-metrics-instrumentation-jvm` module, so if you have
 `JvmMetrics` registered you should have a `jvm_runtime_info` metric out-of-the-box.

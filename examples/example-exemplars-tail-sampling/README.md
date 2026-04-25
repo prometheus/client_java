@@ -9,7 +9,6 @@ Exemplars are often used to reference trace IDs when distributed tracing is used
 The following shows an example of a histogram in OpenMetrics text format where each non-empty bucket
 has an Exemplar:
 
-<!-- editorconfig-checker-disable -->
 
 ```text
 # TYPE request_duration_seconds histogram
@@ -31,13 +30,12 @@ request_duration_seconds_count{http_status="200"} 11243
 request_duration_seconds_sum{http_status="200"} 2843.3178731140015
 ```
 
-<!-- editorconfig-checker-enable -->
 
 In Grafana Exemplars can be visualized as little green dots. The following shows an example of the
 95th [quantile](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
 for the histogram above.
 
-![Screenshot of a Latency Graph with Exemplars](https://github.com/prometheus/client_java/assets/330535/68aada3d-f55b-4a7b-90be-222481f0ec79) <!-- editorconfig-checker-disable-line -->
+![Screenshot of a Latency Graph with Exemplars](https://github.com/prometheus/client_java/assets/330535/68aada3d-f55b-4a7b-90be-222481f0ec79)
 
 If you move the mouse over an Exemplar, an overlay pops up with a link to a tracing tool
 like [Tempo](https://github.com/grafana/tempo).
@@ -125,11 +123,11 @@ password _admin_.
 
 The example dashboard shows 50 requests / second for the Java services:
 
-![Screenshot showing the request rate on the Java services](https://github.com/prometheus/client_java/assets/330535/9f8dc92e-c9aa-40b6-8fda-a0f7e98560ba) <!-- editorconfig-checker-disable-line -->
+![Screenshot showing the request rate on the Java services](https://github.com/prometheus/client_java/assets/330535/9f8dc92e-c9aa-40b6-8fda-a0f7e98560ba)
 
 The Tempo metrics show that only ~5 traces / second are received:
 
-![Screenshot showing the number of traces per second received by Tempo](https://github.com/prometheus/client_java/assets/330535/5e439ac5-3c5c-4d40-a4cd-6737c2c82dfd) <!-- editorconfig-checker-disable-line -->
+![Screenshot showing the number of traces per second received by Tempo](https://github.com/prometheus/client_java/assets/330535/5e439ac5-3c5c-4d40-a4cd-6737c2c82dfd)
 
 The reason is that the OpenTelemetry collector is configured to sample only 10% of the traces. Yet,
 all Exemplars in the

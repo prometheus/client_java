@@ -54,16 +54,16 @@ browser:
 - [http://localhost:8080/metrics?debug=text](http://localhost:8080/metrics?debug=text): Prometheus
   text format, same as
   without the `debug` option.
-- [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics): <!-- editorconfig-checker-disable-line -->
+- [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics):
   OpenMetrics text
   format.
-- [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf): <!-- editorconfig-checker-disable-line -->
+- [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf):
   Text representation of the Prometheus protobuf format.
 
 ## Testing with the Prometheus Server
 
 1. Download the latest Prometheus server release
-   from [https://github.com/prometheus/prometheus/releases](https://github.com/prometheus/prometheus/releases). <!-- editorconfig-checker-disable-line -->
+   from [https://github.com/prometheus/prometheus/releases](https://github.com/prometheus/prometheus/releases).
 2. Extract the archive
 3. Edit `prometheus.yml` and append the following snippet at the end:
 
@@ -86,7 +86,7 @@ Prometheus is now scraping metrics in Protobuf format. If you type the name
 `request_duration_seconds` you will see a
 non-human-readable representation of the histogram including the native buckets:
 
-![Screenshot showing a Prometheus Native Histogram in Text Format](https://github.com/prometheus/client_java/assets/330535/863efe0b-a9eb-40ae-a078-72497abc6f04) <!-- editorconfig-checker-disable-line -->
+![Screenshot showing a Prometheus Native Histogram in Text Format](https://github.com/prometheus/client_java/assets/330535/863efe0b-a9eb-40ae-a078-72497abc6f04)
 
 Note: You have to run at least one GET request on the Hello World
 endpoint [http://localhost:8080](http://localhost:8080) before you see the metric.

@@ -63,7 +63,7 @@ it from the dependencies.
 ## Dependency management
 
 A Bill of Material
-([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms)) <!-- editorconfig-checker-disable-line -->
+([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
 ensures that versions of dependencies (including transitive ones) are aligned.
 This is especially important when using Spring Boot, which manages some of the dependencies of the
 project.

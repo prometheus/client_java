@@ -57,9 +57,9 @@ JMH parameter reference:
 
 See Javadoc of the benchmark classes:
 
-- [CounterBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java) <!-- editorconfig-checker-disable-line -->
-- [HistogramBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/HistogramBenchmark.java) <!-- editorconfig-checker-disable-line -->
-- [TextFormatUtilBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/TextFormatUtilBenchmark.java) <!-- editorconfig-checker-disable-line -->
+- [CounterBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java)
+- [HistogramBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/HistogramBenchmark.java)
+- [TextFormatUtilBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/TextFormatUtilBenchmark.java)
 
 ## What Prometheus Java client optimizes for
 
