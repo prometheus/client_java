@@ -72,7 +72,6 @@ When the same property is defined in multiple sources, the following precedence 
 
 ## Metrics Properties
 
-
 | Name                                                          | Javadoc                                                                                                                                                                         | Note    |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | io.prometheus.metrics.exemplars_enabled                       | [Counter.Builder.withExemplars()](</client_java/api/io/prometheus/metrics/core/metrics/Counter.Builder.html#withExemplars()>)                                                   | (1) (2) |
@@ -88,7 +87,6 @@ When the same property is defined in multiple sources, the following precedence 
 | io.prometheus.metrics.summary_quantile_errors                 | [Summary.Builder.quantile(double, double)](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)>)                                  | (5)     |
 | io.prometheus.metrics.summary_max_age_seconds                 | [Summary.Builder.maxAgeSeconds()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)>)                                               |         |
 | io.prometheus.metrics.summary_number_of_age_buckets           | [Summary.Builder.numberOfAgeBuckets()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)>)                                      |         |
-
 
 ### Notes
 
@@ -124,27 +122,22 @@ This works for all Metrics properties.
 
 ## Exemplar Properties
 
-
 | Name                                                 | Javadoc                                                                                                                                                         | Note |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exemplars.min_retention_period_seconds | [ExemplarsProperties.getMinRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMinRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.max_retention_period_seconds | [ExemplarsProperties.getMaxRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMaxRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.sample_interval_milliseconds | [ExemplarsProperties.getSampleIntervalMilliseconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getSampleIntervalMilliseconds()>) |      |
 
-
 ## Exporter Properties
-
 
 | Name                                                 | Javadoc                                                                                                                                                     | Note |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.include_created_timestamps    | [ExporterProperties.getIncludeCreatedTimestamps()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()>)   | (1)  |
 | io.prometheus.exporter.exemplars_on_all_metric_types | [ExporterProperties.getExemplarsOnAllMetricTypes()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()>) | (1)  |
 
-
 (1) Boolean value, `true` or `false`. Default see Javadoc.
 
 ## Exporter Filter Properties
-
 
 | Name                                                           | Javadoc                                                                                                                                                                   | Note |
 | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
@@ -152,7 +145,6 @@ This works for all Metrics properties.
 | io.prometheus.exporter.filter.metric_name_must_not_be_equal_to | [ExporterFilterProperties.getExcludedMetricNames()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNames()>)               | (2)  |
 | io.prometheus.exporter.filter.metric_name_must_start_with      | [ExporterFilterProperties.getAllowedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNamePrefixes()>)   | (3)  |
 | io.prometheus.exporter.filter.metric_name_must_not_start_with  | [ExporterFilterProperties.getExcludedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNamePrefixes()>) | (4)  |
-
 
 <!-- markdownlint-disable MD033 -->
 
@@ -166,14 +158,11 @@ Only metrics starting with these prefixes will be exposed.<br/>
 
 ## Exporter HTTPServer Properties
 
-
 | Name                                    | Javadoc                                                                                                                     | Note |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.http_server.port | [HTTPServer.Builder.port()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#port(int)>) |      |
 
-
 ## Exporter OpenTelemetry Properties
-
 
 | Name                                                     | Javadoc                                                                                                                                                                                                       | Note |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
@@ -187,7 +176,6 @@ Only metrics starting with these prefixes will be exposed.<br/>
 | io.prometheus.exporter.opentelemetry.service_instance_id | [OpenTelemetryExporter.Builder.serviceInstanceId()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceInstanceId(java.lang.String)>)                   |      |
 | io.prometheus.exporter.opentelemetry.service_version     | [OpenTelemetryExporter.Builder.serviceVersion()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceVersion(java.lang.String)>)                         |      |
 | io.prometheus.exporter.opentelemetry.resource_attributes | [OpenTelemetryExporter.Builder.resourceAttributes()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#resourceAttribute(java.lang.String,java.lang.String)>) | (3)  |
-
 
 <!-- markdownlint-disable MD033 -->
 
@@ -204,14 +192,12 @@ See Javadoc for details.
 
 ## Exporter PushGateway Properties
 
-
 | Name                                               | Javadoc                                                                                                                                                                                    | Note |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
 | io.prometheus.exporter.pushgateway.address         | [PushGateway.Builder.address()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)>)                                          |      |
 | io.prometheus.exporter.pushgateway.scheme          | [PushGateway.Builder.scheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String)>)                                            |      |
 | io.prometheus.exporter.pushgateway.job             | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)                                                  |      |
 | io.prometheus.exporter.pushgateway.escaping_scheme | [PushGateway.Builder.escapingScheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#escapingScheme(io.prometheus.metrics.config.EscapingScheme)>) | (1)  |
-
 
 (1) Escaping scheme can be `allow-utf-8`, `underscores`, `dots`, or `values` as described in
 [escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes)

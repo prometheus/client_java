@@ -82,7 +82,6 @@ class. The data is coming from
 the [ClassLoadingMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ClassLoadingMXBean.html).
 Example metrics:
 
-
 ```text
 # HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
 # TYPE jvm_classes_currently_loaded gauge
@@ -95,7 +94,6 @@ jvm_classes_loaded_total 1109.0
 jvm_classes_unloaded_total 0.0
 ```
 
-
 ## JVM Compilation Metrics
 
 JVM compilation metrics are provided by
@@ -104,13 +102,11 @@ class. The data is coming from
 the [CompilationMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/CompilationMXBean.html).
 Example metrics:
 
-
 ```text
 # HELP jvm_compilation_time_seconds_total The total time in seconds taken for HotSpot class compilation
 # TYPE jvm_compilation_time_seconds_total counter
 jvm_compilation_time_seconds_total 0.152
 ```
-
 
 ## JVM Garbage Collector Metrics
 
@@ -137,7 +133,6 @@ class. The data is coming from
 the [MemoryMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryMXBean.html)
 and the [MemoryPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryPoolMXBean.html).
 Example metrics:
-
 
 ```text
 # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
@@ -213,7 +208,6 @@ jvm_memory_used_bytes{area="heap"} 9051232.0
 jvm_memory_used_bytes{area="nonheap"} 1.1490688E7
 ```
 
-
 ## JVM Memory Pool Allocation Metrics
 
 JVM memory pool allocation metrics are provided by
@@ -222,7 +216,6 @@ class. The data is obtained by adding
 a [NotificationListener](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/javax/management/NotificationListener.html)
 to the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html).
 Example metrics:
-
 
 ```text
 # HELP jvm_memory_pool_allocated_bytes_total Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.
@@ -235,7 +228,6 @@ jvm_memory_pool_allocated_bytes_total{pool="PS Old Gen"} 1428888.0
 jvm_memory_pool_allocated_bytes_total{pool="PS Survivor Space"} 4115280.0
 ```
 
-
 ## JVM Runtime Info Metric
 
 The JVM runtime info metric is provided by
@@ -243,13 +235,11 @@ the [JvmRuntimeInfoMetric](/client_java/api/io/prometheus/metrics/instrumentatio
 class. The data is obtained via system properties and will not change throughout the lifetime of the
 application. Example metric:
 
-
 ```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
-
 
 ## JVM Thread Metrics
 
@@ -258,7 +248,6 @@ the [JvmThreadsMetrics](/client_java/api/io/prometheus/metrics/instrumentation/j
 class. The data is coming from
 the [ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ThreadMXBean.html).
 Example metrics:
-
 
 ```text
 # HELP jvm_threads_current Current thread count of a JVM
@@ -289,7 +278,6 @@ jvm_threads_state{state="TIMED_WAITING"} 2.0
 jvm_threads_state{state="UNKNOWN"} 0.0
 jvm_threads_state{state="WAITING"} 3.0
 ```
-
 
 ## Process Metrics
 

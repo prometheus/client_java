@@ -73,6 +73,7 @@
       "editorconfig-checker",
       "github:google/google-java-format",
       "github:jonwiggins/xmloxide",
+      "github:koalaman/shellcheck",
       "go:github.com/gohugoio/hugo",
       "go:github.com/grafana/oats",
       "java",
@@ -83,8 +84,8 @@
       "protoc",
       "ruff",
       "rumdl",
-      "shellcheck",
-      "shfmt"
+      "shfmt",
+      "taplo"
     ]
   },
   "mvnw": {

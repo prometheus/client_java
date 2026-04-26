@@ -77,7 +77,7 @@ description = "Generate Javadoc"
 run = [
   "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P 'javadoc,!default'",
   "rm -rf ./docs/static/api",
-  "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api"
+  "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api",
 ]
 
 [tasks.gh-pages-dev]
@@ -91,10 +91,7 @@ depends = ["javadoc", "set-release-version-github-pages"]
 # For maximum backward compatibility with Hugo modules
 env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
 dir = "docs"
-run = [
-  "hugo --gc --minify --baseURL ${BASE_URL}/",
-  "echo 'ls ./public/api' && ls ./public/api"
-]
+run = ["hugo --gc --minify --baseURL ${BASE_URL}/", "echo 'ls ./public/api' && ls ./public/api"]
 
 [tasks."benchmark:quick"]
 description = "Run benchmarks with reduced iterations (quick smoke test, ~10 min)"

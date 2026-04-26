@@ -5,4 +5,3 @@ java = "oracle-graalvm-25.0.1"
 depends = "build"
 run = "../../mvnw test -PnativeTest"
 dir = "../../../integration-tests/it-spring-boot-smoke-test"
-

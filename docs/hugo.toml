@@ -17,18 +17,18 @@ enableRobotsTXT = true
 
 # Needed for mermaid shortcodes
 [markup]
-  [markup.goldmark.renderer]
-    # Needed for mermaid shortcode
-    unsafe = true
-  [markup.tableOfContents]
-    startLevel = 1
-    endLevel = 9
-  [markup.highlight]
-    style = 'solarized-dark'
+[markup.goldmark.renderer]
+# Needed for mermaid shortcode
+unsafe = true
+[markup.tableOfContents]
+startLevel = 1
+endLevel = 9
+[markup.highlight]
+style = 'solarized-dark'
 
 [taxonomies]
-   tag = "tags"
+tag = "tags"
 
 [caches]
-  [caches.images]
-    dir = ':cacheDir/images'
+[caches.images]
+dir = ':cacheDir/images'

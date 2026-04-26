@@ -11,7 +11,6 @@ is a [Jakarta Servlet](https://jakarta.ee/specifications/servlet/) for exposing 
 
 The old-school way of configuring a servlet is in a `web.xml` file:
 
-
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
@@ -28,7 +27,6 @@ The old-school way of configuring a servlet is in a `web.xml` file:
     </servlet-mapping>
 </web-app>
 ```
-
 
 ## Programmatic
 

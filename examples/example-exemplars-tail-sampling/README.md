@@ -9,7 +9,6 @@ Exemplars are often used to reference trace IDs when distributed tracing is used
 The following shows an example of a histogram in OpenMetrics text format where each non-empty bucket
 has an Exemplar:
 
-
 ```text
 # TYPE request_duration_seconds histogram
 # UNIT request_duration_seconds seconds
@@ -29,7 +28,6 @@ request_duration_seconds_bucket{http_status="200",le="+Inf"} 11243
 request_duration_seconds_count{http_status="200"} 11243
 request_duration_seconds_sum{http_status="200"} 2843.3178731140015
 ```
-
 
 In Grafana Exemplars can be visualized as little green dots. The following shows an example of the
 95th [quantile](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
