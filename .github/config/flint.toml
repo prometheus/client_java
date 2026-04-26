@@ -7,6 +7,7 @@ exclude = [
     "mvnw",
     "simpleclient-archive/**",
 ]
+setup_migration_version = 2
 
 [checks.renovate-deps]
 exclude_managers = ["github-actions", "github-runners", "maven"]
