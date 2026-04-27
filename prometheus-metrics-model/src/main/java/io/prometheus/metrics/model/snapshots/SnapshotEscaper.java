@@ -105,6 +105,14 @@ public class SnapshotEscaper {
     }
   }
 
+  public static String getOriginalMetadataName(MetricMetadata metadata, EscapingScheme scheme) {
+    if (scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
+      return PrometheusNaming.prometheusName(metadata.getOriginalName());
+    } else {
+      return metadata.getOriginalName();
+    }
+  }
+
   public static Labels escapeLabels(Labels labels, EscapingScheme scheme) {
     Labels.Builder outLabelsBuilder = Labels.builder();
 

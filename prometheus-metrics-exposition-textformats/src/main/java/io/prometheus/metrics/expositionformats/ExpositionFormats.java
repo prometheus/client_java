@@ -69,9 +69,9 @@ public class ExpositionFormats {
         if ("2.0.0".equals(version)) {
           return openMetrics2TextFormatWriter;
         }
-        // version=1.0.0 or no version: fall through to OM1
+        // version=1.0.0 or no version: fall through to OM1.
       } else {
-        // contentNegotiation=false: OM2 handles all OpenMetrics requests
+        // contentNegotiation=false: OM2 handles all OpenMetrics requests.
         return openMetrics2TextFormatWriter;
       }
     }

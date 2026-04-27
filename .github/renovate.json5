@@ -30,7 +30,7 @@
     {
       enabled: false,
       description: "Ignore internal project modules",
-      matchPackageNames: ["/^io\\.prometheus:(examples|example-.+|integration-tests|it-.+)$/"],
+      matchPackageNames: ["/^io\\.prometheus:(prometheus-metrics-bom|examples|example-.+|integration-tests|it-.+)$/"],
     },
     {
       description: "Group protobuf-java and protoc together so generated code can be updated in one PR",

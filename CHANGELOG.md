@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.6.0](https://github.com/prometheus/client_java/compare/v1.5.1...v1.6.0) (2026-04-25)
+
+> Note: OpenMetrics 2.0 support is still in progress and not ready for general use yet.
+
+### Features
+
+* Relax metric name validation in Dropwizard5 ([#1985](https://github.com/prometheus/client_java/issues/1985)) ([deb782f](https://github.com/prometheus/client_java/commit/deb782f9fce60ffb1308a98b661c0a1ccb79a82b))
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.guava:guava to v33.6.0-jre ([#2021](https://github.com/prometheus/client_java/issues/2021)) ([1382693](https://github.com/prometheus/client_java/commit/13826930b9c2f566040a6929090ef23c94e81796))
+* **deps:** update dependency commons-io:commons-io to v2.22.0 ([#2044](https://github.com/prometheus/client_java/issues/2044)) ([9e05c1d](https://github.com/prometheus/client_java/commit/9e05c1d56b7b0de17ba5aaaa300eb6433cc70824))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.27.0-alpha ([#2022](https://github.com/prometheus/client_java/issues/2022)) ([30ac534](https://github.com/prometheus/client_java/commit/30ac534d860fb7c60a1e7835723a6cf0035ea7f7))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.27.0-alpha ([#2023](https://github.com/prometheus/client_java/issues/2023)) ([2d51a32](https://github.com/prometheus/client_java/commit/2d51a3251f6943cf1b03ba9ea8778ff052f83ef9))
+* **deps:** update dependency io.prometheus:prometheus-metrics-bom to v1.5.1 ([#2004](https://github.com/prometheus/client_java/issues/2004)) ([650ce4b](https://github.com/prometheus/client_java/commit/650ce4b677f2ca65f5877e77260e403fa85533db))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.21 ([#2005](https://github.com/prometheus/client_java/issues/2005)) ([7a36df7](https://github.com/prometheus/client_java/commit/7a36df7151e55adafd5bb5a72af81fd7bf8f1133))
+* **deps:** update dependency org.springframework.boot:spring-boot-starter-parent to v4.0.5 ([#2006](https://github.com/prometheus/client_java/issues/2006)) ([0106c18](https://github.com/prometheus/client_java/commit/0106c18adffd6d3e829f73979917bdf7cc5f53dd))
+* **deps:** update dependency org.springframework.boot:spring-boot-starter-parent to v4.0.6 ([#2046](https://github.com/prometheus/client_java/issues/2046)) ([40a9db8](https://github.com/prometheus/client_java/commit/40a9db868805e36fbaa0f9ac3d02becb17104cd0))
+* **deps:** update jetty monorepo to v12.1.8 ([#2007](https://github.com/prometheus/client_java/issues/2007)) ([acab5b2](https://github.com/prometheus/client_java/commit/acab5b213e7661818470716158b3cfe67caae9da))
+* **deps:** update protobuf ([#2024](https://github.com/prometheus/client_java/issues/2024)) ([8e2214e](https://github.com/prometheus/client_java/commit/8e2214e0a3ac2fe8a9194d9519dcee10f6c9a694))
+* pass release tag as input to deploy workflow ([#1982](https://github.com/prometheus/client_java/issues/1982)) ([165c921](https://github.com/prometheus/client_java/commit/165c921c2508e073baa8f403b30e536ba9b43df9))
+* pin grafana/otel-lgtm to 0.7.2 in OATs acceptance test ([#1992](https://github.com/prometheus/client_java/issues/1992)) ([f17ad9a](https://github.com/prometheus/client_java/commit/f17ad9ad9be2ed0a8519db094f9d8fe9a8a83c48))
+* stabilize flaky timer and thread count tests ([#1973](https://github.com/prometheus/client_java/issues/1973)) ([ce5867b](https://github.com/prometheus/client_java/commit/ce5867b3e25e10c68a6face275732b994a80ec98))
+* trigger Maven deploy from release-please via workflow_dispatch ([#1981](https://github.com/prometheus/client_java/issues/1981)) ([698f956](https://github.com/prometheus/client_java/commit/698f9565e825cdb0f58d2782131cb152cc13894a))
+
 ## [1.5.1](https://github.com/prometheus/client_java/compare/v1.5.0...v1.5.1) (2026-03-20)
 
 

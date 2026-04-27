@@ -13,10 +13,10 @@ import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +32,6 @@ class OpenMetrics2TextFormatWriterTest {
                 OpenMetrics2Properties.builder().contentNegotiation(false).build())
             .build();
 
-    // Should masquerade as OM1 when contentNegotiation is disabled
     assertThat(writer.getContentType())
         .isEqualTo("application/openmetrics-text; version=1.0.0; charset=utf-8");
   }
@@ -53,7 +52,6 @@ class OpenMetrics2TextFormatWriterTest {
   void testContentTypeDefault() {
     OpenMetrics2TextFormatWriter writer = OpenMetrics2TextFormatWriter.create();
 
-    // Default should masquerade as OM1 for compatibility
     assertThat(writer.getContentType())
         .isEqualTo("application/openmetrics-text; version=1.0.0; charset=utf-8");
   }
@@ -87,33 +85,6 @@ class OpenMetrics2TextFormatWriterTest {
     assertThat(writer.getOpenMetrics2Properties()).isEqualTo(props);
     assertThat(writer.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
     assertThat(writer.getOpenMetrics2Properties().getCompositeValues()).isTrue();
-  }
-
-  @Test
-  void testCounterNoTotalSuffix() throws IOException {
-    MetricSnapshots snapshots =
-        MetricSnapshots.of(
-            CounterSnapshot.builder()
-                .name("my_counter_seconds")
-                .help("Test counter")
-                .unit(Unit.SECONDS)
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .value(42.0)
-                        .labels(Labels.of("method", "GET"))
-                        .build())
-                .build());
-
-    String om2Output = writeWithOM2(snapshots);
-
-    // OM2: name as provided, no _total appending
-    assertThat(om2Output)
-        .isEqualTo(
-            "# TYPE my_counter_seconds counter\n"
-                + "# UNIT my_counter_seconds seconds\n"
-                + "# HELP my_counter_seconds Test counter\n"
-                + "my_counter_seconds{method=\"GET\"} 42.0\n"
-                + "# EOF\n");
   }
 
   @Test
@@ -289,7 +260,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testCounterWithCreatedTimestamps() throws IOException {
+  void testCounterStartTimestampWithDefaultWriter() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             CounterSnapshot.builder()
@@ -302,19 +273,53 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    OpenMetrics2TextFormatWriter om2Writer =
-        OpenMetrics2TextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
+    String om2Output = writeWithOM2(snapshots);
 
-    String om2Output = write(snapshots, om2Writer);
-
-    // OM2: no _total, _created uses the counter name directly
+    // OM2: no _total, start timestamp uses st@ inline.
     assertThat(om2Output)
         .isEqualTo(
             "# TYPE my_counter counter\n"
                 + "# HELP my_counter Test counter\n"
-                + "my_counter 42.0\n"
-                + "my_counter_created 1672850385.800\n"
+                + "my_counter 42.0 st@1672850385.800\n"
                 + "# EOF\n");
+  }
+
+  @Test
+  void testCounterAndHistogramEmitStartTimestampConsistently() throws IOException {
+    long createdMs = 1672850385800L;
+    MetricSnapshots counterSnapshots =
+        MetricSnapshots.of(
+            CounterSnapshot.builder()
+                .name("my_counter")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .value(1.0)
+                        .createdTimestampMillis(createdMs)
+                        .build())
+                .build());
+    MetricSnapshots histogramSnapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("my_histogram")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(1.0)
+                        .createdTimestampMillis(createdMs)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(Double.POSITIVE_INFINITY, 1)
+                                .build())
+                        .build())
+                .build());
+
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().compositeValues(true).build())
+            .build();
+
+    assertThat(write(counterSnapshots, writer)).contains("st@1672850385.800");
+    assertThat(write(histogramSnapshots, writer)).contains("st@1672850385.800");
   }
 
   @Test
@@ -392,8 +397,10 @@ class OpenMetrics2TextFormatWriterTest {
 
   @Test
   void testCompositeHistogramWithExemplar() throws IOException {
-    Exemplar exemplar =
+    Exemplar exemplar1 =
         Exemplar.builder().value(0.67).traceId("shaZ8oxi").timestampMillis(1520879607789L).build();
+    Exemplar exemplar2 =
+        Exemplar.builder().value(1.2).traceId("ookahn0M").timestampMillis(1520879608589L).build();
 
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -407,7 +414,7 @@ class OpenMetrics2TextFormatWriterTest {
                                 .bucket(1.0, 1)
                                 .bucket(Double.POSITIVE_INFINITY, 0)
                                 .build())
-                        .exemplars(Exemplars.of(exemplar))
+                        .exemplars(Exemplars.of(exemplar1, exemplar2))
                         .build())
                 .build());
 
@@ -417,7 +424,8 @@ class OpenMetrics2TextFormatWriterTest {
         .isEqualTo(
             "# TYPE foo histogram\n"
                 + "foo {count:1,sum:1.5,bucket:[1.0:1,+Inf:1]}"
-                + " # {trace_id=\"shaZ8oxi\"} 0.67 1520879607.789\n"
+                + " # {trace_id=\"shaZ8oxi\"} 0.67 1520879607.789"
+                + " # {trace_id=\"ookahn0M\"} 1.2 1520879608.589\n"
                 + "# EOF\n");
   }
 
@@ -451,6 +459,204 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
+  void testNativeHistogram() throws IOException {
+    Exemplar exemplar1 =
+        Exemplar.builder().value(0.67).traceId("shaZ8oxi").timestampMillis(1520879607789L).build();
+    Exemplar exemplar2 =
+        Exemplar.builder().value(1.2).traceId("ookahn0M").timestampMillis(1520879608589L).build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("foo")
+                .help("Native histogram")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(324789.3)
+                        .nativeSchema(0)
+                        .nativeZeroThreshold(0.0001)
+                        .nativeZeroCount(0)
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder().bucket(0, 5).bucket(1, 12).build())
+                        .scrapeTimestampMillis(1520879609000L)
+                        .createdTimestampMillis(1520430000000L)
+                        .exemplars(Exemplars.of(exemplar1, exemplar2))
+                        .build())
+                .build());
+
+    String output = writeWithNativeHistograms(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE foo histogram\n"
+                + "# HELP foo Native histogram\n"
+                + "foo {count:17,sum:324789.3,schema:0,zero_threshold:1.0E-4,zero_count:0,"
+                + "positive_spans:[0:2],positive_buckets:[5,12]} 1520879609.000"
+                + " st@1520430000.000 # {trace_id=\"shaZ8oxi\"} 0.67 1520879607.789"
+                + " # {trace_id=\"ookahn0M\"} 1.2 1520879608.589\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testNativeHistogramWithClassicBuckets() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("http_request_duration_seconds")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(4.0)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(0.5, 1)
+                                .bucket(1.0, 7)
+                                .bucket(Double.POSITIVE_INFINITY, 14)
+                                .build())
+                        .nativeSchema(3)
+                        .nativeZeroThreshold(0.0)
+                        .nativeZeroCount(1)
+                        .nativeBucketsForNegativeValues(
+                            NativeHistogramBuckets.builder().bucket(1, 2).bucket(2, 4).build())
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder()
+                                .bucket(-1, 5)
+                                .bucket(0, 7)
+                                .bucket(4, 3)
+                                .build())
+                        .build())
+                .build());
+
+    String output = writeWithNativeHistograms(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE http_request_duration_seconds histogram\n"
+                + "http_request_duration_seconds"
+                + " {count:22,sum:4.0,schema:3,zero_threshold:0.0,zero_count:1,"
+                + "negative_spans:[1:2],negative_buckets:[2,4],"
+                + "positive_spans:[-1:2,3:1],positive_buckets:[5,7,3],"
+                + "bucket:[0.5:1,1.0:8,+Inf:22]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testNativeGaugeHistogram() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("queue_size")
+                .gaugeHistogram(true)
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(4.5)
+                        .nativeSchema(2)
+                        .nativeZeroThreshold(0.0)
+                        .nativeZeroCount(1)
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder().bucket(0, 1).bucket(1, 1).build())
+                        .createdTimestampMillis(1520430000000L)
+                        .build())
+                .build());
+
+    String output = writeWithNativeHistograms(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE queue_size gaugehistogram\n"
+                + "queue_size {gcount:3,gsum:4.5,schema:2,zero_threshold:0.0,zero_count:1,"
+                + "positive_spans:[0:2],positive_buckets:[1,1]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testNativeHistogramExemplarComplianceSkipsExemplarWithoutTimestamp() throws IOException {
+    Exemplar exemplarWithoutTs = Exemplar.builder().value(2.0).traceId("bbb").build();
+    OpenMetrics2TextFormatWriter complianceWriter =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder()
+                    .nativeHistograms(true)
+                    .exemplarCompliance(true)
+                    .build())
+            .build();
+
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(2.0)
+                        .nativeSchema(5)
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder().bucket(0, 1).build())
+                        .exemplars(Exemplars.of(exemplarWithoutTs))
+                        .build())
+                .build());
+
+    String output = write(snapshots, complianceWriter);
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE requests histogram\n"
+                + "requests {count:1,sum:2.0,schema:5,zero_threshold:0.0,zero_count:0,"
+                + "positive_spans:[0:1],positive_buckets:[1]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testNativeHistogramMinimalOm2() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("latency_seconds")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(0.0)
+                        .nativeSchema(5)
+                        .build())
+                .build());
+
+    String output = writeWithNativeHistograms(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE latency_seconds histogram\n"
+                + "latency_seconds {count:0,sum:0.0,schema:5,zero_threshold:0.0,zero_count:0}\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testNativeGaugeHistogramWithNegativeAndPositiveSpans() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            HistogramSnapshot.builder()
+                .name("temperature_delta")
+                .gaugeHistogram(true)
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .sum(0.5)
+                        .nativeSchema(1)
+                        .nativeZeroThreshold(0.25)
+                        .nativeZeroCount(3)
+                        .nativeBucketsForNegativeValues(
+                            NativeHistogramBuckets.builder().bucket(0, 2).bucket(2, 4).build())
+                        .nativeBucketsForPositiveValues(
+                            NativeHistogramBuckets.builder().bucket(1, 1).bucket(2, 5).build())
+                        .build())
+                .build());
+
+    String output = writeWithNativeHistograms(snapshots);
+
+    assertThat(output)
+        .isEqualTo(
+            "# TYPE temperature_delta gaugehistogram\n"
+                + "temperature_delta {gcount:15,gsum:0.5,schema:1,zero_threshold:0.25,"
+                + "zero_count:3,negative_spans:[0:1,1:1],negative_buckets:[2,4],"
+                + "positive_spans:[1:2],positive_buckets:[1,5]}\n"
+                + "# EOF\n");
+  }
+
+  @Test
   void testCompositeSummary() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -479,8 +685,10 @@ class OpenMetrics2TextFormatWriterTest {
 
   @Test
   void testCompositeSummaryWithCreatedAndExemplar() throws IOException {
-    Exemplar exemplar =
+    Exemplar exemplar1 =
         Exemplar.builder().value(0.5).traceId("abc123").timestampMillis(1520879607000L).build();
+    Exemplar exemplar2 =
+        Exemplar.builder().value(1.5).traceId("def456").timestampMillis(1520879608000L).build();
 
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -491,7 +699,7 @@ class OpenMetrics2TextFormatWriterTest {
                         .count(10)
                         .sum(100.0)
                         .createdTimestampMillis(1520430000000L)
-                        .exemplars(Exemplars.of(exemplar))
+                        .exemplars(Exemplars.of(exemplar1, exemplar2))
                         .build())
                 .build());
 
@@ -500,8 +708,9 @@ class OpenMetrics2TextFormatWriterTest {
     assertThat(output)
         .isEqualTo(
             "# TYPE rpc_duration_seconds summary\n"
-                + "rpc_duration_seconds {count:10,sum:100.0} st@1520430000.000"
-                + " # {trace_id=\"abc123\"} 0.5 1520879607.000\n"
+                + "rpc_duration_seconds {count:10,sum:100.0,quantile:[]} st@1520430000.000"
+                + " # {trace_id=\"abc123\"} 0.5 1520879607.000"
+                + " # {trace_id=\"def456\"} 1.5 1520879608.000\n"
                 + "# EOF\n");
   }
 
@@ -610,6 +819,15 @@ class OpenMetrics2TextFormatWriterTest {
     return write(snapshots, writer);
   }
 
+  private String writeWithNativeHistograms(MetricSnapshots snapshots) throws IOException {
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(
+                OpenMetrics2Properties.builder().nativeHistograms(true).build())
+            .build();
+    return write(snapshots, writer);
+  }
+
   private String writeWithOM1(MetricSnapshots snapshots) throws IOException {
     OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
     return write(snapshots, writer);
@@ -624,6 +842,6 @@ class OpenMetrics2TextFormatWriterTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
-    return out.toString(StandardCharsets.UTF_8);
+    return out.toString(StandardCharsets.UTF_8.name());
   }
 }
