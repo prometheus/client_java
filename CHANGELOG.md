@@ -2,6 +2,7 @@
 
 ## [1.6.0](https://github.com/prometheus/client_java/compare/v1.5.1...v1.6.0) (2026-04-25)
 
+> Note: OpenMetrics 2.0 support is still in progress and not ready for general use yet.
 
 ### Features
 
@@ -11,6 +12,7 @@
 * compositeValues and exemplarCompliance flags for OM2 writer ([#1991](https://github.com/prometheus/client_java/issues/1991)) ([ff48ae8](https://github.com/prometheus/client_java/commit/ff48ae8118c4e071bf86ca7beabdd0e951b896dc))
 * move suffix handling to scrape time ([#1955](https://github.com/prometheus/client_java/issues/1955)) ([5a5106c](https://github.com/prometheus/client_java/commit/5a5106c2ad46ad5e0c1c97d99b994e7626af18ee))
 * OM2 writer outputs names as provided, no suffix appending ([#1957](https://github.com/prometheus/client_java/issues/1957)) ([5ce2b57](https://github.com/prometheus/client_java/commit/5ce2b575272a06b5115f40f3298d5c861cef8bbd))
+* Relax metric name validation in Dropwizard5 ([#1985](https://github.com/prometheus/client_java/issues/1985)) ([deb782f](https://github.com/prometheus/client_java/commit/deb782f9fce60ffb1308a98b661c0a1ccb79a82b))
 
 
 ### Bug Fixes
@@ -27,7 +29,6 @@
 * **deps:** update protobuf ([#2024](https://github.com/prometheus/client_java/issues/2024)) ([8e2214e](https://github.com/prometheus/client_java/commit/8e2214e0a3ac2fe8a9194d9519dcee10f6c9a694))
 * pass release tag as input to deploy workflow ([#1982](https://github.com/prometheus/client_java/issues/1982)) ([165c921](https://github.com/prometheus/client_java/commit/165c921c2508e073baa8f403b30e536ba9b43df9))
 * pin grafana/otel-lgtm to 0.7.2 in OATs acceptance test ([#1992](https://github.com/prometheus/client_java/issues/1992)) ([f17ad9a](https://github.com/prometheus/client_java/commit/f17ad9ad9be2ed0a8519db094f9d8fe9a8a83c48))
-* Relax metric name validation in Dropwizard5 ([#1985](https://github.com/prometheus/client_java/issues/1985)) ([deb782f](https://github.com/prometheus/client_java/commit/deb782f9fce60ffb1308a98b661c0a1ccb79a82b))
 * stabilize flaky timer and thread count tests ([#1973](https://github.com/prometheus/client_java/issues/1973)) ([ce5867b](https://github.com/prometheus/client_java/commit/ce5867b3e25e10c68a6face275732b994a80ec98))
 * Tighten OM2 summary and start timestamp output ([#2041](https://github.com/prometheus/client_java/issues/2041)) ([5699469](https://github.com/prometheus/client_java/commit/5699469d345b9d3aaf3d6c0e5e76de2959477269))
 * trigger Maven deploy from release-please via workflow_dispatch ([#1981](https://github.com/prometheus/client_java/issues/1981)) ([698f956](https://github.com/prometheus/client_java/commit/698f9565e825cdb0f58d2782131cb152cc13894a))
