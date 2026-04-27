@@ -2,6 +2,8 @@
 
 ## [1.6.1](https://github.com/prometheus/client_java/compare/v1.6.0...v1.6.1) (2026-04-27)
 
+> Note: With the OM2 metric-name preservation fix in this release, OpenMetrics 2.0 can now be
+> tested. It is still in progress and not ready for general use yet.
 
 ### Bug Fixes
 
@@ -16,6 +18,20 @@
 ## [1.6.0](https://github.com/prometheus/client_java/compare/v1.5.1...v1.6.0) (2026-04-25)
 
 > Note: OpenMetrics 2.0 support is still in progress and not ready for general use yet.
+>
+> As part of the OM2 work, metric-name suffix handling moved from metric creation time to scrape
+> time. A positive side effect is that metric names are now more flexible across the board, for
+> example names ending in suffixes like `_total` are accepted where they were previously rejected.
+> To keep the Prometheus and OM1 output unambiguous, the registry tracks claimed exposition names
+> and still rejects registrations that would collide at scrape time.
+>
+> | Example | Before 1.6.0 | Since 1.6.0 | Reason |
+> | --- | --- | --- | --- |
+> | `Gauge("foo_total")` | Rejected | Allowed | Not breaking because this previously failed at registration, so no working setup changes behavior, and safe because `_total` suffix expansion applies to counters, not gauges. |
+> | `Counter("events_total")` | Rejected | Allowed | Not breaking because the OM1 output is still `events_total`; only the builder now accepts the name. |
+> | `Gauge("foo_total")` + `Histogram("foo")` | Rejected | Allowed | Not breaking because this combination used to be blocked even though the exposed names do not overlap. |
+> | `Gauge("events_total")` + `Counter("events")` | Rejected | Rejected | Not breaking because the ambiguous OM1 output would still expose two `events_total` series. |
+> | `Gauge("foo_count")` + `Histogram("foo")` | Allowed | Rejected | Intentionally breaking because the old behavior could expose a conflicting `foo_count` name at scrape time. |
 
 ### Features
 
