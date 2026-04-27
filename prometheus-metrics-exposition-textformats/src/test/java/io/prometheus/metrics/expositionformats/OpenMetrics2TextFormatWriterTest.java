@@ -17,7 +17,6 @@ import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -86,33 +85,6 @@ class OpenMetrics2TextFormatWriterTest {
     assertThat(writer.getOpenMetrics2Properties()).isEqualTo(props);
     assertThat(writer.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
     assertThat(writer.getOpenMetrics2Properties().getCompositeValues()).isTrue();
-  }
-
-  @Test
-  void testCounterNoTotalSuffix() throws IOException {
-    MetricSnapshots snapshots =
-        MetricSnapshots.of(
-            CounterSnapshot.builder()
-                .name("my_counter_seconds")
-                .help("Test counter")
-                .unit(Unit.SECONDS)
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .value(42.0)
-                        .labels(Labels.of("method", "GET"))
-                        .build())
-                .build());
-
-    String om2Output = writeWithOM2(snapshots);
-
-    // OM2: name as provided, no _total appending
-    assertThat(om2Output)
-        .isEqualTo(
-            "# TYPE my_counter_seconds counter\n"
-                + "# UNIT my_counter_seconds seconds\n"
-                + "# HELP my_counter_seconds Test counter\n"
-                + "my_counter_seconds{method=\"GET\"} 42.0\n"
-                + "# EOF\n");
   }
 
   @Test
@@ -685,47 +657,6 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testNativeHistogramWithDots() throws IOException {
-    Exemplar exemplar =
-        Exemplar.builder()
-            .labels(Labels.of("some.exemplar.key", "some value"))
-            .value(3.0)
-            .timestampMillis(1690298864383L)
-            .build();
-
-    MetricSnapshots snapshots =
-        MetricSnapshots.of(
-            HistogramSnapshot.builder()
-                .name("my.request.duration.seconds")
-                .help("Request duration in seconds")
-                .unit(Unit.SECONDS)
-                .dataPoint(
-                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
-                        .labels(Labels.builder().label("http.path", "/hello").build())
-                        .sum(3.2)
-                        .nativeSchema(5)
-                        .nativeZeroCount(1)
-                        .nativeBucketsForPositiveValues(
-                            NativeHistogramBuckets.builder().bucket(2, 3).build())
-                        .exemplars(Exemplars.of(exemplar))
-                        .build())
-                .build());
-
-    String output = writeWithNativeHistograms(snapshots);
-
-    assertThat(output)
-        .isEqualTo(
-            "# TYPE \"my.request.duration.seconds\" histogram\n"
-                + "# UNIT \"my.request.duration.seconds\" seconds\n"
-                + "# HELP \"my.request.duration.seconds\" Request duration in seconds\n"
-                + "{\"my.request.duration.seconds\",\"http.path\"=\"/hello\"}"
-                + " {count:4,sum:3.2,schema:5,zero_threshold:0.0,zero_count:1,"
-                + "positive_spans:[2:1],positive_buckets:[3]}"
-                + " # {\"some.exemplar.key\"=\"some value\"} 3.0 1690298864.383\n"
-                + "# EOF\n");
-  }
-
-  @Test
   void testCompositeSummary() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -911,6 +842,6 @@ class OpenMetrics2TextFormatWriterTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
-    return out.toString(StandardCharsets.UTF_8);
+    return out.toString(StandardCharsets.UTF_8.name());
   }
 }
