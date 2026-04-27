@@ -94,6 +94,14 @@ Pre-built instrumentations:
 - **Markdown code blocks**: Always specify language
   (e.g., ` ```java`, ` ```bash`, ` ```text`)
 
+## Pull Requests
+
+- PR titles must use semantic/conventional prefixes, for example
+  `feat: ...`, `fix: ...`, `docs: ...`, `chore: ...`, or
+  `test: ...`.
+- Do not prefix PR titles with `[codex]`.
+- Match the PR title type to the primary user-facing change.
+
 ## Linting and Validation
 
 **CRITICAL**: These checks MUST be run before creating any
