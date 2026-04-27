@@ -21,6 +21,26 @@ The main steps when converting OpenTelemetry metric names to Prometheus metric n
 - If the metric has a unit, append the unit to the metric name, like `_seconds`.
 - If the metric type has a suffix, append it, like `_total` for counters.
 
+## `preserve_names`
+
+The Prometheus Java client library can also export its own metrics to OpenTelemetry using the
+[OpenTelemetryExporter](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.html). <!-- editorconfig-checker-disable-line -->
+
+For that exporter, `io.prometheus.exporter.opentelemetry.preserve_names=true` preserves metric
+names exactly as they were written in the Prometheus Java client.
+
+Examples:
+
+| Prometheus Java metric             | Default OTel export   | With `preserve_names=true`  |
+| ---------------------------------- | --------------------- | --------------------------- |
+| `Counter("events")`                | `events`              | `events`                    |
+| `Counter("events_total")`          | `events`              | `events_total`              |
+| `Counter("req").unit(BYTES)`       | name `req`, unit `By` | name `req`, unit `By`       |
+| `Counter("req_bytes").unit(BYTES)` | name `req`, unit `By` | name `req_bytes`, unit `By` |
+
+Today the default is `false` for backward compatibility. It is planned to change to `true` in the
+next major release.
+
 ## Dots in Metric and Label Names
 
 OpenTelemetry defines not only a line protocol, but also _semantic conventions_, i.e. standardized

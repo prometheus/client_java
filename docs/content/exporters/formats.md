@@ -11,6 +11,11 @@ All exporters the following exposition formats:
 
 Moreover, gzip encoding is supported for each of these formats.
 
+## OpenMetrics 2.0 Preview
+
+The library also includes an experimental OpenMetrics 2.0 writer. It is disabled by default and
+must be enabled explicitly. See [OpenMetrics 2.0 Preview]({{< relref "./openmetrics2.md" >}}).
+
 ## Scraping with a Prometheus server
 
 The Prometheus server sends an `Accept` header to specify which format is requested. By default, the

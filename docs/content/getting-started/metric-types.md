@@ -37,9 +37,13 @@ serviceTimeSeconds.inc(Unit.millisToSeconds(200));
 The resulting counter has the value `0.2`. As `SECONDS` is the standard time unit in Prometheus, the
 `Unit` utility class has methods to convert other time units to seconds.
 
-As defined in [OpenMetrics](https://openmetrics.io/), counter metric names must have the `_total`
-suffix. If you create a counter without the `_total` suffix the suffix will be appended
-automatically.
+For the default OpenMetrics 1.0 and Prometheus text formats, counters are exposed with the
+`_total` suffix. You can name a counter either `service_time_seconds` or
+`service_time_seconds_total`; the exposed name will be `service_time_seconds_total` in both cases.
+
+The experimental OpenMetrics 2.0 writer behaves differently: It preserves metric names instead of
+appending `_total` or unit suffixes automatically. In OpenMetrics 2.0, `_total` is recommended for
+counters, but not enforced by the Java client.
 
 ## Gauge
 
