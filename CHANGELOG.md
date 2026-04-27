@@ -2,6 +2,8 @@
 
 ## [1.6.0](https://github.com/prometheus/client_java/compare/v1.5.1...v1.6.0) (2026-04-25)
 
+> Note: OpenMetrics 2.0 support is still in progress and not ready for general use yet.
+
 ### Features
 
 * Relax metric name validation in Dropwizard5 ([#1985](https://github.com/prometheus/client_java/issues/1985)) ([deb782f](https://github.com/prometheus/client_java/commit/deb782f9fce60ffb1308a98b661c0a1ccb79a82b))
