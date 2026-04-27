@@ -4,7 +4,7 @@
 
   <groupId>io.prometheus</groupId>
   <artifactId>example-exemplars-tail-sampling</artifactId>
-  <version>1.6.1-SNAPSHOT</version>
+  <version>1.6.1</version>
   <packaging>pom</packaging>
 
   <name>Example - Exemplars with OpenTelemetry's Tail Sampling</name>

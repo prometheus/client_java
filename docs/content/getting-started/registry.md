@@ -78,6 +78,26 @@ Counter eventsTotal2 = Counter.builder()
     .register(); // IllegalArgumentException, because a metric with that name is already registered
 ```
 
+## Suffix-Based Name Validation
+
+Suffix handling happens at scrape time. This makes metric names more flexible while keeping the
+exposed output unambiguous.
+
+The registry now tracks not only the metric names you register, but also the exposition names they
+would claim in OpenMetrics 1.x and Prometheus text format, such as `_total`, `_count`, `_sum`,
+`_bucket`, `_created`, and `_info`.
+
+This means names are accepted when they are safe, and combinations are rejected when they would
+collide at scrape time. The table below also shows the pre-1.6.0 behavior for comparison.
+
+| Example                                       | Before 1.6.0 | Current behavior | Why                                                                                               |
+| --------------------------------------------- | ------------ | ---------------- | ------------------------------------------------------------------------------------------------- |
+| `Gauge("foo_total")`                          | Rejected     | Allowed          | Safe because `_total` suffix expansion applies to counters, not gauges.                           |
+| `Counter("events_total")`                     | Rejected     | Allowed          | Safe because the OM1 output is `events_total`; the writer avoids double-appending `_total`.       |
+| `Gauge("foo_total")` + `Histogram("foo")`     | Rejected     | Allowed          | Safe because the exposed names do not overlap: `foo_total` vs `foo_bucket`/`foo_count`/`foo_sum`. |
+| `Gauge("events_total")` + `Counter("events")` | Rejected     | Rejected         | Rejected because both would expose `events_total` in OM1.                                         |
+| `Gauge("foo_count")` + `Histogram("foo")`     | Allowed      | Rejected         | Rejected because both would claim `foo_count` at scrape time.                                     |
+
 ## Validation at registration only
 
 Validation of duplicate metric names and label schemas happens at registration time only.
