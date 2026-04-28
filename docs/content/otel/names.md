@@ -25,7 +25,7 @@ The main steps when converting OpenTelemetry metric names to Prometheus metric n
 ## `preserve_names`
 
 The Prometheus Java client library can also export its own metrics to OpenTelemetry using the
-[OpenTelemetryExporter](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.html). <!-- editorconfig-checker-disable-line -->
+[OpenTelemetryExporter](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.html).
 
 For that exporter, `io.prometheus.exporter.opentelemetry.preserve_names=true` preserves metric
 names exactly as they were written in the Prometheus Java client.

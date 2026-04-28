@@ -139,8 +139,6 @@ This works for all Metrics properties.
 
 ## OpenMetrics 2.0 Properties
 
-<!-- editorconfig-checker-disable -->
-
 | Name                                           | Javadoc                                                                                                                                               | Note |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.openmetrics2.enabled             | [OpenMetrics2Properties.getEnabled()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getEnabled()>)                       | (1)  |
@@ -148,8 +146,6 @@ This works for all Metrics properties.
 | io.prometheus.openmetrics2.composite_values    | [OpenMetrics2Properties.getCompositeValues()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getCompositeValues()>)       | (1)  |
 | io.prometheus.openmetrics2.exemplar_compliance | [OpenMetrics2Properties.getExemplarCompliance()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getExemplarCompliance()>) | (1)  |
 | io.prometheus.openmetrics2.native_histograms   | [OpenMetrics2Properties.getNativeHistograms()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getNativeHistograms()>)     | (1)  |
-
-<!-- editorconfig-checker-enable -->
 
 (1) Boolean value, `true` or `false`. `enabled=true` switches OpenMetrics responses to the OM2
 writer, preserving metric names as written by the application. The other OM2 properties remain
