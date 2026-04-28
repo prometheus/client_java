@@ -25,7 +25,7 @@ Programmatic configuration:
 
 ```java
 PrometheusProperties properties = PrometheusProperties.builder()
-    .enableOpenMetrics2(om2 -> om2.contentNegotiation(true))
+    .enableOpenMetrics2(om2 -> {})
     .build();
 ```
 
@@ -38,6 +38,21 @@ With `enabled=true` alone:
 - Metric names are preserved as written by the application.
 - Optional OM2 features such as `composite_values`, `exemplar_compliance`, and
   `native_histograms` remain off.
+
+To enable OM2 only when the scraper explicitly requests `version=2.0.0`, set:
+
+```properties
+io.prometheus.openmetrics2.enabled=true
+io.prometheus.openmetrics2.content_negotiation=true
+```
+
+Programmatic equivalent:
+
+```java
+PrometheusProperties properties = PrometheusProperties.builder()
+    .enableOpenMetrics2(om2 -> om2.contentNegotiation(true))
+    .build();
+```
 
 ## Naming Behavior
 
