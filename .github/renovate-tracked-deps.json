@@ -64,6 +64,47 @@
       "maven"
     ]
   },
+  "examples/example-custom-buckets/docker-compose.yaml": {
+    "docker-compose": [
+      "eclipse-temurin",
+      "grafana/grafana",
+      "prom/prometheus"
+    ]
+  },
+  "examples/example-exemplars-tail-sampling/docker-compose.yaml": {
+    "docker-compose": [
+      "grafana/grafana",
+      "grafana/k6",
+      "grafana/tempo",
+      "opentelemetry-java-agent",
+      "otel/opentelemetry-collector-contrib",
+      "prom/prometheus"
+    ]
+  },
+  "examples/example-exporter-opentelemetry/docker-compose.yaml": {
+    "docker-compose": [
+      "openjdk",
+      "otel/opentelemetry-collector-contrib",
+      "prom/prometheus"
+    ]
+  },
+  "examples/example-exporter-opentelemetry/oats-tests/agent/Dockerfile": {
+    "dockerfile": [
+      "eclipse-temurin"
+    ]
+  },
+  "examples/example-exporter-opentelemetry/oats-tests/http/Dockerfile": {
+    "dockerfile": [
+      "eclipse-temurin"
+    ]
+  },
+  "examples/example-native-histogram/docker-compose.yaml": {
+    "docker-compose": [
+      "eclipse-temurin",
+      "grafana/grafana",
+      "prom/prometheus"
+    ]
+  },
   "mise.toml": {
     "mise": [
       "actionlint",
