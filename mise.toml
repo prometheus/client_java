@@ -18,7 +18,7 @@ lychee = "0.23.0"
 "npm:renovate" = "43.141.6"
 "pipx:codespell" = "2.4.2"
 ruff = "0.15.12"
-rumdl = "0.1.83"
+rumdl = "0.1.84"
 shfmt = "3.13.1"
 taplo = "0.10.0"
 
