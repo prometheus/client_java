@@ -258,6 +258,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       HistogramSnapshot snapshot,
       EscapingScheme scheme)
       throws IOException {
+    String bucketName = name + "_bucket";
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       ClassicHistogramBuckets buckets = getClassicBuckets(data);
       Exemplars exemplars = data.getExemplars();
@@ -265,7 +266,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       for (int i = 0; i < buckets.size(); i++) {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
-            writer, name, "_bucket", data.getLabels(), scheme, "le", buckets.getUpperBound(i));
+            writer, bucketName, null, data.getLabels(), scheme, "le", buckets.getUpperBound(i));
         writeLong(writer, cumulativeCount);
         Exemplar exemplar;
         if (i == 0) {
@@ -636,7 +637,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
+    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer,

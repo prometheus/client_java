@@ -204,6 +204,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "", "histogram", metadata, scheme);
+    String name = getMetadataName(metadata, scheme);
+    String bucketName = name + "_bucket";
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       ClassicHistogramBuckets buckets = getClassicBuckets(data);
       long cumulativeCount = 0;
@@ -211,8 +213,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
             writer,
-            getMetadataName(metadata, scheme),
-            "_bucket",
+            bucketName,
+            null,
             data.getLabels(),
             scheme,
             "le",
@@ -405,7 +407,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
+    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces, scheme);

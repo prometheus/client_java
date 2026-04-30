@@ -59,7 +59,6 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks."lint"]
 description = "Run all lints"
-raw_args = true
 depends = ["lint:bom"]
 run = "flint run"
 
@@ -95,11 +94,11 @@ run = ["hugo --gc --minify --baseURL ${BASE_URL}/", "echo 'ls ./public/api' && l
 
 [tasks."benchmark:quick"]
 description = "Run benchmarks with reduced iterations (quick smoke test, ~10 min)"
-run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 1 -wi 1 -i 3'"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 1 -wi 1 -i 3 -prof gc'"
 
 [tasks."benchmark:ci"]
 description = "Run benchmarks with CI configuration (3 forks, 3 warmup, 5 measurement iterations (~60 min total)"
-run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 3 -wi 3 -i 5'"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 3 -wi 3 -i 5 -prof gc'"
 
 [tasks."benchmark:ci-json"]
 description = "Run benchmarks with CI configuration and JSON output (for workflow/testing)"
