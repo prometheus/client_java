@@ -20,11 +20,27 @@ import org.openjdk.jmh.annotations.State;
  * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text formats.
  *
  * <pre>
- * Benchmark                                                        Mode  Cnt  Score  Error  Units
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray         thrpt
- * HistogramTextFormatBenchmark.openMetricsWriteToNull              thrpt
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray          thrpt
- * HistogramTextFormatBenchmark.prometheusWriteToNull               thrpt
+ * Benchmark                                                                     Mode  Cnt       Score        Error   Units
+ * HistogramTextFormatBenchmark.openMetricsWriteToByteArray                     thrpt    3   37567.116 ±  14566.571   ops/s
+ * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.alloc.rate       thrpt    3    1466.289 ±    568.584  MB/sec
+ * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.alloc.rate.norm  thrpt    3   40928.019 ±      0.006    B/op
+ * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.count            thrpt    3     147.000               counts
+ * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.time             thrpt    3      77.000                   ms
+ * HistogramTextFormatBenchmark.openMetricsWriteToNull                          thrpt    3   36179.016 ±   1149.646   ops/s
+ * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.alloc.rate            thrpt    3    1412.112 ±     44.791  MB/sec
+ * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.alloc.rate.norm       thrpt    3   40928.019 ±      0.001    B/op
+ * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.count                 thrpt    3     142.000               counts
+ * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.time                  thrpt    3      74.000                   ms
+ * HistogramTextFormatBenchmark.prometheusWriteToByteArray                      thrpt    3   36616.472 ±   5189.952   ops/s
+ * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.alloc.rate        thrpt    3    1434.773 ±    203.524  MB/sec
+ * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.alloc.rate.norm   thrpt    3   41088.019 ±      0.003    B/op
+ * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.count             thrpt    3     144.000               counts
+ * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.time              thrpt    3      73.000                   ms
+ * HistogramTextFormatBenchmark.prometheusWriteToNull                           thrpt    3   36357.284 ±   4298.616   ops/s
+ * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.alloc.rate             thrpt    3    1424.614 ±    168.607  MB/sec
+ * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.alloc.rate.norm        thrpt    3   41088.019 ±      0.003    B/op
+ * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.count                  thrpt    3     143.000               counts
+ * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.time                   thrpt    3      73.000                   ms
  * </pre>
  */
 public class HistogramTextFormatBenchmark {
