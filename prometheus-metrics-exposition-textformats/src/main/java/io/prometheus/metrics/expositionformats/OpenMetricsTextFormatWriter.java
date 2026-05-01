@@ -207,13 +207,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       for (int i = 0; i < buckets.size(); i++) {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
-            writer,
-            bucketName,
-            null,
-            data.getLabels(),
-            scheme,
-            "le",
-            buckets.getUpperBound(i));
+            writer, bucketName, null, data.getLabels(), scheme, "le", buckets.getUpperBound(i));
         writeLong(writer, cumulativeCount);
         Exemplar exemplar;
         if (i == 0) {

@@ -20,8 +20,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
 /**
- * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text
- * formats.
+ * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text formats.
  *
  * <p>Two variants per format:
  *
