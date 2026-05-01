@@ -112,10 +112,15 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme scheme)
       throws IOException {
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+    write(writer, metricSnapshots, scheme);
+  }
+
+  public void write(Writer writer, MetricSnapshots metricSnapshots, EscapingScheme scheme)
+      throws IOException {
     // See https://prometheus.io/docs/instrumenting/exposition_formats/
     // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and
     // "summary".
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     MetricSnapshots merged = TextFormatUtil.mergeDuplicates(metricSnapshots);
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = escapeMetricSnapshot(s, scheme);
@@ -193,8 +198,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "", "gauge", metadata, scheme);
+    String name = getMetadataName(metadata, scheme);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, getMetadataName(metadata, scheme), null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -206,6 +212,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     writeMetadata(writer, "", "histogram", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
     String bucketName = name + "_bucket";
+    String countName = name + "_count";
+    String sumName = name + "_sum";
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       ClassicHistogramBuckets buckets = getClassicBuckets(data);
       long cumulativeCount = 0;
@@ -224,14 +232,12 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       }
       if (!snapshot.isGaugeHistogram()) {
         if (data.hasCount()) {
-          writeNameAndLabels(
-              writer, getMetadataName(metadata, scheme), "_count", data.getLabels(), scheme);
+          writeNameAndLabels(writer, countName, null, data.getLabels(), scheme);
           writeLong(writer, data.getCount());
           writeScrapeTimestampAndNewline(writer, data);
         }
         if (data.hasSum()) {
-          writeNameAndLabels(
-              writer, getMetadataName(metadata, scheme), "_sum", data.getLabels(), scheme);
+          writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme);
           writeDouble(writer, data.getSum());
           writeScrapeTimestampAndNewline(writer, data);
         }
@@ -257,6 +263,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     // Prometheus text format does not support gaugehistogram's _gcount and _gsum.
     // So we append _gcount and _gsum as gauge metrics.
+    String baseName = getMetadataName(metadata, scheme);
+    String gaugeCountName = baseName + "_gcount";
+    String gaugeSumName = baseName + "_gsum";
     boolean metadataWritten = false;
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.hasCount()) {
@@ -264,8 +273,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           writeMetadata(writer, "_gcount", "gauge", metadata, scheme);
           metadataWritten = true;
         }
-        writeNameAndLabels(
-            writer, getMetadataName(metadata, scheme), "_gcount", data.getLabels(), scheme);
+        writeNameAndLabels(writer, gaugeCountName, null, data.getLabels(), scheme);
         writeLong(writer, data.getCount());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -277,8 +285,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           writeMetadata(writer, "_gsum", "gauge", metadata, scheme);
           metadataWritten = true;
         }
-        writeNameAndLabels(
-            writer, getMetadataName(metadata, scheme), "_gsum", data.getLabels(), scheme);
+        writeNameAndLabels(writer, gaugeSumName, null, data.getLabels(), scheme);
         writeDouble(writer, data.getSum());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -289,6 +296,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
+    String name = getMetadataName(metadata, scheme);
+    String countName = name + "_count";
+    String sumName = name + "_sum";
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
         continue;
@@ -299,25 +309,17 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       }
       for (Quantile quantile : data.getQuantiles()) {
         writeNameAndLabels(
-            writer,
-            getMetadataName(metadata, scheme),
-            null,
-            data.getLabels(),
-            scheme,
-            "quantile",
-            quantile.getQuantile());
+            writer, name, null, data.getLabels(), scheme, "quantile", quantile.getQuantile());
         writeDouble(writer, quantile.getValue());
         writeScrapeTimestampAndNewline(writer, data);
       }
       if (data.hasCount()) {
-        writeNameAndLabels(
-            writer, getMetadataName(metadata, scheme), "_count", data.getLabels(), scheme);
+        writeNameAndLabels(writer, countName, null, data.getLabels(), scheme);
         writeLong(writer, data.getCount());
         writeScrapeTimestampAndNewline(writer, data);
       }
       if (data.hasSum()) {
-        writeNameAndLabels(
-            writer, getMetadataName(metadata, scheme), "_sum", data.getLabels(), scheme);
+        writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme);
         writeDouble(writer, data.getSum());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -340,9 +342,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "", "gauge", metadata, scheme);
+    String name = getMetadataName(metadata, scheme);
     for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getDataPoints()) {
       for (int i = 0; i < data.size(); i++) {
-        writer.write(getMetadataName(metadata, scheme));
+        writer.write(name);
         writer.write('{');
         for (int j = 0; j < data.getLabels().size(); j++) {
           if (j > 0) {
@@ -356,7 +359,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         if (!data.getLabels().isEmpty()) {
           writer.write(",");
         }
-        writer.write(getMetadataName(metadata, scheme));
+        writer.write(name);
         writer.write("=\"");
         writeEscapedString(writer, data.getName(i));
         writer.write("\"} ");
@@ -374,8 +377,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "", "untyped", metadata, scheme);
+    String name = getMetadataName(metadata, scheme);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, getMetadataName(metadata, scheme), null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -424,7 +428,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       MetricMetadata metadata,
       EscapingScheme scheme)
       throws IOException {
-    String name = getMetadataName(metadata, scheme) + (suffix != null ? suffix : "");
+    String baseName = getMetadataName(metadata, scheme);
+    String name = suffix != null ? baseName + suffix : baseName;
     if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
       writer.write("# HELP ");
       writeName(writer, name, NameType.Metric);

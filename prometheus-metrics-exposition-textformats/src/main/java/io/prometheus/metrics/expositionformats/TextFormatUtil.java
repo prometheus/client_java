@@ -67,7 +67,22 @@ public class TextFormatUtil {
   }
 
   static void writeLong(Writer writer, long value) throws IOException {
-    writer.append(Long.toString(value));
+    if (value == Long.MIN_VALUE) {
+      writer.write("-9223372036854775808");
+      return;
+    }
+    char[] buf = new char[20];
+    int pos = 20;
+    boolean negative = value < 0;
+    long v = negative ? -value : value;
+    do {
+      buf[--pos] = (char) ('0' + (v % 10));
+      v /= 10;
+    } while (v > 0);
+    if (negative) {
+      buf[--pos] = '-';
+    }
+    writer.write(buf, pos, 20 - pos);
   }
 
   static void writeDouble(Writer writer, double d) throws IOException {
@@ -77,7 +92,6 @@ public class TextFormatUtil {
       writer.write("-Inf");
     } else {
       writer.write(Double.toString(d));
-      // FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
     }
   }
 
@@ -86,7 +100,7 @@ public class TextFormatUtil {
     if (timestampsInMs) {
       // correct for prometheus exposition format
       // https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details
-      writer.write(Long.toString(timestampMs));
+      writeLong(writer, timestampMs);
     } else {
       // incorrect for prometheus exposition format -
       // but we need to support it for backwards compatibility
@@ -95,7 +109,7 @@ public class TextFormatUtil {
   }
 
   static void writeOpenMetricsTimestamp(Writer writer, long timestampMs) throws IOException {
-    writer.write(Long.toString(timestampMs / 1000L));
+    writeLong(writer, timestampMs / 1000L);
     writer.write(".");
     long ms = timestampMs % 1000;
     if (ms < 100) {
@@ -104,7 +118,7 @@ public class TextFormatUtil {
     if (ms < 10) {
       writer.write("0");
     }
-    writer.write(Long.toString(ms));
+    writeLong(writer, ms);
   }
 
   static void writeEscapedString(Writer writer, String s) throws IOException {

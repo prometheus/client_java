@@ -1,7 +1,6 @@
 package io.prometheus.metrics.benchmarks;
 
 import io.prometheus.metrics.config.EscapingScheme;
-import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
@@ -9,39 +8,31 @@ import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
 /**
- * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text formats.
+ * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text
+ * formats.
  *
- * <pre>
- * Benchmark                                                                     Mode  Cnt       Score        Error   Units
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray                     thrpt    3   37567.116 ±  14566.571   ops/s
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.alloc.rate       thrpt    3    1466.289 ±    568.584  MB/sec
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.alloc.rate.norm  thrpt    3   40928.019 ±      0.006    B/op
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.count            thrpt    3     147.000               counts
- * HistogramTextFormatBenchmark.openMetricsWriteToByteArray:gc.time             thrpt    3      77.000                   ms
- * HistogramTextFormatBenchmark.openMetricsWriteToNull                          thrpt    3   36179.016 ±   1149.646   ops/s
- * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.alloc.rate            thrpt    3    1412.112 ±     44.791  MB/sec
- * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.alloc.rate.norm       thrpt    3   40928.019 ±      0.001    B/op
- * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.count                 thrpt    3     142.000               counts
- * HistogramTextFormatBenchmark.openMetricsWriteToNull:gc.time                  thrpt    3      74.000                   ms
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray                      thrpt    3   36616.472 ±   5189.952   ops/s
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.alloc.rate        thrpt    3    1434.773 ±    203.524  MB/sec
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.alloc.rate.norm   thrpt    3   41088.019 ±      0.003    B/op
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.count             thrpt    3     144.000               counts
- * HistogramTextFormatBenchmark.prometheusWriteToByteArray:gc.time              thrpt    3      73.000                   ms
- * HistogramTextFormatBenchmark.prometheusWriteToNull                           thrpt    3   36357.284 ±   4298.616   ops/s
- * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.alloc.rate             thrpt    3    1424.614 ±    168.607  MB/sec
- * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.alloc.rate.norm        thrpt    3   41088.019 ±      0.003    B/op
- * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.count                  thrpt    3     143.000               counts
- * HistogramTextFormatBenchmark.prometheusWriteToNull:gc.time                   thrpt    3      73.000                   ms
- * </pre>
+ * <p>Two variants per format:
+ *
+ * <ul>
+ *   <li>{@code writeToByteArray} — OutputStream path, new BufferedWriter created per call.
+ *   <li>{@code reusingWriter} — Writer path, BufferedWriter reused across calls.
+ * </ul>
+ *
+ * <p>Baseline (before allocation optimizations): ~41 KB/op for both Prometheus and OpenMetrics
+ * formats, dominated by the per-call BufferedWriter buffer (~16 KB) and number-to-string
+ * conversions.
  */
 public class HistogramTextFormatBenchmark {
 
@@ -70,9 +61,9 @@ public class HistogramTextFormatBenchmark {
     SNAPSHOTS = MetricSnapshots.of(builder.build());
   }
 
-  private static final ExpositionFormatWriter OPEN_METRICS_TEXT_FORMAT_WRITER =
+  private static final OpenMetricsTextFormatWriter OPEN_METRICS_TEXT_FORMAT_WRITER =
       OpenMetricsTextFormatWriter.create();
-  private static final ExpositionFormatWriter PROMETHEUS_TEXT_FORMAT_WRITER =
+  private static final PrometheusTextFormatWriter PROMETHEUS_TEXT_FORMAT_WRITER =
       PrometheusTextFormatWriter.create();
 
   @State(Scope.Benchmark)
@@ -82,6 +73,26 @@ public class HistogramTextFormatBenchmark {
 
     public WriterState() {
       this.byteArrayOutputStream = new ByteArrayOutputStream();
+    }
+  }
+
+  @State(Scope.Benchmark)
+  public static class ReusableWriterState {
+
+    final ByteArrayOutputStream openMetricsByteArrayOutputStream;
+    final ByteArrayOutputStream prometheusByteArrayOutputStream;
+    final BufferedWriter openMetricsWriter;
+    final BufferedWriter prometheusWriter;
+
+    public ReusableWriterState() {
+      this.openMetricsByteArrayOutputStream = new ByteArrayOutputStream();
+      this.prometheusByteArrayOutputStream = new ByteArrayOutputStream();
+      this.openMetricsWriter =
+          new BufferedWriter(
+              new OutputStreamWriter(openMetricsByteArrayOutputStream, StandardCharsets.UTF_8));
+      this.prometheusWriter =
+          new BufferedWriter(
+              new OutputStreamWriter(prometheusByteArrayOutputStream, StandardCharsets.UTF_8));
     }
   }
 
@@ -102,6 +113,14 @@ public class HistogramTextFormatBenchmark {
   }
 
   @Benchmark
+  public Writer openMetricsReusingWriter(ReusableWriterState state) throws IOException {
+    state.openMetricsByteArrayOutputStream.reset();
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(
+        state.openMetricsWriter, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
+    return state.openMetricsWriter;
+  }
+
+  @Benchmark
   public OutputStream prometheusWriteToByteArray(WriterState writerState) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
@@ -115,5 +134,13 @@ public class HistogramTextFormatBenchmark {
     OutputStream nullOutputStream = TextFormatUtilBenchmark.NullOutputStream.INSTANCE;
     PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return nullOutputStream;
+  }
+
+  @Benchmark
+  public Writer prometheusReusingWriter(ReusableWriterState state) throws IOException {
+    state.prometheusByteArrayOutputStream.reset();
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(
+        state.prometheusWriter, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
+    return state.prometheusWriter;
   }
 }
