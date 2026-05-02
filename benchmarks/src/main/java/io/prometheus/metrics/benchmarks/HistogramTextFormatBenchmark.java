@@ -15,24 +15,43 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Warmup;
 
 /**
  * Benchmarks for writing a classic histogram (10 label combinations × 12 buckets) to text formats.
  *
- * <p>Two variants per format:
+ * <p>Three variants per format:
  *
  * <ul>
- *   <li>{@code writeToByteArray} — OutputStream path, new BufferedWriter created per call.
- *   <li>{@code reusingWriter} — Writer path, BufferedWriter reused across calls.
+ *   <li>{@code writeToByteArray} — OutputStream path, new BufferedWriter created per call (~41
+ *       KB/op; IO stack allocation dominates).
+ *   <li>{@code writeToNull} — OutputStream path to /dev/null, new BufferedWriter still created per
+ *       call (same allocation as writeToByteArray; shows ByteArrayOutputStream write cost is
+ *       negligible).
+ *   <li>{@code reusingWriter} — Writer path, BufferedWriter reused across calls (~18 KB/op; saves
+ *       the ~25 KB BufferedWriter char[] buffer and OutputStreamWriter per call).
+ *   <li>{@code reusingWriterToNull} — Writer path, BufferedWriter reused, output to /dev/null.
+ *       Lowest-allocation floor; isolates pure formatting CPU cost with zero IO stack overhead.
  * </ul>
  *
- * <p>Baseline (before allocation optimizations): ~41 KB/op for both Prometheus and OpenMetrics
- * formats, dominated by the per-call BufferedWriter buffer (~16 KB) and number-to-string
- * conversions.
+ * <p>Key allocation sources:
+ *
+ * <ul>
+ *   <li>BufferedWriter internal char[8192] buffer: 16,384 bytes per call (eliminated by reuse).
+ *   <li>OutputStreamWriter + StreamEncoder state: ~1–2 KB per call (eliminated by reuse).
+ *   <li>Remaining ~18 KB/op in reuse variants: ByteArrayOutputStream byte[] growth + any
+ *       per-call String allocations remaining in the format path.
+ * </ul>
  */
+@Fork(3)
+@Warmup(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 2, timeUnit = TimeUnit.SECONDS)
 public class HistogramTextFormatBenchmark {
 
   private static final MetricSnapshots SNAPSHOTS;
@@ -95,6 +114,21 @@ public class HistogramTextFormatBenchmark {
     }
   }
 
+  @State(Scope.Benchmark)
+  public static class ReusableWriterToNullState {
+
+    final BufferedWriter openMetricsWriter;
+    final BufferedWriter prometheusWriter;
+
+    public ReusableWriterToNullState() {
+      OutputStream nullOutputStream = TextFormatUtilBenchmark.NullOutputStream.INSTANCE;
+      this.openMetricsWriter =
+          new BufferedWriter(new OutputStreamWriter(nullOutputStream, StandardCharsets.UTF_8));
+      this.prometheusWriter =
+          new BufferedWriter(new OutputStreamWriter(nullOutputStream, StandardCharsets.UTF_8));
+    }
+  }
+
   @Benchmark
   public OutputStream openMetricsWriteToByteArray(WriterState writerState) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
@@ -120,6 +154,13 @@ public class HistogramTextFormatBenchmark {
   }
 
   @Benchmark
+  public Writer openMetricsReusingWriterToNull(ReusableWriterToNullState state) throws IOException {
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(
+        state.openMetricsWriter, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
+    return state.openMetricsWriter;
+  }
+
+  @Benchmark
   public OutputStream prometheusWriteToByteArray(WriterState writerState) throws IOException {
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
@@ -138,6 +179,13 @@ public class HistogramTextFormatBenchmark {
   @Benchmark
   public Writer prometheusReusingWriter(ReusableWriterState state) throws IOException {
     state.prometheusByteArrayOutputStream.reset();
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(
+        state.prometheusWriter, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
+    return state.prometheusWriter;
+  }
+
+  @Benchmark
+  public Writer prometheusReusingWriterToNull(ReusableWriterToNullState state) throws IOException {
     PROMETHEUS_TEXT_FORMAT_WRITER.write(
         state.prometheusWriter, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return state.prometheusWriter;
