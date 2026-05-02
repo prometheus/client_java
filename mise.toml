@@ -110,16 +110,6 @@ echo "Running benchmarks with args: $JMH_ARGS"
 java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json $JMH_ARGS
 """
 
-[tasks."benchmark:format"]
-description = "Run format benchmarks only (HistogramTextFormat + TextFormatUtil), ~5 min"
-run = """
-./mvnw -pl benchmarks -am -DskipTests clean package -q
-java -jar ./benchmarks/target/benchmarks.jar \
-  "HistogramTextFormatBenchmark|TextFormatUtilBenchmark" \
-  -prof gc \
-  -rf json -rff format-benchmark-results.json
-"""
-
 [tasks."benchmark:generate-summary"]
 description = "Generate summary from existing benchmark-results.json"
 run = "python3 ./.mise/tasks/generate_benchmark_summary.py"

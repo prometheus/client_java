@@ -45,8 +45,8 @@ import org.openjdk.jmh.annotations.Warmup;
  * <ul>
  *   <li>BufferedWriter internal char[8192] buffer: 16,384 bytes per call (eliminated by reuse).
  *   <li>OutputStreamWriter + StreamEncoder state: ~1–2 KB per call (eliminated by reuse).
- *   <li>Remaining ~18 KB/op in reuse variants: ByteArrayOutputStream byte[] growth + any
- *       per-call String allocations remaining in the format path.
+ *   <li>Remaining ~18 KB/op in reuse variants: ByteArrayOutputStream byte[] growth + any per-call
+ *       String allocations remaining in the format path.
  * </ul>
  */
 @Fork(3)
