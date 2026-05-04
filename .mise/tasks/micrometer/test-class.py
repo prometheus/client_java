@@ -11,15 +11,15 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT / "lib") not in sys.path:
     sys.path.insert(0, str(ROOT / "lib"))
 
-from micrometer_compat import (
-    install_local_artifacts,
-    prepare_repo,
-    run_gradle_test,
-    write_init_script,
-)
-
 
 def main() -> int:
+    from micrometer_compat import (
+        install_local_artifacts,
+        prepare_repo,
+        run_gradle_test,
+        write_init_script,
+    )
+
     install_local_artifacts()
     prepare_repo()
     write_init_script()

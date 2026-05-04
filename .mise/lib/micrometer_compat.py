@@ -9,7 +9,9 @@ from typing import Optional
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-DEFAULT_MICROMETER_DIR = Path(os.environ.get("MICROMETER_DIR", "/tmp/micrometer-compat"))
+DEFAULT_MICROMETER_DIR = Path(
+    os.environ.get("MICROMETER_DIR", "/tmp/micrometer-compat")
+)
 DEFAULT_MICROMETER_REMOTE = os.environ.get("MICROMETER_REMOTE", "origin")
 DEFAULT_MICROMETER_REF = os.environ.get("MICROMETER_REF", "main")
 DEFAULT_INIT_SCRIPT = Path(

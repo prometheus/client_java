@@ -34,6 +34,11 @@
       "mise"
     ]
   },
+  ".github/workflows/micrometer-compatibility.yml": {
+    "regex": [
+      "mise"
+    ]
+  },
   ".github/workflows/native-tests.yml": {
     "regex": [
       "mise"
