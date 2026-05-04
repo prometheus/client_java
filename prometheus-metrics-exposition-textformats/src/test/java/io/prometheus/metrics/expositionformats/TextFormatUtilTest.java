@@ -29,6 +29,21 @@ class TextFormatUtilTest {
   }
 
   @Test
+  void testWriteLong() throws IOException {
+    assertThat(writeLong(0)).isEqualTo("0");
+    assertThat(writeLong(1)).isEqualTo("1");
+    assertThat(writeLong(-1)).isEqualTo("-1");
+    assertThat(writeLong(Long.MAX_VALUE)).isEqualTo("9223372036854775807");
+    assertThat(writeLong(Long.MIN_VALUE)).isEqualTo("-9223372036854775808");
+  }
+
+  private static String writeLong(long value) throws IOException {
+    StringWriter writer = new StringWriter();
+    TextFormatUtil.writeLong(writer, value);
+    return writer.toString();
+  }
+
+  @Test
   void testWritePrometheusTimestamp() throws IOException {
     assertThat(writePrometheusTimestamp(true)).isEqualTo("1000");
     assertThat(writePrometheusTimestamp(false)).isEqualTo("1.000");

@@ -192,7 +192,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "", "gauge", metadata, scheme);
+    writeMetadata(writer, null, "gauge", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
@@ -204,7 +204,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeHistogram(Writer writer, HistogramSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "", "histogram", metadata, scheme);
+    writeMetadata(writer, null, "histogram", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
     String bucketName = name + "_bucket";
     String countName = name + "_count";
@@ -293,7 +293,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         continue;
       }
       if (!metadataWritten) {
-        writeMetadata(writer, "", "summary", metadata, scheme);
+        writeMetadata(writer, null, "summary", metadata, scheme);
         metadataWritten = true;
       }
       for (Quantile quantile : data.getQuantiles()) {
@@ -330,7 +330,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeStateSet(Writer writer, StateSetSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "", "gauge", metadata, scheme);
+    writeMetadata(writer, null, "gauge", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
     for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getDataPoints()) {
       for (int i = 0; i < data.size(); i++) {
@@ -365,7 +365,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeUnknown(Writer writer, UnknownSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "", "untyped", metadata, scheme);
+    writeMetadata(writer, null, "untyped", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
