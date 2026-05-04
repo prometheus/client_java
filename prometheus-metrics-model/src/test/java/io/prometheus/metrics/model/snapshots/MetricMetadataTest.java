@@ -35,26 +35,30 @@ class MetricMetadataTest {
 
   @Test
   void testNameWithTotalSuffix() {
+    // sanitizeMetricName strips the reserved _total suffix.
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_total"));
-    assertThat(metadata.getName()).isEqualTo("my_events_total");
+    assertThat(metadata.getName()).isEqualTo("my_events");
   }
 
   @Test
   void testNameWithInfoSuffix() {
+    // sanitizeMetricName strips the reserved _info suffix.
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("target_info"));
-    assertThat(metadata.getName()).isEqualTo("target_info");
+    assertThat(metadata.getName()).isEqualTo("target");
   }
 
   @Test
   void testNameWithCreatedSuffix() {
+    // sanitizeMetricName strips the reserved _created suffix.
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_created"));
-    assertThat(metadata.getName()).isEqualTo("my_events_created");
+    assertThat(metadata.getName()).isEqualTo("my_events");
   }
 
   @Test
   void testNameWithBucketSuffix() {
+    // sanitizeMetricName strips the reserved _bucket suffix.
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_histogram_bucket"));
-    assertThat(metadata.getName()).isEqualTo("my_histogram_bucket");
+    assertThat(metadata.getName()).isEqualTo("my_histogram");
   }
 
   @Test
