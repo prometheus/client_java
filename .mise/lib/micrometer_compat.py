@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import Optional
 
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_MICROMETER_DIR = Path(
     os.environ.get("MICROMETER_DIR", "/tmp/micrometer-compat")
+)
+DEFAULT_MICROMETER_REPOSITORY = os.environ.get(
+    "MICROMETER_REPOSITORY", "micrometer-metrics/micrometer"
 )
 DEFAULT_MICROMETER_REMOTE = os.environ.get("MICROMETER_REMOTE", "origin")
 DEFAULT_MICROMETER_REF = os.environ.get("MICROMETER_REF", "main")
@@ -22,6 +24,10 @@ DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION", "1.6.1")
 
 def run_cmd(cmd: list[str], cwd: Optional[Path] = None) -> None:
     subprocess.run(cmd, cwd=cwd, check=True)
+
+
+def micrometer_repository_url(repository: str) -> str:
+    return f"https://github.com/{repository}.git"
 
 
 def check_clean_worktree(micrometer_dir: Path) -> None:
@@ -64,18 +70,23 @@ def write_init_script(
 
 def prepare_repo(
     micrometer_dir: Path = DEFAULT_MICROMETER_DIR,
+    repository: str = DEFAULT_MICROMETER_REPOSITORY,
     remote: str = DEFAULT_MICROMETER_REMOTE,
     ref: str = DEFAULT_MICROMETER_REF,
 ) -> None:
+    repository_url = micrometer_repository_url(repository)
     if (micrometer_dir / ".git").is_dir():
         check_clean_worktree(micrometer_dir)
+        run_cmd(
+            ["git", "remote", "set-url", remote, repository_url], cwd=micrometer_dir
+        )
         run_cmd(["git", "fetch", remote, ref], cwd=micrometer_dir)
     else:
         run_cmd(
             [
                 "git",
                 "clone",
-                "https://github.com/micrometer-metrics/micrometer.git",
+                repository_url,
                 str(micrometer_dir),
             ]
         )
@@ -86,7 +97,7 @@ def prepare_repo(
     )
 
 
-def install_local_artifacts(root_dir: Path = ROOT_DIR) -> None:
+def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
     run_cmd(
         [
             "./mvnw",

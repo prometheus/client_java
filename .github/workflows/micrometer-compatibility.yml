@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      micrometer-repository:
+        description: Micrometer repository to test, in owner/name form
+        required: false
+        default: micrometer-metrics/micrometer
       micrometer-ref:
         description: Micrometer branch, tag, or commit to test
         required: false
@@ -32,5 +36,6 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Run Micrometer compatibility tests
         env:
+          MICROMETER_REPOSITORY: ${{ github.event.inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
           MICROMETER_REF: ${{ github.event.inputs.micrometer-ref || 'main' }}
         run: mise run micrometer:test

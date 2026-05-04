@@ -3,13 +3,10 @@
 # [MISE] description="Run Micrometer PrometheusMeterRegistryTest against a target Micrometer ref"
 # [MISE] alias="micrometer:test-class"
 
-from pathlib import Path
 import sys
 
 
-ROOT = Path(__file__).resolve().parents[2]
-if str(ROOT / "lib") not in sys.path:
-    sys.path.insert(0, str(ROOT / "lib"))
+sys.path.insert(0, ".mise/lib")
 
 
 def main() -> int:
