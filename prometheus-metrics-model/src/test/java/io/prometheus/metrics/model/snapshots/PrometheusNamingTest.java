@@ -27,7 +27,10 @@ class PrometheusNamingTest {
     assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("a.b")).isEqualTo("a.b");
+    // "_total" / ".total" corner cases: the suffix is the entire name, so the separator
+    // character is dropped to avoid returning an empty string.
     assertThat(sanitizeMetricName("_total")).isEqualTo("total");
+    assertThat(sanitizeMetricName(".total")).isEqualTo("total");
     assertThat(sanitizeMetricName("total")).isEqualTo("total");
     assertThat(sanitizeMetricName("my_events_created")).isEqualTo("my_events");
     assertThat(sanitizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram");

@@ -178,25 +178,29 @@ public class PrometheusNaming {
    * bridge) which relied on {@code sanitizeMetricName} to strip these suffixes before passing names
    * to the snapshot builders.
    *
-   * @throws IllegalArgumentException if the input is empty or becomes empty after stripping
+   * @throws IllegalArgumentException if the input is empty
    */
   public static String sanitizeMetricName(String metricName) {
     if (metricName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
     }
     String sanitizedName = metricName;
-    boolean modified = true;
-    while (modified) {
-      modified = false;
+    boolean stripped = true;
+    while (stripped) {
+      stripped = false;
+      // When the name equals the suffix exactly, drop the leading separator character to avoid
+      // returning an empty string (e.g. "_total" → "total", ".info" → "info").
       for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
         if (sanitizedName.equals(reservedSuffix)) {
-          // Corner case: sanitizeMetricName("_total") returns "total".
           return reservedSuffix.substring(1);
         }
+      }
+      for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
         if (sanitizedName.endsWith(reservedSuffix)) {
           sanitizedName =
               sanitizedName.substring(0, sanitizedName.length() - reservedSuffix.length());
-          modified = true;
+          stripped = true;
+          break; // restart the outer loop to re-check all suffixes on the shortened name
         }
       }
     }
