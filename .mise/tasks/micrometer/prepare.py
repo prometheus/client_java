@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+
+# [MISE] description="Install local artifacts and check out a target Micrometer ref"
+# [MISE] alias="micrometer:prepare"
+
+from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT / "lib") not in sys.path:
+    sys.path.insert(0, str(ROOT / "lib"))
+
+from micrometer_compat import install_local_artifacts, prepare_repo, write_init_script
+
+
+def main() -> int:
+    install_local_artifacts()
+    prepare_repo()
+    write_init_script()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
