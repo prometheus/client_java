@@ -114,11 +114,6 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme scheme)
       throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-    write(writer, metricSnapshots, scheme);
-  }
-
-  public void write(Writer writer, MetricSnapshots metricSnapshots, EscapingScheme scheme)
-      throws IOException {
     MetricSnapshots merged = TextFormatUtil.mergeDuplicates(metricSnapshots);
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, scheme);
