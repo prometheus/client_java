@@ -24,6 +24,8 @@ taplo = "0.10.0"
 
 [env]
 FLINT_CONFIG_DIR = ".github/config"
+MICROMETER_REPOSITORY = "zeitlinger/micrometer"
+MICROMETER_REF = "prom-client-java-compat-prototype"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
 LGTM_VERSION = "0.25.0"
 
