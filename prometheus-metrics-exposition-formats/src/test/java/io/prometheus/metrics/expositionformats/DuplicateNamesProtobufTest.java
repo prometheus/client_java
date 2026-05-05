@@ -239,6 +239,28 @@ class DuplicateNamesProtobufTest {
     assertThat(gaugeFamily.getMetric(0).getGauge().getValue()).isEqualTo(50.0);
   }
 
+  @Test
+  void testLegacyGaugeNameWithDotTotal_usesBaseName() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            GaugeSnapshot.builder()
+                .name("legacy.total")
+                .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(7).build())
+                .build());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
+    writer.write(out, snapshots, EscapingScheme.UNDERSCORE_ESCAPING);
+
+    List<Metrics.MetricFamily> metricFamilies = parseProtobufOutput(out);
+
+    assertThat(metricFamilies).hasSize(1);
+    Metrics.MetricFamily family = metricFamilies.get(0);
+    assertThat(family.getName()).isEqualTo("legacy");
+    assertThat(family.getType()).isEqualTo(Metrics.MetricType.GAUGE);
+    assertThat(family.getMetricCount()).isEqualTo(1);
+    assertThat(family.getMetric(0).getGauge().getValue()).isEqualTo(7.0);
+  }
+
   private static MetricSnapshots getMetricSnapshots() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
