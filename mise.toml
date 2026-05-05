@@ -107,7 +107,7 @@ run = """
 ./mvnw -pl benchmarks -am -DskipTests clean package
 JMH_ARGS="${JMH_ARGS:--f 3 -wi 3 -i 5}"
 echo "Running benchmarks with args: $JMH_ARGS"
-java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json $JMH_ARGS
+java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json $JMH_ARGS -prof gc
 """
 
 [tasks."benchmark:generate-summary"]
