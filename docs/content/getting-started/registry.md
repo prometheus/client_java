@@ -116,6 +116,14 @@ and full label-schema validation and duplicate detection still apply. A collecto
 non-null type but leaves `getLabelNames()` as `null` is still validated, with its labels treated as
 empty.
 
+This is also relevant for downstream adapter libraries that bridge to this registry. If an adapter
+implements `MultiCollector`, its registration-time metadata must match the metric families it will
+actually emit at scrape time. In practice, that means `getPrometheusNames()`, `getMetricType(...)`,
+`getLabelNames(...)`, and `getMetadata(...)` need to describe the same names, types, labels, and
+suffix behavior as the eventual `MetricSnapshot` output. Otherwise an adapter may pass or fail
+collision checks differently after upgrading to a newer client_java release, even if its scrape
+output logic did not change.
+
 ## Unregistering a Metric
 
 There is no automatic expiry of unused metrics (yet), once a metric is registered it will remain
