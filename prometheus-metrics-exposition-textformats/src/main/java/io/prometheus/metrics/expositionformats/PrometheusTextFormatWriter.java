@@ -192,9 +192,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, "", "gauge", metadata, scheme);
+    String gaugeName = resolveLegacyGaugeName(metadata, scheme);
+    writeMetadataWithFullName(writer, gaugeName, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, getMetadataName(metadata, scheme), null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, gaugeName, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -473,6 +474,19 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       return fullName.substring(0, fullName.length() - suffix.length());
     }
     return fullName;
+  }
+
+  private static String resolveLegacyGaugeName(MetricMetadata metadata, EscapingScheme scheme) {
+    String originalName = metadata.getOriginalName();
+    if (originalName.endsWith(".created")) {
+      return PrometheusNaming.escapeName(
+          originalName.substring(0, originalName.length() - ".created".length()), scheme);
+    }
+    if (originalName.endsWith(".total")) {
+      return PrometheusNaming.escapeName(
+          originalName.substring(0, originalName.length() - ".total".length()), scheme);
+    }
+    return getMetadataName(metadata, scheme);
   }
 
   private void writeEscapedHelp(Writer writer, String s) throws IOException {

@@ -667,6 +667,63 @@ class ExpositionFormatsTest {
   }
 
   @Test
+  void testGaugeReservedSuffixCompatibilityOutsideOpenMetrics() throws IOException {
+    GaugeSnapshot createdGauge =
+        GaugeSnapshot.builder()
+            .name("test3.created")
+            .dataPoint(GaugeDataPointSnapshot.builder().value(3).build())
+            .build();
+    assertOpenMetricsText(
+        """
+        # TYPE U__test3_2e_created gauge
+        U__test3_2e_created 3.0
+        # EOF
+        """,
+        createdGauge);
+    assertPrometheusText(
+        """
+        # TYPE test3 gauge
+        test3 3.0
+        """,
+        createdGauge);
+    assertPrometheusTextWithoutCreated(
+        """
+        # TYPE test3 gauge
+        test3 3.0
+        """,
+        createdGauge);
+    assertPrometheusProtobuf(
+        "name: \"test3\" type: GAUGE metric { gauge { value: 3.0 } }", createdGauge);
+
+    GaugeSnapshot totalGauge =
+        GaugeSnapshot.builder()
+            .name("test6.total")
+            .dataPoint(GaugeDataPointSnapshot.builder().value(6).build())
+            .build();
+    assertOpenMetricsText(
+        """
+        # TYPE U__test6_2e_total gauge
+        U__test6_2e_total 6.0
+        # EOF
+        """,
+        totalGauge);
+    assertPrometheusText(
+        """
+        # TYPE test6 gauge
+        test6 6.0
+        """,
+        totalGauge);
+    assertPrometheusTextWithoutCreated(
+        """
+        # TYPE test6 gauge
+        test6 6.0
+        """,
+        totalGauge);
+    assertPrometheusProtobuf(
+        "name: \"test6\" type: GAUGE metric { gauge { value: 6.0 } }", totalGauge);
+  }
+
+  @Test
   void testGaugeUTF8() throws IOException {
     String prometheusText =
         """
