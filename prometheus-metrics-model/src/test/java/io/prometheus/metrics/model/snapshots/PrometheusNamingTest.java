@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.normalizeMetricName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeLabelName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
@@ -70,6 +71,29 @@ class PrometheusNamingTest {
     assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
     assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
     assertThat(sanitizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
+  }
+
+  @Test
+  void testNormalizeMetricName() {
+    assertThat(normalizeMetricName("my_counter_total")).isEqualTo("my_counter_total");
+    assertThat(normalizeMetricName("jvm.info")).isEqualTo("jvm.info");
+    assertThat(normalizeMetricName("jvm_info")).isEqualTo("jvm_info");
+    assertThat(normalizeMetricName("a.b")).isEqualTo("a.b");
+    assertThat(normalizeMetricName("_total")).isEqualTo("_total");
+    assertThat(normalizeMetricName(".total")).isEqualTo(".total");
+    assertThat(normalizeMetricName("my_events_created")).isEqualTo("my_events_created");
+    assertThat(normalizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram_bucket");
+  }
+
+  @Test
+  void testNormalizeMetricNameWithUnit() {
+    assertThat(prometheusName(normalizeMetricName("def", Unit.RATIO)))
+        .isEqualTo("def_" + Unit.RATIO);
+    assertThat(prometheusName(normalizeMetricName("my_counter_total", Unit.RATIO)))
+        .isEqualTo("my_counter_total_" + Unit.RATIO);
+    assertThat(normalizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm.info_" + Unit.RATIO);
+    assertThat(normalizeMetricName("_total", Unit.RATIO)).isEqualTo("_total_" + Unit.RATIO);
+    assertThat(normalizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
   }
 
   @Test
