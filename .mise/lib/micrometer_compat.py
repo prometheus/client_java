@@ -6,6 +6,7 @@ import os
 import subprocess
 from pathlib import Path
 from typing import Optional
+import xml.etree.ElementTree as ET
 
 
 DEFAULT_MICROMETER_DIR = Path(
@@ -19,7 +20,7 @@ DEFAULT_MICROMETER_REF = os.environ.get("MICROMETER_REF", "main")
 DEFAULT_INIT_SCRIPT = Path(
     os.environ.get("MICROMETER_INIT_SCRIPT", "/tmp/micrometer-prom-local.init.gradle")
 )
-DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION", "1.6.1")
+DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION")
 
 
 def run_cmd(cmd: list[str], cwd: Optional[Path] = None) -> None:
@@ -44,9 +45,25 @@ def check_clean_worktree(micrometer_dir: Path) -> None:
         )
 
 
+def get_prom_version(root_dir: Path = Path.cwd()) -> str:
+    configured_version = DEFAULT_PROM_VERSION
+    if configured_version:
+        return configured_version
+    pom = ET.parse(root_dir / "pom.xml")
+    root = pom.getroot()
+    version = root.findtext("./{*}version")
+    if not version:
+        version = root.findtext("./{*}parent/{*}version")
+    if not version:
+        raise RuntimeError("could not determine Prometheus version from pom.xml")
+    return version
+
+
 def write_init_script(
-    init_script: Path = DEFAULT_INIT_SCRIPT, prom_version: str = DEFAULT_PROM_VERSION
+    init_script: Path = DEFAULT_INIT_SCRIPT, prom_version: Optional[str] = None
 ) -> None:
+    if prom_version is None:
+        prom_version = get_prom_version()
     init_script.write_text(
         f"""allprojects {{
     repositories {{
