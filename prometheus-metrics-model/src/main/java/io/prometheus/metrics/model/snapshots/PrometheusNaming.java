@@ -180,6 +180,9 @@ public class PrometheusNaming {
    * bridge) which relied on {@code sanitizeMetricName} to strip these suffixes before passing names
    * to the snapshot builders.
    *
+   * <p>If you want permissive normalization that keeps reserved suffixes intact, use {@link
+   * #normalizeMetricName(String)} instead.
+   *
    * @throws IllegalArgumentException if the input is empty
    */
   public static String sanitizeMetricName(String metricName) {
