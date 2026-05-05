@@ -46,7 +46,9 @@ public class PrometheusNaming {
    * format, this will be represented as two values: {@code processing_time_seconds_total} for the
    * counter value, and the optional {@code processing_time_seconds_created} timestamp.
    *
-   * <p>Use {@link #sanitizeMetricName(String)} to convert arbitrary Strings to valid metric names.
+   * <p>Use {@link #sanitizeMetricName(String)} for compatibility-preserving sanitization that
+   * strips reserved suffixes, or {@link #normalizeMetricName(String)} for permissive normalization
+   * that keeps the original suffixes intact.
    */
   public static boolean isValidMetricName(String name) {
     return validateMetricName(name) == null;
@@ -178,6 +180,9 @@ public class PrometheusNaming {
    * bridge) which relied on {@code sanitizeMetricName} to strip these suffixes before passing names
    * to the snapshot builders.
    *
+   * <p>If you want permissive normalization that keeps reserved suffixes intact, use {@link
+   * #normalizeMetricName(String)} instead.
+   *
    * @throws IllegalArgumentException if the input is empty
    */
   public static String sanitizeMetricName(String metricName) {
@@ -213,6 +218,37 @@ public class PrometheusNaming {
    */
   public static String sanitizeMetricName(String metricName, Unit unit) {
     String result = sanitizeMetricName(metricName);
+    if (unit != null) {
+      if (!result.endsWith("_" + unit) && !result.endsWith("." + unit)) {
+        result += "_" + unit;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Convert an arbitrary string to a valid metric name without stripping reserved suffixes.
+   *
+   * <p>Any non-empty valid UTF-8 string is accepted and returned unchanged. This is the permissive
+   * normalization behavior introduced in 1.6.0. Use this method for new integrations that want to
+   * preserve the original metric name and rely on registration-time collision detection instead of
+   * suffix stripping.
+   *
+   * @throws IllegalArgumentException if the input is empty
+   */
+  public static String normalizeMetricName(String metricName) {
+    if (metricName.isEmpty()) {
+      throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
+    }
+    return metricName;
+  }
+
+  /**
+   * Like {@link #normalizeMetricName(String)}, but also makes sure that the unit is appended as a
+   * suffix if the unit is not {@code null}.
+   */
+  public static String normalizeMetricName(String metricName, Unit unit) {
+    String result = normalizeMetricName(metricName);
     if (unit != null) {
       if (!result.endsWith("_" + unit) && !result.endsWith("." + unit)) {
         result += "_" + unit;
