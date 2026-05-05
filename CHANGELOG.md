@@ -25,6 +25,12 @@
 > To keep the Prometheus and OM1 output unambiguous, the registry tracks claimed exposition names
 > and still rejects registrations that would collide at scrape time.
 >
+> Downstream adapter libraries that implement `MultiCollector` need their registration-time
+> metadata to match the metric families they emit at scrape time. When upgrading to 1.6.0+, adapter
+> registration metadata needs to stay aligned with emitted names, types, label names, and suffix
+> behavior under the new collision model.
+> See also: [Validation at registration only](docs/content/getting-started/registry.md#validation-at-registration-only)
+>
 > | Example | Before 1.6.0 | Since 1.6.0 | Reason |
 > | --- | --- | --- | --- |
 > | `Gauge("foo_total")` | Rejected | Allowed | Not breaking because this previously failed at registration, so no working setup changes behavior, and safe because `_total` suffix expansion applies to counters, not gauges. |
