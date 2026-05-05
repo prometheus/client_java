@@ -22,6 +22,24 @@
 > As part of the OM2 work, metric-name suffix handling moved from metric creation time to scrape
 > time. A positive side effect is that metric names are now more flexible across the board, for
 > example names ending in suffixes like `_total` are accepted where they were previously rejected.
+> This is not just an internal model change and not just an OM2 change: it also affects
+> user-visible exposition in OM1, OpenMetrics, and protobuf for some arbitrary metric names ending
+> in suffix-like strings such as `.created`, `.total`, `.info`, or `.bucket`.
+>
+> For real counter and info semantics, the exposed names are mostly preserved:
+>
+> | Example | Before 1.6.0 | Since 1.6.0 |
+> | --- | --- | --- |
+> | `Counter("events")` | `events_total` | `events_total` |
+> | `Counter("events_total")` | `events_total` | `events_total` |
+>
+> For arbitrary names ending in suffix-like strings, the exposed output may change:
+>
+> | Example | Before 1.6.0 | Since 1.6.0 |
+> | --- | --- | --- |
+> | `Gauge("test3.created")` | `test3` | `test3_created` |
+> | `Gauge("test6.total")` | `test6` | `test6_total` |
+>
 > To keep the Prometheus and OM1 output unambiguous, the registry tracks claimed exposition names
 > and still rejects registrations that would collide at scrape time.
 >

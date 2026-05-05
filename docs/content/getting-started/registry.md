@@ -83,6 +83,20 @@ Counter eventsTotal2 = Counter.builder()
 Suffix handling happens at scrape time. This makes metric names more flexible while keeping the
 exposed output unambiguous.
 
+This is not just an internal validation change and not just an OpenMetrics 2.0 change. It also
+affects user-visible exposition in Prometheus-facing formats for some arbitrary metric names ending
+in suffix-like strings.
+
+For real counter and info semantics, the exposed names are mostly preserved. For arbitrary metric
+names ending in suffix-like strings, the exposed output may change.
+
+| Metric builder input      | Before 1.6.0 | Since 1.6.0 |
+| ------------------------- | ------------ | ----------- |
+| `Counter("events")`      | `events_total` | `events_total` |
+| `Counter("events_total")` | `events_total` | `events_total` |
+| `Gauge("test3.created")` | `test3` | `test3_created` |
+| `Gauge("test6.total")`   | `test6` | `test6_total` |
+
 The registry now tracks not only the metric names you register, but also the exposition names they
 would claim in OpenMetrics 1.x and Prometheus text format, such as `_total`, `_count`, `_sum`,
 `_bucket`, `_created`, and `_info`.
