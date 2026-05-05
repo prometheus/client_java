@@ -39,8 +39,8 @@ jobs:
           fetch-depth: 0
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          version: v2026.4.23
-          sha256: 4a650daf1c6db2bb9c32a4d4f6d2389051906f85792d97b04ad10b9f6e212372
+          version: v2026.5.0
+          sha256: 7db5db7a36d28203eb8329140d98fb26b41f5efea32d762f69a1e4b369e1e1a8
           cache: "false"
       - name: Setup Pages
         id: pages
