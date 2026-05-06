@@ -7,7 +7,7 @@ max_retries = 2
 max_concurrency = 4
 
 # Check link anchors
-include_fragments = true
+include_fragments = "anchor-only"
 
 base_url = "https://prometheus.github.io"
 exclude_path = ["docs/themes", "CHANGELOG.md"]
