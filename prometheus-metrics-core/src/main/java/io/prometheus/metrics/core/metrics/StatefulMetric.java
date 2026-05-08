@@ -207,8 +207,8 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
 
     /**
      * Provide additional labels to be merged into every automatically-sampled exemplar. The
-     * supplier is called each time an exemplar is sampled, so it can return dynamic values (e.g.
-     * a request-scoped identifier from a thread-local). The supplier is only invoked when a valid,
+     * supplier is called each time an exemplar is sampled, so it can return dynamic values (e.g. a
+     * request-scoped identifier from a thread-local). The supplier is only invoked when a valid,
      * sampled span context is present; it has no effect when tracing is not active.
      */
     public B exemplarLabelsSupplier(Supplier<Labels> supplier) {

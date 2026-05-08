@@ -329,9 +329,7 @@ class CounterTest {
     Counter counter = Counter.builder().name("requests_total").build();
     counter.incWithExemplar(
         Labels.of(
-            Exemplar.TRACE_ID, "abc123",
-            Exemplar.SPAN_ID, "def456",
-            "management_id", "mgmt-42"));
+            Exemplar.TRACE_ID, "abc123", Exemplar.SPAN_ID, "def456", "management_id", "mgmt-42"));
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     new OpenMetricsTextFormatWriter(false, true)
