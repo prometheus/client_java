@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -35,6 +36,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 
   @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final Supplier<Labels> exemplarLabelsSupplier;
 
   private Counter(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
@@ -47,6 +49,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     } else {
       exemplarSamplerConfig = null;
     }
+    exemplarLabelsSupplier = builder.exemplarLabelsSupplier;
   }
 
   @Override
@@ -101,7 +104,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   @Override
   protected DataPoint newDataPoint() {
     if (exemplarSamplerConfig != null) {
-      return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
+      return new DataPoint(new ExemplarSampler(exemplarSamplerConfig, exemplarLabelsSupplier));
     } else {
       return new DataPoint(null);
     }
