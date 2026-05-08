@@ -66,9 +66,9 @@ public class ExemplarSampler {
 
   /**
    * Constructor that accepts a supplier of additional labels to be merged into every
-   * automatically-sampled exemplar. The supplier is called each time an exemplar is sampled
-   * from a span context, so it can return dynamic values (e.g. a request-scoped identifier).
-   * The supplier is only called when a valid, sampled span context is present.
+   * automatically-sampled exemplar. The supplier is called each time an exemplar is sampled from a
+   * span context, so it can return dynamic values (e.g. a request-scoped identifier). The supplier
+   * is only called when a valid, sampled span context is present.
    */
   public ExemplarSampler(
       ExemplarSamplerConfig config, @Nullable Supplier<Labels> additionalLabelsSupplier) {
