@@ -115,7 +115,8 @@ PushGateway pushGateway = PushGateway.builder()
 However, this requires that the JVM can validate the server certificate.
 
 If you want to skip certificate verification, you need to provide your own
-[HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
+`HttpConnectionFactory`. See the
+[API docs](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
 ## Configuration Properties
@@ -123,3 +124,34 @@ The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete ex
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html)
 supports a couple of properties that can be configured at runtime.
 See [config]({{< relref "../config/config.md" >}}).
+
+## Troubleshooting shaded jars
+
+If you build a shaded jar with the Maven Shade Plugin and `minimizeJar=true`, the PushGateway may
+fail at runtime with an error like this:
+
+```text
+java.lang.RuntimeException: class
+io.prometheus.metrics.expositionformats.PrometheusProtobufWriter is not available
+```
+
+This happens because the PushGateway loads the protobuf writer implementation via reflection. The
+Maven Shade Plugin does not detect that reflective usage during minimization, so it may strip the
+required classes from the final jar.
+
+To avoid this, keep the `prometheus-metrics-exposition-formats` artifact on the classpath and
+preserve the protobuf-related packages in your shade configuration:
+
+```xml
+<filters>
+  <filter>
+    <artifact>io.prometheus:prometheus-metrics-exposition-formats</artifact>
+    <includes>
+      <include>io/prometheus/metrics/expositionformats/**</include>
+      <include>io/prometheus/metrics/shaded/**</include>
+    </includes>
+  </filter>
+</filters>
+```
+
+Alternatively, disable jar minimization for the shaded build.
