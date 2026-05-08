@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -50,6 +51,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   private final long maxAgeSeconds;
   private final int ageBuckets;
   @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final Supplier<Labels> exemplarLabelsSupplier;
 
   private Summary(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
@@ -65,6 +67,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     } else {
       exemplarSamplerConfig = null;
     }
+    exemplarLabelsSupplier = builder.exemplarLabelsSupplier;
   }
 
   private List<CKMSQuantiles.Quantile> makeQuantiles(MetricsProperties[] properties) {
@@ -153,7 +156,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
                 ageBuckets);
       }
       if (exemplarSamplerConfig != null) {
-        exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
+        exemplarSampler = new ExemplarSampler(exemplarSamplerConfig, exemplarLabelsSupplier);
       } else {
         exemplarSampler = null;
       }

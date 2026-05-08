@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -45,8 +46,10 @@ public class ExemplarSampler {
   private final SpanContext
       spanContext; // may be null, in that case SpanContextSupplier.getSpanContext() is used.
 
+  @Nullable private final Supplier<Labels> additionalLabelsSupplier;
+
   public ExemplarSampler(ExemplarSamplerConfig config) {
-    this(config, null);
+    this(config, null, null);
   }
 
   /**
@@ -58,10 +61,29 @@ public class ExemplarSampler {
    * SpanContextSupplier.getSpanContext()} is called to find a span context.
    */
   public ExemplarSampler(ExemplarSamplerConfig config, @Nullable SpanContext spanContext) {
+    this(config, spanContext, null);
+  }
+
+  /**
+   * Constructor that accepts a supplier of additional labels to be merged into every
+   * automatically-sampled exemplar. The supplier is called each time an exemplar is sampled
+   * from a span context, so it can return dynamic values (e.g. a request-scoped identifier).
+   * The supplier is only called when a valid, sampled span context is present.
+   */
+  public ExemplarSampler(
+      ExemplarSamplerConfig config, @Nullable Supplier<Labels> additionalLabelsSupplier) {
+    this(config, null, additionalLabelsSupplier);
+  }
+
+  public ExemplarSampler(
+      ExemplarSamplerConfig config,
+      @Nullable SpanContext spanContext,
+      @Nullable Supplier<Labels> additionalLabelsSupplier) {
     this.config = config;
     this.exemplars = new Exemplar[config.getNumberOfExemplars()];
     this.customExemplars = new Exemplar[exemplars.length];
     this.spanContext = spanContext;
+    this.additionalLabelsSupplier = additionalLabelsSupplier;
   }
 
   public Exemplars collect() {
@@ -355,7 +377,14 @@ public class ExemplarSampler {
           String traceId = spanContext.getCurrentTraceId();
           if (spanId != null && traceId != null) {
             spanContext.markCurrentSpanAsExemplar();
-            return Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
+            Labels base = Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
+            if (additionalLabelsSupplier != null) {
+              Labels extra = additionalLabelsSupplier.get();
+              if (!extra.isEmpty()) {
+                return base.merge(extra);
+              }
+            }
+            return base;
           }
         }
       }
