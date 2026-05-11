@@ -66,7 +66,7 @@ You can exclude the shaded protobuf classes including the
 `prometheus-metrics-exposition-formats-no-protobuf` module and excluding the
 `prometheus-metrics-exposition-formats` module in your build file.
 
-If you are using the PushGateway in a shaded jar with `minimizeJar=true`, do not use this setup.
+If you are using the PushGateway in a shaded jar with `minimizeJar=true`, do not exclude the protobuf classes.
 The PushGateway loads the protobuf writer implementation via reflection, so the full
 `prometheus-metrics-exposition-formats` artifact must stay on the classpath and the relevant
 packages must be preserved during shading. See the [PushGateway docs]({{< relref
