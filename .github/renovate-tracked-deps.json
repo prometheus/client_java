@@ -1,142 +1,150 @@
 {
-  ".github/renovate.json5": {
-    "renovate-config-presets": [
-      "grafana/flint"
-    ]
+  "meta": {
+    "protoc": {
+      "packageName": "protocolbuffers/protobuf",
+      "datasource": "github-releases"
+    }
   },
-  ".github/workflows/acceptance-tests.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/build.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/generate-protobuf.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/github-pages.yaml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/java-version-matrix-tests.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/lint.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/native-tests.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/nightly-benchmarks.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/release.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".github/workflows/test-release-build.yml": {
-    "regex": [
-      "mise"
-    ]
-  },
-  ".mise/envs/native/mise.toml": {
-    "mise": [
-      "java"
-    ]
-  },
-  ".mvn/wrapper/maven-wrapper.properties": {
-    "maven-wrapper": [
-      "maven"
-    ]
-  },
-  "examples/example-custom-buckets/docker-compose.yaml": {
-    "docker-compose": [
-      "eclipse-temurin",
-      "grafana/grafana",
-      "prom/prometheus"
-    ]
-  },
-  "examples/example-exemplars-tail-sampling/docker-compose.yaml": {
-    "docker-compose": [
-      "grafana/grafana",
-      "grafana/k6",
-      "grafana/tempo",
-      "opentelemetry-java-agent",
-      "otel/opentelemetry-collector-contrib",
-      "prom/prometheus"
-    ]
-  },
-  "examples/example-exporter-opentelemetry/docker-compose.yaml": {
-    "docker-compose": [
-      "openjdk",
-      "otel/opentelemetry-collector-contrib",
-      "prom/prometheus"
-    ]
-  },
-  "examples/example-exporter-opentelemetry/oats-tests/agent/Dockerfile": {
-    "dockerfile": [
-      "eclipse-temurin"
-    ]
-  },
-  "examples/example-exporter-opentelemetry/oats-tests/http/Dockerfile": {
-    "dockerfile": [
-      "eclipse-temurin"
-    ]
-  },
-  "examples/example-native-histogram/docker-compose.yaml": {
-    "docker-compose": [
-      "eclipse-temurin",
-      "grafana/grafana",
-      "prom/prometheus"
-    ]
-  },
-  "mise.toml": {
-    "mise": [
-      "actionlint",
-      "aqua:owenlamont/ryl",
-      "biome",
-      "editorconfig-checker",
-      "github:google/google-java-format",
-      "github:grafana/flint",
-      "github:jonwiggins/xmloxide",
-      "github:koalaman/shellcheck",
-      "go:github.com/grafana/oats",
-      "hugo",
-      "java",
-      "lychee",
-      "node",
-      "npm:renovate",
-      "pipx:codespell",
-      "protoc",
-      "ruff",
-      "rumdl",
-      "shfmt",
-      "taplo"
-    ]
-  },
-  "mvnw": {
-    "maven-wrapper": [
-      "maven-wrapper"
-    ]
-  },
-  "mvnw.cmd": {
-    "maven-wrapper": [
-      "maven-wrapper"
-    ]
+  "files": {
+    ".github/renovate.json5": {
+      "renovate-config-presets": [
+        "grafana/flint"
+      ]
+    },
+    ".github/workflows/acceptance-tests.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/build.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/generate-protobuf.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/github-pages.yaml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/java-version-matrix-tests.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/lint.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/native-tests.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/nightly-benchmarks.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/release.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/test-release-build.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".mise/envs/native/mise.toml": {
+      "mise": [
+        "java"
+      ]
+    },
+    ".mvn/wrapper/maven-wrapper.properties": {
+      "maven-wrapper": [
+        "maven"
+      ]
+    },
+    "examples/example-custom-buckets/docker-compose.yaml": {
+      "docker-compose": [
+        "eclipse-temurin",
+        "grafana/grafana",
+        "prom/prometheus"
+      ]
+    },
+    "examples/example-exemplars-tail-sampling/docker-compose.yaml": {
+      "docker-compose": [
+        "grafana/grafana",
+        "grafana/k6",
+        "grafana/tempo",
+        "opentelemetry-java-agent",
+        "otel/opentelemetry-collector-contrib",
+        "prom/prometheus"
+      ]
+    },
+    "examples/example-exporter-opentelemetry/docker-compose.yaml": {
+      "docker-compose": [
+        "openjdk",
+        "otel/opentelemetry-collector-contrib",
+        "prom/prometheus"
+      ]
+    },
+    "examples/example-exporter-opentelemetry/oats-tests/agent/Dockerfile": {
+      "dockerfile": [
+        "eclipse-temurin"
+      ]
+    },
+    "examples/example-exporter-opentelemetry/oats-tests/http/Dockerfile": {
+      "dockerfile": [
+        "eclipse-temurin"
+      ]
+    },
+    "examples/example-native-histogram/docker-compose.yaml": {
+      "docker-compose": [
+        "eclipse-temurin",
+        "grafana/grafana",
+        "prom/prometheus"
+      ]
+    },
+    "mise.toml": {
+      "mise": [
+        "actionlint",
+        "aqua:grafana/flint",
+        "aqua:jonwiggins/xmloxide",
+        "aqua:owenlamont/ryl",
+        "biome",
+        "editorconfig-checker",
+        "go:github.com/grafana/oats",
+        "google-java-format",
+        "hugo",
+        "java",
+        "lychee",
+        "node",
+        "npm:renovate",
+        "protoc",
+        "ruff",
+        "rumdl",
+        "shellcheck",
+        "shfmt",
+        "taplo",
+        "typos"
+      ]
+    },
+    "mvnw": {
+      "maven-wrapper": [
+        "maven-wrapper"
+      ]
+    },
+    "mvnw.cmd": {
+      "maven-wrapper": [
+        "maven-wrapper"
+      ]
+    }
   }
 }

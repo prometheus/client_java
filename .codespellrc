@@ -1,6 +1,0 @@
-[codespell]
-# nd: legitimate variable name in quantile algorithms
-# atmost: AssertJ atMost() matcher
-# re-use: hyphenated form used in comments
-# errorprone: Google ErrorProne tool name
-ignore-words-list = nd,atmost,re-use,errorprone
