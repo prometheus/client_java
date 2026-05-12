@@ -1,0 +1,10 @@
+[default]
+extend-ignore-re = [
+  're-use',
+  '\.atMost\(',
+  '<id>errorprone</id>',
+  'com\.google\.errorprone',
+  '\bNormalDistribution nd\b',
+  '\bnd\.inverseCumulativeProbability\(',
+  'BQAwFDESMBAGA1UEAwwJbG9jYWxob3N0MCAXDTI0MDUxMDE0MzY1NloYDzIxMjQw',
+]
