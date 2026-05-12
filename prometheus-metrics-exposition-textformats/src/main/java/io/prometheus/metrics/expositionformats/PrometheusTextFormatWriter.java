@@ -8,6 +8,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writePrometheusTimestamp;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetricSnapshot;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getExpositionBaseMetadataName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getLegacyGaugeName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
@@ -123,7 +124,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot, scheme);
         } else if (snapshot instanceof GaugeSnapshot) {
-          writeGauge(writer, (GaugeSnapshot) snapshot, scheme);
+          writeGauge(writer, (GaugeSnapshot) snapshot, s.getMetadata().getOriginalName(), scheme);
         } else if (snapshot instanceof HistogramSnapshot) {
           writeHistogram(writer, (HistogramSnapshot) snapshot, scheme);
         } else if (snapshot instanceof SummarySnapshot) {
@@ -189,10 +190,11 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
+  private void writeGauge(
+      Writer writer, GaugeSnapshot snapshot, String rawOriginalName, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    String gaugeName = resolveLegacyGaugeName(metadata, scheme);
+    String gaugeName = getLegacyGaugeName(metadata, rawOriginalName, scheme);
     writeMetadataWithFullName(writer, gaugeName, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, gaugeName, null, data.getLabels(), scheme);
@@ -469,19 +471,6 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       return fullName.substring(0, fullName.length() - suffix.length());
     }
     return fullName;
-  }
-
-  private static String resolveLegacyGaugeName(MetricMetadata metadata, EscapingScheme scheme) {
-    String originalName = metadata.getOriginalName();
-    if (originalName.endsWith(".created")) {
-      return PrometheusNaming.escapeName(
-          originalName.substring(0, originalName.length() - ".created".length()), scheme);
-    }
-    if (originalName.endsWith(".total")) {
-      return PrometheusNaming.escapeName(
-          originalName.substring(0, originalName.length() - ".total".length()), scheme);
-    }
-    return getMetadataName(metadata, scheme);
   }
 
   private void writeEscapedHelp(Writer writer, String s) throws IOException {

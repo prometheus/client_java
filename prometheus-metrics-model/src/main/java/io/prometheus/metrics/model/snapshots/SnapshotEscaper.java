@@ -113,6 +113,26 @@ public class SnapshotEscaper {
     }
   }
 
+  public static String getLegacyGaugeName(
+      MetricMetadata metadata, String rawOriginalName, EscapingScheme scheme) {
+    String legacyGaugeBaseName = stripLegacyGaugeSuffix(rawOriginalName);
+    if (legacyGaugeBaseName != null) {
+      return PrometheusNaming.escapeName(legacyGaugeBaseName, scheme);
+    }
+    return getMetadataName(metadata, scheme);
+  }
+
+  @Nullable
+  private static String stripLegacyGaugeSuffix(String rawOriginalName) {
+    if (rawOriginalName.endsWith(".created")) {
+      return rawOriginalName.substring(0, rawOriginalName.length() - ".created".length());
+    }
+    if (rawOriginalName.endsWith(".total")) {
+      return rawOriginalName.substring(0, rawOriginalName.length() - ".total".length());
+    }
+    return null;
+  }
+
   public static Labels escapeLabels(Labels labels, EscapingScheme scheme) {
     Labels.Builder outLabelsBuilder = Labels.builder();
 

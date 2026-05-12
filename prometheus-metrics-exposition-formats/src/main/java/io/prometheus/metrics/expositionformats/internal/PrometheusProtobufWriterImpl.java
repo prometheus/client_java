@@ -21,7 +21,6 @@ import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
@@ -51,7 +50,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        stringBuilder.append(TextFormat.printer().printToString(convert(snapshot, escapingScheme)));
+        stringBuilder.append(
+            TextFormat.printer()
+                .printToString(
+                    convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme)));
       }
     }
     return stringBuilder.toString();
@@ -65,12 +67,17 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        convert(snapshot, escapingScheme).writeDelimitedTo(out);
+        convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme).writeDelimitedTo(out);
       }
     }
   }
 
   public Metrics.MetricFamily convert(MetricSnapshot snapshot, EscapingScheme scheme) {
+    return convert(snapshot, snapshot.getMetadata().getOriginalName(), scheme);
+  }
+
+  private Metrics.MetricFamily convert(
+      MetricSnapshot snapshot, String rawOriginalName, EscapingScheme scheme) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
@@ -83,7 +90,13 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
         builder.addMetric(convert(data, scheme));
       }
       setMetadataUnlessEmpty(
-          builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE, scheme, true);
+          builder,
+          snapshot.getMetadata(),
+          rawOriginalName,
+          null,
+          Metrics.MetricType.GAUGE,
+          scheme,
+          true);
     } else if (snapshot instanceof HistogramSnapshot) {
       HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
       for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getDataPoints()) {
@@ -291,12 +304,14 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       @Nullable String nameSuffix,
       Metrics.MetricType type,
       EscapingScheme scheme) {
-    setMetadataUnlessEmpty(builder, metadata, nameSuffix, type, scheme, false);
+    setMetadataUnlessEmpty(
+        builder, metadata, metadata.getOriginalName(), nameSuffix, type, scheme, false);
   }
 
   private void setMetadataUnlessEmpty(
       Metrics.MetricFamily.Builder builder,
       MetricMetadata metadata,
+      String rawOriginalName,
       @Nullable String nameSuffix,
       Metrics.MetricType type,
       EscapingScheme scheme,
@@ -305,7 +320,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       return;
     }
     builder.setName(
-        resolveMetricFamilyName(metadata, nameSuffix, scheme, normalizeLegacyGaugeName));
+        resolveMetricFamilyName(
+            metadata, rawOriginalName, nameSuffix, scheme, normalizeLegacyGaugeName));
     if (metadata.getHelp() != null) {
       builder.setHelp(metadata.getHelp());
     }
@@ -314,19 +330,12 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   private String resolveMetricFamilyName(
       MetricMetadata metadata,
+      String rawOriginalName,
       @Nullable String nameSuffix,
       EscapingScheme scheme,
       boolean normalizeLegacyGaugeName) {
     if (normalizeLegacyGaugeName) {
-      String originalName = metadata.getOriginalName();
-      if (originalName.endsWith(".created")) {
-        return PrometheusNaming.escapeName(
-            originalName.substring(0, originalName.length() - ".created".length()), scheme);
-      }
-      if (originalName.endsWith(".total")) {
-        return PrometheusNaming.escapeName(
-            originalName.substring(0, originalName.length() - ".total".length()), scheme);
-      }
+      return SnapshotEscaper.getLegacyGaugeName(metadata, rawOriginalName, scheme);
     }
     if (nameSuffix == null) {
       return SnapshotEscaper.getMetadataName(metadata, scheme);

@@ -240,6 +240,21 @@ class DuplicateNamesProtobufTest {
   }
 
   @Test
+  void testLegacyGaugeNameWithAlternateEscapingSchemes_usesBaseName() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            GaugeSnapshot.builder()
+                .name("legacy.name.total")
+                .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(7).build())
+                .build());
+
+    assertThat(getSingleMetricFamilyName(snapshots, EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("legacy_dot_name");
+    assertThat(getSingleMetricFamilyName(snapshots, EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__legacy_2e_name");
+  }
+
+  @Test
   void testLegacyGaugeNameWithDotTotal_usesBaseName() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
@@ -259,6 +274,16 @@ class DuplicateNamesProtobufTest {
     assertThat(family.getType()).isEqualTo(Metrics.MetricType.GAUGE);
     assertThat(family.getMetricCount()).isEqualTo(1);
     assertThat(family.getMetric(0).getGauge().getValue()).isEqualTo(7.0);
+  }
+
+  private static String getSingleMetricFamilyName(
+      MetricSnapshots snapshots, EscapingScheme escapingScheme) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
+    writer.write(out, snapshots, escapingScheme);
+    List<Metrics.MetricFamily> metricFamilies = parseProtobufOutput(out);
+    assertThat(metricFamilies).hasSize(1);
+    return metricFamilies.get(0).getName();
   }
 
   private static MetricSnapshots getMetricSnapshots() {
