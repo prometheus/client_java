@@ -239,6 +239,53 @@ class DuplicateNamesProtobufTest {
     assertThat(gaugeFamily.getMetric(0).getGauge().getValue()).isEqualTo(50.0);
   }
 
+  @Test
+  void testLegacyGaugeNameWithAlternateEscapingSchemes_usesBaseName() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            GaugeSnapshot.builder()
+                .name("legacy.name.total")
+                .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(7).build())
+                .build());
+
+    assertThat(getSingleMetricFamilyName(snapshots, EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("legacy_dot_name");
+    assertThat(getSingleMetricFamilyName(snapshots, EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__legacy_2e_name");
+  }
+
+  @Test
+  void testLegacyGaugeNameWithDotTotal_usesBaseName() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            GaugeSnapshot.builder()
+                .name("legacy.total")
+                .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(7).build())
+                .build());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
+    writer.write(out, snapshots, EscapingScheme.UNDERSCORE_ESCAPING);
+
+    List<Metrics.MetricFamily> metricFamilies = parseProtobufOutput(out);
+
+    assertThat(metricFamilies).hasSize(1);
+    Metrics.MetricFamily family = metricFamilies.get(0);
+    assertThat(family.getName()).isEqualTo("legacy");
+    assertThat(family.getType()).isEqualTo(Metrics.MetricType.GAUGE);
+    assertThat(family.getMetricCount()).isEqualTo(1);
+    assertThat(family.getMetric(0).getGauge().getValue()).isEqualTo(7.0);
+  }
+
+  private static String getSingleMetricFamilyName(
+      MetricSnapshots snapshots, EscapingScheme escapingScheme) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
+    writer.write(out, snapshots, escapingScheme);
+    List<Metrics.MetricFamily> metricFamilies = parseProtobufOutput(out);
+    assertThat(metricFamilies).hasSize(1);
+    return metricFamilies.get(0).getName();
+  }
+
   private static MetricSnapshots getMetricSnapshots() {
     PrometheusRegistry registry = new PrometheusRegistry();
 

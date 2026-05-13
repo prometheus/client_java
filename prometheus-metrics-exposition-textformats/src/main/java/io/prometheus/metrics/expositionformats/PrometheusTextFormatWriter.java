@@ -8,6 +8,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writePrometheusTimestamp;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetricSnapshot;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getExpositionBaseMetadataName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getLegacyGaugeName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
@@ -123,7 +124,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot, scheme);
         } else if (snapshot instanceof GaugeSnapshot) {
-          writeGauge(writer, (GaugeSnapshot) snapshot, scheme);
+          writeGauge(writer, (GaugeSnapshot) snapshot, s.getMetadata().getOriginalName(), scheme);
         } else if (snapshot instanceof HistogramSnapshot) {
           writeHistogram(writer, (HistogramSnapshot) snapshot, scheme);
         } else if (snapshot instanceof SummarySnapshot) {
@@ -189,13 +190,14 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
+  private void writeGauge(
+      Writer writer, GaugeSnapshot snapshot, String rawOriginalName, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    writeMetadata(writer, null, "gauge", metadata, scheme);
-    String name = getMetadataName(metadata, scheme);
+    String gaugeName = getLegacyGaugeName(metadata, rawOriginalName, scheme);
+    writeMetadataWithFullName(writer, gaugeName, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, gaugeName, null, data.getLabels(), scheme);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
