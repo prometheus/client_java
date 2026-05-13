@@ -100,10 +100,12 @@ class CounterSnapshotTest {
 
   @Test
   void testCounterUnitDerivedFromTypedBuilder() {
-    CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").unit(Unit.SECONDS).build();
+    CounterSnapshot snapshot =
+        CounterSnapshot.builder().name("test_total").unit(Unit.SECONDS).build();
 
     SnapshotTestUtil.assertMetadata(snapshot, "test_seconds", null, "seconds");
-    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test_seconds", "test_total_seconds", "test_total");
+    SnapshotTestUtil.assertDerivedMetadata(
+        snapshot, "test_seconds", "test_total_seconds", "test_total");
   }
 
   @Test

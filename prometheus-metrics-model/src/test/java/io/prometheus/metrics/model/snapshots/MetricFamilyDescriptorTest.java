@@ -51,7 +51,8 @@ class MetricFamilyDescriptorTest {
 
   @Test
   void genericFactoryUsesTypedBuilderSemantics() {
-    MetricFamilyDescriptor counter = MetricFamilyDescriptor.of(MetricType.COUNTER, "http_requests_total").build();
+    MetricFamilyDescriptor counter =
+        MetricFamilyDescriptor.of(MetricType.COUNTER, "http_requests_total").build();
     MetricFamilyDescriptor info = MetricFamilyDescriptor.of(MetricType.INFO, "build_info").build();
 
     assertThat(counter.getPrometheusName()).isEqualTo("http_requests");
