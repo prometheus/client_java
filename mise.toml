@@ -8,7 +8,7 @@ protoc = "34.1"
 # Linters
 actionlint = "1.7.12"
 "aqua:grafana/flint" = "0.22.2"
-"aqua:jonwiggins/xmloxide" = "v0.4.2"
+"aqua:jonwiggins/xmloxide" = "v0.4.3"
 "aqua:owenlamont/ryl" = "0.8.0"
 biome = "2.4.12"
 editorconfig-checker = "v3.6.1"
