@@ -75,6 +75,7 @@ class CounterSnapshotTest {
             .dataPoint(CounterDataPointSnapshot.builder().value(1.0).build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "events", "events", "events");
     assertThat(snapshot.getDataPoints()).hasSize(1);
     CounterDataPointSnapshot data = snapshot.getDataPoints().get(0);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
@@ -93,7 +94,16 @@ class CounterSnapshotTest {
   @Test
   void testTotalSuffixPresent() {
     CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test", "test_total", "test_total");
+  }
+
+  @Test
+  void testCounterUnitDerivedFromTypedBuilder() {
+    CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").unit(Unit.SECONDS).build();
+
+    SnapshotTestUtil.assertMetadata(snapshot, "test_seconds", null, "seconds");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test_seconds", "test_total_seconds", "test_total");
   }
 
   @Test
