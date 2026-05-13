@@ -50,7 +50,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        stringBuilder.append(TextFormat.printer().printToString(convert(snapshot, escapingScheme)));
+        stringBuilder.append(
+            TextFormat.printer()
+                .printToString(
+                    convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme)));
       }
     }
     return stringBuilder.toString();
@@ -64,12 +67,17 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        convert(snapshot, escapingScheme).writeDelimitedTo(out);
+        convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme).writeDelimitedTo(out);
       }
     }
   }
 
   public Metrics.MetricFamily convert(MetricSnapshot snapshot, EscapingScheme scheme) {
+    return convert(snapshot, snapshot.getMetadata().getOriginalName(), scheme);
+  }
+
+  private Metrics.MetricFamily convert(
+      MetricSnapshot snapshot, String rawOriginalName, EscapingScheme scheme) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
@@ -82,7 +90,13 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
         builder.addMetric(convert(data, scheme));
       }
       setMetadataUnlessEmpty(
-          builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE, scheme);
+          builder,
+          snapshot.getMetadata(),
+          rawOriginalName,
+          null,
+          Metrics.MetricType.GAUGE,
+          scheme,
+          true);
     } else if (snapshot instanceof HistogramSnapshot) {
       HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
       for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getDataPoints()) {
@@ -290,23 +304,47 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       @Nullable String nameSuffix,
       Metrics.MetricType type,
       EscapingScheme scheme) {
+    setMetadataUnlessEmpty(
+        builder, metadata, metadata.getOriginalName(), nameSuffix, type, scheme, false);
+  }
+
+  private void setMetadataUnlessEmpty(
+      Metrics.MetricFamily.Builder builder,
+      MetricMetadata metadata,
+      String rawOriginalName,
+      @Nullable String nameSuffix,
+      Metrics.MetricType type,
+      EscapingScheme scheme,
+      boolean normalizeLegacyGaugeName) {
     if (builder.getMetricCount() == 0) {
       return;
     }
-    if (nameSuffix == null) {
-      builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme));
-    } else {
-      String expositionBaseName = SnapshotEscaper.getExpositionBaseMetadataName(metadata, scheme);
-      if (expositionBaseName.endsWith(nameSuffix)) {
-        builder.setName(expositionBaseName);
-      } else {
-        builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme) + nameSuffix);
-      }
-    }
+    builder.setName(
+        resolveMetricFamilyName(
+            metadata, rawOriginalName, nameSuffix, scheme, normalizeLegacyGaugeName));
     if (metadata.getHelp() != null) {
       builder.setHelp(metadata.getHelp());
     }
     builder.setType(type);
+  }
+
+  private String resolveMetricFamilyName(
+      MetricMetadata metadata,
+      String rawOriginalName,
+      @Nullable String nameSuffix,
+      EscapingScheme scheme,
+      boolean normalizeLegacyGaugeName) {
+    if (normalizeLegacyGaugeName) {
+      return SnapshotEscaper.getLegacyGaugeName(metadata, rawOriginalName, scheme);
+    }
+    if (nameSuffix == null) {
+      return SnapshotEscaper.getMetadataName(metadata, scheme);
+    }
+    String expositionBaseName = SnapshotEscaper.getExpositionBaseMetadataName(metadata, scheme);
+    if (expositionBaseName.endsWith(nameSuffix)) {
+      return expositionBaseName;
+    }
+    return SnapshotEscaper.getMetadataName(metadata, scheme) + nameSuffix;
   }
 
   private long getNativeCount(HistogramSnapshot.HistogramDataPointSnapshot data) {
