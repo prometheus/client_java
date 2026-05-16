@@ -20,7 +20,7 @@ rumdl = "0.1.84"
 shellcheck = "v0.11.0"
 shfmt = "3.13.1"
 taplo = "0.10.0"
-typos = "1.46.1"
+typos = "1.46.2"
 
 [env]
 FLINT_CONFIG_DIR = ".github/config"
