@@ -1,6 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "config:recommended", "github>grafana/flint#v0.21.0"],
+  extends: ["config:best-practices", "config:recommended", "github>grafana/flint#v0.22.2"],
   platformCommit: "enabled",
   automerge: true,
   ignorePaths: [
