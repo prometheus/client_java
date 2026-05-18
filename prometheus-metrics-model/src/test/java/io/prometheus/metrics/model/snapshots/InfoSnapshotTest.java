@@ -62,14 +62,14 @@ class InfoSnapshotTest {
   @Test
   void testNameMayIncludeSuffix() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("jvm_info").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm");
-    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm", "jvm_info", "jvm_info");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm_info");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm_info", "jvm_info", "jvm_info");
   }
 
   @Test
   void testNameMayIncludeSuffixDot() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("jvm.info").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm");
-    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm", "jvm.info", "jvm.info");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm_info");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm.info", "jvm.info", "jvm.info");
   }
 }

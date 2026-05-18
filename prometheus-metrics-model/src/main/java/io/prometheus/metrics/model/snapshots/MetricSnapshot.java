@@ -55,9 +55,9 @@ public abstract class MetricSnapshot {
 
   public abstract static class Builder<T extends Builder<T>> {
 
-    @Nullable protected String name;
-    @Nullable protected String help;
-    @Nullable protected Unit unit;
+    @Nullable private String name;
+    @Nullable private String help;
+    @Nullable private Unit unit;
 
     /**
      * The name is required. If the name is missing or invalid, {@code build()} will throw an {@link
@@ -85,7 +85,7 @@ public abstract class MetricSnapshot {
       if (name == null) {
         throw new IllegalArgumentException("Missing required field: name is null");
       }
-      return MetricMetadataSupport.metricMetadata(name, help, unit);
+      return new MetricMetadata(name, help, unit);
     }
 
     protected abstract T self();

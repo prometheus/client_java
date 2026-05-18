@@ -180,14 +180,6 @@ public class CounterSnapshot extends MetricSnapshot {
     }
 
     @Override
-    protected MetricMetadata buildMetadata() {
-      if (name == null) {
-        throw new IllegalArgumentException("Missing required field: name is null");
-      }
-      return MetricMetadataSupport.counterMetadata(name, help, unit);
-    }
-
-    @Override
     public CounterSnapshot build() {
       return new CounterSnapshot(buildMetadata(), dataPoints);
     }

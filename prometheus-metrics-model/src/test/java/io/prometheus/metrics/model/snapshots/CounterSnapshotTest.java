@@ -94,18 +94,14 @@ class CounterSnapshotTest {
   @Test
   void testTotalSuffixPresent() {
     CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test");
-    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test", "test_total", "test_total");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test_total", "test_total", "test_total");
   }
 
   @Test
-  void testCounterUnitDerivedFromTypedBuilder() {
-    CounterSnapshot snapshot =
-        CounterSnapshot.builder().name("test_total").unit(Unit.SECONDS).build();
-
-    SnapshotTestUtil.assertMetadata(snapshot, "test_seconds", null, "seconds");
-    SnapshotTestUtil.assertDerivedMetadata(
-        snapshot, "test_seconds", "test_total_seconds", "test_total");
+  void testCounterBuilderKeepsLegacyUnitValidation() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterSnapshot.builder().name("test_total").unit(Unit.SECONDS).build());
   }
 
   @Test

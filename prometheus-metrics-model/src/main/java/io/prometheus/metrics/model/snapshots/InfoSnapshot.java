@@ -119,14 +119,6 @@ public final class InfoSnapshot extends MetricSnapshot {
     }
 
     @Override
-    protected MetricMetadata buildMetadata() {
-      if (name == null) {
-        throw new IllegalArgumentException("Missing required field: name is null");
-      }
-      return MetricMetadataSupport.infoMetadata(name, help);
-    }
-
-    @Override
     public InfoSnapshot build() {
       return new InfoSnapshot(buildMetadata(), dataPoints);
     }
