@@ -8,16 +8,27 @@ on:
       micrometer-repository:
         description: Micrometer repository to test, in owner/name form
         required: false
-        default: micrometer-metrics/micrometer
       micrometer-ref:
         description: Micrometer branch, tag, or commit to test
-        required: true
+        required: false
 
 permissions: {}
 
 jobs:
   micrometer-compatibility:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: upstream
+            repository: micrometer-metrics/micrometer
+            ref: main
+          - name: opt-in
+            repository: zeitlinger/micrometer
+            # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prometheus-client-opt-in
+            ref: 1af1b3185058941eea57dc467bfe0df5a4786fe4
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -35,6 +46,6 @@ jobs:
       - name: Run Micrometer compatibility tests
         working-directory: .mise/envs/micrometer
         env:
-          MICROMETER_REPOSITORY: ${{ inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
-          MICROMETER_REF: ${{ inputs.micrometer-ref }}
+          MICROMETER_REPOSITORY: ${{ inputs.micrometer-repository || matrix.repository }}
+          MICROMETER_REF: ${{ inputs.micrometer-ref || matrix.ref }}
         run: mise compat-test
