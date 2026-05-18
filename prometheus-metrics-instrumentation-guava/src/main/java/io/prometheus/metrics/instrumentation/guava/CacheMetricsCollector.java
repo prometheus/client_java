@@ -216,7 +216,12 @@ public class CacheMetricsCollector implements MultiCollector {
     return metricSnapshotsBuilder.build();
   }
 
+  /**
+   * @deprecated Use {@code getMetricFamilyDescriptors()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public List<String> getPrometheusNames() {
     return ALL_METRIC_NAMES;
   }

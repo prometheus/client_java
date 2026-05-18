@@ -1,8 +1,10 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Unit;
@@ -20,7 +22,7 @@ import javax.annotation.Nullable;
  */
 public abstract class MetricWithFixedMetadata extends Metric {
 
-  private final MetricMetadata metadata;
+  protected final MetricMetadata metadata;
   protected final String[] labelNames;
 
   protected MetricWithFixedMetadata(Builder<?, ?> builder) {
@@ -37,6 +39,22 @@ public abstract class MetricWithFixedMetadata extends Metric {
   }
 
   @Override
+  @Nullable
+  @SuppressWarnings("deprecation")
+  public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+    MetricType metricType = getMetricType();
+    if (metricType == null) {
+      return null;
+    }
+    return MetricFamilyDescriptor.of(metricType, metadata, getPrometheusLabels());
+  }
+
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
+  @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricMetadata getMetadata() {
     return metadata;
   }
@@ -65,13 +83,27 @@ public abstract class MetricWithFixedMetadata extends Metric {
     return expositionBaseName;
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public String getPrometheusName() {
     return metadata.getPrometheusName();
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public Set<String> getLabelNames() {
+    return getPrometheusLabels();
+  }
+
+  private Set<String> getPrometheusLabels() {
     Set<String> names = new HashSet<>();
     for (String labelName : labelNames) {
       names.add(PrometheusNaming.prometheusName(labelName));

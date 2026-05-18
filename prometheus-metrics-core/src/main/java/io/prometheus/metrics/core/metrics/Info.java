@@ -48,7 +48,7 @@ public class Info extends MetricWithFixedMetadata {
       throw new IllegalArgumentException(
           getClass().getSimpleName()
               + " "
-              + getMetadata().getName()
+              + metadata.getName()
               + " was created with "
               + labelNames.length
               + " label names, but you called setLabelValues() with "
@@ -66,7 +66,7 @@ public class Info extends MetricWithFixedMetadata {
       throw new IllegalArgumentException(
           getClass().getSimpleName()
               + " "
-              + getMetadata().getName()
+              + metadata.getName()
               + " was created with "
               + labelNames.length
               + " label names, but you called addLabelValues() with "
@@ -82,7 +82,7 @@ public class Info extends MetricWithFixedMetadata {
       throw new IllegalArgumentException(
           getClass().getSimpleName()
               + " "
-              + getMetadata().getName()
+              + metadata.getName()
               + " was created with "
               + labelNames.length
               + " label names, but you called remove() with "
@@ -103,10 +103,15 @@ public class Info extends MetricWithFixedMetadata {
         data.add(new InfoSnapshot.InfoDataPointSnapshot(label.merge(constLabels)));
       }
     }
-    return new InfoSnapshot(getMetadata(), data);
+    return new InfoSnapshot(metadata, data);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.INFO;
   }

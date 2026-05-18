@@ -61,10 +61,15 @@ public class SummaryWithCallback extends CallbackMetric {
               new SummarySnapshot.SummaryDataPointSnapshot(
                   count, sum, quantiles, makeLabels(labelValues), Exemplars.EMPTY, 0L));
         });
-    return new SummarySnapshot(getMetadata(), dataPoints);
+    return new SummarySnapshot(metadata, dataPoints);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.SUMMARY;
   }

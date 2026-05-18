@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
  * scrape, and unregister continue to work for that usage pattern and that a shared registry with
  * both SDK-style and validated collectors behaves correctly.
  */
+@SuppressWarnings("deprecation")
 class OpenTelemetryExporterRegistryCompatibilityTest {
 
   /**

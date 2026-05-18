@@ -60,7 +60,7 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
     super(builder);
     this.names = names;
     for (String name : names) {
-      if (this.getMetadata().getPrometheusName().equals(prometheusName(name))) {
+      if (metadata.getPrometheusName().equals(prometheusName(name))) {
         throw new IllegalArgumentException(
             "Label name "
                 + name
@@ -82,10 +82,15 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
           new StateSetSnapshot.StateSetDataPointSnapshot(
               names, metricDataList.get(i).values, labels.get(i)));
     }
-    return new StateSetSnapshot(getMetadata(), data);
+    return new StateSetSnapshot(metadata, data);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.STATESET;
   }

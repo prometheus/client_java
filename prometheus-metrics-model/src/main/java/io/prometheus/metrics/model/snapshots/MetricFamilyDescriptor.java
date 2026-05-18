@@ -16,9 +16,27 @@ public final class MetricFamilyDescriptor {
 
   private MetricFamilyDescriptor(
       MetricType type, MetricMetadata metadata, Collection<String> labelNames) {
+    if (type == null) {
+      throw new IllegalArgumentException("Missing required field: type is null");
+    }
+    if (metadata == null) {
+      throw new IllegalArgumentException("Missing required field: metadata is null");
+    }
+    if (labelNames == null) {
+      throw new IllegalArgumentException("Missing required field: labelNames is null");
+    }
     this.type = type;
     this.metadata = metadata;
     this.labelNames = Collections.unmodifiableSet(new LinkedHashSet<>(labelNames));
+  }
+
+  public static MetricFamilyDescriptor of(MetricType type, MetricMetadata metadata) {
+    return of(type, metadata, Collections.emptySet());
+  }
+
+  public static MetricFamilyDescriptor of(
+      MetricType type, MetricMetadata metadata, Collection<String> labelNames) {
+    return new MetricFamilyDescriptor(type, metadata, labelNames);
   }
 
   public static Builder<?> of(MetricType type, String name) {
