@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.normalizeMetricName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeLabelName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
@@ -22,25 +23,77 @@ class PrometheusNamingTest {
 
   @Test
   void testSanitizeMetricName() {
-    assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter_total");
-    assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm.info");
-    assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm_info");
+    // Reserved suffixes are stripped to avoid confusion with Prometheus type conventions.
+    assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter");
+    assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
+    assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("a.b")).isEqualTo("a.b");
-    assertThat(sanitizeMetricName("_total")).isEqualTo("_total");
+    // "_total" / ".total" corner cases: the suffix is the entire name, so the separator
+    // character is dropped to avoid returning an empty string.
+    assertThat(sanitizeMetricName("_total")).isEqualTo("total");
+    assertThat(sanitizeMetricName(".total")).isEqualTo("total");
     assertThat(sanitizeMetricName("total")).isEqualTo("total");
-    assertThat(sanitizeMetricName("my_events_created")).isEqualTo("my_events_created");
-    assertThat(sanitizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram_bucket");
+    assertThat(sanitizeMetricName("my_events_created")).isEqualTo("my_events");
+    assertThat(sanitizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram");
+  }
+
+  /**
+   * Regression test: reserved suffixes must be stripped even when the raw name comes from an
+   * external system (e.g. JMX Exporter converting a JMX attribute named {@code "Total"} into a
+   * Prometheus name {@code kafka_consumer_request_total}).
+   *
+   * <p>Without stripping, an UNKNOWN metric would be stored under {@code
+   * kafka_consumer_request_total} instead of {@code kafka_consumer_request}, breaking registry
+   * lookups by the expected base name and potentially triggering unintended counter-type inference
+   * in tools that check for the {@code _total} suffix.
+   */
+  @Test
+  void testSanitizeMetricNameStripsReservedSuffixForDownstreamTools() {
+    // A JMX attribute "Total" produces "kafka_consumer_request_total" as the raw name.
+    // sanitizeMetricName must strip "_total" so that the metric is stored and looked up under
+    // "kafka_consumer_request", not "kafka_consumer_request_total".
+    assertThat(sanitizeMetricName("kafka_consumer_request_total"))
+        .isEqualTo("kafka_consumer_request");
+    // Dot variant is stripped too.
+    assertThat(sanitizeMetricName("kafka_consumer_request.total"))
+        .isEqualTo("kafka_consumer_request");
+    // Multiple chained reserved suffixes are stripped iteratively.
+    assertThat(sanitizeMetricName("events_total_created")).isEqualTo("events");
   }
 
   @Test
   void testSanitizeMetricNameWithUnit() {
     assertThat(prometheusName(sanitizeMetricName("def", Unit.RATIO)))
         .isEqualTo("def_" + Unit.RATIO);
+    // _total is stripped first, then the unit is appended.
     assertThat(prometheusName(sanitizeMetricName("my_counter_total", Unit.RATIO)))
-        .isEqualTo("my_counter_total_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm.info_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("_total_" + Unit.RATIO);
+        .isEqualTo("my_counter_" + Unit.RATIO);
+    assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
+    assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
     assertThat(sanitizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
+  }
+
+  @Test
+  void testNormalizeMetricName() {
+    assertThat(normalizeMetricName("my_counter_total")).isEqualTo("my_counter_total");
+    assertThat(normalizeMetricName("jvm.info")).isEqualTo("jvm.info");
+    assertThat(normalizeMetricName("jvm_info")).isEqualTo("jvm_info");
+    assertThat(normalizeMetricName("a.b")).isEqualTo("a.b");
+    assertThat(normalizeMetricName("_total")).isEqualTo("_total");
+    assertThat(normalizeMetricName(".total")).isEqualTo(".total");
+    assertThat(normalizeMetricName("my_events_created")).isEqualTo("my_events_created");
+    assertThat(normalizeMetricName("my_histogram_bucket")).isEqualTo("my_histogram_bucket");
+  }
+
+  @Test
+  void testNormalizeMetricNameWithUnit() {
+    assertThat(prometheusName(normalizeMetricName("def", Unit.RATIO)))
+        .isEqualTo("def_" + Unit.RATIO);
+    assertThat(prometheusName(normalizeMetricName("my_counter_total", Unit.RATIO)))
+        .isEqualTo("my_counter_total_" + Unit.RATIO);
+    assertThat(normalizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm.info_" + Unit.RATIO);
+    assertThat(normalizeMetricName("_total", Unit.RATIO)).isEqualTo("_total_" + Unit.RATIO);
+    assertThat(normalizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
   }
 
   @Test

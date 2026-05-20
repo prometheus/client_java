@@ -1,7 +1,7 @@
 package io.prometheus.metrics.examples.otelruntimemetrics;
 
 import io.opentelemetry.exporter.prometheus.PrometheusMetricReader;
-import io.opentelemetry.instrumentation.runtimemetrics.java8.RuntimeMetrics;
+import io.opentelemetry.instrumentation.runtimetelemetry.RuntimeTelemetry;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.prometheus.metrics.core.metrics.Counter;
@@ -47,11 +47,7 @@ public class Main {
             .build();
 
     // 4. Start OTel JVM runtime metrics collection.
-    //    - captureGcCause() adds a jvm.gc.cause attribute to jvm.gc.duration
-    //    - emitExperimentalTelemetry() enables buffer pools, extended CPU,
-    //      extended memory pools, and file descriptor metrics
-    RuntimeMetrics runtimeMetrics =
-        RuntimeMetrics.builder(openTelemetry).captureGcCause().emitExperimentalTelemetry().build();
+    RuntimeTelemetry runtimeMetrics = RuntimeTelemetry.create(openTelemetry);
 
     // 5. Expose both Prometheus and OTel metrics on a single endpoint.
     HTTPServer server = HTTPServer.builder().port(9400).registry(registry).buildAndStart();
