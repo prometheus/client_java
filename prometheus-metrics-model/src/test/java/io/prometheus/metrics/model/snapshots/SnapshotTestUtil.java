@@ -14,4 +14,11 @@ public class SnapshotTestUtil {
       assertThat(snapshot.getMetadata().getUnit()).isNull();
     }
   }
+
+  public static void assertDerivedMetadata(
+      MetricSnapshot snapshot, String name, String expositionBaseName, String originalName) {
+    assertThat(snapshot.getMetadata().getName()).isEqualTo(name);
+    assertThat(snapshot.getMetadata().getExpositionBaseName()).isEqualTo(expositionBaseName);
+    assertThat(snapshot.getMetadata().getOriginalName()).isEqualTo(originalName);
+  }
 }
