@@ -9,6 +9,7 @@ import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
+import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
@@ -17,9 +18,11 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import org.junit.jupiter.api.AfterEach;
@@ -319,6 +322,63 @@ class CounterTest {
     assertExemplarEquals(
         Exemplar.builder().value(1.0).labels(Labels.of("test", "test2")).build(),
         getData(counter).getExemplar());
+  }
+
+  @Test
+  void incWithExemplarCustomMetadataInExposition() throws Exception {
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.incWithExemplar(
+        Labels.of(
+            Exemplar.TRACE_ID, "abc123", Exemplar.SPAN_ID, "def456", "management_id", "mgmt-42"));
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    new OpenMetricsTextFormatWriter(false, true)
+        .write(out, MetricSnapshots.of(counter.collect()), EscapingScheme.ALLOW_UTF8);
+
+    assertThat(out.toString())
+        .contains("management_id=\"mgmt-42\"")
+        .contains("trace_id=\"abc123\"")
+        .contains("span_id=\"def456\"");
+  }
+
+  @Test
+  void exemplarLabelsSupplierAppearsInAutomaticallySampledExemplar() throws Exception {
+    SpanContextSupplier.setSpanContext(
+        new SpanContext() {
+          @Override
+          public String getCurrentTraceId() {
+            return "trace-abc";
+          }
+
+          @Override
+          public String getCurrentSpanId() {
+            return "span-def";
+          }
+
+          @Override
+          public boolean isCurrentSpanSampled() {
+            return true;
+          }
+
+          @Override
+          public void markCurrentSpanAsExemplar() {}
+        });
+
+    Counter counter =
+        Counter.builder()
+            .name("requests_total")
+            .exemplarLabelsSupplier(() -> Labels.of("management_id", "mgmt-42"))
+            .build();
+    counter.inc(); // automatic sampling path
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    new OpenMetricsTextFormatWriter(false, true)
+        .write(out, MetricSnapshots.of(counter.collect()), EscapingScheme.ALLOW_UTF8);
+
+    assertThat(out.toString())
+        .contains("management_id=\"mgmt-42\"")
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"");
   }
 
   @Test
