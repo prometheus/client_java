@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.6.2](https://github.com/prometheus/client_java/compare/v1.6.1...v1.6.2) (2026-05-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.2.4 ([#2088](https://github.com/prometheus/client_java/issues/2088)) ([144eb61](https://github.com/prometheus/client_java/commit/144eb61030d412afe83631b8f341d2cb1595ab1c))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.0-alpha ([#2126](https://github.com/prometheus/client_java/issues/2126)) ([b62b5d0](https://github.com/prometheus/client_java/commit/b62b5d0ab4b8d3a1335286bd3d36e8c9ac5aa269))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.0-alpha ([#2127](https://github.com/prometheus/client_java/issues/2127)) ([e11ce3d](https://github.com/prometheus/client_java/commit/e11ce3de19daf5acd2f73ffb90c96689c172f3c3))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.22 ([#2099](https://github.com/prometheus/client_java/issues/2099)) ([22125c5](https://github.com/prometheus/client_java/commit/22125c5f531467030793fc48cb2308ff14bbcaa7))
+* **deps:** update jetty monorepo to v12.1.9 ([#2102](https://github.com/prometheus/client_java/issues/2102)) ([04bee70](https://github.com/prometheus/client_java/commit/04bee70efff866f8c4966643926905c28a4eae3a))
+* **deps:** update protobuf ([#2129](https://github.com/prometheus/client_java/issues/2129)) ([320538a](https://github.com/prometheus/client_java/commit/320538a09efad128c6d80bcc3d6eecca394603db))
+* Reduce allocations for classic histogram buckets  ([#2081](https://github.com/prometheus/client_java/issues/2081)) ([edd160a](https://github.com/prometheus/client_java/commit/edd160ab93254c80250d7cf58a1dcb399fef67a1))
+* restore legacy suffix compatibility ([#2100](https://github.com/prometheus/client_java/issues/2100)) ([b2ae70f](https://github.com/prometheus/client_java/commit/b2ae70ffd4ac0830fb567319beae9d1c3ad8bc2f))
+* restore reserved suffix stripping in `PrometheusNaming.sanitizeMetricName()` ([#2124](https://github.com/prometheus/client_java/issues/2124)) ([2d0f508](https://github.com/prometheus/client_java/commit/2d0f508efd2f5e009b6f09f6a9ccb451cf9f3b6f))
+
+
+### Documentation
+
+* clarify downstream adapter validation requirements ([#2101](https://github.com/prometheus/client_java/issues/2101)) ([ef8c75c](https://github.com/prometheus/client_java/commit/ef8c75cf352bddd0d3a2052c3f1b0c8b6103a6f4))
+* Document OM2  ([#2059](https://github.com/prometheus/client_java/issues/2059)) ([45d753c](https://github.com/prometheus/client_java/commit/45d753c418f005fbb17bf7caca3dc94655717687))
+* document PushGateway shading workaround ([#2106](https://github.com/prometheus/client_java/issues/2106)) ([8ca0eb8](https://github.com/prometheus/client_java/commit/8ca0eb8d79b800ad8d7a08f10762ed631f4f2a70))
+
 ## [1.6.1](https://github.com/prometheus/client_java/compare/v1.6.0...v1.6.1) (2026-04-27)
 
 > Note: With the OM2 metric-name preservation fix in this release, OpenMetrics 2.0 can now be
