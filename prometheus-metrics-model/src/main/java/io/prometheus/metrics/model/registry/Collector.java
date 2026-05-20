@@ -1,7 +1,9 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -61,6 +63,33 @@ public interface Collector {
   }
 
   /**
+   * Returns a registration-time descriptor for this metric family.
+   *
+   * <p>The registry uses this descriptor for duplicate-name, type, label-schema, help, and unit
+   * validation at registration time. Returning {@code null} means registration-time validation is
+   * skipped for this collector.
+   *
+   * <p>The default implementation adapts the deprecated fragmented metadata methods. New collectors
+   * with fixed registration-time metadata should override this method directly.
+   */
+  @Nullable
+  @SuppressWarnings("deprecation")
+  default MetricFamilyDescriptor getMetricFamilyDescriptor() {
+    String prometheusName = getPrometheusName();
+    MetricType metricType = getMetricType();
+    if (prometheusName == null || metricType == null) {
+      return null;
+    }
+    MetricMetadata metadata = getMetadata();
+    if (metadata == null) {
+      metadata = new MetricMetadata(prometheusName);
+    }
+    Set<String> labelNames = getLabelNames();
+    return MetricFamilyDescriptor.of(
+        metricType, metadata, labelNames == null ? Collections.emptySet() : labelNames);
+  }
+
+  /**
    * This is called in two places:
    *
    * <ol>
@@ -77,7 +106,10 @@ public interface Collector {
    * this and return the name.
    *
    * <p>All metrics in {@code prometheus-metrics-core} override this.
+   *
+   * @deprecated Override {@link #getMetricFamilyDescriptor()} instead.
    */
+  @Deprecated
   @Nullable
   default String getPrometheusName() {
     return null;
@@ -94,7 +126,9 @@ public interface Collector {
    * result in invalid exposition output.
    *
    * @return the metric type, or {@code null} to skip validation
+   * @deprecated Override {@link #getMetricFamilyDescriptor()} instead.
    */
+  @Deprecated
   @Nullable
   default MetricType getMetricType() {
     return null;
@@ -118,7 +152,9 @@ public interface Collector {
    *
    * @return the set of all label names, or {@code null} (treated as empty) for a metric with no
    *     labels
+   * @deprecated Override {@link #getMetricFamilyDescriptor()} instead.
    */
+  @Deprecated
   @Nullable
   default Set<String> getLabelNames() {
     return null;
@@ -132,7 +168,9 @@ public interface Collector {
    * collector.
    *
    * @return the metric metadata, or {@code null} to skip help/unit validation
+   * @deprecated Override {@link #getMetricFamilyDescriptor()} instead.
    */
+  @Deprecated
   @Nullable
   default MetricMetadata getMetadata() {
     return null;

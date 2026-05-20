@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-@SuppressWarnings("CheckReturnValue")
+@SuppressWarnings({"CheckReturnValue", "deprecation"})
 class CacheMetricsCollectorTest {
   // This enum was added to simplify test parametrization on argument options.
   enum Options {

@@ -116,10 +116,15 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     for (int i = 0; i < labels.size(); i++) {
       data.add(metricData.get(i).collect(labels.get(i)));
     }
-    return new SummarySnapshot(getMetadata(), data);
+    return new SummarySnapshot(metadata, data);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.SUMMARY;
   }

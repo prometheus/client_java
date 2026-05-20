@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.registry;
 
 import static java.util.Collections.emptySet;
 
+import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -158,6 +159,17 @@ public class PrometheusRegistry {
     return Collections.unmodifiableSet(new HashSet<>(labelNames));
   }
 
+  @SuppressWarnings("deprecation")
+  @Nullable
+  private static String getDeprecatedPrometheusName(Collector collector) {
+    return collector.getPrometheusName();
+  }
+
+  @SuppressWarnings("deprecation")
+  private static List<String> getDeprecatedPrometheusNames(MultiCollector collector) {
+    return collector.getPrometheusNames();
+  }
+
   /**
    * Computes the set of exposition-level time series names that a metric with the given name and
    * type will produce.
@@ -288,27 +300,24 @@ public class PrometheusRegistry {
       throw new IllegalArgumentException("Collector instance is already registered");
     }
     try {
-      String prometheusName = collector.getPrometheusName();
-      MetricType metricType = collector.getMetricType();
-      Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames());
-      MetricMetadata metadata = collector.getMetadata();
-      String help = metadata != null ? metadata.getHelp() : null;
-      Unit unit = metadata != null ? metadata.getUnit() : null;
+      MetricFamilyDescriptor descriptor = collector.getMetricFamilyDescriptor();
 
-      // Only perform validation if collector provides sufficient metadata.
-      // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
-      if (prometheusName != null && metricType != null) {
-        validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
-        String expositionBasePrometheusName =
-            metadata != null ? metadata.getExpositionBasePrometheusName() : null;
+      // Only perform validation if collector provides sufficient metadata. Collectors that don't
+      // implement getMetricFamilyDescriptor() will skip registration-time validation.
+      if (descriptor != null) {
+        String prometheusName = descriptor.getPrometheusName();
+        MetricType metricType = descriptor.getType();
+        Set<String> normalizedLabels = immutableLabelNames(descriptor.getLabelNames());
+        MetricMetadata metadata = descriptor.getMetadata();
+        validateRegistration(
+            prometheusName, metricType, normalizedLabels, metadata.getHelp(), metadata.getUnit());
         collectorMetadata.put(
             collector,
             new CollectorRegistration(
-                prometheusName, expositionBasePrometheusName, normalizedLabels));
+                prometheusName, metadata.getExpositionBasePrometheusName(), normalizedLabels));
       }
-      // Catch RuntimeException broadly because collector methods (getPrometheusName, getMetricType,
-      // etc.) are user-implemented and could throw any RuntimeException. Ensures cleanup on
-      // failure.
+      // Catch RuntimeException broadly because collector methods are user-implemented and could
+      // throw any RuntimeException. Ensures cleanup on failure.
     } catch (RuntimeException e) {
       collectors.remove(collector);
       CollectorRegistration reg = collectorMetadata.remove(collector);
@@ -323,27 +332,26 @@ public class PrometheusRegistry {
     if (!multiCollectors.add(collector)) {
       throw new IllegalArgumentException("MultiCollector instance is already registered");
     }
-    List<String> prometheusNamesList = collector.getPrometheusNames();
     List<MultiCollectorRegistration> registrations = new ArrayList<>();
 
     try {
-      for (String prometheusName : prometheusNamesList) {
-        MetricType metricType = collector.getMetricType(prometheusName);
-        Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames(prometheusName));
-        MetricMetadata metadata = collector.getMetadata(prometheusName);
-        String help = metadata != null ? metadata.getHelp() : null;
-        Unit unit = metadata != null ? metadata.getUnit() : null;
+      for (MetricFamilyDescriptor descriptor : collector.getMetricFamilyDescriptors()) {
+        String prometheusName = descriptor.getPrometheusName();
+        Set<String> normalizedLabels = immutableLabelNames(descriptor.getLabelNames());
+        MetricMetadata metadata = descriptor.getMetadata();
 
-        if (metricType != null) {
-          validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
-          registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
-        }
+        validateRegistration(
+            prometheusName,
+            descriptor.getType(),
+            normalizedLabels,
+            metadata.getHelp(),
+            metadata.getUnit());
+        registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
       }
 
       multiCollectorMetadata.put(collector, registrations);
-      // Catch RuntimeException broadly because collector methods (getPrometheusNames,
-      // getMetricType, etc.) are user-implemented and could throw any RuntimeException.
-      // Ensures cleanup on failure.
+      // Catch RuntimeException broadly because collector methods are user-implemented and could
+      // throw any RuntimeException. Ensures cleanup on failure.
     } catch (RuntimeException e) {
       multiCollectors.remove(collector);
       for (MultiCollectorRegistration registration : registrations) {
@@ -445,11 +453,12 @@ public class PrometheusRegistry {
     }
     List<MetricSnapshot> allSnapshots = new ArrayList<>();
     for (Collector collector : collectors) {
-      String prometheusName = collector.getPrometheusName();
+      CollectorRegistration reg = collectorMetadata.get(collector);
+      String prometheusName =
+          reg != null ? reg.prometheusName : getDeprecatedPrometheusName(collector);
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
       // prometheusName != null means we can skip the scrape if the name is excluded.
       // Also test the original name (e.g. "events_total" for a counter named "events").
-      CollectorRegistration reg = collectorMetadata.get(collector);
       String expositionName = reg != null ? reg.expositionBasePrometheusName : null;
       if (prometheusName == null
           || includedNames.test(prometheusName)
@@ -464,12 +473,22 @@ public class PrometheusRegistry {
       }
     }
     for (MultiCollector collector : multiCollectors) {
-      List<String> prometheusNames = collector.getPrometheusNames();
+      List<MultiCollectorRegistration> registrations = multiCollectorMetadata.get(collector);
+      List<String> prometheusNames = getDeprecatedPrometheusNames(collector);
       // empty prometheusNames means the names are unknown, and we have to scrape to learn the
       // names.
       // non-empty prometheusNames means we can exclude the collector if all names are excluded by
       // the filter.
-      boolean excluded = !prometheusNames.isEmpty();
+      boolean excluded =
+          (registrations != null && !registrations.isEmpty()) || !prometheusNames.isEmpty();
+      if (registrations != null) {
+        for (MultiCollectorRegistration registration : registrations) {
+          if (includedNames.test(registration.prometheusName)) {
+            excluded = false;
+            break;
+          }
+        }
+      }
       for (String prometheusName : prometheusNames) {
         if (includedNames.test(prometheusName)) {
           excluded = false;

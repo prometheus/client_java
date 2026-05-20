@@ -52,10 +52,15 @@ public class GaugeWithCallback extends CallbackMetric {
           dataPoints.add(
               new GaugeSnapshot.GaugeDataPointSnapshot(value, makeLabels(labelValues), null, 0L));
         });
-    return new GaugeSnapshot(getMetadata(), dataPoints);
+    return new GaugeSnapshot(metadata, dataPoints);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.GAUGE;
   }

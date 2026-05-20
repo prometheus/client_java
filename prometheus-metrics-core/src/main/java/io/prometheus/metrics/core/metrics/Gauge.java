@@ -92,10 +92,15 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     for (int i = 0; i < labels.size(); i++) {
       dataPointSnapshots.add(metricData.get(i).collect(labels.get(i)));
     }
-    return new GaugeSnapshot(getMetadata(), dataPointSnapshots);
+    return new GaugeSnapshot(metadata, dataPointSnapshots);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.GAUGE;
   }

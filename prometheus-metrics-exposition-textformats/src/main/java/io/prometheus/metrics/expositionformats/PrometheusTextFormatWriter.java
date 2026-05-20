@@ -61,6 +61,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       return this;
     }
 
+    /**
+     * @deprecated Use {@link #build()} with the default millisecond timestamps instead.
+     */
     @Deprecated
     public Builder setTimestampsInMs(boolean timestampsInMs) {
       this.timestampsInMs = timestampsInMs;
