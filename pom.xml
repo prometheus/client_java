@@ -23,7 +23,7 @@
     <protobuf-java.version>4.34.1</protobuf-java.version>
     <guava.version>33.6.0-jre</guava.version>
     <junit-jupiter.version>6.0.3</junit-jupiter.version>
-    <otel.instrumentation.version>2.27.0-alpha</otel.instrumentation.version>
+    <otel.instrumentation.version>2.28.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -101,7 +101,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.17</version>
+      <version>2.0.18</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -186,7 +186,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.2</version>
+          <version>3.6.3</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
