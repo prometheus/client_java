@@ -111,7 +111,7 @@ def prepare_repo(
         )
         run_cmd(["git", "fetch", remote, ref], cwd=micrometer_dir)
     run_cmd(
-        ["git", "checkout", "-B", "codex-micrometer-compat", "FETCH_HEAD"],
+        ["git", "checkout", "-B", "micrometer-compat", "FETCH_HEAD"],
         cwd=micrometer_dir,
     )
 
