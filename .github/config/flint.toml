@@ -1,6 +1,6 @@
 [settings]
 # These paths are generated, vendored, or handled by other checks.
-exclude = ["CHANGELOG.md", "**/src/main/generated/**", "docs/themes/**", "mvnw", "simpleclient-archive/**"]
+exclude = ["CHANGELOG.md", "**/src/main/generated/**", "docs/themes/**", "mvnw", "simpleclient-archive/**", "mise.lock"]
 setup_migration_version = 2
 
 [checks.renovate-deps]
