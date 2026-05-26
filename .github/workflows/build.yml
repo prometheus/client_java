@@ -25,3 +25,5 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
         run: mise run ci
+        env:
+          MISE_LOCKED: "1"  # prevents update of mise.lock - we check for clean git in "mise run generate"
