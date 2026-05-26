@@ -59,6 +59,6 @@ STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
 	help
 	echo "Local changes:"
-	echo "$STATUS"
+	git diff
 	exit 1
 fi

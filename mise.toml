@@ -32,6 +32,7 @@ description = "CI Build"
 run = "./mvnw clean install"
 env.REQUIRE_PROTO_UP_TO_DATE = "true"
 env.PROTO_GENERATION = "true"
+
 [tasks.clean]
 description = "clean all modules"
 run = "./mvnw clean"
