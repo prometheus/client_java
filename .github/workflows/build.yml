@@ -17,6 +17,7 @@ jobs:
           version: v2026.5.15
           sha256: a86aa65c8ca48a548c3f9904853489383bb8cdebfd8f2cf8ddd18b675e03bbf4
           install_args: --locked  # prevents update of mise.lock - we check for clean git in "mise run generate"
+          cache: false # just for testing
 
       - name: Cache local Maven repository
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
