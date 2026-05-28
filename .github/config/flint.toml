@@ -1,7 +1,5 @@
 [settings]
-# These paths are generated, vendored, or handled by other checks.
-exclude = ["CHANGELOG.md", "**/src/main/generated/**", "docs/themes/**", "mvnw", "simpleclient-archive/**"]
-setup_migration_version = 2
+exclude = ["docs/themes/**", "mvnw", "simpleclient-archive/**"]
 
 [checks.renovate-deps]
 exclude_managers = ["github-actions", "github-runners", "maven"]
