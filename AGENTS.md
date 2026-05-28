@@ -102,7 +102,15 @@ Pre-built instrumentations:
 - Do not prefix PR titles with `[codex]`.
 - Match the PR title type to the primary user-facing change.
 
-## Linting and Validation
+## Linting
+
+Run `mise run lint:fix` before committing changes.
+If output includes `fixed`, keep those changes.
+If output includes `partial` or `review`, address the remaining issues and
+run `mise run lint:fix` again.
+
+Example output:
+flint: fixed: gofmt — commit before pushing | partial: cargo-clippy
 
 **CRITICAL**: These checks MUST be run before creating any
 commits. CI will fail if these checks fail.
@@ -116,39 +124,6 @@ commits. CI will fail if these checks fail.
   - Checkstyle validation
   - Build succeeds (tests are skipped;
     run `mise run test` or `mise run test-all` for tests)
-
-### Non-Java Files (Markdown, YAML, JSON, shell scripts)
-
-- **ALWAYS** run `mise run lint` after modifying non-Java
-  files (runs super-linter + link checking + BOM check)
-- `mise run lint:fix` autofixes linting issues
-- Super-linter will **autofix** many issues
-  (formatting, trailing whitespace, etc.)
-- It only reports ERROR-level issues
-  (configured via `LOG_LEVEL=ERROR` in
-  `.github/super-linter.env`)
-- Common issues caught:
-  - Lines exceeding 100 characters in Markdown files
-  - Missing language tags in fenced code blocks
-  - Table formatting issues
-  - YAML/JSON syntax errors
-
-### Running Linters
-
-```bash
-# After modifying Java files (run BEFORE committing)
-mise run build
-
-# After modifying non-Java files (run BEFORE committing)
-mise run lint
-# or to autofix: mise run lint:fix
-```
-
-### Before Pushing
-
-**ALWAYS** run `mise run lint` before pushing to verify
-all lints pass. CI runs the same checks and will fail
-if any lint is violated.
 
 ## Testing
 
@@ -179,3 +154,4 @@ if any lint is violated.
 
 Source compatibility: Java 8. Tests run on Java 25
 (configured in `mise.toml`).
+
