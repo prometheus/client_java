@@ -20,4 +20,13 @@
     <automatic.module.name>io.prometheus.metrics.config</automatic.module.name>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.junit-pioneer</groupId>
+      <artifactId>junit-pioneer</artifactId>
+      <version>${junit-pioneer.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
 </project>
