@@ -154,4 +154,3 @@ commits. CI will fail if these checks fail.
 
 Source compatibility: Java 8. Tests run on Java 25
 (configured in `mise.toml`).
-

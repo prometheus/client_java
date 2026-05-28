@@ -28,6 +28,7 @@ jobs:
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.release-please.outputs.tag_name }}
         run: >
           gh workflow run release.yml --repo "${GITHUB_REPOSITORY}"
-          -f tag=${{ steps.release-please.outputs.tag_name }}
+          -f "tag=${TAG_NAME}"

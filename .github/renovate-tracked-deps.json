@@ -36,12 +36,12 @@
         "mise"
       ]
     },
-    ".github/workflows/micrometer-compatibility.yml": {
+    ".github/workflows/lint.yml": {
       "regex": [
         "mise"
       ]
     },
-    ".github/workflows/lint.yml": {
+    ".github/workflows/micrometer-compatibility.yml": {
       "regex": [
         "mise"
       ]
@@ -138,7 +138,8 @@
         "shellcheck",
         "shfmt",
         "taplo",
-        "typos"
+        "typos",
+        "zizmor"
       ]
     },
     "mvnw": {
