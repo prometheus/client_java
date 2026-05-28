@@ -1,6 +1,6 @@
 [tools]
 "go:github.com/grafana/oats" = "0.6.1"
-hugo = "0.161.1"
+hugo = "0.162.0"
 java = "temurin-25.0.3+9.0.LTS"
 node = "24.16.0"
 protoc = "35.0"
