@@ -35,9 +35,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run Micrometer compatibility tests
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            export MICROMETER_REPOSITORY="${{ github.event.inputs.micrometer-repository }}"
-            export MICROMETER_REF="${{ github.event.inputs.micrometer-ref }}"
-          fi
-          mise run micrometer:test
+        env:
+          MICROMETER_REPOSITORY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
+          MICROMETER_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.micrometer-ref || 'main' }}
+        run: mise run micrometer:test
