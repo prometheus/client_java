@@ -32,8 +32,6 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
       - name: Run Micrometer compatibility tests
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
