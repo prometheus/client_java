@@ -1,0 +1,73 @@
+name: Deploy Documentation to Github Pages
+
+on:
+  # Runs on pushes targeting the 1.0.x branch
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*" # updates the version in the docs
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions: {}
+
+# Allow only one concurrent deployment, skipping runs queued between
+# the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow
+# these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# Default to bash
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Build job
+  build:
+    if: github.repository == 'prometheus/client_java'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+          fetch-tags: "true"
+          fetch-depth: 0
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          version: v2026.5.15
+          sha256: a86aa65c8ca48a548c3f9904853489383bb8cdebfd8f2cf8ddd18b675e03bbf4
+          cache: "false"
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - name: Build GitHub Pages
+        run: mise run build-gh-pages
+        env:
+          BASE_URL: "${{ steps.pages.outputs.base_url }}/"
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: ./docs/public
+          # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+
+  # Deployment job
+  deploy:
+    if: github.repository == 'prometheus/client_java'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

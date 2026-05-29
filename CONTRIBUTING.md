@@ -1,0 +1,126 @@
+# Contributing
+
+Prometheus uses GitHub to manage reviews of pull requests.
+
+- If you have a trivial fix or improvement, go ahead and create a pull request,
+  addressing (with `@...`) the maintainer of this repository (see
+  [MAINTAINERS.md](MAINTAINERS.md)) in the
+  description of the pull request.
+
+- If you plan to do something more involved, first discuss your ideas
+  on our [mailing list](https://groups.google.com/forum/?fromgroups#!forum/prometheus-developers).
+  This will avoid unnecessary work and surely give you and us a good deal
+  of inspiration.
+
+## Signing Off Commits
+
+Every commit must include a `Signed-off-by` line, as required by the
+[Developer Certificate of Origin (DCO)](https://developercertificate.org/).
+
+Sign off each commit by passing `--signoff` (or `-s`) to `git commit`:
+
+```bash
+git commit --signoff -m "Your commit message"
+```
+
+To sign off only the most recent commit, use `--amend`:
+
+```bash
+git commit --amend --signoff --no-edit
+```
+
+To sign off multiple commits, rebase (replace `N` with the number of commits):
+
+```bash
+git rebase --signoff HEAD~N
+```
+
+Then force-push the branch:
+
+```bash
+git push --force-with-lease
+```
+
+## Formatting
+
+This repository uses flint to run formatting and lint checks.
+
+Run all the linters:
+
+`mise run lint`
+
+To autofix linting issues:
+
+`mise run lint:fix`
+
+### Pre-commit Hook (Optional)
+
+Run `mise run setup:pre-commit-hook` to install a git pre-commit hook
+that auto-lints changed files before each commit.
+This requires native lint tools,
+which you can install with `mise run setup:native-lint-tools`.
+These are optional but catch formatting and lint issues before CI.
+
+## Running Tests
+
+If you're getting errors when running tests:
+
+- Make sure that the IDE uses only the "Maven Shade" dependency of "
+  prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer\*" dependencies.
+
+### Running native tests
+
+```shell
+mise --cd .mise/envs/native run native-test
+```
+
+### Avoid failures while running tests
+
+- Use `-Dcoverage.skip=true` to skip the coverage check during development.
+- Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
+- Use `-Dwarnings=-nowarn` to skip the warnings during development.
+
+Combine all with
+
+```shell
+./mvnw install -DskipTests -Dcoverage.skip=true \
+  -Dcheckstyle.skip=true -Dwarnings=-nowarn
+```
+
+or simply
+
+```shell
+mise run compile
+```
+
+## Version Numbers in Examples
+
+Example `pom.xml` files (under `examples/`) should reference the latest
+**released** version, not a SNAPSHOT. After each release, Renovate
+updates these versions automatically.
+
+Only use a SNAPSHOT version in an example when it demonstrates a new
+feature that has not been released yet.
+
+## Updating the Protobuf Java Classes
+
+The generated protobuf `Metrics.java` lives in a versioned package
+(e.g., `...generated.com_google_protobuf_4_33_5`) that changes with each
+protobuf release. A stable extending class at
+`...generated/Metrics.java` reexports all types so that consumer code
+only imports from the version-free package. On protobuf upgrades only
+the `extends` clause in the stable class changes.
+
+In the failing PR from renovate, run:
+
+```shell
+mise run generate
+```
+
+The script will:
+
+1. Re-generate the protobuf sources with the new version.
+2. Update the versioned package name in all Java files
+   (including the stable `Metrics.java` extends clause).
+
+Add the updated files to Git and commit them.

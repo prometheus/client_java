@@ -1,0 +1,14 @@
+---
+more:
+  - name: JavaDoc
+    ref: "/client_java/api"
+    external: true
+    icon: "gdoc_bookmark"
+  - name: Releases
+    ref: "https://github.com/prometheus/client_java/releases"
+    external: true
+    icon: "gdoc_download"
+  - name: Github
+    ref: "https://github.com/prometheus/client_java"
+    external: true
+    icon: "gdoc_github"

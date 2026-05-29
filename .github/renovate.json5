@@ -1,0 +1,43 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:best-practices", "config:recommended", "github>grafana/flint#v0.22.2"],
+  platformCommit: "enabled",
+  automerge: true,
+  ignorePaths: [
+    "**/simpleclient-archive/**",
+    // old projects
+    // agent resources packages an OTel API that is the minimum required API version
+    "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
+  ],
+  labels: ["dependencies"],
+  packageRules: [
+    {
+      matchFileNames: ["mise.toml"],
+      matchDepNames: ["java"],
+      groupName: "java temurin",
+      additionalBranchPrefix: "temurin-",
+    },
+    {
+      matchFileNames: [".mise/envs/native/mise.toml"],
+      matchDepNames: ["java"],
+      groupName: "java graalvm",
+      additionalBranchPrefix: "graalvm-",
+    },
+    {
+      matchPackageNames: ["io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"],
+      ignoreUnstable: false,
+    },
+    {
+      enabled: false,
+      description: "Ignore internal project modules",
+      matchPackageNames: ["/^io\\.prometheus:(prometheus-metrics-bom|examples|example-.+|integration-tests|it-.+)$/"],
+    },
+    {
+      description: "Group protobuf-java and protoc together so generated code can be updated in one PR",
+      matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
+      groupName: "protobuf",
+      separateMajorMinor: false,
+    },
+  ],
+  customManagers: [],
+}

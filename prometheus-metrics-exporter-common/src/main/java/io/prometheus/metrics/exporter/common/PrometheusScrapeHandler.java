@@ -1,0 +1,205 @@
+package io.prometheus.metrics.exporter.common;
+
+import io.prometheus.metrics.config.EscapingScheme;
+import io.prometheus.metrics.config.ExporterFilterProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
+import io.prometheus.metrics.expositionformats.ExpositionFormats;
+import io.prometheus.metrics.model.registry.MetricNameFilter;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.zip.GZIPOutputStream;
+import javax.annotation.Nullable;
+
+/** Prometheus scrape endpoint. */
+public class PrometheusScrapeHandler {
+
+  private final PrometheusRegistry registry;
+  private final ExpositionFormats expositionFormats;
+  @Nullable private final Predicate<String> nameFilter;
+  private final AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
+  private final List<String> supportedFormats;
+  private final boolean preferUncompressedResponse;
+
+  public PrometheusScrapeHandler() {
+    this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
+  }
+
+  public PrometheusScrapeHandler(PrometheusRegistry registry) {
+    this(PrometheusProperties.get(), registry);
+  }
+
+  public PrometheusScrapeHandler(PrometheusProperties config) {
+    this(config, PrometheusRegistry.defaultRegistry);
+  }
+
+  public PrometheusScrapeHandler(PrometheusProperties config, PrometheusRegistry registry) {
+    this.expositionFormats = ExpositionFormats.init(config);
+    this.preferUncompressedResponse =
+        config.getExporterHttpServerProperties().isPreferUncompressedResponse();
+    this.registry = registry;
+    this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
+    supportedFormats = new ArrayList<>(Arrays.asList("openmetrics", "text"));
+    if (expositionFormats.getPrometheusProtobufWriter().isAvailable()) {
+      supportedFormats.add("prometheus-protobuf");
+    }
+  }
+
+  public void handleRequest(PrometheusHttpExchange exchange) throws IOException {
+    try {
+      PrometheusHttpRequest request = exchange.getRequest();
+      MetricSnapshots snapshots = scrape(request);
+      String acceptHeader = request.getHeader("Accept");
+      EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
+      if (writeDebugResponse(snapshots, escapingScheme, exchange)) {
+        return;
+      }
+      ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
+      PrometheusHttpResponse response = exchange.getResponse();
+      response.setHeader("Content-Type", writer.getContentType());
+
+      if (shouldUseCompression(request)) {
+        response.setHeader("Content-Encoding", "gzip");
+        try (GZIPOutputStream gzipOutputStream =
+            new GZIPOutputStream(response.sendHeadersAndGetBody(200, 0))) {
+          writer.write(gzipOutputStream, snapshots, escapingScheme);
+        }
+      } else {
+        ByteArrayOutputStream responseBuffer =
+            new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+        writer.write(responseBuffer, snapshots, escapingScheme);
+        lastResponseSize.set(responseBuffer.size());
+        int contentLength = responseBuffer.size();
+        if (contentLength > 0) {
+          response.setHeader("Content-Length", String.valueOf(contentLength));
+        }
+        if (request.getMethod().equals("HEAD")) {
+          // The HTTPServer implementation will throw an Exception if we close the output stream
+          // without sending a response body, so let's not close the output stream in case of a HEAD
+          // response.
+          response.sendHeadersAndGetBody(200, -1);
+        } else {
+          try (OutputStream outputStream = response.sendHeadersAndGetBody(200, contentLength)) {
+            responseBuffer.writeTo(outputStream);
+          }
+        }
+      }
+    } catch (IOException e) {
+      exchange.handleException(e);
+    } catch (RuntimeException e) {
+      exchange.handleException(e);
+    } finally {
+      exchange.close();
+    }
+  }
+
+  @Nullable
+  private Predicate<String> makeNameFilter(ExporterFilterProperties props) {
+    if (props.getAllowedMetricNames() == null
+        && props.getExcludedMetricNames() == null
+        && props.getAllowedMetricNamePrefixes() == null
+        && props.getExcludedMetricNamePrefixes() == null) {
+      return null;
+    } else {
+      return MetricNameFilter.builder()
+          .nameMustBeEqualTo(props.getAllowedMetricNames())
+          .nameMustNotBeEqualTo(props.getExcludedMetricNames())
+          .nameMustStartWith(props.getAllowedMetricNamePrefixes())
+          .nameMustNotStartWith(props.getExcludedMetricNamePrefixes())
+          .build();
+    }
+  }
+
+  @Nullable
+  private Predicate<String> makeNameFilter(@Nullable String[] includedNames) {
+    Predicate<String> result = null;
+    if (includedNames != null && includedNames.length > 0) {
+      result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();
+    }
+    if (result != null && nameFilter != null) {
+      result = result.and(nameFilter);
+    } else if (nameFilter != null) {
+      result = nameFilter;
+    }
+    return result;
+  }
+
+  private MetricSnapshots scrape(PrometheusHttpRequest request) {
+
+    Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
+    if (filter != null) {
+      return registry.scrape(filter, request);
+    } else {
+      return registry.scrape(request);
+    }
+  }
+
+  private boolean writeDebugResponse(
+      MetricSnapshots snapshots, EscapingScheme escapingScheme, PrometheusHttpExchange exchange)
+      throws IOException {
+    String debugParam = exchange.getRequest().getParameter("debug");
+    PrometheusHttpResponse response = exchange.getResponse();
+    if (debugParam == null) {
+      return false;
+    } else {
+      response.setHeader("Content-Type", "text/plain; charset=utf-8");
+      int responseStatus = supportedFormats.contains(debugParam) ? 200 : 500;
+      OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0);
+      switch (debugParam) {
+        case "openmetrics":
+          expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots, escapingScheme);
+          break;
+        case "text":
+          expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots, escapingScheme);
+          break;
+        case "prometheus-protobuf":
+          String debugString =
+              expositionFormats
+                  .getPrometheusProtobufWriter()
+                  .toDebugString(snapshots, escapingScheme);
+          body.write(debugString.getBytes(StandardCharsets.UTF_8));
+          break;
+        default:
+          body.write(
+              ("debug="
+                      + debugParam
+                      + ": Unsupported query parameter. Valid values are 'openmetrics', "
+                      + "'text', and 'prometheus-protobuf'.")
+                  .getBytes(StandardCharsets.UTF_8));
+          break;
+      }
+      return true;
+    }
+  }
+
+  private boolean shouldUseCompression(PrometheusHttpRequest request) {
+    if (preferUncompressedResponse) {
+      return false;
+    }
+
+    Enumeration<String> encodingHeaders = request.getHeaders("Accept-Encoding");
+    if (encodingHeaders == null) {
+      return false;
+    }
+    while (encodingHeaders.hasMoreElements()) {
+      String encodingHeader = encodingHeaders.nextElement();
+      String[] encodings = encodingHeader.split(",");
+      for (String encoding : encodings) {
+        if (encoding.trim().equalsIgnoreCase("gzip")) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}

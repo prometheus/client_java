@@ -1,0 +1,30 @@
+root = true
+
+[*]
+max_line_length = 100
+indent_size = 2
+
+[{version-rules.xml,maven-wrapper.properties,checkstyle.xml,docker-compose.yaml,docker-compose.yml,Dockerfile,example_target_info.json,mise.toml,mvnm,mvnw.cmd,generate-protobuf.sh,.gitleaksignore,prometheus.properties}]
+max_line_length = 200
+
+[{grafana-dashboard-*.json,.editorconfig,lychee.toml,renovate.json5,CODE_OF_CONDUCT.md}]
+max_line_length = 300
+
+[pom.xml]
+max_line_length = 210
+
+[*.py]
+# checked by black
+indent_size = 4
+max_line_length = 120
+
+[{.mise/tasks/build-release.sh,.github/workflows/*.yml}]
+max_line_length = 300
+
+[*.java]
+# Java line length is handled by google-java-format
+max_line_length = off
+
+[*.md]
+# Markdown line length is handled by rumdl
+max_line_length = off

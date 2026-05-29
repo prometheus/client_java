@@ -1,0 +1,33 @@
+---
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    if: ${{ github.repository == 'prometheus/client_java' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0
+        id: release-please
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/config/release-please-config.json
+          manifest-file: .github/config/.release-please-manifest.json
+
+      - name: Trigger deploy to Maven Central
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh workflow run release.yml --repo "${GITHUB_REPOSITORY}"
+          -f tag=${{ steps.release-please.outputs.tag_name }}

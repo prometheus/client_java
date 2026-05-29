@@ -1,0 +1,169 @@
+package io.prometheus.metrics.core.metrics;
+
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.Unit;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.Nullable;
+
+/**
+ * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
+ *
+ * <p>An exception would be a metric that is a bridge to a 3rd party metric library, where the
+ * metric name has to be retrieved from the 3rd party metric library at scrape time.
+ */
+public abstract class MetricWithFixedMetadata extends Metric {
+
+  private final MetricMetadata metadata;
+  protected final String[] labelNames;
+
+  protected MetricWithFixedMetadata(Builder<?, ?> builder) {
+    super(builder);
+    String name = makeName(builder.name, builder.unit);
+    if (builder.originalName == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
+    String originalName = builder.originalName;
+    String expositionBaseName = makeExpositionBaseName(originalName, builder.unit);
+    this.metadata =
+        new MetricMetadata(name, expositionBaseName, originalName, builder.help, builder.unit);
+    this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
+  }
+
+  @Override
+  public MetricMetadata getMetadata() {
+    return metadata;
+  }
+
+  private String makeName(@Nullable String name, @Nullable Unit unit) {
+    if (name == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
+    if (unit != null) {
+      if (!name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
+        name += "_" + unit;
+      }
+    }
+    return name;
+  }
+
+  private String makeExpositionBaseName(@Nullable String expositionBaseName, @Nullable Unit unit) {
+    if (expositionBaseName == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
+    if (unit != null) {
+      if (!expositionBaseName.endsWith("_" + unit) && !expositionBaseName.endsWith("." + unit)) {
+        expositionBaseName += "_" + unit;
+      }
+    }
+    return expositionBaseName;
+  }
+
+  @Override
+  public String getPrometheusName() {
+    return metadata.getPrometheusName();
+  }
+
+  @Override
+  public Set<String> getLabelNames() {
+    Set<String> names = new HashSet<>();
+    for (String labelName : labelNames) {
+      names.add(PrometheusNaming.prometheusName(labelName));
+    }
+    for (Label label : constLabels) {
+      names.add(PrometheusNaming.prometheusName(label.getName()));
+    }
+    return names;
+  }
+
+  public abstract static class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata>
+      extends Metric.Builder<B, M> {
+
+    @Nullable private String name;
+    @Nullable private String originalName;
+    @Nullable private Unit unit;
+    @Nullable private String help;
+    private String[] labelNames = new String[0];
+
+    protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
+      super(illegalLabelNames, properties);
+    }
+
+    public B name(String name) {
+      String error = PrometheusNaming.validateMetricName(name);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
+      }
+      this.name = name;
+      this.originalName = name;
+      return self();
+    }
+
+    /**
+     * Set the metric name and original name separately. Used by Counter and Info builders which
+     * strip type suffixes from the name but preserve the original for exposition.
+     */
+    protected B nameWithOriginal(String name, String originalName) {
+      String error = PrometheusNaming.validateMetricName(name);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
+      }
+      error = PrometheusNaming.validateMetricName(originalName);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + originalName + "': Illegal metric name: " + error);
+      }
+      this.name = name;
+      this.originalName = originalName;
+      return self();
+    }
+
+    public B unit(@Nullable Unit unit) {
+      this.unit = unit;
+      return self();
+    }
+
+    public B help(String help) {
+      this.help = help;
+      return self();
+    }
+
+    public B labelNames(String... labelNames) {
+      for (String labelName : labelNames) {
+        if (!PrometheusNaming.isValidLabelName(labelName)) {
+          throw new IllegalArgumentException(labelName + ": illegal label name");
+        }
+        if (illegalLabelNames.contains(labelName)) {
+          throw new IllegalArgumentException(
+              labelName + ": illegal label name for this metric type");
+        }
+        if (constLabels.contains(labelName)) {
+          throw new IllegalArgumentException(labelName + ": duplicate label name");
+        }
+      }
+      this.labelNames = labelNames;
+      return self();
+    }
+
+    @Override
+    public B constLabels(Labels constLabels) {
+      for (String labelName : labelNames) {
+        if (constLabels.contains(labelName)) { // Labels.contains() treats dots like underscores
+          throw new IllegalArgumentException(labelName + ": duplicate label name");
+        }
+      }
+      return super.constLabels(constLabels);
+    }
+
+    @Override
+    public abstract M build();
+
+    @Override
+    protected abstract B self();
+  }
+}

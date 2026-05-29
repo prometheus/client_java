@@ -1,0 +1,145 @@
+package io.prometheus.metrics.exporter.opentelemetry;
+
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.resources.ResourceBuilder;
+import io.prometheus.metrics.exporter.opentelemetry.otelmodel.MetricDataFactory;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nullable;
+
+class PrometheusMetricProducer implements CollectionRegistration {
+
+  private final PrometheusRegistry registry;
+  private final Resource resource;
+  private final InstrumentationScopeInfo instrumentationScopeInfo;
+  private final boolean preserveNames;
+
+  public PrometheusMetricProducer(
+      PrometheusRegistry registry,
+      InstrumentationScopeInfo instrumentationScopeInfo,
+      Resource resource,
+      boolean preserveNames) {
+    this.registry = registry;
+    this.instrumentationScopeInfo = instrumentationScopeInfo;
+    this.resource = resource;
+    this.preserveNames = preserveNames;
+  }
+
+  @Override
+  public Collection<MetricData> collectAllMetrics() {
+    // Note: Currently all metrics from the registry are exported. To add metric filtering
+    // similar to the Servlet exporter, one could:
+    // 1. Add filter properties to ExporterOpenTelemetryProperties (allowedNames, excludedNames,
+    // etc.)
+    // 2. Convert these properties to a Predicate<String> using MetricNameFilter.builder()
+    // 3. Call registry.scrape(filter) instead of registry.scrape()
+    // OpenTelemetry also provides its own Views API for filtering and aggregation, which may be
+    // preferred for OpenTelemetry-specific deployments.
+    MetricSnapshots snapshots = registry.scrape();
+    Resource resourceWithTargetInfo = resource.merge(resourceFromTargetInfo(snapshots));
+    InstrumentationScopeInfo scopeFromInfo = instrumentationScopeFromOtelScopeInfo(snapshots);
+    List<MetricData> result = new ArrayList<>(snapshots.size());
+    MetricDataFactory factory =
+        new MetricDataFactory(
+            resourceWithTargetInfo,
+            scopeFromInfo != null ? scopeFromInfo : instrumentationScopeInfo,
+            System.currentTimeMillis(),
+            preserveNames);
+    for (MetricSnapshot snapshot : snapshots) {
+      if (snapshot instanceof CounterSnapshot) {
+        addUnlessNull(result, factory.create((CounterSnapshot) snapshot));
+      } else if (snapshot instanceof GaugeSnapshot) {
+        addUnlessNull(result, factory.create((GaugeSnapshot) snapshot));
+      } else if (snapshot instanceof HistogramSnapshot) {
+        if (!((HistogramSnapshot) snapshot).isGaugeHistogram()) {
+          addUnlessNull(result, factory.create((HistogramSnapshot) snapshot));
+        }
+      } else if (snapshot instanceof SummarySnapshot) {
+        addUnlessNull(result, factory.create((SummarySnapshot) snapshot));
+      } else if (snapshot instanceof InfoSnapshot) {
+        String name = snapshot.getMetadata().getPrometheusName();
+        if (!name.equals("target") && !name.equals("otel_scope")) {
+          addUnlessNull(result, factory.create((InfoSnapshot) snapshot));
+        }
+      } else if (snapshot instanceof StateSetSnapshot) {
+        addUnlessNull(result, factory.create((StateSetSnapshot) snapshot));
+      } else if (snapshot instanceof UnknownSnapshot) {
+        addUnlessNull(result, factory.create((UnknownSnapshot) snapshot));
+      }
+    }
+    return result;
+  }
+
+  private Resource resourceFromTargetInfo(MetricSnapshots snapshots) {
+    ResourceBuilder result = Resource.builder();
+    for (MetricSnapshot snapshot : snapshots) {
+      if (snapshot.getMetadata().getName().equals("target") && snapshot instanceof InfoSnapshot) {
+        InfoSnapshot targetInfo = (InfoSnapshot) snapshot;
+        if (!targetInfo.getDataPoints().isEmpty()) {
+          InfoSnapshot.InfoDataPointSnapshot data = targetInfo.getDataPoints().get(0);
+          Labels labels = data.getLabels();
+          for (int i = 0; i < labels.size(); i++) {
+            result.put(labels.getName(i), labels.getValue(i));
+          }
+        }
+      }
+    }
+    return result.build();
+  }
+
+  @Nullable
+  private InstrumentationScopeInfo instrumentationScopeFromOtelScopeInfo(
+      MetricSnapshots snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
+      if (snapshot.getMetadata().getPrometheusName().equals("otel_scope")
+          && snapshot instanceof InfoSnapshot) {
+        InfoSnapshot scopeInfo = (InfoSnapshot) snapshot;
+        if (!scopeInfo.getDataPoints().isEmpty()) {
+          Labels labels = scopeInfo.getDataPoints().get(0).getLabels();
+          String name = null;
+          String version = null;
+          AttributesBuilder attributesBuilder = Attributes.builder();
+          for (int i = 0; i < labels.size(); i++) {
+            if (labels.getPrometheusName(i).equals("otel_scope_name")) {
+              name = labels.getValue(i);
+            } else if (labels.getPrometheusName(i).equals("otel_scope_version")) {
+              version = labels.getValue(i);
+            } else {
+              attributesBuilder.put(labels.getName(i), labels.getValue(i));
+            }
+          }
+          if (name != null) {
+            return InstrumentationScopeInfo.builder(name)
+                .setVersion(version)
+                .setAttributes(attributesBuilder.build())
+                .build();
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  private void addUnlessNull(List<MetricData> result, @Nullable MetricData data) {
+    if (data != null) {
+      result.add(data);
+    }
+  }
+}

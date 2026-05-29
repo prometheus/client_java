@@ -1,0 +1,23 @@
+---
+name: GraalVM Native Tests
+
+on: [pull_request]
+
+permissions: {}
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        with:
+          persist-credentials: false
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          version: v2026.5.15
+          sha256: a86aa65c8ca48a548c3f9904853489383bb8cdebfd8f2cf8ddd18b675e03bbf4
+          working_directory: .mise/envs/native
+      - name: Run native tests
+        working-directory: .mise/envs/native
+        run: mise native-test

@@ -1,0 +1,498 @@
+package io.prometheus.metrics.model.registry;
+
+import static java.util.Collections.emptySet;
+
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.Unit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import javax.annotation.Nullable;
+
+public class PrometheusRegistry {
+
+  public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();
+
+  private final Set<Collector> collectors = ConcurrentHashMap.newKeySet();
+  private final Set<MultiCollector> multiCollectors = ConcurrentHashMap.newKeySet();
+  private final ConcurrentHashMap<String, RegistrationInfo> registered = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Collector, CollectorRegistration> collectorMetadata =
+      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<MultiCollector, List<MultiCollectorRegistration>>
+      multiCollectorMetadata = new ConcurrentHashMap<>();
+
+  /**
+   * Maps exposition-level names (e.g. "events_total", "events_created") to the owning
+   * prometheusName (e.g. "events"). Used to detect cross-type collisions at registration time.
+   */
+  private final ConcurrentHashMap<String, String> expositionNameOwners = new ConcurrentHashMap<>();
+
+  /** Stores the registration details for a Collector at registration time. */
+  private static class CollectorRegistration {
+    final String prometheusName;
+    @Nullable final String expositionBasePrometheusName;
+    final Set<String> labelNames;
+
+    CollectorRegistration(
+        String prometheusName,
+        @Nullable String expositionBasePrometheusName,
+        @Nullable Set<String> labelNames) {
+      this.prometheusName = prometheusName;
+      this.expositionBasePrometheusName = expositionBasePrometheusName;
+      this.labelNames = immutableLabelNames(labelNames);
+    }
+  }
+
+  /**
+   * Stores the registration details for a single metric within a MultiCollector. A MultiCollector
+   * can produce multiple metrics, so we need one of these per metric name.
+   */
+  private static class MultiCollectorRegistration {
+    final String prometheusName;
+    final Set<String> labelNames;
+
+    MultiCollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
+      this.prometheusName = prometheusName;
+      this.labelNames = immutableLabelNames(labelNames);
+    }
+  }
+
+  /**
+   * Tracks registration information for each metric name to enable validation of type consistency,
+   * label schema uniqueness, and help/unit consistency.
+   */
+  private static class RegistrationInfo {
+    private final MetricType type;
+    private final Set<Set<String>> labelSchemas;
+    @Nullable private String help;
+    @Nullable private Unit unit;
+
+    private RegistrationInfo(
+        MetricType type,
+        Set<Set<String>> labelSchemas,
+        @Nullable String help,
+        @Nullable Unit unit) {
+      this.type = type;
+      this.labelSchemas = labelSchemas;
+      this.help = help;
+      this.unit = unit;
+    }
+
+    static RegistrationInfo of(
+        MetricType type,
+        @Nullable Set<String> labelNames,
+        @Nullable String help,
+        @Nullable Unit unit) {
+      Set<Set<String>> labelSchemas = ConcurrentHashMap.newKeySet();
+      Set<String> normalized =
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
+      labelSchemas.add(normalized);
+      return new RegistrationInfo(type, labelSchemas, help, unit);
+    }
+
+    /**
+     * Validates that the given help and unit are exactly equal to this registration. Throws if
+     * values differ, including when one is null and the other is non-null. This ensures consistent
+     * metadata across all collectors sharing the same metric name.
+     */
+    void validateMetadata(@Nullable String newHelp, @Nullable Unit newUnit) {
+      if (!Objects.equals(help, newHelp)) {
+        throw new IllegalArgumentException(
+            "Conflicting help strings. Existing: \"" + help + "\", new: \"" + newHelp + "\"");
+      }
+      if (!Objects.equals(unit, newUnit)) {
+        throw new IllegalArgumentException(
+            "Conflicting unit. Existing: " + unit + ", new: " + newUnit);
+      }
+    }
+
+    /**
+     * Adds a label schema to this registration.
+     *
+     * @param labelNames the label names to add (null or empty sets are normalized to empty set)
+     * @return true if the schema was added (new), false if it already existed
+     */
+    boolean addLabelSet(@Nullable Set<String> labelNames) {
+      Set<String> normalized =
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
+      return labelSchemas.add(normalized);
+    }
+
+    /**
+     * Removes a label schema from this registration.
+     *
+     * @param labelNames the label names to remove (null or empty sets are normalized to empty set)
+     */
+    void removeLabelSet(@Nullable Set<String> labelNames) {
+      Set<String> normalized =
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
+      labelSchemas.remove(normalized);
+    }
+
+    /** Returns true if all label schemas have been unregistered. */
+    boolean isEmpty() {
+      return labelSchemas.isEmpty();
+    }
+
+    MetricType getType() {
+      return type;
+    }
+  }
+
+  /**
+   * Returns an immutable set of label names for storage. Defends against mutation of the set
+   * returned by {@code Collector.getLabelNames()} after registration, which would break duplicate
+   * detection and unregistration.
+   */
+  private static Set<String> immutableLabelNames(@Nullable Set<String> labelNames) {
+    if (labelNames == null || labelNames.isEmpty()) {
+      return emptySet();
+    }
+    return Collections.unmodifiableSet(new HashSet<>(labelNames));
+  }
+
+  /**
+   * Computes the set of exposition-level time series names that a metric with the given name and
+   * type will produce.
+   */
+  static Set<String> computeExpositionNames(String prometheusName, MetricType type) {
+    Set<String> names = new HashSet<>();
+    switch (type) {
+      case COUNTER:
+        names.add(prometheusName + "_total");
+        names.add(prometheusName + "_created");
+        break;
+      case INFO:
+        names.add(prometheusName + "_info");
+        break;
+      case HISTOGRAM:
+        names.add(prometheusName + "_bucket");
+        names.add(prometheusName + "_count");
+        names.add(prometheusName + "_sum");
+        names.add(prometheusName + "_created");
+        break;
+      case SUMMARY:
+        names.add(prometheusName + "_count");
+        names.add(prometheusName + "_sum");
+        names.add(prometheusName + "_created");
+        break;
+      case GAUGE:
+      case STATESET:
+      case UNKNOWN:
+      default:
+        names.add(prometheusName);
+        break;
+    }
+    return names;
+  }
+
+  /**
+   * Validates the registration of a metric with the given parameters. Ensures type consistency,
+   * label schema uniqueness, help/unit consistency, and exposition name collision detection.
+   */
+  private void validateRegistration(
+      String prometheusName,
+      MetricType metricType,
+      Set<String> normalizedLabels,
+      @Nullable String help,
+      @Nullable Unit unit) {
+    final MetricType type = metricType;
+    final Set<String> names = normalizedLabels;
+    final String helpForValidation = help;
+    final Unit unitForValidation = unit;
+
+    Set<String> expositionNames = computeExpositionNames(prometheusName, type);
+    String claimError = claimExpositionNames(expositionNames, prometheusName);
+    if (claimError != null) {
+      throw new IllegalArgumentException(claimError);
+    }
+
+    boolean success = false;
+    try {
+      registered.compute(
+          prometheusName,
+          (n, existingInfo) -> {
+            if (existingInfo == null) {
+              return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
+            } else {
+              if (existingInfo.getType() != type) {
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": Conflicting metric types. Existing: "
+                        + existingInfo.getType()
+                        + ", new: "
+                        + type);
+              }
+              // Check label set first; only mutate help/unit after validation passes.
+              if (!existingInfo.addLabelSet(names)) {
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": duplicate metric name with identical label schema "
+                        + names);
+              }
+              // Roll back label schema if metadata validation fails
+              try {
+                existingInfo.validateMetadata(helpForValidation, unitForValidation);
+              } catch (IllegalArgumentException e) {
+                existingInfo.removeLabelSet(names);
+                throw e;
+              }
+              return existingInfo;
+            }
+          });
+      success = true;
+    } finally {
+      if (!success) {
+        releaseExpositionNames(expositionNames, prometheusName);
+      }
+    }
+  }
+
+  /**
+   * Atomically claims exposition names for the given metric. Returns null on success, or an error
+   * message on conflict. Rolls back any partially claimed names on failure.
+   */
+  @Nullable
+  private String claimExpositionNames(Set<String> expositionNames, String prometheusName) {
+    for (String expositionName : expositionNames) {
+      String existingOwner = expositionNameOwners.putIfAbsent(expositionName, prometheusName);
+      if (existingOwner != null && !existingOwner.equals(prometheusName)) {
+        releaseExpositionNames(expositionNames, prometheusName);
+        return "'"
+            + prometheusName
+            + "' and '"
+            + existingOwner
+            + "' have conflicting exposition name: '"
+            + expositionName
+            + "'";
+      }
+    }
+    return null;
+  }
+
+  private void releaseExpositionNames(Set<String> expositionNames, String owner) {
+    for (String expositionName : expositionNames) {
+      expositionNameOwners.remove(expositionName, owner);
+    }
+  }
+
+  public void register(Collector collector) {
+    if (!collectors.add(collector)) {
+      throw new IllegalArgumentException("Collector instance is already registered");
+    }
+    try {
+      String prometheusName = collector.getPrometheusName();
+      MetricType metricType = collector.getMetricType();
+      Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames());
+      MetricMetadata metadata = collector.getMetadata();
+      String help = metadata != null ? metadata.getHelp() : null;
+      Unit unit = metadata != null ? metadata.getUnit() : null;
+
+      // Only perform validation if collector provides sufficient metadata.
+      // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
+      if (prometheusName != null && metricType != null) {
+        validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
+        String expositionBasePrometheusName =
+            metadata != null ? metadata.getExpositionBasePrometheusName() : null;
+        collectorMetadata.put(
+            collector,
+            new CollectorRegistration(
+                prometheusName, expositionBasePrometheusName, normalizedLabels));
+      }
+      // Catch RuntimeException broadly because collector methods (getPrometheusName, getMetricType,
+      // etc.) are user-implemented and could throw any RuntimeException. Ensures cleanup on
+      // failure.
+    } catch (RuntimeException e) {
+      collectors.remove(collector);
+      CollectorRegistration reg = collectorMetadata.remove(collector);
+      if (reg != null && reg.prometheusName != null) {
+        unregisterLabelSchema(reg.prometheusName, reg.labelNames);
+      }
+      throw e;
+    }
+  }
+
+  public void register(MultiCollector collector) {
+    if (!multiCollectors.add(collector)) {
+      throw new IllegalArgumentException("MultiCollector instance is already registered");
+    }
+    List<String> prometheusNamesList = collector.getPrometheusNames();
+    List<MultiCollectorRegistration> registrations = new ArrayList<>();
+
+    try {
+      for (String prometheusName : prometheusNamesList) {
+        MetricType metricType = collector.getMetricType(prometheusName);
+        Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames(prometheusName));
+        MetricMetadata metadata = collector.getMetadata(prometheusName);
+        String help = metadata != null ? metadata.getHelp() : null;
+        Unit unit = metadata != null ? metadata.getUnit() : null;
+
+        if (metricType != null) {
+          validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
+          registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
+        }
+      }
+
+      multiCollectorMetadata.put(collector, registrations);
+      // Catch RuntimeException broadly because collector methods (getPrometheusNames,
+      // getMetricType, etc.) are user-implemented and could throw any RuntimeException.
+      // Ensures cleanup on failure.
+    } catch (RuntimeException e) {
+      multiCollectors.remove(collector);
+      for (MultiCollectorRegistration registration : registrations) {
+        unregisterLabelSchema(registration.prometheusName, registration.labelNames);
+      }
+      throw e;
+    }
+  }
+
+  public void unregister(Collector collector) {
+    collectors.remove(collector);
+
+    CollectorRegistration registration = collectorMetadata.remove(collector);
+    if (registration != null && registration.prometheusName != null) {
+      unregisterLabelSchema(registration.prometheusName, registration.labelNames);
+    }
+  }
+
+  public void unregister(MultiCollector collector) {
+    multiCollectors.remove(collector);
+
+    List<MultiCollectorRegistration> registrations = multiCollectorMetadata.remove(collector);
+    if (registrations != null) {
+      for (MultiCollectorRegistration registration : registrations) {
+        unregisterLabelSchema(registration.prometheusName, registration.labelNames);
+      }
+    }
+  }
+
+  /**
+   * Removes the label schema for the given metric name. If no label schemas remain for that name,
+   * removes the metric name entirely from the registry, including its exposition name reservations.
+   */
+  private void unregisterLabelSchema(String prometheusName, Set<String> labelNames) {
+    registered.computeIfPresent(
+        prometheusName,
+        (name, info) -> {
+          info.removeLabelSet(labelNames);
+          if (info.isEmpty()) {
+            // Remove exposition name reservations for this metric.
+            Set<String> expositionNames = computeExpositionNames(prometheusName, info.getType());
+            for (String expositionName : expositionNames) {
+              expositionNameOwners.remove(expositionName, prometheusName);
+            }
+            return null;
+          }
+          return info;
+        });
+  }
+
+  public void clear() {
+    collectors.clear();
+    multiCollectors.clear();
+    registered.clear();
+    collectorMetadata.clear();
+    multiCollectorMetadata.clear();
+    expositionNameOwners.clear();
+  }
+
+  public MetricSnapshots scrape() {
+    return scrape((PrometheusScrapeRequest) null);
+  }
+
+  public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
+    List<MetricSnapshot> allSnapshots = new ArrayList<>();
+    for (Collector collector : collectors) {
+      MetricSnapshot snapshot =
+          scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
+      if (snapshot != null) {
+        allSnapshots.add(snapshot);
+      }
+    }
+    for (MultiCollector collector : multiCollectors) {
+      MetricSnapshots snapshots =
+          scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
+      for (MetricSnapshot snapshot : snapshots) {
+        allSnapshots.add(snapshot);
+      }
+    }
+
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    for (MetricSnapshot snapshot : allSnapshots) {
+      result.metricSnapshot(snapshot);
+    }
+    return result.build();
+  }
+
+  public MetricSnapshots scrape(Predicate<String> includedNames) {
+    if (includedNames == null) {
+      return scrape();
+    }
+    return scrape(includedNames, null);
+  }
+
+  public MetricSnapshots scrape(
+      Predicate<String> includedNames, @Nullable PrometheusScrapeRequest scrapeRequest) {
+    if (includedNames == null) {
+      return scrape(scrapeRequest);
+    }
+    List<MetricSnapshot> allSnapshots = new ArrayList<>();
+    for (Collector collector : collectors) {
+      String prometheusName = collector.getPrometheusName();
+      // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
+      // prometheusName != null means we can skip the scrape if the name is excluded.
+      // Also test the original name (e.g. "events_total" for a counter named "events").
+      CollectorRegistration reg = collectorMetadata.get(collector);
+      String expositionName = reg != null ? reg.expositionBasePrometheusName : null;
+      if (prometheusName == null
+          || includedNames.test(prometheusName)
+          || (expositionName != null && includedNames.test(expositionName))) {
+        MetricSnapshot snapshot =
+            scrapeRequest == null
+                ? collector.collect(includedNames)
+                : collector.collect(includedNames, scrapeRequest);
+        if (snapshot != null) {
+          allSnapshots.add(snapshot);
+        }
+      }
+    }
+    for (MultiCollector collector : multiCollectors) {
+      List<String> prometheusNames = collector.getPrometheusNames();
+      // empty prometheusNames means the names are unknown, and we have to scrape to learn the
+      // names.
+      // non-empty prometheusNames means we can exclude the collector if all names are excluded by
+      // the filter.
+      boolean excluded = !prometheusNames.isEmpty();
+      for (String prometheusName : prometheusNames) {
+        if (includedNames.test(prometheusName)) {
+          excluded = false;
+          break;
+        }
+      }
+      if (!excluded) {
+        MetricSnapshots snapshots =
+            scrapeRequest == null
+                ? collector.collect(includedNames)
+                : collector.collect(includedNames, scrapeRequest);
+        for (MetricSnapshot snapshot : snapshots) {
+          if (snapshot != null) {
+            allSnapshots.add(snapshot);
+          }
+        }
+      }
+    }
+
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    for (MetricSnapshot snapshot : allSnapshots) {
+      result.metricSnapshot(snapshot);
+    }
+    return result.build();
+  }
+}

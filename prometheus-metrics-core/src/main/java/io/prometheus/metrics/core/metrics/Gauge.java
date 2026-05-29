@@ -1,0 +1,203 @@
+package io.prometheus.metrics.core.metrics;
+
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
+import io.prometheus.metrics.core.exemplars.ExemplarSampler;
+import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.registry.MetricType;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
+
+/**
+ * Gauge metric.
+ *
+ * <p>Example usage:
+ *
+ * <pre>{@code
+ * Gauge currentActiveUsers = Gauge.builder()
+ *     .name("current_active_users")
+ *     .help("Number of users that are currently active")
+ *     .labelNames("region")
+ *     .register();
+ *
+ * public void login(String region) {
+ *     currentActiveUsers.labelValues(region).inc();
+ *     // perform login
+ * }
+ *
+ * public void logout(String region) {
+ *     currentActiveUsers.labelValues(region).dec();
+ *     // perform logout
+ * }
+ * }</pre>
+ */
+public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
+    implements GaugeDataPoint {
+
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
+
+  private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
+    super(builder);
+    MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+    boolean exemplarsEnabled =
+        getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    if (exemplarsEnabled) {
+      exemplarSamplerConfig =
+          new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
+    } else {
+      exemplarSamplerConfig = null;
+    }
+  }
+
+  @Override
+  public void inc(double amount) {
+    getNoLabels().inc(amount);
+  }
+
+  @Override
+  public double get() {
+    return getNoLabels().get();
+  }
+
+  @Override
+  public void incWithExemplar(double amount, Labels labels) {
+    getNoLabels().incWithExemplar(amount, labels);
+  }
+
+  @Override
+  public void set(double value) {
+    getNoLabels().set(value);
+  }
+
+  @Override
+  public void setWithExemplar(double value, Labels labels) {
+    getNoLabels().setWithExemplar(value, labels);
+  }
+
+  @Override
+  public GaugeSnapshot collect() {
+    return (GaugeSnapshot) super.collect();
+  }
+
+  @Override
+  protected GaugeSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+    List<GaugeSnapshot.GaugeDataPointSnapshot> dataPointSnapshots = new ArrayList<>(labels.size());
+    for (int i = 0; i < labels.size(); i++) {
+      dataPointSnapshots.add(metricData.get(i).collect(labels.get(i)));
+    }
+    return new GaugeSnapshot(getMetadata(), dataPointSnapshots);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.GAUGE;
+  }
+
+  @Override
+  protected DataPoint newDataPoint() {
+    if (exemplarSamplerConfig != null) {
+      return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
+    } else {
+      return new DataPoint(null);
+    }
+  }
+
+  static class DataPoint implements GaugeDataPoint {
+
+    @Nullable
+    private final ExemplarSampler exemplarSampler; // null if exemplarSamplerConfig is null
+
+    private DataPoint(@Nullable ExemplarSampler exemplarSampler) {
+      this.exemplarSampler = exemplarSampler;
+    }
+
+    private final AtomicLong value = new AtomicLong(Double.doubleToRawLongBits(0));
+
+    @Override
+    public void inc(double amount) {
+      long next =
+          value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
+      if (exemplarSampler != null) {
+        exemplarSampler.observe(Double.longBitsToDouble(next));
+      }
+    }
+
+    @Override
+    public void incWithExemplar(double amount, Labels labels) {
+      long next =
+          value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
+      if (exemplarSampler != null) {
+        exemplarSampler.observeWithExemplar(Double.longBitsToDouble(next), labels);
+      }
+    }
+
+    @Override
+    public void set(double value) {
+      this.value.set(Double.doubleToRawLongBits(value));
+      if (exemplarSampler != null) {
+        exemplarSampler.observe(value);
+      }
+    }
+
+    @Override
+    public double get() {
+      return Double.longBitsToDouble(value.get());
+    }
+
+    @Override
+    public void setWithExemplar(double value, Labels labels) {
+      this.value.set(Double.doubleToRawLongBits(value));
+      if (exemplarSampler != null) {
+        exemplarSampler.observeWithExemplar(value, labels);
+      }
+    }
+
+    private GaugeSnapshot.GaugeDataPointSnapshot collect(Labels labels) {
+      // Read the exemplar first. Otherwise, there is a race condition where you might
+      // see an Exemplar for a value that's not represented in getValue() yet.
+      // If there are multiple Exemplars (by default it's just one), use the oldest
+      // so that we don't violate min age.
+      Exemplar oldest = null;
+      if (exemplarSampler != null) {
+        for (Exemplar exemplar : exemplarSampler.collect()) {
+          if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
+            oldest = exemplar;
+          }
+        }
+      }
+      return new GaugeSnapshot.GaugeDataPointSnapshot(get(), labels, oldest);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder(PrometheusProperties.get());
+  }
+
+  public static Builder builder(PrometheusProperties config) {
+    return new Builder(config);
+  }
+
+  public static class Builder extends StatefulMetric.Builder<Builder, Gauge> {
+
+    private Builder(PrometheusProperties config) {
+      super(Collections.emptyList(), config);
+    }
+
+    @Override
+    public Gauge build() {
+      return new Gauge(this, properties);
+    }
+
+    @Override
+    protected Builder self() {
+      return this;
+    }
+  }
+}

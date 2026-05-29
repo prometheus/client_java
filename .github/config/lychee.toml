@@ -1,0 +1,30 @@
+# Lychee configuration file
+# See https://lychee.cli.rs/config/
+
+timeout = 30
+retry_wait_time = 10
+max_retries = 2
+max_concurrency = 4
+
+# Check link anchors
+include_fragments = "anchor-only"
+
+base_url = "https://prometheus.github.io"
+exclude_path = ["docs/themes", "CHANGELOG.md"]
+
+exclude = [
+  # excluding links to pull requests and issues is done for performance
+  "^https://github.com/prometheus/client_java/(issues|pull)/\\d+$",
+
+  # exclude localhost URLs as they require running services
+  "^http://localhost",
+  "^https://localhost",
+
+  '#',
+  'CONTRIBUTING.md',
+  'LICENSE',
+  'MAINTAINERS.md',
+
+  # exclude private GitHub settings pages
+  "^https://github.com/prometheus/client_java/settings/",
+]

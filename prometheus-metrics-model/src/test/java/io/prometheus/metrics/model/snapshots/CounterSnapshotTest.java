@@ -1,0 +1,119 @@
+package io.prometheus.metrics.model.snapshots;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
+
+class CounterSnapshotTest {
+
+  @Test
+  void testCompleteGoodCase() {
+    long createdTimestamp1 = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
+    long createdTimestamp2 = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
+    long exemplarTimestamp = System.currentTimeMillis();
+    CounterSnapshot snapshot =
+        CounterSnapshot.builder()
+            .name("http_server_requests_seconds")
+            .help("total time spent serving requests")
+            .unit(Unit.SECONDS)
+            .dataPoint(
+                CounterDataPointSnapshot.builder()
+                    .value(1.0)
+                    .exemplar(
+                        Exemplar.builder()
+                            .value(3.0)
+                            .traceId("abc123")
+                            .spanId("123457")
+                            .timestampMillis(exemplarTimestamp)
+                            .build())
+                    .labels(Labels.builder().label("path", "/world").build())
+                    .createdTimestampMillis(createdTimestamp1)
+                    .build())
+            .dataPoint(
+                CounterDataPointSnapshot.builder()
+                    .value(2.0)
+                    .exemplar(
+                        Exemplar.builder()
+                            .value(4.0)
+                            .traceId("def456")
+                            .spanId("234567")
+                            .timestampMillis(exemplarTimestamp)
+                            .build())
+                    .labels(Labels.builder().label("path", "/hello").build())
+                    .createdTimestampMillis(createdTimestamp2)
+                    .build())
+            .build();
+    SnapshotTestUtil.assertMetadata(
+        snapshot, "http_server_requests_seconds", "total time spent serving requests", "seconds");
+    assertThat(snapshot.getDataPoints()).hasSize(2);
+    CounterDataPointSnapshot data =
+        snapshot
+            .getDataPoints()
+            .get(0); // data is sorted by labels, so the first one should be path="/hello"
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/hello"));
+    assertThat(data.getValue()).isEqualTo(2.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(4.0);
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp2);
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+    data = snapshot.getDataPoints().get(1);
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/world"));
+    assertThat(data.getValue()).isEqualTo(1.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(3.0);
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp1);
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+  }
+
+  @Test
+  void testMinimalGoodCase() {
+    CounterSnapshot snapshot =
+        CounterSnapshot.builder()
+            .name("events")
+            .dataPoint(CounterDataPointSnapshot.builder().value(1.0).build())
+            .build();
+    SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
+    assertThat(snapshot.getDataPoints()).hasSize(1);
+    CounterDataPointSnapshot data = snapshot.getDataPoints().get(0);
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
+    assertThat(data.getValue()).isEqualTo(1.0);
+    assertThat(data.getExemplar()).isNull();
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+  }
+
+  @Test
+  void testEmptyCounter() {
+    CounterSnapshot snapshot = CounterSnapshot.builder().name("events").build();
+    assertThat(snapshot.getDataPoints()).isEmpty();
+  }
+
+  @Test
+  void testTotalSuffixPresent() {
+    CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
+  }
+
+  @Test
+  void testValueMissing() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterDataPointSnapshot.builder().build());
+  }
+
+  @Test
+  void testDataImmutable() {
+    CounterSnapshot snapshot =
+        CounterSnapshot.builder()
+            .name("events")
+            .dataPoint(
+                CounterDataPointSnapshot.builder().labels(Labels.of("a", "a")).value(1.0).build())
+            .dataPoint(
+                CounterDataPointSnapshot.builder().labels(Labels.of("a", "b")).value(2.0).build())
+            .build();
+    Iterator<CounterDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
+    iterator.next();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
+  }
+}

@@ -1,0 +1,362 @@
+package io.prometheus.metrics.config;
+
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Nullable;
+
+/**
+ * Properties for configuring the OpenTelemetry exporter.
+ *
+ * <p>These properties can be configured via {@code prometheus.properties}, system properties, or
+ * programmatically.
+ *
+ * <p>All properties are prefixed with {@code io.prometheus.exporter.opentelemetry}.
+ *
+ * <p>Available properties:
+ *
+ * <ul>
+ *   <li>{@code protocol} - OTLP protocol: {@code "grpc"} or {@code "http/protobuf"}
+ *   <li>{@code endpoint} - OTLP endpoint URL
+ *   <li>{@code headers} - HTTP headers for outgoing requests
+ *   <li>{@code intervalSeconds} - Export interval in seconds
+ *   <li>{@code timeoutSeconds} - Request timeout in seconds
+ *   <li>{@code serviceName} - Service name resource attribute
+ *   <li>{@code serviceNamespace} - Service namespace resource attribute
+ *   <li>{@code serviceInstanceId} - Service instance ID resource attribute
+ *   <li>{@code serviceVersion} - Service version resource attribute
+ *   <li>{@code resourceAttributes} - Additional resource attributes
+ * </ul>
+ *
+ * @see <a
+ *     href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/">OpenTelemetry
+ *     SDK Environment Variables</a>
+ */
+public class ExporterOpenTelemetryProperties {
+
+  // See
+  // https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md
+  private static final String PROTOCOL = "protocol"; // otel.exporter.otlp.protocol
+  private static final String ENDPOINT = "endpoint"; // otel.exporter.otlp.endpoint
+  private static final String HEADERS = "headers"; // otel.exporter.otlp.headers
+  private static final String INTERVAL_SECONDS = "interval_seconds"; // otel.metric.export.interval
+  private static final String TIMEOUT_SECONDS = "timeout_seconds"; // otel.exporter.otlp.timeout
+  private static final String SERVICE_NAME = "service_name"; // otel.service.name
+  private static final String SERVICE_NAMESPACE = "service_namespace";
+  private static final String SERVICE_INSTANCE_ID = "service_instance_id";
+  private static final String SERVICE_VERSION = "service_version";
+  private static final String RESOURCE_ATTRIBUTES =
+      "resource_attributes"; // otel.resource.attributes
+  private static final String PRESERVE_NAMES = "preserve_names";
+  private static final String PREFIX = "io.prometheus.exporter.opentelemetry";
+
+  @Nullable private final String endpoint;
+  @Nullable private final String protocol;
+  private final Map<String, String> headers;
+  @Nullable private final String interval;
+  @Nullable private final String timeout;
+  @Nullable private final String serviceName;
+  @Nullable private final String serviceNamespace;
+  @Nullable private final String serviceInstanceId;
+  @Nullable private final String serviceVersion;
+  private final Map<String, String> resourceAttributes;
+  @Nullable private final Boolean preserveNames;
+
+  private ExporterOpenTelemetryProperties(
+      @Nullable String protocol,
+      @Nullable String endpoint,
+      Map<String, String> headers,
+      @Nullable String interval,
+      @Nullable String timeout,
+      @Nullable String serviceName,
+      @Nullable String serviceNamespace,
+      @Nullable String serviceInstanceId,
+      @Nullable String serviceVersion,
+      Map<String, String> resourceAttributes,
+      @Nullable Boolean preserveNames) {
+    this.protocol = protocol;
+    this.endpoint = endpoint;
+    this.headers = headers;
+    this.interval = interval;
+    this.timeout = timeout;
+    this.serviceName = serviceName;
+    this.serviceNamespace = serviceNamespace;
+    this.serviceInstanceId = serviceInstanceId;
+    this.serviceVersion = serviceVersion;
+    this.resourceAttributes = resourceAttributes;
+    this.preserveNames = preserveNames;
+  }
+
+  @Nullable
+  public String getProtocol() {
+    return protocol;
+  }
+
+  @Nullable
+  public String getEndpoint() {
+    return endpoint;
+  }
+
+  public Map<String, String> getHeaders() {
+    return headers;
+  }
+
+  @Nullable
+  public String getInterval() {
+    return interval;
+  }
+
+  @Nullable
+  public String getTimeout() {
+    return timeout;
+  }
+
+  @Nullable
+  public String getServiceName() {
+    return serviceName;
+  }
+
+  @Nullable
+  public String getServiceNamespace() {
+    return serviceNamespace;
+  }
+
+  @Nullable
+  public String getServiceInstanceId() {
+    return serviceInstanceId;
+  }
+
+  @Nullable
+  public String getServiceVersion() {
+    return serviceVersion;
+  }
+
+  public Map<String, String> getResourceAttributes() {
+    return resourceAttributes;
+  }
+
+  /**
+   * When {@code true}, metric names are preserved as-is (including suffixes like {@code _total}).
+   * When {@code false} (default), standard OTel name normalization is applied (stripping unit
+   * suffix).
+   */
+  @Nullable
+  public Boolean getPreserveNames() {
+    return preserveNames;
+  }
+
+  /**
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
+   */
+  static ExporterOpenTelemetryProperties load(PropertySource propertySource)
+      throws PrometheusPropertiesException {
+    String protocol = Util.loadString(PREFIX, PROTOCOL, propertySource);
+    String endpoint = Util.loadString(PREFIX, ENDPOINT, propertySource);
+    Map<String, String> headers = Util.loadMap(PREFIX, HEADERS, propertySource);
+    String interval = Util.loadStringAddSuffix(PREFIX, INTERVAL_SECONDS, propertySource, "s");
+    String timeout = Util.loadStringAddSuffix(PREFIX, TIMEOUT_SECONDS, propertySource, "s");
+    String serviceName = Util.loadString(PREFIX, SERVICE_NAME, propertySource);
+    String serviceNamespace = Util.loadString(PREFIX, SERVICE_NAMESPACE, propertySource);
+    String serviceInstanceId = Util.loadString(PREFIX, SERVICE_INSTANCE_ID, propertySource);
+    String serviceVersion = Util.loadString(PREFIX, SERVICE_VERSION, propertySource);
+    Map<String, String> resourceAttributes =
+        Util.loadMap(PREFIX, RESOURCE_ATTRIBUTES, propertySource);
+    Boolean preserveNames = Util.loadBoolean(PREFIX, PRESERVE_NAMES, propertySource);
+    return new ExporterOpenTelemetryProperties(
+        protocol,
+        endpoint,
+        headers,
+        interval,
+        timeout,
+        serviceName,
+        serviceNamespace,
+        serviceInstanceId,
+        serviceVersion,
+        resourceAttributes,
+        preserveNames);
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    @Nullable private String protocol;
+    @Nullable private String endpoint;
+    private final Map<String, String> headers = new HashMap<>();
+    @Nullable private String interval;
+    @Nullable private String timeout;
+    @Nullable private String serviceName;
+    @Nullable private String serviceNamespace;
+    @Nullable private String serviceInstanceId;
+    @Nullable private String serviceVersion;
+    private final Map<String, String> resourceAttributes = new HashMap<>();
+    @Nullable private Boolean preserveNames;
+
+    private Builder() {}
+
+    /**
+     * The OTLP protocol to use.
+     *
+     * <p>Supported values: {@code "grpc"} or {@code "http/protobuf"}.
+     *
+     * <p>See OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_protocol">OTEL_EXPORTER_OTLP_PROTOCOL</a>.
+     */
+    public Builder protocol(String protocol) {
+      if (!protocol.equals("grpc") && !protocol.equals("http/protobuf")) {
+        throw new IllegalArgumentException(
+            protocol + ": Unsupported protocol. Expecting grpc or http/protobuf");
+      }
+      this.protocol = protocol;
+      return this;
+    }
+
+    /**
+     * The OTLP endpoint to send metric data to.
+     *
+     * <p>The default depends on the protocol:
+     *
+     * <ul>
+     *   <li>{@code "grpc"}: {@code "http://localhost:4317"}
+     *   <li>{@code "http/protobuf"}: {@code "http://localhost:4318/v1/metrics"}
+     * </ul>
+     *
+     * <p>See OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint">OTEL_EXPORTER_OTLP_METRICS_ENDPOINT</a>.
+     */
+    public Builder endpoint(String endpoint) {
+      this.endpoint = endpoint;
+      return this;
+    }
+
+    /**
+     * Add an HTTP header to be applied to outgoing requests. Call multiple times to add multiple
+     * headers.
+     *
+     * <p>See OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers">OTEL_EXPORTER_OTLP_HEADERS</a>.
+     */
+    public Builder header(String name, String value) {
+      this.headers.put(name, value);
+      return this;
+    }
+
+    /**
+     * The interval between the start of two export attempts. Default is 60 seconds.
+     *
+     * <p>Like OpenTelemetry's <a
+     * href="https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#periodic-metric-reader">OTEL_METRIC_EXPORT_INTERVAL</a>
+     * (which defaults to 60000 milliseconds), but specified in seconds rather than milliseconds.
+     */
+    public Builder intervalSeconds(int intervalSeconds) {
+      if (intervalSeconds <= 0) {
+        throw new IllegalArgumentException(intervalSeconds + ": Expecting intervalSeconds > 0");
+      }
+      this.interval = intervalSeconds + "s";
+      return this;
+    }
+
+    /**
+     * The timeout for outgoing requests. Default is 10.
+     *
+     * <p>Like OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_timeout">OTEL_EXPORTER_OTLP_METRICS_TIMEOUT</a>,
+     * but in seconds rather than milliseconds.
+     */
+    public Builder timeoutSeconds(int timeoutSeconds) {
+      if (timeoutSeconds <= 0) {
+        throw new IllegalArgumentException(timeoutSeconds + ": Expecting timeoutSeconds > 0");
+      }
+      this.timeout = timeoutSeconds + "s";
+      return this;
+    }
+
+    /**
+     * The {@code service.name} resource attribute.
+     *
+     * <p>If not explicitly specified, {@code client_java} will try to initialize it with a
+     * reasonable default, like the JAR file name.
+     *
+     * <p>See {@code service.name} in OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service">Resource
+     * Semantic Conventions</a>.
+     */
+    public Builder serviceName(String serviceName) {
+      this.serviceName = serviceName;
+      return this;
+    }
+
+    /**
+     * The {@code service.namespace} resource attribute.
+     *
+     * <p>See {@code service.namespace} in OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource
+     * Semantic Conventions</a>.
+     */
+    public Builder serviceNamespace(String serviceNamespace) {
+      this.serviceNamespace = serviceNamespace;
+      return this;
+    }
+
+    /**
+     * The {@code service.instance.id} resource attribute.
+     *
+     * <p>See {@code service.instance.id} in OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource
+     * Semantic Conventions</a>.
+     */
+    public Builder serviceInstanceId(String serviceInstanceId) {
+      this.serviceInstanceId = serviceInstanceId;
+      return this;
+    }
+
+    /**
+     * The {@code service.version} resource attribute.
+     *
+     * <p>See {@code service.version} in OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource
+     * Semantic Conventions</a>.
+     */
+    public Builder serviceVersion(String serviceVersion) {
+      this.serviceVersion = serviceVersion;
+      return this;
+    }
+
+    /**
+     * Add a resource attribute. Call multiple times to add multiple resource attributes.
+     *
+     * <p>See OpenTelemetry's <a
+     * href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration">OTEL_RESOURCE_ATTRIBUTES</a>.
+     */
+    public Builder resourceAttribute(String name, String value) {
+      this.resourceAttributes.put(name, value);
+      return this;
+    }
+
+    /**
+     * When {@code true}, metric names are preserved as-is (including suffixes like {@code _total}).
+     * When {@code false} (default), standard OTel name normalization is applied.
+     */
+    public Builder preserveNames(boolean preserveNames) {
+      this.preserveNames = preserveNames;
+      return this;
+    }
+
+    public ExporterOpenTelemetryProperties build() {
+      return new ExporterOpenTelemetryProperties(
+          protocol,
+          endpoint,
+          headers,
+          interval,
+          timeout,
+          serviceName,
+          serviceNamespace,
+          serviceInstanceId,
+          serviceVersion,
+          resourceAttributes,
+          preserveNames);
+    }
+  }
+}
