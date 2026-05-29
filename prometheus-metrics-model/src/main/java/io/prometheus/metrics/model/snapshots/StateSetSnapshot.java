@@ -164,25 +164,16 @@ public final class StateSetSnapshot extends MetricSnapshot {
       return asList().stream();
     }
 
+    /**
+     * Sorts names and values in place using introspective quicksort.
+     *
+     * <p>Algorithm: 3-way quicksort with insertion sort for tiny partitions and heapsort fallback
+     * at the recursion depth limit. Parallel arrays are swapped in lockstep.
+     *
+     * <p>Complexity: O(n log n) average and worst case.
+     */
     private static void sort(String[] names, boolean[] values) {
-      // Bubblesort
-      int n = names.length;
-      for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-          if (names[j].compareTo(names[j + 1]) > 0) {
-            swap(j, j + 1, names, values);
-          }
-        }
-      }
-    }
-
-    private static void swap(int i, int j, String[] names, boolean[] values) {
-      String tmpName = names[j];
-      names[j] = names[i];
-      names[i] = tmpName;
-      boolean tmpValue = values[j];
-      values[j] = values[i];
-      values[i] = tmpValue;
+      StringBooleanArraySorter.sort(names, values);
     }
 
     public static Builder builder() {
@@ -266,6 +257,157 @@ public final class StateSetSnapshot extends MetricSnapshot {
     @Override
     protected Builder self() {
       return this;
+    }
+  }
+
+  /**
+   * In-place introsort for state {@code names} and parallel boolean {@code values}.
+   *
+   * <p>Uses 3-way quicksort partitioning for large ranges, insertion sort for tiny ranges, and a
+   * heapsort fallback at the recursion-depth limit to guarantee O(n log n) worst-case complexity.
+   */
+  private static final class StringBooleanArraySorter {
+
+    private static final int INSERTION_SORT_THRESHOLD = 24;
+
+    private static void sort(String[] names, boolean[] values) {
+      int right = names.length - 1;
+      if (right <= 0) {
+        return;
+      }
+      introSort(names, values, 0, right, depthLimit(names.length));
+    }
+
+    private static void introSort(
+        String[] names, boolean[] values, int left, int right, int depthLimit) {
+      while (left < right) {
+        if (right - left + 1 <= INSERTION_SORT_THRESHOLD) {
+          insertionSort(names, values, left, right);
+          return;
+        }
+        if (depthLimit == 0) {
+          heapSort(names, values, left, right);
+          return;
+        }
+        depthLimit--;
+
+        int mid = left + ((right - left) >>> 1);
+        int pivotIndex = medianOf3(names, left, mid, right);
+        String pivot = names[pivotIndex];
+
+        int lt = left;
+        int i = left;
+        int gt = right;
+        while (i <= gt) {
+          int cmp = compare(names[i], pivot);
+          if (cmp < 0) {
+            swap(i, lt, names, values);
+            i++;
+            lt++;
+          } else if (cmp > 0) {
+            swap(i, gt, names, values);
+            gt--;
+          } else {
+            i++;
+          }
+        }
+
+        if (lt - left < right - gt) {
+          introSort(names, values, left, lt - 1, depthLimit);
+          left = gt + 1;
+        } else {
+          introSort(names, values, gt + 1, right, depthLimit);
+          right = lt - 1;
+        }
+      }
+    }
+
+    private static void insertionSort(String[] names, boolean[] values, int left, int right) {
+      for (int i = left + 1; i <= right; i++) {
+        String name = names[i];
+        boolean value = values[i];
+        int j = i - 1;
+        while (j >= left && compare(names[j], name) > 0) {
+          names[j + 1] = names[j];
+          values[j + 1] = values[j];
+          j--;
+        }
+        names[j + 1] = name;
+        values[j + 1] = value;
+      }
+    }
+
+    private static void heapSort(String[] names, boolean[] values, int left, int right) {
+      int size = right - left + 1;
+      for (int i = (size >>> 1) - 1; i >= 0; i--) {
+        siftDown(names, values, left, i, size);
+      }
+      for (int end = size - 1; end > 0; end--) {
+        swap(left, left + end, names, values);
+        siftDown(names, values, left, 0, end);
+      }
+    }
+
+    private static void siftDown(String[] names, boolean[] values, int base, int root, int size) {
+      while (true) {
+        int child = (root << 1) + 1;
+        if (child >= size) {
+          return;
+        }
+        int rightChild = child + 1;
+        if (rightChild < size && compare(names[base + child], names[base + rightChild]) < 0) {
+          child = rightChild;
+        }
+        if (compare(names[base + root], names[base + child]) >= 0) {
+          return;
+        }
+        swap(base + root, base + child, names, values);
+        root = child;
+      }
+    }
+
+    private static int depthLimit(int length) {
+      int result = 0;
+      while (length > 1) {
+        result++;
+        length >>>= 1;
+      }
+      return result << 1;
+    }
+
+    private static int medianOf3(String[] names, int i, int j, int k) {
+      if (compare(names[i], names[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      if (compare(names[j], names[k]) > 0) {
+        int tmp = j;
+        j = k;
+        k = tmp;
+      }
+      if (compare(names[i], names[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      return j;
+    }
+
+    private static int compare(String left, String right) {
+      return left.compareTo(right);
+    }
+
+    private static void swap(int i, int j, String[] names, boolean[] values) {
+      if (i == j) {
+        return;
+      }
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      boolean value = values[i];
+      values[i] = values[j];
+      values[j] = value;
     }
   }
 }
