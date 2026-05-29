@@ -11,6 +11,7 @@ on:
 jobs:
   deploy:
     if: ${{ github.repository == 'prometheus/client_java' }}
+    environment: release
     runs-on: ubuntu-24.04
     permissions: {}
 
