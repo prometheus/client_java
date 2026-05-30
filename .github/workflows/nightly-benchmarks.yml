@@ -25,12 +25,12 @@ jobs:
   benchmark:
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: read # checkout only
     steps:
       - name: Checkout main branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Setup mise
@@ -61,12 +61,34 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-results
+          path: benchmark-results
+          retention-days: 5
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs: benchmark
+    permissions:
+      contents: write # push generated results to the benchmarks branch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # zizmor: ignore[artipacked] -- needs credentials to push to benchmarks branch
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Download benchmark results
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: benchmark-results
+          path: /tmp/benchmark-output
+
       - name: Commit and push results to benchmarks branch
         run: |
-          # Save results to a temp location
-          mkdir -p /tmp/benchmark-output
-          cp -r benchmark-results/* /tmp/benchmark-output/
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 

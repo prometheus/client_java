@@ -8,6 +8,8 @@ on:
         description: "Release tag to deploy (e.g. v1.5.1)"
         required: true
 
+permissions: {}
+
 jobs:
   deploy:
     if: ${{ github.repository == 'prometheus/client_java' }}
