@@ -94,6 +94,8 @@ class CounterSnapshotTest {
   @Test
   void testTotalSuffixPresent() {
     CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
+    // Counter snapshots derive the internal metadata name without the _total suffix; the exposition
+    // base name keeps the literal original name that will still be used at the wire level.
     assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test");
     SnapshotTestUtil.assertDerivedMetadata(snapshot, "test", "test_total", "test_total");
   }

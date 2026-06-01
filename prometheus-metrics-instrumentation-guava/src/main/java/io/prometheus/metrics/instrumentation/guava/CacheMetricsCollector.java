@@ -217,7 +217,7 @@ public class CacheMetricsCollector implements MultiCollector {
   }
 
   /**
-   * @deprecated Use {@code getMetricFamilyDescriptors()} instead.
+   * @deprecated Use {@link #getMetricFamilyDescriptors()} instead.
    */
   @Override
   @Deprecated

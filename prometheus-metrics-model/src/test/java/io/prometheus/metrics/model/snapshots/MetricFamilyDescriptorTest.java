@@ -15,12 +15,12 @@ class MetricFamilyDescriptorTest {
         MetricFamilyDescriptor.counter("events_total")
             .help("help")
             .unit(Unit.SECONDS)
-            .labelNames(Arrays.asList("method", "status"))
+            .labelNames(Arrays.asList("method.name", "status"))
             .build();
 
     assertThat(descriptor.getType()).isEqualTo(MetricType.COUNTER);
     assertThat(descriptor.getPrometheusName()).isEqualTo("events_seconds");
-    assertThat(descriptor.getLabelNames()).containsExactly("method", "status");
+    assertThat(descriptor.getLabelNames()).containsExactly("method_name", "status");
     assertThat(descriptor.getMetadata().getName()).isEqualTo("events_seconds");
     assertThat(descriptor.getMetadata().getExpositionBaseName()).isEqualTo("events_total_seconds");
     assertThat(descriptor.getMetadata().getOriginalName()).isEqualTo("events_total");
@@ -124,6 +124,20 @@ class MetricFamilyDescriptorTest {
     assertThatThrownBy(() -> MetricFamilyDescriptor.info("jvm_info").unit(Unit.SECONDS))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Info metric cannot have a unit.");
+  }
+
+  @Test
+  void buildersRejectNullHelp() {
+    assertThatThrownBy(() -> MetricFamilyDescriptor.counter("events_total").help(null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Missing required field: help is null");
+  }
+
+  @Test
+  void buildersRejectNullUnit() {
+    assertThatThrownBy(() -> MetricFamilyDescriptor.counter("events_total").unit(null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Missing required field: unit is null");
   }
 
   @Test

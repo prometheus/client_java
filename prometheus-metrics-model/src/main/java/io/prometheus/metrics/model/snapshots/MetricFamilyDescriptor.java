@@ -115,28 +115,38 @@ public final class MetricFamilyDescriptor {
       return self();
     }
 
-    public T help(@Nullable String help) {
+    public T help(String help) {
+      if (help == null) {
+        throw new IllegalArgumentException("Missing required field: help is null");
+      }
       this.help = help;
       return self();
     }
 
-    public T unit(@Nullable Unit unit) {
+    public T unit(Unit unit) {
+      if (unit == null) {
+        throw new IllegalArgumentException("Missing required field: unit is null");
+      }
       this.unit = unit;
       return self();
     }
 
     public T labelName(String labelName) {
-      this.labelNames.add(labelName);
+      this.labelNames.add(PrometheusNaming.prometheusName(labelName));
       return self();
     }
 
     public T labelNames(String... labelNames) {
-      Collections.addAll(this.labelNames, labelNames);
+      for (String labelName : labelNames) {
+        labelName(labelName);
+      }
       return self();
     }
 
     public T labelNames(Collection<String> labelNames) {
-      this.labelNames.addAll(labelNames);
+      for (String labelName : labelNames) {
+        labelName(labelName);
+      }
       return self();
     }
 
@@ -219,7 +229,10 @@ public final class MetricFamilyDescriptor {
   public static final class InfoBuilder extends Builder<InfoBuilder> {
 
     @Override
-    public InfoBuilder unit(@Nullable Unit unit) {
+    public InfoBuilder unit(Unit unit) {
+      if (unit == null) {
+        throw new IllegalArgumentException("Missing required field: unit is null");
+      }
       throw new IllegalArgumentException("Info metric cannot have a unit.");
     }
 
@@ -245,7 +258,10 @@ public final class MetricFamilyDescriptor {
   public static final class StateSetBuilder extends Builder<StateSetBuilder> {
 
     @Override
-    public StateSetBuilder unit(@Nullable Unit unit) {
+    public StateSetBuilder unit(Unit unit) {
+      if (unit == null) {
+        throw new IllegalArgumentException("Missing required field: unit is null");
+      }
       throw new IllegalArgumentException("State set metric cannot have a unit.");
     }
 
