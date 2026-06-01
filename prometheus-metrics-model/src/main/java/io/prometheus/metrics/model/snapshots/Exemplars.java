@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import javax.annotation.Nullable;
  * <p>This is currently backed by a {@code List<Exemplar>}. May be refactored later to use a more
  * efficient data structure.
  */
+@StableApi
 public class Exemplars implements Iterable<Exemplar> {
 
   /** EMPTY means no Exemplars. */

@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 import io.prometheus.metrics.model.registry.MetricType;
@@ -51,6 +52,7 @@ import javax.annotation.Nullable;
  * The example above shows how to use a StateSet with an enum. You don't have to use enum, you can
  * use regular strings as well.
  */
+@StableApi
 public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoint>
     implements StateSetDataPoint {
 

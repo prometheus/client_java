@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -41,6 +42,7 @@ import javax.annotation.Nullable;
  * jvm_buffer_pool_used_bytes{pool="mapped"} 0.0
  * </pre>
  */
+@StableApi
 public class JvmBufferPoolMetrics {
 
   private static final String JVM_BUFFER_POOL_USED_BYTES = "jvm_buffer_pool_used_bytes";

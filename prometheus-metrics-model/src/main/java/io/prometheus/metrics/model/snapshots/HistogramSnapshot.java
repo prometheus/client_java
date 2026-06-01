@@ -1,11 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of a Histogram. */
+@StableApi
 public final class HistogramSnapshot extends MetricSnapshot {
 
   private final boolean gaugeHistogram;

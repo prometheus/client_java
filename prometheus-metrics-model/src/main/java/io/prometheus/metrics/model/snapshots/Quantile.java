@@ -1,6 +1,9 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /** Immutable representation of a Quantile. */
+@StableApi
 public class Quantile {
 
   private final double quantile;

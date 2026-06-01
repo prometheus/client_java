@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /** Immutable list of quantiles. */
+@StableApi
 public class Quantiles implements Iterable<Quantile> {
 
   private final List<Quantile> quantiles;

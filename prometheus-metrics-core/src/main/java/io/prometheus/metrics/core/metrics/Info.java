@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
@@ -30,6 +31,7 @@ import javax.annotation.Nullable;
  * info.addLabelValues("dev", version, vendor, runtime);
  * }</pre>
  */
+@StableApi
 public class Info extends MetricWithFixedMetadata {
 
   private final Set<Labels> labels = new CopyOnWriteArraySet<>();

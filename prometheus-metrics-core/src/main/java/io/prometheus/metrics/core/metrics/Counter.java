@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
  * requestCount.labelValues("/hello-world", "500").inc();
  * }</pre>
  */
+@StableApi
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 

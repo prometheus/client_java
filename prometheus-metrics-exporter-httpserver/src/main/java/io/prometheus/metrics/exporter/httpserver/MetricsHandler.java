@@ -2,12 +2,14 @@ package io.prometheus.metrics.exporter.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exporter.common.PrometheusScrapeHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.IOException;
 
 /** Handler for the /metrics endpoint */
+@StableApi
 public class MetricsHandler implements HttpHandler {
 
   private final PrometheusScrapeHandler prometheusScrapeHandler;

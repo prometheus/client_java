@@ -2,10 +2,12 @@ package io.prometheus.metrics.exporter.httpserver;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.prometheus.metrics.annotations.StableApi;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /** Handler for the / endpoint */
+@StableApi
 public class DefaultHandler implements HttpHandler {
 
   private final byte[] responseBytes;

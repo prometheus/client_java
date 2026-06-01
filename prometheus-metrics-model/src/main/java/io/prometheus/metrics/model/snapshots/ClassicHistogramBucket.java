@@ -1,9 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /**
  * Helper class for iterating over {@link ClassicHistogramBuckets}. Note that the {@code count} is
  * <i>not</i> cumulative.
  */
+@StableApi
 public class ClassicHistogramBucket implements Comparable<ClassicHistogramBucket> {
 
   private final long count; // not cumulative

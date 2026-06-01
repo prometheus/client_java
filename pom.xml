@@ -29,6 +29,7 @@
     <otel.instrumentation.version>2.28.1-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
+    <api.diff.baseline.version>1.5.1</api.diff.baseline.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>
@@ -38,6 +39,7 @@
 
   <modules>
     <module>prometheus-metrics-parent</module>
+    <module>prometheus-metrics-annotations</module>
     <module>prometheus-metrics-bom</module>
     <module>prometheus-metrics-core</module>
     <module>prometheus-metrics-config</module>
@@ -170,6 +172,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.6.3</version>
+        </plugin>
+        <plugin>
+          <groupId>com.github.siom79.japicmp</groupId>
+          <artifactId>japicmp-maven-plugin</artifactId>
+          <version>0.26.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -397,6 +404,71 @@
               </excludePackageNames>
               <source>8</source>
             </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>api-diff</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.siom79.japicmp</groupId>
+            <artifactId>japicmp-maven-plugin</artifactId>
+            <configuration>
+              <oldVersion>
+                <dependency>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>${project.artifactId}</artifactId>
+                  <version>${api.diff.baseline.version}</version>
+                  <type>jar</type>
+                </dependency>
+              </oldVersion>
+              <newVersion>
+                <file>
+                  <path>${project.build.directory}/${project.build.finalName}.jar</path>
+                </file>
+              </newVersion>
+              <parameter>
+                <accessModifier>public</accessModifier>
+                <onlyModified>true</onlyModified>
+                <includes>
+                  <include>io.prometheus.metrics.annotations.StableApi</include>
+                  <include>@io.prometheus.metrics.annotations.StableApi</include>
+                </includes>
+                <excludes>
+                  <exclude>io.prometheus.metrics.expositionformats.generated</exclude>
+                  <exclude>io.prometheus.metrics.shaded</exclude>
+                </excludes>
+                <breakBuildOnModifications>false</breakBuildOnModifications>
+                <breakBuildOnBinaryIncompatibleModifications>
+                  false
+                </breakBuildOnBinaryIncompatibleModifications>
+                <breakBuildOnSourceIncompatibleModifications>
+                  false
+                </breakBuildOnSourceIncompatibleModifications>
+                <breakBuildBasedOnSemanticVersioning>false</breakBuildBasedOnSemanticVersioning>
+                <ignoreMissingClasses>true</ignoreMissingClasses>
+                <ignoreMissingOldVersion>true</ignoreMissingOldVersion>
+                <ignoreMissingOptionalDependency>true</ignoreMissingOptionalDependency>
+                <skipPomModules>true</skipPomModules>
+                <skipHtmlReport>true</skipHtmlReport>
+                <reportOnlyFilename>true</reportOnlyFilename>
+                <packagingSupporteds>
+                  <packagingSupported>bundle</packagingSupported>
+                  <packagingSupported>jar</packagingSupported>
+                </packagingSupporteds>
+              </parameter>
+            </configuration>
+            <executions>
+              <execution>
+                <id>api-diff</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>cmp</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

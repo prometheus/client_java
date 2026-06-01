@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.Labels;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
  * labels and names. Prometheus metric name and labels are extracted from the Dropwizard name based
  * on the provided list of {@link MapperConfig}s. The FIRST matching config will be used.
  */
+@StableApi
 public class CustomLabelMapper {
   private final List<CompiledMapperConfig> compiledMapperConfigs;
 

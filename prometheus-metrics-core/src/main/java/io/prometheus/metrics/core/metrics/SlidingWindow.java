@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.lang.reflect.Array;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
@@ -26,6 +27,7 @@ import java.util.function.Supplier;
  * and the observation frequency is typically lower than Counter increments, the current
  * implementation provides an acceptable trade-off between simplicity and performance.
  */
+@StableApi
 public class SlidingWindow<T> {
 
   private final Supplier<T> constructor;

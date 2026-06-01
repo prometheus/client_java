@@ -1,5 +1,6 @@
 package io.prometheus.metrics.exporter.common;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.annotation.Nullable;
 
+@StableApi
 public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
 
   /** See {@code jakarta.servlet.http.HttpServletRequest.getQueryString()} */

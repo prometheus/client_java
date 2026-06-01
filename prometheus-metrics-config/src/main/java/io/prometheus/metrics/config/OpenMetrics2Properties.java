@@ -1,11 +1,13 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
 /**
  * Properties starting with io.prometheus.openmetrics2. These properties are experimental and
  * subject to change.
  */
+@StableApi
 public class OpenMetrics2Properties {
 
   private static final String PREFIX = "io.prometheus.openmetrics2";

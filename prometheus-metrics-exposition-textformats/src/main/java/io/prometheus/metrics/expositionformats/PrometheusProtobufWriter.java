@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import javax.annotation.Nullable;
  *
  * <p>As of today, this is the only exposition format that supports native histograms.
  */
+@StableApi
 public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   @Nullable private static final ExpositionFormatWriter DELEGATE = createProtobufWriter();

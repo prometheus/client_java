@@ -1,6 +1,9 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /** For iterating over {@link NativeHistogramBuckets}. */
+@StableApi
 public class NativeHistogramBucket {
 
   private final int bucketIndex;

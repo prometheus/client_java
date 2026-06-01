@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler;
 import io.prometheus.metrics.instrumentation.dropwizard5.internal.AbstractDropwizardExports;
 import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
@@ -22,6 +23,7 @@ import javax.annotation.Nullable;
  * <p>This is a thin wrapper around {@link AbstractDropwizardExports} that handles the Dropwizard
  * 4.x specific API where metric names are Strings.
  */
+@StableApi
 public class DropwizardExports
     extends AbstractDropwizardExports<
         MetricRegistry,

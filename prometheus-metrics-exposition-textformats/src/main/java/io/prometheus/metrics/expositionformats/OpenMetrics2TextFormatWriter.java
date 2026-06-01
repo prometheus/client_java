@@ -9,6 +9,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMe
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getOriginalMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.OpenMetrics2Properties;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
@@ -45,6 +46,7 @@ import javax.annotation.Nullable;
  * href="https://github.com/prometheus/docs/blob/main/docs/specs/om/open_metrics_spec_2_0.md">OpenMetrics
  * 2.0 specification</a> evolves.
  */
+@StableApi
 public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   public static class Builder {

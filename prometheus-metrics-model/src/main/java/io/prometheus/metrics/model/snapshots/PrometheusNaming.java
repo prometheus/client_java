@@ -4,6 +4,7 @@ import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
@@ -15,6 +16,7 @@ import javax.annotation.Nullable;
  * replaced with underscores in Prometheus exposition formats. However, if metrics are exposed in
  * OpenTelemetry format the dots are retained.
  */
+@StableApi
 public class PrometheusNaming {
 
   /**

@@ -22,6 +22,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-annotations</artifactId>
+      <version>${project.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.junit-pioneer</groupId>
       <artifactId>junit-pioneer</artifactId>
       <version>${junit-pioneer.version}</version>

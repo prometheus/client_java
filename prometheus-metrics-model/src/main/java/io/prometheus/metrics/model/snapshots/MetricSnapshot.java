@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /** Base class for metric snapshots. */
+@StableApi
 public abstract class MetricSnapshot {
   private final MetricMetadata metadata;
   protected final List<? extends DataPointSnapshot> dataPoints;

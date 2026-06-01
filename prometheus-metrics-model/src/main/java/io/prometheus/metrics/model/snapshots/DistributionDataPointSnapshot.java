@@ -1,9 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /**
  * Common base class for histogram and summary data. Histograms and Summaries represent
  * distributions, like a latency distribution or a distribution of request sizes in Bytes.
  */
+@StableApi
 public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
   private final long count; // optional, negative value means no count.
   private final double sum; // optional, Double.NaN means no sum.

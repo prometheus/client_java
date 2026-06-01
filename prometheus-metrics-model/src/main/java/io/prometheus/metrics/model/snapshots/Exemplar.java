@@ -2,9 +2,11 @@ package io.prometheus.metrics.model.snapshots;
 
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
 /** Immutable representation of an Exemplar. */
+@StableApi
 public class Exemplar {
 
   /** Label name for trace id. */

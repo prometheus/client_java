@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /** Immutable snapshot of a StateSet metric. */
+@StableApi
 public final class StateSetSnapshot extends MetricSnapshot {
 
   /**

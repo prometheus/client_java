@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.Objects;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Objects;
  * <p>Note that in Prometheus, units are largely based on SI base units (seconds, bytes, joules,
  * grams, meters, ratio, volts, amperes, and Celsius).
  */
+@StableApi
 public final class Unit {
 
   private final String name;

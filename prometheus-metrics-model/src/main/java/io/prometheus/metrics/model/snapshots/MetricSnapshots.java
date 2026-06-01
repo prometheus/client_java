@@ -4,6 +4,7 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusN
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /** Immutable list of metric snapshots. */
+@StableApi
 public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
   private final List<MetricSnapshot> snapshots;

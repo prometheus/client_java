@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /** Immutable snapshot of a Gauge. */
+@StableApi
 public final class GaugeSnapshot extends MetricSnapshot {
 
   /**

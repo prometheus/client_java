@@ -2,6 +2,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.model.snapshots.Unit.millisToSeconds;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
  * jvm_compilation_time_seconds_total 0.152
  * </pre>
  */
+@StableApi
 public class JvmCompilationMetrics {
 
   private static final String JVM_COMPILATION_TIME_SECONDS_TOTAL =

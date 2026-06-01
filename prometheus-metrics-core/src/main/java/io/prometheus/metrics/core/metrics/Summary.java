@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
@@ -42,6 +43,7 @@ import javax.annotation.Nullable;
  *
  * See {@link Summary.Builder} for configuration options.
  */
+@StableApi
 public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataPoint>
     implements DistributionDataPoint {
 

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.exporter.common;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -22,6 +23,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.annotation.Nullable;
 
 /** Prometheus scrape endpoint. */
+@StableApi
 public class PrometheusScrapeHandler {
 
   private final PrometheusRegistry registry;

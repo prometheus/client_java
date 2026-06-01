@@ -1,7 +1,9 @@
 package io.prometheus.metrics.tracer.common;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
+@StableApi
 public interface SpanContext {
 
   String EXEMPLAR_ATTRIBUTE_NAME = "exemplar";
