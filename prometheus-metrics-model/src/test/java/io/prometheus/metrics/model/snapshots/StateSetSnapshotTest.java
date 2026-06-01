@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
@@ -166,5 +169,104 @@ class StateSetSnapshotTest {
                             .state("feature", true)
                             .build())
                     .build());
+  }
+
+  @Test
+  void testSortSmallInputMaintainsPairs() {
+    int size = 5;
+    String[] names = new String[size];
+    boolean[] values = new boolean[size];
+    Map<String, Boolean> expectedValues = new TreeMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = "state_" + i;
+      values[i] = i % 3 == 0;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(16L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      boolean value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    StateSetSnapshot.StateSetDataPointSnapshot snapshot =
+        new StateSetSnapshot.StateSetDataPointSnapshot(names, values, Labels.EMPTY);
+    for (int i = 1; i < snapshot.size(); i++) {
+      assertThat(snapshot.getName(i - 1)).isLessThan(snapshot.getName(i));
+    }
+    for (int i = 0; i < snapshot.size(); i++) {
+      assertThat(snapshot.isTrue(i)).isEqualTo(expectedValues.get(snapshot.getName(i)));
+    }
+  }
+
+  @Test
+  void testSortMediumInputMaintainsPairs() {
+    int size = 25;
+    String[] names = new String[size];
+    boolean[] values = new boolean[size];
+    Map<String, Boolean> expectedValues = new TreeMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = "state_" + i;
+      values[i] = i % 3 == 0;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(17L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      boolean value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    StateSetSnapshot.StateSetDataPointSnapshot snapshot =
+        new StateSetSnapshot.StateSetDataPointSnapshot(names, values, Labels.EMPTY);
+    for (int i = 1; i < snapshot.size(); i++) {
+      assertThat(snapshot.getName(i - 1)).isLessThan(snapshot.getName(i));
+    }
+    for (int i = 0; i < snapshot.size(); i++) {
+      assertThat(snapshot.isTrue(i)).isEqualTo(expectedValues.get(snapshot.getName(i)));
+    }
+  }
+
+  @Test
+  void testSortLargeInputMaintainsPairs() {
+    int size = 64;
+    String[] names = new String[size];
+    boolean[] values = new boolean[size];
+    Map<String, Boolean> expectedValues = new TreeMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = "state_" + i;
+      values[i] = i % 3 == 0;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(4L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      boolean value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    StateSetSnapshot.StateSetDataPointSnapshot snapshot =
+        new StateSetSnapshot.StateSetDataPointSnapshot(names, values, Labels.EMPTY);
+    for (int i = 1; i < snapshot.size(); i++) {
+      assertThat(snapshot.getName(i - 1)).isLessThan(snapshot.getName(i));
+    }
+    for (int i = 0; i < snapshot.size(); i++) {
+      assertThat(snapshot.isTrue(i)).isEqualTo(expectedValues.get(snapshot.getName(i)));
+    }
   }
 }

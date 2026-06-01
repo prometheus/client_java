@@ -3,8 +3,11 @@ package io.prometheus.metrics.model.snapshots;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
@@ -126,5 +129,110 @@ class ClassicHistogramBucketsTest {
             .build();
     List<ClassicHistogramBucket> list = buckets.stream().collect(Collectors.toList());
     assertThat(list.get(0)).isNotEqualByComparingTo(list.get(1));
+  }
+
+  @Test
+  void testSortSmallInputMaintainsPairs() {
+    int size = 5;
+    double[] upperBounds = new double[size];
+    long[] counts = new long[size];
+    Map<Double, Long> expectedCounts = new HashMap<>();
+    for (int i = 0; i < size - 1; i++) {
+      upperBounds[i] = i + 0.5;
+      counts[i] = 100L + i;
+      expectedCounts.put(upperBounds[i], counts[i]);
+    }
+    upperBounds[size - 1] = Double.POSITIVE_INFINITY;
+    counts[size - 1] = 200L;
+    expectedCounts.put(upperBounds[size - 1], counts[size - 1]);
+
+    Random random = new Random(10L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      double upperBound = upperBounds[i];
+      upperBounds[i] = upperBounds[j];
+      upperBounds[j] = upperBound;
+      long count = counts[i];
+      counts[i] = counts[j];
+      counts[j] = count;
+    }
+
+    ClassicHistogramBuckets buckets = ClassicHistogramBuckets.of(upperBounds, counts);
+    for (int i = 1; i < buckets.size(); i++) {
+      assertThat(buckets.getUpperBound(i - 1)).isLessThan(buckets.getUpperBound(i));
+    }
+    for (int i = 0; i < buckets.size(); i++) {
+      assertThat(buckets.getCount(i)).isEqualTo(expectedCounts.get(buckets.getUpperBound(i)));
+    }
+  }
+
+  @Test
+  void testSortMediumInputMaintainsPairs() {
+    int size = 25;
+    double[] upperBounds = new double[size];
+    long[] counts = new long[size];
+    Map<Double, Long> expectedCounts = new HashMap<>();
+    for (int i = 0; i < size - 1; i++) {
+      upperBounds[i] = i + 0.125;
+      counts[i] = 1000L + i;
+      expectedCounts.put(upperBounds[i], counts[i]);
+    }
+    upperBounds[size - 1] = Double.POSITIVE_INFINITY;
+    counts[size - 1] = 2000L;
+    expectedCounts.put(upperBounds[size - 1], counts[size - 1]);
+
+    Random random = new Random(11L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      double upperBound = upperBounds[i];
+      upperBounds[i] = upperBounds[j];
+      upperBounds[j] = upperBound;
+      long count = counts[i];
+      counts[i] = counts[j];
+      counts[j] = count;
+    }
+
+    ClassicHistogramBuckets buckets = ClassicHistogramBuckets.of(upperBounds, counts);
+    for (int i = 1; i < buckets.size(); i++) {
+      assertThat(buckets.getUpperBound(i - 1)).isLessThan(buckets.getUpperBound(i));
+    }
+    for (int i = 0; i < buckets.size(); i++) {
+      assertThat(buckets.getCount(i)).isEqualTo(expectedCounts.get(buckets.getUpperBound(i)));
+    }
+  }
+
+  @Test
+  void testSortLargeInputMaintainsPairs() {
+    int size = 64;
+    double[] upperBounds = new double[size];
+    long[] counts = new long[size];
+    Map<Double, Long> expectedCounts = new HashMap<>();
+    for (int i = 0; i < size - 1; i++) {
+      upperBounds[i] = i + 0.125;
+      counts[i] = 1000L + i;
+      expectedCounts.put(upperBounds[i], counts[i]);
+    }
+    upperBounds[size - 1] = Double.POSITIVE_INFINITY;
+    counts[size - 1] = 2000L;
+    expectedCounts.put(upperBounds[size - 1], counts[size - 1]);
+
+    Random random = new Random(1L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      double upperBound = upperBounds[i];
+      upperBounds[i] = upperBounds[j];
+      upperBounds[j] = upperBound;
+      long count = counts[i];
+      counts[i] = counts[j];
+      counts[j] = count;
+    }
+
+    ClassicHistogramBuckets buckets = ClassicHistogramBuckets.of(upperBounds, counts);
+    for (int i = 1; i < buckets.size(); i++) {
+      assertThat(buckets.getUpperBound(i - 1)).isLessThan(buckets.getUpperBound(i));
+    }
+    for (int i = 0; i < buckets.size(); i++) {
+      assertThat(buckets.getCount(i)).isEqualTo(expectedCounts.get(buckets.getUpperBound(i)));
+    }
   }
 }

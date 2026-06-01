@@ -3,6 +3,9 @@ package io.prometheus.metrics.model.snapshots;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import org.assertj.core.api.IterableAssert;
 import org.junit.jupiter.api.Test;
 
@@ -128,5 +131,101 @@ class LabelsTest {
   void testDuplicateName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Labels.of("key_one", "v1", "key.one", "v2"));
+  }
+
+  @Test
+  void testSortSmallInputMaintainsPairs() {
+    int size = 5;
+    String[] names = new String[size];
+    String[] values = new String[size];
+    Map<String, String> expectedValues = new HashMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = i % 2 == 0 ? "even_" + i : "odd." + i;
+      values[i] = "value-" + i;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(14L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      String value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    Labels labels = Labels.of(names, values);
+    for (int i = 1; i < labels.size(); i++) {
+      assertThat(labels.getPrometheusName(i - 1)).isLessThan(labels.getPrometheusName(i));
+    }
+    for (int i = 0; i < labels.size(); i++) {
+      assertThat(labels.getValue(i)).isEqualTo(expectedValues.get(labels.getName(i)));
+    }
+  }
+
+  @Test
+  void testSortMediumInputMaintainsPairs() {
+    int size = 25;
+    String[] names = new String[size];
+    String[] values = new String[size];
+    Map<String, String> expectedValues = new HashMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = i % 2 == 0 ? "even_" + i : "odd." + i;
+      values[i] = "value-" + i;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(15L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      String value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    Labels labels = Labels.of(names, values);
+    for (int i = 1; i < labels.size(); i++) {
+      assertThat(labels.getPrometheusName(i - 1)).isLessThan(labels.getPrometheusName(i));
+    }
+    for (int i = 0; i < labels.size(); i++) {
+      assertThat(labels.getValue(i)).isEqualTo(expectedValues.get(labels.getName(i)));
+    }
+  }
+
+  @Test
+  void testSortLargeInputMaintainsPairs() {
+    int size = 64;
+    String[] names = new String[size];
+    String[] values = new String[size];
+    Map<String, String> expectedValues = new HashMap<>();
+    for (int i = 0; i < size; i++) {
+      names[i] = i % 2 == 0 ? "even_" + i : "odd." + i;
+      values[i] = "value-" + i;
+      expectedValues.put(names[i], values[i]);
+    }
+
+    Random random = new Random(3L);
+    for (int i = size - 1; i > 0; i--) {
+      int j = random.nextInt(i + 1);
+      String name = names[i];
+      names[i] = names[j];
+      names[j] = name;
+      String value = values[i];
+      values[i] = values[j];
+      values[j] = value;
+    }
+
+    Labels labels = Labels.of(names, values);
+    for (int i = 1; i < labels.size(); i++) {
+      assertThat(labels.getPrometheusName(i - 1)).isLessThan(labels.getPrometheusName(i));
+    }
+    for (int i = 0; i < labels.size(); i++) {
+      assertThat(labels.getValue(i)).isEqualTo(expectedValues.get(labels.getName(i)));
+    }
   }
 }
