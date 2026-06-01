@@ -87,14 +87,16 @@ class GaugeSnapshotTest {
 
   @Test
   void testTotalSuffixPresent() {
-    CounterSnapshot snapshot = CounterSnapshot.builder().name("test_total").build();
+    GaugeSnapshot snapshot = GaugeSnapshot.builder().name("test_total").build();
     assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test_total", "test_total", "test_total");
   }
 
   @Test
   void testTotalSuffixPresentDot() {
-    CounterSnapshot snapshot = CounterSnapshot.builder().name("test.total").build();
+    GaugeSnapshot snapshot = GaugeSnapshot.builder().name("test.total").build();
     assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("test_total");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "test.total", "test.total", "test.total");
   }
 
   @Test

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("deprecation")
 class MultiCollectorNameFilterTest {
 
   private static class Registry extends PrometheusRegistry {

@@ -77,7 +77,12 @@ public class SampleMultiCollector implements MultiCollector {
     return new MetricSnapshots(snaps);
   }
 
+  /**
+   * @deprecated Use {@code getMetricFamilyDescriptors()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public List<String> getPrometheusNames() {
     List<String> names = new ArrayList<String>();
     names.add("x_calls_total");

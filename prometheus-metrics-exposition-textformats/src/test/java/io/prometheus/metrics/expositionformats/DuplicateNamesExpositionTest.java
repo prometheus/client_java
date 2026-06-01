@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("deprecation")
 class DuplicateNamesExpositionTest {
 
   private static PrometheusRegistry getPrometheusRegistry() {

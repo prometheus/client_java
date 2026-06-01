@@ -650,10 +650,15 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     for (int i = 0; i < labels.size(); i++) {
       data.add(metricData.get(i).collect(labels.get(i)));
     }
-    return new HistogramSnapshot(getMetadata(), data);
+    return new HistogramSnapshot(metadata, data);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.HISTOGRAM;
   }

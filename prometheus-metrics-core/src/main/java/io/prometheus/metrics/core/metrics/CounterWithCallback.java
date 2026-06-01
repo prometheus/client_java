@@ -48,10 +48,15 @@ public class CounterWithCallback extends CallbackMetric {
               new CounterSnapshot.CounterDataPointSnapshot(
                   value, makeLabels(labelValues), null, 0L));
         });
-    return new CounterSnapshot(getMetadata(), dataPoints);
+    return new CounterSnapshot(metadata, dataPoints);
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptor()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public MetricType getMetricType() {
     return MetricType.COUNTER;
   }
