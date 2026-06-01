@@ -20,10 +20,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
-    <protobuf-java.version>4.34.1</protobuf-java.version>
+    <protobuf-java.version>4.35.0</protobuf-java.version>
     <guava.version>33.6.0-jre</guava.version>
+    <junit-pioneer.version>2.3.0</junit-pioneer.version>
+    <awaitility.version>4.3.0</awaitility.version>
+    <wiremock.version>3.13.2</wiremock.version>
     <junit-jupiter.version>6.0.3</junit-jupiter.version>
-    <otel.instrumentation.version>2.28.0-alpha</otel.instrumentation.version>
+    <otel.instrumentation.version>2.28.1-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -93,40 +96,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>${guava.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>2.0.18</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit-pioneer</groupId>
-      <artifactId>junit-pioneer</artifactId>
-      <version>2.3.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>4.3.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.wiremock</groupId>
-      <artifactId>wiremock</artifactId>
-      <version>3.13.2</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.hamcrest</groupId>
-          <artifactId>hamcrest-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 
@@ -149,7 +122,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.5</version>
+          <version>3.5.6</version>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
@@ -165,7 +138,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.21.0</version>
+          <version>3.22.0</version>
         </plugin>
         <!-- Plugins with groupId org.apache.maven.plugins that are not part of default bindings. -->
         <plugin>
@@ -174,11 +147,11 @@
         </plugin>
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.5.5</version>
+          <version>3.5.6</version>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.10.0</version>
+          <version>3.11.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>

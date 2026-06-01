@@ -12,17 +12,16 @@ jobs:
   generate:
     runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: read # checkout + read-only `git fetch origin main` for the verify step
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.ref }}
-          # zizmor: ignore[artipacked] -- needs credentials to push
-          persist-credentials: true
+          persist-credentials: false
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
         with:
-          version: v2026.5.11
-          sha256: 9bb41ae4dbe2bcdfdbe36cf3c737a8bdb72035c03af3b7218a70780988f62b9b
+          version: v2026.5.18
+          sha256: cfac593469d028d7ae5fe36e37bd7c59118b5238e92d8a876209578464f24a84
       - name: Cache local Maven repository
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
@@ -45,18 +44,48 @@ jobs:
           fi
       - name: Generate protobuf sources
         run: mise run generate
-      - name: Commit and push generated sources
+      - name: Validate and export generated sources as a patch
         run: |
-          git diff --quiet && exit 0
           UNEXPECTED=$(git diff --name-only | grep -v '\.java$' || true)
           if [[ -n "$UNEXPECTED" ]]; then
             echo "::error::Unexpected files changed:"
             echo "$UNEXPECTED"
             exit 1
           fi
+          git diff --binary > /tmp/protobuf-sources.patch
+      - name: Upload generated patch
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: protobuf-sources-patch
+          path: /tmp/protobuf-sources.patch
+          retention-days: 5
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs: generate
+    permissions:
+      contents: write # push regenerated sources back to the renovate branch
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ github.ref }}
+          # zizmor: ignore[artipacked] -- needs credentials to push
+          persist-credentials: true
+      - name: Download generated patch
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: protobuf-sources-patch
+          path: /tmp/patch
+      - name: Commit and push generated sources
+        run: |
+          PATCH=/tmp/patch/protobuf-sources.patch
+          if [[ ! -s "$PATCH" ]]; then
+            echo "No generated changes to commit"
+            exit 0
+          fi
+          git apply "$PATCH"
           # Note: GITHUB_TOKEN pushes don't trigger CI re-runs.
           # Close and reopen the PR to trigger CI after this commit.
-          # TODO: switch to PROMBOT_GITHUB_TOKEN once it's added to this repo.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add '*.java'

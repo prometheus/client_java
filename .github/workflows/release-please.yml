@@ -6,16 +6,17 @@ on:
     branches:
       - main
 
-permissions:
-  actions: write
-  contents: write
-  issues: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   release-please:
     if: ${{ github.repository == 'prometheus/client_java' }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write # release-please creates release commits, tags, and the GitHub release
+      pull-requests: write # release-please opens/updates the release PR
+      issues: write # release-please comments on/labels issues included in the release
+      actions: write # required to trigger release.yml via `gh workflow run`
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0
         id: release-please
@@ -28,6 +29,7 @@ jobs:
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.release-please.outputs.tag_name }}
         run: >
           gh workflow run release.yml --repo "${GITHUB_REPOSITORY}"
-          -f tag=${{ steps.release-please.outputs.tag_name }}
+          -f "tag=${TAG_NAME}"

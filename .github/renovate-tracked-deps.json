@@ -7,7 +7,7 @@
   },
   "files": {
     ".github/renovate.json5": {
-      "renovate-config-presets": [
+      "renovate-config": [
         "grafana/flint"
       ]
     },
@@ -37,6 +37,11 @@
       ]
     },
     ".github/workflows/lint.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
+    ".github/workflows/micrometer-compatibility.yml": {
       "regex": [
         "mise"
       ]
@@ -133,7 +138,8 @@
         "shellcheck",
         "shfmt",
         "taplo",
-        "typos"
+        "typos",
+        "zizmor"
       ]
     },
     "mvnw": {
