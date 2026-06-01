@@ -7,7 +7,7 @@
   },
   "files": {
     ".github/renovate.json5": {
-      "renovate-config-presets": [
+      "renovate-config": [
         "grafana/flint"
       ]
     },
