@@ -177,31 +177,16 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     }
   }
 
+  /**
+   * Sorts all three parallel arrays in place using introspective quicksort.
+   *
+   * <p>Algorithm: 3-way quicksort with insertion sort for tiny partitions and heapsort fallback at
+   * the recursion depth limit. Parallel arrays are swapped in lockstep.
+   *
+   * <p>Complexity: O(n log n) average and worst case.
+   */
   private static void sort(String[] names, String[] prometheusNames, String[] values) {
-    // bubblesort
-    int n = prometheusNames.length;
-    for (int i = 0; i < n - 1; i++) {
-      for (int j = 0; j < n - i - 1; j++) {
-        if (prometheusNames[j].compareTo(prometheusNames[j + 1]) > 0) {
-          swap(j, j + 1, names, prometheusNames, values);
-        }
-      }
-    }
-  }
-
-  private static void swap(
-      int i, int j, String[] names, String[] prometheusNames, String[] values) {
-    String tmp = names[j];
-    names[j] = names[i];
-    names[i] = tmp;
-    tmp = values[j];
-    values[j] = values[i];
-    values[i] = tmp;
-    if (prometheusNames != names) {
-      tmp = prometheusNames[j];
-      prometheusNames[j] = prometheusNames[i];
-      prometheusNames[i] = tmp;
-    }
+    StringArraySorter.sort(names, prometheusNames, values);
   }
 
   @Override
@@ -439,6 +424,179 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
 
     public Labels build() {
       return Labels.of(names, values);
+    }
+  }
+
+  /**
+   * In-place introsort for label arrays, keyed by {@code prometheusNames}.
+   *
+   * <p>Uses 3-way quicksort partitioning for large ranges, insertion sort for tiny ranges, and a
+   * heapsort fallback at the recursion-depth limit to guarantee O(n log n) worst-case complexity.
+   */
+  private static final class StringArraySorter {
+
+    private static final int INSERTION_SORT_THRESHOLD = 24;
+
+    private static void sort(String[] names, String[] prometheusNames, String[] values) {
+      int right = names.length - 1;
+      if (right <= 0) {
+        return;
+      }
+      introSort(names, prometheusNames, values, 0, right, depthLimit(names.length));
+    }
+
+    private static void introSort(
+        String[] names,
+        String[] prometheusNames,
+        String[] values,
+        int left,
+        int right,
+        int depthLimit) {
+      while (left < right) {
+        if (right - left + 1 <= INSERTION_SORT_THRESHOLD) {
+          insertionSort(names, prometheusNames, values, left, right);
+          return;
+        }
+        if (depthLimit == 0) {
+          heapSort(names, prometheusNames, values, left, right);
+          return;
+        }
+        depthLimit--;
+
+        int mid = left + ((right - left) >>> 1);
+        int pivotIndex = medianOf3(prometheusNames, left, mid, right);
+        String pivot = prometheusNames[pivotIndex];
+
+        int lt = left;
+        int i = left;
+        int gt = right;
+        while (i <= gt) {
+          int cmp = compare(prometheusNames[i], pivot);
+          if (cmp < 0) {
+            swap(i, lt, names, prometheusNames, values);
+            i++;
+            lt++;
+          } else if (cmp > 0) {
+            swap(i, gt, names, prometheusNames, values);
+            gt--;
+          } else {
+            i++;
+          }
+        }
+
+        if (lt - left < right - gt) {
+          introSort(names, prometheusNames, values, left, lt - 1, depthLimit);
+          left = gt + 1;
+        } else {
+          introSort(names, prometheusNames, values, gt + 1, right, depthLimit);
+          right = lt - 1;
+        }
+      }
+    }
+
+    private static void insertionSort(
+        String[] names, String[] prometheusNames, String[] values, int left, int right) {
+      for (int i = left + 1; i <= right; i++) {
+        String name = names[i];
+        String prometheusName = prometheusNames[i];
+        final String value = values[i];
+        int j = i - 1;
+        while (j >= left && compare(prometheusNames[j], prometheusName) > 0) {
+          names[j + 1] = names[j];
+          if (prometheusNames != names) {
+            prometheusNames[j + 1] = prometheusNames[j];
+          }
+          values[j + 1] = values[j];
+          j--;
+        }
+        names[j + 1] = name;
+        if (prometheusNames != names) {
+          prometheusNames[j + 1] = prometheusName;
+        }
+        values[j + 1] = value;
+      }
+    }
+
+    private static void heapSort(
+        String[] names, String[] prometheusNames, String[] values, int left, int right) {
+      int size = right - left + 1;
+      for (int i = (size >>> 1) - 1; i >= 0; i--) {
+        siftDown(names, prometheusNames, values, left, i, size);
+      }
+      for (int end = size - 1; end > 0; end--) {
+        swap(left, left + end, names, prometheusNames, values);
+        siftDown(names, prometheusNames, values, left, 0, end);
+      }
+    }
+
+    private static void siftDown(
+        String[] names, String[] prometheusNames, String[] values, int base, int root, int size) {
+      while (true) {
+        int child = (root << 1) + 1;
+        if (child >= size) {
+          return;
+        }
+        int rightChild = child + 1;
+        if (rightChild < size
+            && compare(prometheusNames[base + child], prometheusNames[base + rightChild]) < 0) {
+          child = rightChild;
+        }
+        if (compare(prometheusNames[base + root], prometheusNames[base + child]) >= 0) {
+          return;
+        }
+        swap(base + root, base + child, names, prometheusNames, values);
+        root = child;
+      }
+    }
+
+    private static int depthLimit(int length) {
+      int result = 0;
+      while (length > 1) {
+        result++;
+        length >>>= 1;
+      }
+      return result << 1;
+    }
+
+    private static int medianOf3(String[] values, int i, int j, int k) {
+      if (compare(values[i], values[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      if (compare(values[j], values[k]) > 0) {
+        int tmp = j;
+        j = k;
+        k = tmp;
+      }
+      if (compare(values[i], values[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      return j;
+    }
+
+    private static int compare(String left, String right) {
+      return left.compareTo(right);
+    }
+
+    private static void swap(
+        int i, int j, String[] names, String[] prometheusNames, String[] values) {
+      if (i == j) {
+        return;
+      }
+      String tmp = names[i];
+      names[i] = names[j];
+      names[j] = tmp;
+      tmp = values[i];
+      values[i] = values[j];
+      values[j] = tmp;
+      if (prometheusNames != names) {
+        tmp = prometheusNames[i];
+        prometheusNames[i] = prometheusNames[j];
+        prometheusNames[j] = tmp;
+      }
     }
   }
 }

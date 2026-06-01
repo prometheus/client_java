@@ -110,25 +110,16 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     validate(upperBounds, counts);
   }
 
+  /**
+   * Sorts upperBounds and counts in place using introspective quicksort.
+   *
+   * <p>Algorithm: 3-way quicksort with insertion sort for tiny partitions and heapsort fallback at
+   * the recursion depth limit. Parallel arrays are swapped in lockstep.
+   *
+   * <p>Complexity: O(n log n) average and worst case.
+   */
   private static void sort(double[] upperBounds, long[] counts) {
-    // Bubblesort. Should be efficient here as in most cases upperBounds is already sorted.
-    int n = upperBounds.length;
-    for (int i = 0; i < n - 1; i++) {
-      for (int j = 0; j < n - i - 1; j++) {
-        if (upperBounds[j] > upperBounds[j + 1]) {
-          swap(j, j + 1, upperBounds, counts);
-        }
-      }
-    }
-  }
-
-  private static void swap(int i, int j, double[] upperBounds, long[] counts) {
-    double tmpDouble = upperBounds[j];
-    upperBounds[j] = upperBounds[i];
-    upperBounds[i] = tmpDouble;
-    long tmpLong = counts[j];
-    counts[j] = counts[i];
-    counts[i] = tmpLong;
+    DoubleArraySorter.sort(upperBounds, counts);
   }
 
   private static void validate(double[] upperBounds, long[] counts) {
@@ -222,6 +213,159 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
      */
     public ClassicHistogramBuckets build() {
       return ClassicHistogramBuckets.of(upperBounds, counts);
+    }
+  }
+
+  /**
+   * In-place introsort for {@code upperBounds} and parallel {@code counts}.
+   *
+   * <p>Uses 3-way quicksort partitioning for large ranges, insertion sort for tiny ranges, and a
+   * heapsort fallback at the recursion-depth limit to guarantee O(n log n) worst-case complexity.
+   */
+  private static final class DoubleArraySorter {
+
+    private static final int INSERTION_SORT_THRESHOLD = 24;
+
+    private static void sort(double[] upperBounds, long[] counts) {
+      int right = upperBounds.length - 1;
+      if (right <= 0) {
+        return;
+      }
+      introSort(upperBounds, counts, 0, right, depthLimit(upperBounds.length));
+    }
+
+    private static void introSort(
+        double[] upperBounds, long[] counts, int left, int right, int depthLimit) {
+      while (left < right) {
+        if (right - left + 1 <= INSERTION_SORT_THRESHOLD) {
+          insertionSort(upperBounds, counts, left, right);
+          return;
+        }
+        if (depthLimit == 0) {
+          heapSort(upperBounds, counts, left, right);
+          return;
+        }
+        depthLimit--;
+
+        int mid = left + ((right - left) >>> 1);
+        int pivotIndex = medianOf3(upperBounds, left, mid, right);
+        double pivot = upperBounds[pivotIndex];
+
+        int lt = left;
+        int i = left;
+        int gt = right;
+        while (i <= gt) {
+          int cmp = compare(upperBounds[i], pivot);
+          if (cmp < 0) {
+            swap(i, lt, upperBounds, counts);
+            i++;
+            lt++;
+          } else if (cmp > 0) {
+            swap(i, gt, upperBounds, counts);
+            gt--;
+          } else {
+            i++;
+          }
+        }
+
+        if (lt - left < right - gt) {
+          introSort(upperBounds, counts, left, lt - 1, depthLimit);
+          left = gt + 1;
+        } else {
+          introSort(upperBounds, counts, gt + 1, right, depthLimit);
+          right = lt - 1;
+        }
+      }
+    }
+
+    private static void insertionSort(double[] upperBounds, long[] counts, int left, int right) {
+      for (int i = left + 1; i <= right; i++) {
+        double upperBound = upperBounds[i];
+        long count = counts[i];
+        int j = i - 1;
+        while (j >= left && compare(upperBounds[j], upperBound) > 0) {
+          upperBounds[j + 1] = upperBounds[j];
+          counts[j + 1] = counts[j];
+          j--;
+        }
+        upperBounds[j + 1] = upperBound;
+        counts[j + 1] = count;
+      }
+    }
+
+    private static void heapSort(double[] upperBounds, long[] counts, int left, int right) {
+      int size = right - left + 1;
+      for (int i = (size >>> 1) - 1; i >= 0; i--) {
+        siftDown(upperBounds, counts, left, i, size);
+      }
+      for (int end = size - 1; end > 0; end--) {
+        swap(left, left + end, upperBounds, counts);
+        siftDown(upperBounds, counts, left, 0, end);
+      }
+    }
+
+    private static void siftDown(
+        double[] upperBounds, long[] counts, int base, int root, int size) {
+      while (true) {
+        int child = (root << 1) + 1;
+        if (child >= size) {
+          return;
+        }
+        int rightChild = child + 1;
+        if (rightChild < size
+            && compare(upperBounds[base + child], upperBounds[base + rightChild]) < 0) {
+          child = rightChild;
+        }
+        if (compare(upperBounds[base + root], upperBounds[base + child]) >= 0) {
+          return;
+        }
+        swap(base + root, base + child, upperBounds, counts);
+        root = child;
+      }
+    }
+
+    private static int depthLimit(int length) {
+      int result = 0;
+      while (length > 1) {
+        result++;
+        length >>>= 1;
+      }
+      return result << 1;
+    }
+
+    private static int medianOf3(double[] upperBounds, int i, int j, int k) {
+      if (compare(upperBounds[i], upperBounds[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      if (compare(upperBounds[j], upperBounds[k]) > 0) {
+        int tmp = j;
+        j = k;
+        k = tmp;
+      }
+      if (compare(upperBounds[i], upperBounds[j]) > 0) {
+        int tmp = i;
+        i = j;
+        j = tmp;
+      }
+      return j;
+    }
+
+    private static int compare(double a, double b) {
+      return Double.compare(a, b);
+    }
+
+    private static void swap(int i, int j, double[] upperBounds, long[] counts) {
+      if (i == j) {
+        return;
+      }
+      double upperBound = upperBounds[i];
+      upperBounds[i] = upperBounds[j];
+      upperBounds[j] = upperBound;
+      long count = counts[i];
+      counts[i] = counts[j];
+      counts[j] = count;
     }
   }
 }
