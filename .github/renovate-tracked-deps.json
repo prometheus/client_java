@@ -36,6 +36,11 @@
         "mise"
       ]
     },
+    ".github/workflows/jmx-exporter-compatibility.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/lint.yml": {
       "regex": [
         "mise"
