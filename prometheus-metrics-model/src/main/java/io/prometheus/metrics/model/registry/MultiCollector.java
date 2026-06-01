@@ -1,8 +1,10 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +56,36 @@ public interface MultiCollector {
   }
 
   /**
+   * Returns registration-time descriptors for the metric families collected by this collector.
+   *
+   * <p>The registry uses these descriptors for duplicate-name, type, label-schema, help, and unit
+   * validation at registration time. Returning an empty list means registration-time validation is
+   * skipped for this collector.
+   *
+   * <p>The default implementation adapts the deprecated fragmented metadata methods. New collectors
+   * with fixed registration-time metadata should override this method directly.
+   */
+  @SuppressWarnings("deprecation")
+  default List<MetricFamilyDescriptor> getMetricFamilyDescriptors() {
+    List<String> prometheusNames = getPrometheusNames();
+    List<MetricFamilyDescriptor> descriptors = new ArrayList<>(prometheusNames.size());
+    for (String prometheusName : prometheusNames) {
+      MetricType metricType = getMetricType(prometheusName);
+      if (metricType != null) {
+        MetricMetadata metadata = getMetadata(prometheusName);
+        if (metadata == null) {
+          metadata = new MetricMetadata(prometheusName);
+        }
+        Set<String> labelNames = getLabelNames(prometheusName);
+        descriptors.add(
+            MetricFamilyDescriptor.of(
+                metricType, metadata, labelNames == null ? Collections.emptySet() : labelNames));
+      }
+    }
+    return Collections.unmodifiableList(descriptors);
+  }
+
+  /**
    * This is called in two places:
    *
    * <ol>
@@ -68,7 +100,10 @@ public interface MultiCollector {
    *
    * <p>If your collector returns a constant list of metrics that have names that do not change at
    * runtime it is a good idea to overwrite this and return the names.
+   *
+   * @deprecated Override {@link #getMetricFamilyDescriptors()} instead.
    */
+  @Deprecated
   default List<String> getPrometheusNames() {
     return Collections.emptyList();
   }
@@ -85,7 +120,9 @@ public interface MultiCollector {
    *
    * @param prometheusName the Prometheus metric name
    * @return the metric type for the given name, or {@code null} to skip validation
+   * @deprecated Override {@link #getMetricFamilyDescriptors()} instead.
    */
+  @Deprecated
   @Nullable
   default MetricType getMetricType(String prometheusName) {
     return null;
@@ -108,7 +145,9 @@ public interface MultiCollector {
    * @param prometheusName the Prometheus metric name
    * @return the set of all label names for the given name, or {@code null} (treated as empty) for a
    *     metric with no labels
+   * @deprecated Override {@link #getMetricFamilyDescriptors()} instead.
    */
+  @Deprecated
   @Nullable
   default Set<String> getLabelNames(String prometheusName) {
     return null;
@@ -123,7 +162,9 @@ public interface MultiCollector {
    *
    * @param prometheusName the Prometheus metric name
    * @return the metric metadata for that name, or {@code null} to skip help/unit validation
+   * @deprecated Override {@link #getMetricFamilyDescriptors()} instead.
    */
+  @Deprecated
   @Nullable
   default MetricMetadata getMetadata(String prometheusName) {
     return null;

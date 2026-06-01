@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("deprecation")
 class PrometheusRegistryTest {
 
   Collector noName = () -> GaugeSnapshot.builder().name("no_name_gauge").build();
@@ -81,7 +83,7 @@ class PrometheusRegistryTest {
 
         @Override
         public List<String> getPrometheusNames() {
-          return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
+          return Arrays.asList("gauge_a", "counter_b");
         }
       };
 
@@ -457,6 +459,81 @@ class PrometheusRegistryTest {
     // Both collectors can register successfully since validation is skipped
     assertThatCode(() -> registry.register(legacyCollector1)).doesNotThrowAnyException();
     assertThatCode(() -> registry.register(legacyCollector2)).doesNotThrowAnyException();
+  }
+
+  @Test
+  void register_metricFamilyDescriptor_usedForValidation() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests_total").build();
+          }
+
+          @Override
+          public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+            return MetricFamilyDescriptor.counter("requests_total").labelName("path").build();
+          }
+        };
+
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+            return MetricFamilyDescriptor.gauge("requests").labelName("path").build();
+          }
+        };
+
+    registry.register(counter);
+
+    assertThatThrownBy(() -> registry.register(gauge))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting metric types");
+  }
+
+  @Test
+  void register_multiCollector_metricFamilyDescriptorsUsedForValidation() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    MultiCollector multiCollector =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(CounterSnapshot.builder().name("requests_total").build());
+          }
+
+          @Override
+          public List<MetricFamilyDescriptor> getMetricFamilyDescriptors() {
+            return asList(
+                MetricFamilyDescriptor.counter("requests_total").labelName("path").build());
+          }
+        };
+
+    Collector duplicate =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests_total").build();
+          }
+
+          @Override
+          public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+            return MetricFamilyDescriptor.counter("requests_total").labelName("path").build();
+          }
+        };
+
+    registry.register(multiCollector);
+
+    assertThatThrownBy(() -> registry.register(duplicate))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("identical label schema");
   }
 
   @Test

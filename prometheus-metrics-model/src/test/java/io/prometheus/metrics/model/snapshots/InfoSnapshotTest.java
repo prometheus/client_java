@@ -19,7 +19,7 @@ class InfoSnapshotTest {
                     .labels(Labels.of("instance_id", "127.0.0.1:9100", "service_name", "gateway"))
                     .build())
             .build();
-    assertThat(snapshot.getMetadata().getName()).isEqualTo("target");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "target", "target", "target");
     assertThat(snapshot.getMetadata().getHelp()).isEqualTo("Target info");
     assertThat(snapshot.getMetadata().hasUnit()).isFalse();
     assertThat(snapshot.getDataPoints().size()).isOne();
@@ -62,12 +62,14 @@ class InfoSnapshotTest {
   @Test
   void testNameMayIncludeSuffix() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("jvm_info").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm_info");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm", "jvm_info", "jvm_info");
   }
 
   @Test
   void testNameMayIncludeSuffixDot() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("jvm.info").build();
-    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm_info");
+    assertThat(snapshot.getMetadata().getPrometheusName()).isEqualTo("jvm");
+    SnapshotTestUtil.assertDerivedMetadata(snapshot, "jvm", "jvm.info", "jvm.info");
   }
 }

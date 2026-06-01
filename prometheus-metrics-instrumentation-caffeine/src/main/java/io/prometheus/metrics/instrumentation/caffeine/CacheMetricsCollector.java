@@ -95,6 +95,8 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * <p>Note that the {@link #builder()} API has different default values than this deprecated
    * constructor.
+   *
+   * @deprecated Use {@link #builder()} instead.
    */
   @Deprecated
   public CacheMetricsCollector() {
@@ -313,7 +315,12 @@ public class CacheMetricsCollector implements MultiCollector {
         .build();
   }
 
+  /**
+   * @deprecated Use {@link #getMetricFamilyDescriptors()} instead.
+   */
   @Override
+  @Deprecated
+  @SuppressWarnings("InlineMeSuggester")
   public List<String> getPrometheusNames() {
     if (!collectWeightedSize) {
       return ALL_METRIC_NAMES.stream()

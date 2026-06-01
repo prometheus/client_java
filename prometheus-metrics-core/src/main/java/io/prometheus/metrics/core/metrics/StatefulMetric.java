@@ -105,7 +105,7 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
         throw new IllegalArgumentException(
             getClass().getSimpleName()
                 + " "
-                + getMetadata().getName()
+                + metadata.getName()
                 + " was created with label names, so you must call labelValues(...)"
                 + " when using it.");
       } else {
@@ -120,7 +120,7 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
             if (l.get(i) == null) {
               throw new IllegalArgumentException(
                   "null label value for metric "
-                      + getMetadata().getName()
+                      + metadata.getName()
                       + " and label "
                       + labelNames[i]);
             }
@@ -171,7 +171,7 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
     if (Objects.equals(builder.exemplarsEnabled, false)) {
       properties.add(MetricsProperties.builder().exemplarsEnabled(false).build());
     }
-    String metricName = getMetadata().getName();
+    String metricName = metadata.getName();
     if (prometheusProperties.getMetricProperties(metricName) != null) {
       properties.add(prometheusProperties.getMetricProperties(metricName));
     }
