@@ -125,7 +125,10 @@ def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
         [
             "./mvnw",
             "install",
-            "-DskipTests",
+            # Skip test compilation too (not just execution): downstream needs only
+            # our main artifacts, and our test sources target a newer release than
+            # the compatibility JDK supports.
+            "-Dmaven.test.skip=true",
             "-Dcoverage.skip=true",
             "-Dcheckstyle.skip=true",
             "-Dwarnings=-nowarn",
