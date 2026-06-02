@@ -26,13 +26,15 @@ jobs:
         with:
           version: v2026.5.18
           sha256: cfac593469d028d7ae5fe36e37bd7c59118b5238e92d8a876209578464f24a84
+          working_directory: .mise/envs/micrometer
       - name: Cache local Maven repository
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Run Micrometer compatibility tests
+        working-directory: .mise/envs/micrometer
         env:
           MICROMETER_REPOSITORY: ${{ inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
           MICROMETER_REF: ${{ inputs.micrometer-ref }}
-        run: mise run micrometer:test
+        run: mise compat-test

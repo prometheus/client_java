@@ -1,0 +1,10 @@
+# The pinned Micrometer release does not build on the primary JDK (Java 25):
+# its bundled Kotlin compiler predates JDK 25 support. Build it under an LTS JDK
+# the release supports instead.
+[tools]
+java = "temurin-21.0.11+10.0.LTS"
+
+[tasks.compat-test]
+description = "Run Micrometer compatibility tests under a supported JDK"
+dir = "../../.."
+run = "python3 .mise/tasks/micrometer/test.py"

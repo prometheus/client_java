@@ -71,6 +71,16 @@
         "mise"
       ]
     },
+    ".mise/envs/jmx-exporter/mise.toml": {
+      "mise": [
+        "java"
+      ]
+    },
+    ".mise/envs/micrometer/mise.toml": {
+      "mise": [
+        "java"
+      ]
+    },
     ".mise/envs/native/mise.toml": {
       "mise": [
         "java"
