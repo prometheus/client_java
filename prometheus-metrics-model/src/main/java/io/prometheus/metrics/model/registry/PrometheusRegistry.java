@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.registry;
 
 import static java.util.Collections.emptySet;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
+@StableApi
 public class PrometheusRegistry {
 
   public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();

@@ -1,8 +1,10 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exemplars */
+@StableApi
 public class ExemplarsProperties {
 
   private static final String PREFIX = "io.prometheus.exemplars";

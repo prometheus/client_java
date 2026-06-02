@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
@@ -37,6 +38,7 @@ import javax.annotation.Nullable;
  * jvm_classes_unloaded_total 0.0
  * </pre>
  */
+@StableApi
 public class JvmClassLoadingMetrics {
 
   private static final String JVM_CLASSES_CURRENTLY_LOADED = "jvm_classes_currently_loaded";

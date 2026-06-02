@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -62,6 +63,7 @@ import javax.annotation.Nullable;
  * <p>If you want the classic representation only, use {@link Histogram.Builder#classicOnly}. If you
  * want the native representation only, use {@link Histogram.Builder#nativeOnly}.
  */
+@StableApi
 public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.DataPoint>
     implements DistributionDataPoint {
 

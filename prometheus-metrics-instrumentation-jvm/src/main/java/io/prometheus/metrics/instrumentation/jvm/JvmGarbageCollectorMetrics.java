@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -37,6 +38,7 @@ import javax.annotation.Nullable;
  * jvm_gc_collection_seconds_sum{gc="PS Scavenge"} 0.0
  * </pre>
  */
+@StableApi
 public class JvmGarbageCollectorMetrics {
 
   private static final String JVM_GC_COLLECTION_SECONDS = "jvm_gc_collection_seconds";

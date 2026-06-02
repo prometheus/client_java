@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /** Immutable set of name/value pairs, sorted by name. */
+@StableApi
 public final class Labels implements Comparable<Labels>, Iterable<Label> {
 
   public static final Labels EMPTY;

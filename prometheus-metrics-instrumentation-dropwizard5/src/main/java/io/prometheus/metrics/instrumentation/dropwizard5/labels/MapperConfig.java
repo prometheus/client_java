@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ import javax.annotation.Nullable;
  * <p>Dropwizard metrics that match the "match" pattern will be further processed to have a new name
  * and new labels based on this config.
  */
+@StableApi
 public final class MapperConfig {
   // Each part of the metric name between dots. Accepts letters, digits, underscores, hyphens,
   // colons, and glob wildcards (*) to support a broad range of metric naming conventions.

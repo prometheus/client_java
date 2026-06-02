@@ -1,8 +1,10 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter */
+@StableApi
 public class ExporterProperties {
 
   private static final String INCLUDE_CREATED_TIMESTAMPS = "include_created_timestamps";

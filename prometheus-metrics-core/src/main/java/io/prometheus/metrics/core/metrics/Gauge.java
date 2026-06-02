@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
@@ -39,6 +40,7 @@ import javax.annotation.Nullable;
  * }
  * }</pre>
  */
+@StableApi
 public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     implements GaugeDataPoint {
 

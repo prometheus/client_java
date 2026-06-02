@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -104,6 +105,7 @@ import javax.annotation.Nullable;
  * jvm_memory_used_bytes{area="nonheap"} 1.1490688E7
  * </pre>
  */
+@StableApi
 public class JvmMemoryMetrics {
 
   private static final String JVM_MEMORY_OBJECTS_PENDING_FINALIZATION =

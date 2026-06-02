@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
@@ -67,6 +68,7 @@ import javax.annotation.Nullable;
  * process_virtual_memory_bytes 1.2683624448E10
  * </pre>
  */
+@StableApi
 public class ProcessMetrics {
 
   private static final String PROCESS_CPU_SECONDS_TOTAL = "process_cpu_seconds_total";

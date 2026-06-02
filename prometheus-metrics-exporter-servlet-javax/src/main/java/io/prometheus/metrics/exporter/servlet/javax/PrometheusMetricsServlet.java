@@ -1,5 +1,6 @@
 package io.prometheus.metrics.exporter.servlet.javax;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exporter.common.PrometheusScrapeHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * PrometheusScrapeHandler to handle HTTP GET requests and export metrics. The servlet can be
  * configured with custom PrometheusProperties and a PrometheusRegistry.
  */
+@StableApi
 public class PrometheusMetricsServlet extends HttpServlet {
 
   private static final long serialVersionUID = 0L;

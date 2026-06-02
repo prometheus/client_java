@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.guava;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -51,6 +52,7 @@ import java.util.concurrent.ConcurrentMap;
  *     guava_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
  * </pre>
  */
+@StableApi
 public class CacheMetricsCollector implements MultiCollector {
 
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;

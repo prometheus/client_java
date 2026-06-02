@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.Closeable;
@@ -35,6 +36,7 @@ import javax.security.auth.Subject;
  *     .buildAndStart();
  * }</pre>
  */
+@StableApi
 public class HTTPServer implements Closeable {
 
   static {

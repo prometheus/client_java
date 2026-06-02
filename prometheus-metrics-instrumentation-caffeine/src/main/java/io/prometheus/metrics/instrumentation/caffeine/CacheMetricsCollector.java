@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.Policy;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
  *     caffeine_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
  * </pre>
  */
+@StableApi
 public class CacheMetricsCollector implements MultiCollector {
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
 

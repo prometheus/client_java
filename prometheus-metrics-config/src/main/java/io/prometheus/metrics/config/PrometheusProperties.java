@@ -1,5 +1,6 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
  *
  * <p>This class represents the runtime configuration.
  */
+@StableApi
 public class PrometheusProperties {
 
   private static final PrometheusProperties instance = PrometheusPropertiesLoader.load();

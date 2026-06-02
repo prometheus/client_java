@@ -10,6 +10,7 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getExpositio
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -43,6 +44,7 @@ import javax.annotation.Nullable;
  * Write the OpenMetrics text format as defined on <a
  * href="https://openmetrics.io/">https://openmetrics.io</a>.
  */
+@StableApi
 public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   public static class Builder {

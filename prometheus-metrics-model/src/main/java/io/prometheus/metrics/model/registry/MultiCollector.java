@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 
 /** Like {@link Collector}, but collecting multiple Snapshots at once. */
 @FunctionalInterface
+@StableApi
 public interface MultiCollector {
 
   /** Called when the Prometheus server scrapes metrics. */

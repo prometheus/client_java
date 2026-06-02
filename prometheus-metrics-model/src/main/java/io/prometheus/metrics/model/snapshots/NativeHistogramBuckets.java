@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
  *     upper bound = base^index
  * </pre>
  */
+@StableApi
 public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
   public static final NativeHistogramBuckets EMPTY =

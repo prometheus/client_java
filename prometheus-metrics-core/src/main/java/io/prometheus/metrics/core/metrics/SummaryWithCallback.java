@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Exemplars;
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
  *         .register();
  * }</pre>
  */
+@StableApi
 public class SummaryWithCallback extends CallbackMetric {
 
   @FunctionalInterface

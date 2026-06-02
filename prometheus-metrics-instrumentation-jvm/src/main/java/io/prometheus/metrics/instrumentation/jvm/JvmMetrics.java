@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * JvmMetrics.builder().register();
  * }</pre>
  */
+@StableApi
 public class JvmMetrics {
 
   private static final Set<PrometheusRegistry> REGISTERED = ConcurrentHashMap.newKeySet();

@@ -1,8 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 
 @SuppressWarnings("this-escape")
+@StableApi
 public abstract class DataPointSnapshot {
   private final Labels labels;
   private final long createdTimestampMillis;

@@ -1,7 +1,9 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
+@StableApi
 public enum EscapingScheme {
   /** NO_ESCAPING indicates that a name will not be escaped. */
   ALLOW_UTF8("allow-utf-8"),

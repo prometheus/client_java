@@ -2,12 +2,14 @@ package io.prometheus.metrics.config;
 
 import static java.util.Collections.unmodifiableList;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.metrics */
+@StableApi
 public class MetricsProperties {
 
   private static final String EXEMPLARS_ENABLED = "exemplars_enabled";

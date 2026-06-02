@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.Labels;
 
 /**
@@ -56,6 +57,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
  * CounterDataPoint counterData = counterWithoutLabels;
  * }</pre>
  */
+@StableApi
 public interface CounterDataPoint extends DataPoint {
 
   /** Add one. */

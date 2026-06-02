@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
  * Immutable container for histogram buckets with fixed bucket boundaries. Note that the counts are
  * <i>not</i> cumulative.
  */
+@StableApi
 public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket> {
 
   /** Used in native histograms to indicate that no classic histogram buckets are present. */

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Label;
@@ -20,6 +21,7 @@ import javax.annotation.Nullable;
  * <p>An exception would be a metric that is a bridge to a 3rd party metric library, where the
  * metric name has to be retrieved from the 3rd party metric library at scrape time.
  */
+@StableApi
 public abstract class MetricWithFixedMetadata extends Metric {
 
   protected final MetricMetadata metadata;

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Common base class for all metrics. */
+@StableApi
 public abstract class Metric implements Collector {
 
   protected final Labels constLabels;

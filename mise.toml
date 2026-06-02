@@ -59,6 +59,19 @@ run = "./mvnw verify"
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
+[tasks."api-diff"]
+description = "Compare published API against the configured japicmp baseline"
+run = """
+BASELINE_VERSION="${API_DIFF_BASELINE_VERSION:-1.5.1}"
+./mvnw -B verify \
+  -P 'api-diff,!examples-and-integration-tests' \
+  -Dapi.diff.baseline.version="${BASELINE_VERSION}" \
+  -DskipTests \
+  -Dcoverage.skip=true \
+  -Dcheckstyle.skip=true \
+  -Dwarnings=-nowarn
+"""
+
 [tasks."lint"]
 description = "Run all lints"
 depends = ["lint:bom"]

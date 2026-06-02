@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DataPoint;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
  * because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading, but
  * this has nothing to do with multi-threading.
  */
+@StableApi
 public abstract class StatefulMetric<D extends DataPoint, T extends D>
     extends MetricWithFixedMetadata {
 

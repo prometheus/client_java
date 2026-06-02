@@ -1,5 +1,8 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
+import io.prometheus.metrics.annotations.StableApi;
+
+@StableApi
 public enum Scheme {
   HTTP("http"),
   HTTPS("https");

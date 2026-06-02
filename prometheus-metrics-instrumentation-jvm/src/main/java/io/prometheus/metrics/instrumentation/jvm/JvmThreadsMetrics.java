@@ -2,6 +2,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
@@ -61,6 +62,7 @@ import javax.annotation.Nullable;
  * jvm_threads_state{state="WAITING"} 3.0
  * </pre>
  */
+@StableApi
 public class JvmThreadsMetrics {
 
   private static final String UNKNOWN = "UNKNOWN";

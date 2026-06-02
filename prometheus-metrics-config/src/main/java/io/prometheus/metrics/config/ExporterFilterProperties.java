@@ -1,5 +1,6 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter.filter */
+@StableApi
 public class ExporterFilterProperties {
 
   public static final String METRIC_NAME_MUST_BE_EQUAL_TO = "metric_name_must_be_equal_to";

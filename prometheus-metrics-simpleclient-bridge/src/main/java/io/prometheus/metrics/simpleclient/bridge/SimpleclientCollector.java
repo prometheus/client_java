@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -54,6 +55,7 @@ import javax.annotation.Nullable;
  *     .register(prometheusRegistry);
  * }</pre>
  */
+@StableApi
 public class SimpleclientCollector implements MultiCollector {
 
   private final CollectorRegistry simpleclientRegistry;

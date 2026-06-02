@@ -1,6 +1,9 @@
 package io.prometheus.metrics.instrumentation.dropwizard5;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 @FunctionalInterface
+@StableApi
 public interface InvalidMetricHandler {
   InvalidMetricHandler ALWAYS_THROW = (metricName, exc) -> false;
 

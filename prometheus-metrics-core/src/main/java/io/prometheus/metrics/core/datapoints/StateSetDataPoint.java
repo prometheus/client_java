@@ -1,11 +1,14 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /**
  * Represents a single StateSet data point.
  *
  * <p>See JavaDoc of {@link CounterDataPoint} on how using data points directly can improve
  * performance.
  */
+@StableApi
 public interface StateSetDataPoint extends DataPoint {
 
   /**

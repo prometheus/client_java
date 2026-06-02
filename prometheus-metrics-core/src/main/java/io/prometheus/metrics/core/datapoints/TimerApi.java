@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
@@ -11,6 +12,7 @@ import java.util.function.Supplier;
  * must use base units (e.g. seconds, bytes) and leave converting them to something more readable to
  * graphing tools".</i>
  */
+@StableApi
 public interface TimerApi {
 
   /**

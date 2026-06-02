@@ -1,10 +1,12 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.ExporterProperties;
 import io.prometheus.metrics.config.OpenMetrics2Properties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import javax.annotation.Nullable;
 
+@StableApi
 public class ExpositionFormats {
 
   private final PrometheusProtobufWriter prometheusProtobufWriter;

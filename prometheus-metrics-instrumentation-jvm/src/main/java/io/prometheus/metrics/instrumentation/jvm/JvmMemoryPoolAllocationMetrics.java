@@ -2,6 +2,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -47,6 +48,7 @@ import javax.management.openmbean.CompositeData;
  * jvm_memory_pool_allocated_bytes_total{pool="PS Survivor Space"} 4115280.0
  * </pre>
  */
+@StableApi
 public class JvmMemoryPoolAllocationMetrics {
 
   private static final String JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL =
