@@ -1,0 +1,263 @@
+Comparing source compatibility of prometheus-metrics-config-1.6.2-SNAPSHOT.jar against prometheus-metrics-config-1.6.1.jar
++++  NEW ENUM: PUBLIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme  (compatible)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.constant.Constable
+	+++  NEW INTERFACE: java.lang.Comparable
+	+++  NEW INTERFACE: java.io.Serializable
+	+++  NEW SUPERCLASS: java.lang.Enum
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme DOTS_ESCAPING
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme ALLOW_UTF8
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme UNDERSCORE_ESCAPING
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme VALUE_ENCODING_ESCAPING
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme DEFAULT
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.EscapingScheme fromAcceptHeader(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) FINAL(+) java.lang.String getValue()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toHeaderFormat()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.EscapingScheme valueOf(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.EscapingScheme[] values()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExemplarsProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getMaxRetentionPeriodSeconds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getMinRetentionPeriodSeconds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getSampleIntervalMilliseconds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExemplarsProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties$Builder maxRetentionPeriodSeconds(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties$Builder minRetentionPeriodSeconds(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties$Builder sampleIntervalMilliseconds(int)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String METRIC_NAME_MUST_NOT_BE_EQUAL_TO
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String METRIC_NAME_MUST_START_WITH
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String METRIC_NAME_MUST_NOT_START_WITH
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String METRIC_NAME_MUST_BE_EQUAL_TO
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.String> getAllowedMetricNamePrefixes()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.String> getAllowedMetricNames()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.String> getExcludedMetricNamePrefixes()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.String> getExcludedMetricNames()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder allowedNames(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder allowedPrefixes(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder excludedNames(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties$Builder excludedPrefixes(java.lang.String[])
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getPort()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) boolean isPreferUncompressedResponse()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties$Builder port(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties$Builder preferUncompressedResponse(boolean)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getEndpoint()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.Map<java.lang.String,java.lang.String> getHeaders()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getInterval()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Boolean getPreserveNames()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getProtocol()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.Map<java.lang.String,java.lang.String> getResourceAttributes()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getServiceInstanceId()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getServiceName()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getServiceNamespace()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getServiceVersion()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getTimeout()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder endpoint(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder header(java.lang.String, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder intervalSeconds(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder preserveNames(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder protocol(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder resourceAttribute(java.lang.String, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder serviceInstanceId(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder serviceName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder serviceNamespace(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder serviceVersion(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties$Builder timeoutSeconds(int)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) boolean getExemplarsOnAllMetricTypes()
+	+++  NEW METHOD: PUBLIC(+) boolean getIncludeCreatedTimestamps()
+	+++  NEW METHOD: PUBLIC(+) boolean getPrometheusTimestampsInMs()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties$Builder exemplarsOnAllMetricTypes(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties$Builder includeCreatedTimestamps(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties$Builder prometheusTimestampsInMs(boolean)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getAddress()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.time.Duration getConnectTimeout()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.EscapingScheme getEscapingScheme()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getJob()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.time.Duration getReadTimeout()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getScheme()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder address(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder connectTimeout(java.time.Duration)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder escapingScheme(io.prometheus.metrics.config.EscapingScheme)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder job(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder readTimeout(java.time.Duration)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties$Builder scheme(java.lang.String)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricsProperties(java.lang.Boolean, java.lang.Boolean, java.lang.Boolean, java.util.List<java.lang.Double>, java.lang.Integer, java.lang.Double, java.lang.Double, java.lang.Integer, java.lang.Long, java.util.List<java.lang.Double>, java.util.List<java.lang.Double>, java.lang.Long, java.lang.Integer)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.MetricsProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.Boolean getExemplarsEnabled()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Boolean getHistogramClassicOnly()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.Double> getHistogramClassicUpperBounds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getHistogramNativeInitialSchema()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getHistogramNativeMaxNumberOfBuckets()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Double getHistogramNativeMaxZeroThreshold()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Double getHistogramNativeMinZeroThreshold()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Boolean getHistogramNativeOnly()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Long getHistogramNativeResetDurationSeconds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Long getSummaryMaxAgeSeconds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.Integer getSummaryNumberOfAgeBuckets()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.Double> getSummaryQuantileErrors()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.Double> getSummaryQuantiles()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.MetricsProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder exemplarsEnabled(java.lang.Boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramClassicOnly(java.lang.Boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramClassicUpperBounds(double[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeInitialSchema(java.lang.Integer)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeMaxNumberOfBuckets(java.lang.Integer)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeMaxZeroThreshold(java.lang.Double)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeMinZeroThreshold(java.lang.Double)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeOnly(java.lang.Boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder histogramNativeResetDurationSeconds(java.lang.Long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder summaryMaxAgeSeconds(java.lang.Long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder summaryNumberOfAgeBuckets(java.lang.Integer)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder summaryQuantileErrors(double[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties$Builder summaryQuantiles(double[])
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) boolean getCompositeValues()
+	+++  NEW METHOD: PUBLIC(+) boolean getContentNegotiation()
+	+++  NEW METHOD: PUBLIC(+) boolean getEnabled()
+	+++  NEW METHOD: PUBLIC(+) boolean getExemplarCompliance()
+	+++  NEW METHOD: PUBLIC(+) boolean getNativeHistograms()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder compositeValues(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder contentNegotiation(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder enableAll()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder enabled(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder exemplarCompliance(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties$Builder nativeHistograms(boolean)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties get()
+		+++  NEW EXCEPTION: io.prometheus.metrics.config.PrometheusPropertiesException
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties getDefaultMetricProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExemplarsProperties getExemplarProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterFilterProperties getExporterFilterProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterHttpServerProperties getExporterHttpServerProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterProperties getExporterProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.ExporterPushgatewayProperties getExporterPushgatewayProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties getMetricProperties(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties getOpenMetrics2Properties()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder defaultMetricsProperties(io.prometheus.metrics.config.MetricsProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder enableOpenMetrics2(java.util.function.Consumer<io.prometheus.metrics.config.OpenMetrics2Properties$Builder>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder exemplarProperties(io.prometheus.metrics.config.ExemplarsProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder exporterFilterProperties(io.prometheus.metrics.config.ExporterFilterProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder exporterHttpServerProperties(io.prometheus.metrics.config.ExporterHttpServerProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder exporterOpenTelemetryProperties(io.prometheus.metrics.config.ExporterOpenTelemetryProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder exporterProperties(io.prometheus.metrics.config.ExporterProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder metricProperties(java.util.Map<java.lang.String,io.prometheus.metrics.config.MetricsProperties>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder openMetrics2Properties(io.prometheus.metrics.config.OpenMetrics2Properties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder pushgatewayProperties(io.prometheus.metrics.config.ExporterPushgatewayProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.PrometheusProperties$Builder putMetricProperty(java.lang.String, io.prometheus.metrics.config.MetricsProperties)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.PrometheusPropertiesException  (compatible)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.io.Serializable
+	+++  NEW SUPERCLASS: java.lang.RuntimeException
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusPropertiesException(java.lang.String)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusPropertiesException(java.lang.String, java.lang.Exception)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.config.PrometheusPropertiesLoader  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusPropertiesLoader()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties load()
+		+++  NEW EXCEPTION: io.prometheus.metrics.config.PrometheusPropertiesException
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties load(java.util.Map<java.lang.Object,java.lang.Object>)
+		+++  NEW EXCEPTION: io.prometheus.metrics.config.PrometheusPropertiesException
+

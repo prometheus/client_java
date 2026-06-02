@@ -1,0 +1,600 @@
+Comparing source compatibility of prometheus-metrics-model-1.6.2-SNAPSHOT.jar against prometheus-metrics-model-1.6.1.jar
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.registry.Collector  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect(io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect(java.util.function.Predicate<java.lang.String>)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect(java.util.function.Predicate<java.lang.String>, io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.Set<java.lang.String> getLabelNames()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor getMetricFamilyDescriptor()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getPrometheusName()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.util.function.Predicate
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.util.function.Predicate<java.lang.String> ALLOW_ALL
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) boolean test(java.lang.String)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustBeEqualTo(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustBeEqualTo(java.util.Collection<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustNotBeEqualTo(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustNotBeEqualTo(java.util.Collection<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustNotStartWith(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustNotStartWith(java.util.Collection<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustStartWith(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricNameFilter$Builder nameMustStartWith(java.util.Collection<java.lang.String>)
++++  NEW ENUM: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType  (compatible)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.constant.Constable
+	+++  NEW INTERFACE: java.lang.Comparable
+	+++  NEW INTERFACE: java.io.Serializable
+	+++  NEW SUPERCLASS: java.lang.Enum
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType SUMMARY
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType HISTOGRAM
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType STATESET
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType UNKNOWN
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType INFO
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType COUNTER
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.MetricType GAUGE
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.registry.MetricType valueOf(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.registry.MetricType[] values()
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.registry.MultiCollector  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.MetricSnapshots collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots collect(io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots collect(java.util.function.Predicate<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots collect(java.util.function.Predicate<java.lang.String>, io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+	+++  NEW METHOD: PUBLIC(+) java.util.Set<java.lang.String> getLabelNames(java.lang.String)
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata(java.lang.String)
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor> getMetricFamilyDescriptors()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType(java.lang.String)
+		+++  NEW ANNOTATION: java.lang.Deprecated
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.List<java.lang.String> getPrometheusNames()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.registry.PrometheusRegistry  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.registry.PrometheusRegistry defaultRegistry
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusRegistry()
+	+++  NEW METHOD: PUBLIC(+) void clear()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.Collector)
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.MultiCollector)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots scrape()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots scrape(io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots scrape(java.util.function.Predicate<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots scrape(java.util.function.Predicate<java.lang.String>, io.prometheus.metrics.model.registry.PrometheusScrapeRequest)
+	+++  NEW METHOD: PUBLIC(+) void unregister(io.prometheus.metrics.model.registry.Collector)
+	+++  NEW METHOD: PUBLIC(+) void unregister(io.prometheus.metrics.model.registry.MultiCollector)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.registry.PrometheusScrapeRequest  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.lang.String[] getParameterValues(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.lang.String getRequestPath()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBucket  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Comparable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) ClassicHistogramBucket(double, long)
+	+++  NEW METHOD: PUBLIC(+) int compareTo(io.prometheus.metrics.model.snapshots.ClassicHistogramBucket)
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) double getUpperBound()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets EMPTY
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) long getCount(int)
+	+++  NEW METHOD: PUBLIC(+) double getUpperBound(int)
+	+++  NEW METHOD: PUBLIC(+) boolean isEmpty()
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.ClassicHistogramBucket> iterator()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets of(java.util.List<java.lang.Double>, java.util.List<? extends java.lang.Number>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets of(double[], java.lang.Number[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets of(double[], long[])
+	+++  NEW METHOD: PUBLIC(+) int size()
+	+++  NEW METHOD: PUBLIC(+) java.util.stream.Stream<io.prometheus.metrics.model.snapshots.ClassicHistogramBucket> stream()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets$Builder bucket(double, long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets build()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) CounterSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.CounterSnapshot$CounterDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.CounterSnapshot$CounterDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.CounterSnapshot$CounterDataPointSnapshot)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot$CounterDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) CounterSnapshot$CounterDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) CounterSnapshot$CounterDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar, long, long, boolean)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) CounterSnapshot$CounterDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar, long, long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot$CounterDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar getExemplar()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) double getValue()
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.DataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) long getCreatedTimestampMillis()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels getLabels()
+	+++  NEW METHOD: PUBLIC(+) long getScrapeTimestampMillis()
+	+++  NEW METHOD: PUBLIC(+) boolean hasCreatedTimestamp()
+	+++  NEW METHOD: PUBLIC(+) boolean hasScrapeTimestamp()
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.model.snapshots.DataPointSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ T:io.prometheus.metrics.model.snapshots.DataPointSnapshot$Builder<T>
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) DataPointSnapshot$Builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.DataPointSnapshot$Builder labels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.DataPointSnapshot$Builder scrapeTimestampMillis(long)
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.DistributionDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars getExemplars()
+	+++  NEW METHOD: PUBLIC(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) boolean hasCount()
+	+++  NEW METHOD: PUBLIC(+) boolean hasSum()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.DuplicateLabelsException  (compatible)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.io.Serializable
+	+++  NEW SUPERCLASS: java.lang.IllegalArgumentException
+	+++  NEW CONSTRUCTOR: PUBLIC(+) DuplicateLabelsException(io.prometheus.metrics.model.snapshots.MetricMetadata, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels getLabels()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String SPAN_ID
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String TRACE_ID
+	+++  NEW CONSTRUCTOR: PUBLIC(+) Exemplar(double, io.prometheus.metrics.model.snapshots.Labels, long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels getLabels()
+	+++  NEW METHOD: PUBLIC(+) long getTimestampMillis()
+	+++  NEW METHOD: PUBLIC(+) double getValue()
+	+++  NEW METHOD: PUBLIC(+) boolean hasTimestamp()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder labels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder spanId(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder timestampMillis(long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder traceId(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar$Builder value(double)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Exemplars EMPTY
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplars$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar get(int)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar get(double, double)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar getLatest()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.Exemplar> iterator()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplars of(java.util.Collection<io.prometheus.metrics.model.snapshots.Exemplar>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplars of(io.prometheus.metrics.model.snapshots.Exemplar[])
+	+++  NEW METHOD: PUBLIC(+) int size()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Exemplars$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars$Builder exemplar(io.prometheus.metrics.model.snapshots.Exemplar)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars$Builder exemplars(java.util.Collection<io.prometheus.metrics.model.snapshots.Exemplar>)
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) GaugeSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.GaugeSnapshot$GaugeDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.GaugeSnapshot$GaugeDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.GaugeSnapshot$GaugeDataPointSnapshot)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot$GaugeDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) GaugeSnapshot$GaugeDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) GaugeSnapshot$GaugeDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot$GaugeDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar getExemplar()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) double getValue()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) int CLASSIC_HISTOGRAM
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot>)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot(boolean, io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot> getDataPoints()
+	+++  NEW METHOD: PUBLIC(+) boolean isGaugeHistogram()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$Builder gaugeHistogram(boolean)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DistributionDataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot$HistogramDataPointSnapshot(int, long, double, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot$HistogramDataPointSnapshot(io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets, int, long, double, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot$HistogramDataPointSnapshot(io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets, int, long, double, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, io.prometheus.metrics.model.snapshots.NativeHistogramBuckets, double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) HistogramSnapshot$HistogramDataPointSnapshot(io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets, double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot$HistogramDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets getClassicBuckets()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets getNativeBucketsForNegativeValues()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets getNativeBucketsForPositiveValues()
+	+++  NEW METHOD: PUBLIC(+) int getNativeSchema()
+	+++  NEW METHOD: PUBLIC(+) long getNativeZeroCount()
+	+++  NEW METHOD: PUBLIC(+) double getNativeZeroThreshold()
+	+++  NEW METHOD: PUBLIC(+) boolean hasClassicHistogramData()
+	+++  NEW METHOD: PUBLIC(+) boolean hasNativeHistogramData()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.InfoSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) InfoSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.InfoSnapshot$InfoDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.InfoSnapshot$InfoDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.InfoSnapshot$InfoDataPointSnapshot)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$InfoDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) InfoSnapshot$InfoDataPointSnapshot(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) InfoSnapshot$InfoDataPointSnapshot(io.prometheus.metrics.model.snapshots.Labels, long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot$InfoDataPointSnapshot$Builder builder()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Label  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Comparable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) Label(java.lang.String, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) int compareTo(io.prometheus.metrics.model.snapshots.Label)
+	+++  NEW METHOD: PUBLIC(+) boolean equals(java.lang.Object)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getValue()
+	+++  NEW METHOD: PUBLIC(+) int hashCode()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toString()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Labels  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Comparable
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Labels EMPTY
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels add(java.lang.String, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Labels$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) int compareTo(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) boolean contains(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) boolean equals(java.lang.Object)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String get(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName(int)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getPrometheusName(int)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getValue(int)
+	+++  NEW METHOD: PUBLIC(+) int hashCode()
+	+++  NEW METHOD: PUBLIC(+) boolean hasSameNames(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) boolean hasSameValues(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) boolean isEmpty()
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.Label> iterator()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels merge(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels merge(java.lang.String[], java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Labels of(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Labels of(java.util.List<java.lang.String>, java.util.List<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Labels of(java.lang.String[], java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) int size()
+	+++  NEW METHOD: PUBLIC(+) java.util.stream.Stream<io.prometheus.metrics.model.snapshots.Label> stream()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toString()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Labels$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels$Builder label(java.lang.String, java.lang.String)
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$CounterBuilder counter(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$GaugeBuilder gauge(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) java.util.Set<java.lang.String> getLabelNames()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getPrometheusName()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getType()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$HistogramBuilder histogram(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$InfoBuilder info(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor of(io.prometheus.metrics.model.registry.MetricType, io.prometheus.metrics.model.snapshots.MetricMetadata)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor of(io.prometheus.metrics.model.registry.MetricType, io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder<?> of(io.prometheus.metrics.model.registry.MetricType, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$StateSetBuilder stateSet(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$SummaryBuilder summary(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$UnknownBuilder unknown(java.lang.String)
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ T:io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder<T>
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$Builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder help(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder labelName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder labelNames(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder labelNames(java.util.Collection<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder name(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$CounterBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$CounterBuilder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$GaugeBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$GaugeBuilder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$HistogramBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$HistogramBuilder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$InfoBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$InfoBuilder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$InfoBuilder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$StateSetBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$StateSetBuilder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$StateSetBuilder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$SummaryBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$SummaryBuilder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$UnknownBuilder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor$Builder
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricFamilyDescriptor$UnknownBuilder()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricMetadata  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricMetadata(java.lang.String, java.lang.String, java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricMetadata(java.lang.String)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricMetadata(java.lang.String, java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricMetadata(java.lang.String, java.lang.String, java.lang.String, java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricMetadata(java.lang.String, java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getExpositionBaseName()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getExpositionBasePrometheusName()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getHelp()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getOriginalName()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getPrometheusName()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Unit getUnit()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) boolean hasUnit()
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.MetricSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.util.List<? extends io.prometheus.metrics.model.snapshots.DataPointSnapshot> getDataPoints()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata()
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ T:io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder<T>
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricSnapshot$Builder()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.MetricSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder help(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder name(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricSnapshots(java.util.Collection<io.prometheus.metrics.model.snapshots.MetricSnapshot>)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MetricSnapshots(io.prometheus.metrics.model.snapshots.MetricSnapshot[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot get(int)
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.MetricSnapshot> iterator()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots of(io.prometheus.metrics.model.snapshots.MetricSnapshot[])
+	+++  NEW METHOD: PUBLIC(+) int size()
+	+++  NEW METHOD: PUBLIC(+) java.util.stream.Stream<io.prometheus.metrics.model.snapshots.MetricSnapshot> stream()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots build()
+	+++  NEW METHOD: PUBLIC(+) boolean containsMetricName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots$Builder metricSnapshot(io.prometheus.metrics.model.snapshots.MetricSnapshot)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBucket  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) NativeHistogramBucket(int, long)
+	+++  NEW METHOD: PUBLIC(+) int getBucketIndex()
+	+++  NEW METHOD: PUBLIC(+) long getCount()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets EMPTY
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) int getBucketIndex(int)
+	+++  NEW METHOD: PUBLIC(+) long getCount(int)
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.NativeHistogramBucket> iterator()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets of(int[], long[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets of(java.util.List<java.lang.Integer>, java.util.List<java.lang.Long>)
+	+++  NEW METHOD: PUBLIC(+) int size()
+	+++  NEW METHOD: PUBLIC(+) java.util.stream.Stream<io.prometheus.metrics.model.snapshots.NativeHistogramBucket> stream()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets$Builder bucket(int, long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.NativeHistogramBuckets build()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.PrometheusNaming  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusNaming()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String escapeName(java.lang.String, io.prometheus.metrics.config.EscapingScheme)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean isValidLabelName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean isValidLegacyLabelName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean isValidLegacyMetricName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean isValidMetricName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean isValidUnitName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) boolean needsEscaping(java.lang.String, io.prometheus.metrics.config.EscapingScheme)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String normalizeMetricName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String normalizeMetricName(java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String prometheusName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String sanitizeLabelName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String sanitizeMetricName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String sanitizeMetricName(java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String sanitizeUnitName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String validateMetricName(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) java.lang.String validateUnitName(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantile  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) Quantile(double, double)
+	+++  NEW METHOD: PUBLIC(+) double getQuantile()
+	+++  NEW METHOD: PUBLIC(+) double getValue()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantiles  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Quantiles EMPTY
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Quantiles$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantile get(int)
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.Quantile> iterator()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Quantiles of(java.util.List<io.prometheus.metrics.model.snapshots.Quantile>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Quantiles of(io.prometheus.metrics.model.snapshots.Quantile[])
+	+++  NEW METHOD: PUBLIC(+) int size()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.Quantiles$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantiles build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantiles$Builder quantile(io.prometheus.metrics.model.snapshots.Quantile)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantiles$Builder quantile(double, double)
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) StateSetSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.StateSetSnapshot$StateSetDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.StateSetSnapshot$StateSetDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.StateSetSnapshot$StateSetDataPointSnapshot)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$State  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName()
+	+++  NEW METHOD: PUBLIC(+) boolean isTrue()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$StateSetDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.lang.Iterable
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) StateSetSnapshot$StateSetDataPointSnapshot(java.lang.String[], boolean[], io.prometheus.metrics.model.snapshots.Labels, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) StateSetSnapshot$StateSetDataPointSnapshot(java.lang.String[], boolean[], io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot$StateSetDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName(int)
+	+++  NEW METHOD: PUBLIC(+) boolean isTrue(int)
+	+++  NEW METHOD: PUBLIC(+) java.util.Iterator<io.prometheus.metrics.model.snapshots.StateSetSnapshot$State> iterator()
+	+++  NEW METHOD: PUBLIC(+) int size()
+	+++  NEW METHOD: PUBLIC(+) java.util.stream.Stream<io.prometheus.metrics.model.snapshots.StateSetSnapshot$State> stream()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.SummarySnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) SummarySnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.SummarySnapshot$SummaryDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.SummarySnapshot$SummaryDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.SummarySnapshot$SummaryDataPointSnapshot)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.SummarySnapshot$SummaryDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DistributionDataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) SummarySnapshot$SummaryDataPointSnapshot(long, double, io.prometheus.metrics.model.snapshots.Quantiles, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) SummarySnapshot$SummaryDataPointSnapshot(long, double, io.prometheus.metrics.model.snapshots.Quantiles, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplars, long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot$SummaryDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Quantiles getQuantiles()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit BYTES
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit GRAMS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit METERS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit VOLTS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit SECONDS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit RATIO
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit CELSIUS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit JOULES
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.Unit AMPERES
+	+++  NEW CONSTRUCTOR: PUBLIC(+) Unit(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) boolean equals(java.lang.Object)
+	+++  NEW METHOD: PUBLIC(+) int hashCode()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) double kiloBytesToBytes(double)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) double millisToSeconds(long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) double nanosToSeconds(long)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) double secondsToMillis(double)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toString()
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) UnknownSnapshot(io.prometheus.metrics.model.snapshots.MetricMetadata, java.util.Collection<io.prometheus.metrics.model.snapshots.UnknownSnapshot$UnknownDataPointSnapshot>)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) java.util.List<io.prometheus.metrics.model.snapshots.UnknownSnapshot$UnknownDataPointSnapshot> getDataPoints()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.MetricSnapshot$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot$Builder dataPoint(io.prometheus.metrics.model.snapshots.UnknownSnapshot$UnknownDataPointSnapshot)
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot$UnknownDataPointSnapshot  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.model.snapshots.DataPointSnapshot
+	+++  NEW CONSTRUCTOR: PUBLIC(+) UnknownSnapshot$UnknownDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar, long)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) UnknownSnapshot$UnknownDataPointSnapshot(double, io.prometheus.metrics.model.snapshots.Labels, io.prometheus.metrics.model.snapshots.Exemplar)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.UnknownSnapshot$UnknownDataPointSnapshot$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplar getExemplar()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) double getValue()
+
