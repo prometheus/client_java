@@ -26,6 +26,11 @@
         "mise"
       ]
     },
+    ".github/workflows/generate-api-diff-baseline.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/generate-protobuf.yml": {
       "regex": [
         "mise"
@@ -175,6 +180,11 @@
     "mvnw.cmd": {
       "maven-wrapper": [
         "maven-wrapper"
+      ]
+    },
+    "pom.xml": {
+      "regex": [
+        "io.prometheus:prometheus-metrics-core"
       ]
     }
   }

@@ -12,9 +12,11 @@ on:
   workflow_dispatch:
     inputs:
       baseline_version:
-        description: Version to compare the PR artifacts against
+        description: >-
+          Override the baseline version to compare against.
+          Defaults to <api.diff.baseline.version> in pom.xml.
         required: false
-        default: "1.5.1"
+        default: ""
 
 permissions:
   contents: read
@@ -23,7 +25,9 @@ jobs:
   api-diff:
     runs-on: ubuntu-24.04
     env:
-      API_DIFF_BASELINE_VERSION: ${{ inputs.baseline_version || '1.5.1' }}
+      # Empty unless overridden via workflow_dispatch; the api-diff task then
+      # falls back to <api.diff.baseline.version> in pom.xml.
+      API_DIFF_BASELINE_VERSION: ${{ inputs.baseline_version }}
       BREAKING_API_CHANGE_ACCEPTED: >-
         ${{ contains(github.event.pull_request.labels.*.name, 'breaking-api-change-accepted') }}
 
@@ -42,6 +46,13 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Run japicmp API diff
         run: mise run api-diff
+      - name: Check docs/apidiffs is up to date
+        run: |
+          if ! git diff --exit-code -- docs/apidiffs; then
+            echo "::error::Published API surface changed but docs/apidiffs is stale."
+            echo "Run 'mise run api-diff' locally and commit the updated docs/apidiffs."
+            exit 1
+          fi
       - name: Fail on incompatible published API changes
         run: |
           python3 - <<'PY'
