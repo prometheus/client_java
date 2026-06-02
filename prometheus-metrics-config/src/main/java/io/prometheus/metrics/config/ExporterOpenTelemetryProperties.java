@@ -1,5 +1,6 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
  *     href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/">OpenTelemetry
  *     SDK Environment Variables</a>
  */
+@StableApi
 public class ExporterOpenTelemetryProperties {
 
   // See

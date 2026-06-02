@@ -1,8 +1,10 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter.http_server */
+@StableApi
 public class ExporterHttpServerProperties {
 
   private static final String PORT = "port";

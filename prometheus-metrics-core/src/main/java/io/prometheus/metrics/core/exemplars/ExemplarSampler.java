@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.exemplars;
 
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
  *
  * <p>See {@link ExemplarSamplerConfig} for configuration options.
  */
+@StableApi
 public class ExemplarSampler {
 
   private final ExemplarSamplerConfig config;

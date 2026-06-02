@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import javax.annotation.Nullable;
 
+@StableApi
 public interface ExpositionFormatWriter {
   boolean accepts(@Nullable String acceptHeader);
 

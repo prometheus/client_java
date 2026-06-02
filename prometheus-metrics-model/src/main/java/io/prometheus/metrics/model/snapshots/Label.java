@@ -1,8 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.Objects;
 
 /** Utility for iterating over {@link Labels}. */
+@StableApi
 public final class Label implements Comparable<Label> {
 
   private final String name;

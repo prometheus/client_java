@@ -1,12 +1,14 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
 import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+@StableApi
 public class OpenTelemetryExporter implements AutoCloseable {
   private final MetricReader reader;
 

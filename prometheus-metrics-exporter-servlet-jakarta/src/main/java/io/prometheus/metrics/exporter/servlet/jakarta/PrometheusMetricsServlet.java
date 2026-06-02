@@ -1,5 +1,6 @@
 package io.prometheus.metrics.exporter.servlet.jakarta;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exporter.common.PrometheusScrapeHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -14,6 +15,7 @@ import java.io.IOException;
  * <p>We'll add a Jakarta servlet, the built-in HTTPServer, etc. soon, and likely move common code
  * into a common module.
  */
+@StableApi
 public class PrometheusMetricsServlet extends HttpServlet {
 
   private static final long serialVersionUID = 0L;

@@ -1,7 +1,9 @@
 package io.prometheus.metrics.exporter.common;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.io.IOException;
 
+@StableApi
 public interface PrometheusHttpExchange extends AutoCloseable {
   PrometheusHttpRequest getRequest();
 

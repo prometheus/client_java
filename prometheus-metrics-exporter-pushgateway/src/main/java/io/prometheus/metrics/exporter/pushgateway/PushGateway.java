@@ -4,6 +4,7 @@ import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -79,6 +80,7 @@ import javax.annotation.Nullable;
  * <p>See <a
  * href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a>.
  */
+@StableApi
 public class PushGateway {
   private final URL url;
   private final ExpositionFormatWriter writer;

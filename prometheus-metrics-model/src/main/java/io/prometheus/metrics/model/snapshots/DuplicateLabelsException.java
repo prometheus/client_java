@@ -1,9 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
+
 /**
  * Thrown when a collector tries to create a {@link MetricSnapshot} where multiple data points have
  * the same labels (same label names and label values).
  */
+@StableApi
 public class DuplicateLabelsException extends IllegalArgumentException {
 
   private static final long serialVersionUID = 0L;

@@ -10,6 +10,7 @@ import io.dropwizard.metrics5.MetricName;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.dropwizard.metrics5.Snapshot;
 import io.dropwizard.metrics5.Timer;
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.instrumentation.dropwizard5.internal.AbstractDropwizardExports;
 import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -22,6 +23,7 @@ import javax.annotation.Nullable;
  * <p>This is a thin wrapper around {@link AbstractDropwizardExports} that handles the Dropwizard
  * 5.x specific API where metric names are {@link MetricName} objects.
  */
+@StableApi
 public class DropwizardExports
     extends AbstractDropwizardExports<
         MetricRegistry,

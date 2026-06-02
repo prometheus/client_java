@@ -1,5 +1,6 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,6 +13,7 @@ import java.net.URL;
  * certificate verification see {@code PushGatewayTestApp} in {@code
  * integration-tests/it-pushgateway/}.
  */
+@StableApi
 public class DefaultHttpConnectionFactory implements HttpConnectionFactory {
   @Override
   public HttpURLConnection create(URL url) throws IOException {

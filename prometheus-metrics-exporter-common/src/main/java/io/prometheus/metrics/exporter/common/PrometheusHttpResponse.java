@@ -1,8 +1,10 @@
 package io.prometheus.metrics.exporter.common;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@StableApi
 public interface PrometheusHttpResponse {
 
   /** See {@code jakarta.servlet.http.HttpServletResponse.setHeader(String, String)} */

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.MetricType;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 /** Registration-time descriptor for a metric family. */
+@StableApi
 public final class MetricFamilyDescriptor {
 
   private final MetricType type;

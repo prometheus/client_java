@@ -12,6 +12,7 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getLegacyGau
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -40,6 +41,7 @@ import javax.annotation.Nullable;
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your
  * Web browser.
  */
+@StableApi
 public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
   public static final String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";

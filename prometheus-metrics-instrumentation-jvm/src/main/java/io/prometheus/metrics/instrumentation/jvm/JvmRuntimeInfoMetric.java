@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Info;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -26,6 +27,7 @@ import javax.annotation.Nullable;
  * jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
  * </pre>
  */
+@StableApi
 public class JvmRuntimeInfoMetric {
 
   private static final String JVM_RUNTIME_INFO = "jvm_runtime_info";

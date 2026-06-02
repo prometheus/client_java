@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -85,6 +86,7 @@ import javax.management.ReflectionException;
  * jvm_native_memory_reserved_bytes{pool="Unknown"} 32768.0
  * </pre>
  */
+@StableApi
 public class JvmNativeMemoryMetrics {
   private static final String JVM_NATIVE_MEMORY_RESERVED_BYTES = "jvm_native_memory_reserved_bytes";
   private static final String JVM_NATIVE_MEMORY_COMMITTED_BYTES =

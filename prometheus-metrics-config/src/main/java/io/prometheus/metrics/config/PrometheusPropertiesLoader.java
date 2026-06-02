@@ -1,5 +1,6 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import java.util.Set;
  * Boot's Externalized Configuration</a>, like support for YAML, Properties, and env vars, or
  * support for Spring's naming conventions for properties.
  */
+@StableApi
 public class PrometheusPropertiesLoader {
 
   /** See {@link PrometheusProperties#get()}. */

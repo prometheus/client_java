@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.registry;
 
 import static java.util.Collections.unmodifiableCollection;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /** Filter samples (i.e. time series) by name. */
+@StableApi
 public class MetricNameFilter implements Predicate<String> {
 
   /** For convenience, a filter that allows all names. */

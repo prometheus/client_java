@@ -1,10 +1,12 @@
 package io.prometheus.metrics.core.exemplars;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
+@StableApi
 public class ExemplarSamplerConfig {
 
   /** See {@link ExemplarsProperties#getMinRetentionPeriodSeconds()} */

@@ -1,10 +1,12 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.Closeable;
 import java.util.function.DoubleConsumer;
 
 /** Helper class for observing durations. */
+@StableApi
 public class Timer implements Closeable {
 
   private final DoubleConsumer observeFunction;

@@ -16,6 +16,11 @@
         "mise"
       ]
     },
+    ".github/workflows/api-diff.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/build.yml": {
       "regex": [
         "mise"

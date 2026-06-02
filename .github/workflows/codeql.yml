@@ -49,6 +49,7 @@ jobs:
       - name: Build (CodeQL traces the build)
         run: >
           ./mvnw clean compile
+          -P '!default'
           -DskipTests
           -Dcoverage.skip=true
           -Dcheckstyle.skip=true

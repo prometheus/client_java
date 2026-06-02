@@ -1,8 +1,10 @@
 package io.prometheus.metrics.config;
 
+import io.prometheus.metrics.annotations.StableApi;
 import java.time.Duration;
 import javax.annotation.Nullable;
 
+@StableApi
 public class ExporterPushgatewayProperties {
 
   private static final String ADDRESS = "address";

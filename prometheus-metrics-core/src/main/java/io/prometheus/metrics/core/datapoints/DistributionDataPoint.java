@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.snapshots.Labels;
 
 /**
@@ -17,6 +18,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
  * <p>See JavaDoc of {@link CounterDataPoint} on how using data points directly can improve
  * performance.
  */
+@StableApi
 public interface DistributionDataPoint extends DataPoint, TimerApi {
 
   /** Get the count of observations. */
