@@ -38,6 +38,24 @@
       groupName: "protobuf",
       separateMajorMinor: false,
     },
+    {
+      "description": "Flint autofix: align extractVersion for protoc",
+      "extractVersion": "^(?<version>.+)\\.0\\.0$",
+      "matchDepNames": [
+        "protoc"
+      ]
+    }
   ],
-  customManagers: [],
+  customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github\\/workflows\\/jmx-exporter-compatibility\\.yml$/"],
+      matchStrings: [
+        "DEFAULT_JMX_EXPORTER_REF:\\s*(?<currentValue>\\S+)",
+      ],
+      datasourceTemplate: "github-tags",
+      depNameTemplate: "prometheus/jmx_exporter",
+      versioningTemplate: "semver-coerced",
+    },
+  ],
 }
