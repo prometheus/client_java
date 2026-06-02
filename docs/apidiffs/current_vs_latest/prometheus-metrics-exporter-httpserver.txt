@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-exporter-httpserver-1.6.2-SNAPSHOT.jar against prometheus-metrics-exporter-httpserver-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.exporter.httpserver.DefaultHandler  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: com.sun.net.httpserver.HttpHandler
@@ -49,4 +50,3 @@
 	+++  NEW METHOD: PUBLIC(+) void handle(com.sun.net.httpserver.HttpExchange)
 		+++  NEW EXCEPTION: java.io.IOException
 
-Semantic versioning suggestion: 0.1.0

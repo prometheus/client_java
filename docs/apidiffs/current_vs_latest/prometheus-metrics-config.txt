@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-config-1.6.2-SNAPSHOT.jar against prometheus-metrics-config-1.6.1.jar
 +++  NEW ENUM: PUBLIC(+) FINAL(+) io.prometheus.metrics.config.EscapingScheme  (compatible)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: java.lang.constant.Constable
@@ -260,4 +261,3 @@
 	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.config.PrometheusProperties load(java.util.Map<java.lang.Object,java.lang.Object>)
 		+++  NEW EXCEPTION: io.prometheus.metrics.config.PrometheusPropertiesException
 
-Semantic versioning suggestion: 0.1.0

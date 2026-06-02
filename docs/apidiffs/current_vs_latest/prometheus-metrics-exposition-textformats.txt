@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-exposition-textformats-1.6.2-SNAPSHOT.jar against prometheus-metrics-exposition-textformats-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.ExpositionFormats  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW SUPERCLASS: java.lang.Object
@@ -95,4 +96,3 @@
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter$Builder setTimestampsInMs(boolean)
 		+++  NEW ANNOTATION: java.lang.Deprecated
 
-Semantic versioning suggestion: 0.1.0

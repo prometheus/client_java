@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-exporter-common-1.6.2-SNAPSHOT.jar against prometheus-metrics-exporter-common-1.6.1.jar
 +++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.exporter.common.PrometheusHttpExchange  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: java.lang.AutoCloseable
@@ -37,4 +38,3 @@
 	+++  NEW METHOD: PUBLIC(+) void handleRequest(io.prometheus.metrics.exporter.common.PrometheusHttpExchange)
 		+++  NEW EXCEPTION: java.io.IOException
 
-Semantic versioning suggestion: 0.1.0

@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-instrumentation-guava-1.6.2-SNAPSHOT.jar against prometheus-metrics-instrumentation-guava-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.guava.CacheMetricsCollector  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.MultiCollector
@@ -10,4 +11,3 @@
 		+++  NEW ANNOTATION: java.lang.Deprecated
 	+++  NEW METHOD: PUBLIC(+) com.google.common.cache.Cache<?,?> removeCache(java.lang.String)
 
-Semantic versioning suggestion: 0.1.0

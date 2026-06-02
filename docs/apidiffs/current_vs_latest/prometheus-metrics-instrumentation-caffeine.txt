@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-instrumentation-caffeine-1.6.2-SNAPSHOT.jar against prometheus-metrics-instrumentation-caffeine-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.caffeine.CacheMetricsCollector  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.MultiCollector
@@ -20,4 +21,3 @@
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.caffeine.CacheMetricsCollector$Builder collectEvictionWeightAsCounter(boolean)
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.caffeine.CacheMetricsCollector$Builder collectWeightedSize(boolean)
 
-Semantic versioning suggestion: 0.1.0

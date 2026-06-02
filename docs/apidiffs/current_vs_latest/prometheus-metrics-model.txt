@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-model-1.6.2-SNAPSHOT.jar against prometheus-metrics-model-1.6.1.jar
 +++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.registry.Collector  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW SUPERCLASS: java.lang.Object
@@ -597,4 +598,3 @@
 		+++  NEW ANNOTATION: javax.annotation.Nullable
 	+++  NEW METHOD: PUBLIC(+) double getValue()
 
-Semantic versioning suggestion: 0.1.0

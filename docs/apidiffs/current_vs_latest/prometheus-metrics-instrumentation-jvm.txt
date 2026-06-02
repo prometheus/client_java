@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-instrumentation-jvm-1.6.2-SNAPSHOT.jar against prometheus-metrics-instrumentation-jvm-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW SUPERCLASS: java.lang.Object
@@ -121,4 +122,3 @@
 	+++  NEW METHOD: PUBLIC(+) void register()
 	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
 
-Semantic versioning suggestion: 0.0.1

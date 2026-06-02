@@ -1,3 +1,4 @@
+Comparing source compatibility of prometheus-metrics-exporter-servlet-javax-1.6.2-SNAPSHOT.jar against prometheus-metrics-exporter-servlet-javax-1.6.1.jar
 +++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.exporter.servlet.javax.PrometheusMetricsServlet  (compatible)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW INTERFACE: javax.servlet.ServletConfig
@@ -9,4 +10,3 @@
 	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet(io.prometheus.metrics.config.PrometheusProperties, io.prometheus.metrics.model.registry.PrometheusRegistry)
 	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet()
 
-Semantic versioning suggestion: 0.1.0

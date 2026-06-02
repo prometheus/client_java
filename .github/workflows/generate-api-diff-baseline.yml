@@ -6,6 +6,13 @@ name: Generate API Diff Baseline
 # back onto the PR. Renovate only proposes versions already published to Maven
 # Central, so japicmp can always resolve the new baseline.
 #
+# Before regenerating, the previous current_vs_latest is archived as
+# docs/apidiffs/<new>_vs_<old>/ to keep a per-release history (like
+# opentelemetry-java). This is an approximation of a release-vs-release diff:
+# the archived files compare the dev snapshot (which has just become <new>)
+# against <old>, so any commits merged between the release and this bump are
+# included too.
+#
 # Mirrors generate-protobuf.yml: a read-only `generate` job produces a patch
 # artifact and a privileged `publish` job pushes it back.
 
@@ -37,24 +44,39 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Verify the baseline version was updated
+      - name: Archive the previous current_vs_latest
         run: |
           git fetch origin main
-          if ! git diff origin/main -- pom.xml | grep -q 'api.diff.baseline.version'; then
-            echo "::error::api.diff.baseline.version not updated in pom.xml"
+          baseline() {
+            grep -oP '(?<=<api\.diff\.baseline\.version>)[^<]+' "$1"
+          }
+          OLD=$(git show origin/main:pom.xml | baseline /dev/stdin)
+          NEW=$(baseline pom.xml)
+          if [[ -z "$OLD" || -z "$NEW" ]]; then
+            echo "::error::Could not read api.diff.baseline.version"
             exit 1
+          fi
+          if [[ "$OLD" == "$NEW" ]]; then
+            echo "::error::api.diff.baseline.version unchanged ($NEW); nothing to bump"
+            exit 1
+          fi
+          if [[ -d docs/apidiffs/current_vs_latest ]]; then
+            cp -r docs/apidiffs/current_vs_latest "docs/apidiffs/${NEW}_vs_${OLD}"
+            echo "Archived current_vs_latest as ${NEW}_vs_${OLD}"
           fi
       - name: Regenerate docs/apidiffs
         run: mise run api-diff
       - name: Validate and export docs/apidiffs as a patch
         run: |
-          UNEXPECTED=$(git diff --name-only | grep -v '^docs/apidiffs/' || true)
-          if [[ -n "$UNEXPECTED" ]]; then
-            echo "::error::Unexpected files changed:"
-            echo "$UNEXPECTED"
+          # Stage first so newly added files (the archived dir) are captured.
+          git add docs/apidiffs
+          OUTSIDE=$(git status --porcelain -- ':(exclude)docs/apidiffs')
+          if [[ -n "$OUTSIDE" ]]; then
+            echo "::error::Unexpected changes outside docs/apidiffs:"
+            echo "$OUTSIDE"
             exit 1
           fi
-          git diff > /tmp/api-diff-baseline.patch
+          git diff --cached -- docs/apidiffs > /tmp/api-diff-baseline.patch
       - name: Upload generated patch
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
