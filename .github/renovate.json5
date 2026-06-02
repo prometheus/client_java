@@ -37,7 +37,16 @@
       matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
       groupName: "protobuf",
       separateMajorMinor: false,
-    },
+    }
   ],
-  customManagers: [],
+  customManagers: [
+  {
+       "customType": "regex",
+       "description": "update _VERSION variables in mise.toml",
+       "managerFilePatterns": ["/^mise\\.toml$/"],
+       "matchStrings": [
+         "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION\\s*=\\s*\"?(?<currentValue>[^@\"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?\\s"
+       ]
+     },
+  ],
 }

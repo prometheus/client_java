@@ -41,6 +41,11 @@
         "mise"
       ]
     },
+    ".github/workflows/jmx-exporter-compatibility.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/lint.yml": {
       "regex": [
         "mise"
@@ -69,6 +74,16 @@
     ".github/workflows/test-release-build.yml": {
       "regex": [
         "mise"
+      ]
+    },
+    ".mise/envs/jmx-exporter/mise.toml": {
+      "mise": [
+        "java"
+      ]
+    },
+    ".mise/envs/micrometer/mise.toml": {
+      "mise": [
+        "java"
       ]
     },
     ".mise/envs/native/mise.toml": {
@@ -145,6 +160,11 @@
         "taplo",
         "typos",
         "zizmor"
+      ],
+      "regex": [
+        "grafana/docker-otel-lgtm",
+        "micrometer-metrics/micrometer",
+        "prometheus/jmx_exporter"
       ]
     },
     "mvnw": {

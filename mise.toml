@@ -27,6 +27,10 @@ zizmor = "1.25.2"
 FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
 LGTM_VERSION = "0.25.0"
+# renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
+DEFAULT_JMX_EXPORTER_VERSION = "1.5.0"
+# renovate: datasource=github-tags depName=micrometer-metrics/micrometer versioning=semver-coerced
+DEFAULT_MICROMETER_VERSION = "v1.16.5"
 
 [tasks.ci]
 description = "CI Build"
