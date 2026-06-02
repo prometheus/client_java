@@ -1,0 +1,12 @@
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet  (compatible)
+	+++  CLASS FILE FORMAT VERSION: 61.0 <- n.a.
+	+++  NEW INTERFACE: jakarta.servlet.ServletConfig
+	+++  NEW INTERFACE: jakarta.servlet.Servlet
+	+++  NEW INTERFACE: java.io.Serializable
+	+++  NEW SUPERCLASS: jakarta.servlet.http.HttpServlet
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet(io.prometheus.metrics.config.PrometheusProperties, io.prometheus.metrics.model.registry.PrometheusRegistry)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet()
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusMetricsServlet(io.prometheus.metrics.model.registry.PrometheusRegistry)
+
+Semantic versioning suggestion: 0.1.0

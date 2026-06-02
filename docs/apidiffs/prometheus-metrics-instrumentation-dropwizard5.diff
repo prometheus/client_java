@@ -1,0 +1,47 @@
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.MultiCollector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.instrumentation.dropwizard5.internal.AbstractDropwizardExports
+	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(io.dropwizard.metrics5.MetricRegistry, io.dropwizard.metrics5.MetricFilter, io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(io.dropwizard.metrics5.MetricRegistry)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(io.dropwizard.metrics5.MetricRegistry, io.dropwizard.metrics5.MetricFilter)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder builder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder customLabelMapper(io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder dropwizardRegistry(io.dropwizard.metrics5.MetricRegistry)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder invalidMetricHandler(io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder metricFilter(io.dropwizard.metrics5.MetricFilter)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler ALWAYS_THROW
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) boolean suppressException(java.lang.String, java.lang.Exception)
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) CustomLabelMapper(java.util.List<io.prometheus.metrics.instrumentation.dropwizard5.labels.MapperConfig>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Labels getLabels(java.lang.String, java.util.List<java.lang.String>, java.util.List<java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName(java.lang.String)
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.instrumentation.dropwizard5.labels.MapperConfig  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MapperConfig()
+	+++  NEW CONSTRUCTOR: PUBLIC(+) MapperConfig(java.lang.String, java.lang.String, java.util.Map<java.lang.String,java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) boolean equals(java.lang.Object)
+	+++  NEW METHOD: PUBLIC(+) java.util.Map<java.lang.String,java.lang.String> getLabels()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getMatch()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getName()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) int hashCode()
+	+++  NEW METHOD: PUBLIC(+) void setLabels(java.util.Map<java.lang.String,java.lang.String>)
+	+++  NEW METHOD: PUBLIC(+) void setMatch(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) void setName(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toString()
+
+Semantic versioning suggestion: 0.1.0

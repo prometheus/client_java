@@ -1,0 +1,13 @@
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.tracer.common.SpanContext  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String EXEMPLAR_ATTRIBUTE_NAME
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String EXEMPLAR_ATTRIBUTE_VALUE
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.lang.String getCurrentSpanId()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.lang.String getCurrentTraceId()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) boolean isCurrentSpanSampled()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void markCurrentSpanAsExemplar()
+
+Semantic versioning suggestion: 0.0.1

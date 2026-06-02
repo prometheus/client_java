@@ -1,3 +1,4 @@
 CHANGELOG.md linguist-generated
 **/src/main/generated/** linguist-generated
+docs/apidiffs/** linguist-generated
 docs/** linguist-documentation

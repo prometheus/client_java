@@ -1,0 +1,98 @@
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.ExpositionFormats  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.ExpositionFormatWriter findWriter(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter getOpenMetrics2TextFormatWriter()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter getOpenMetricsTextFormatWriter()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusProtobufWriter getPrometheusProtobufWriter()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter getPrometheusTextFormatWriter()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.ExpositionFormats init()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.ExpositionFormats init(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.ExpositionFormats init(io.prometheus.metrics.config.ExporterProperties)
+		+++  NEW ANNOTATION: java.lang.Deprecated
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.expositionformats.ExpositionFormatWriter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) boolean accepts(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) boolean isAvailable()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toDebugString(io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toDebugString(io.prometheus.metrics.model.snapshots.MetricSnapshots)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots)
+		+++  NEW EXCEPTION: java.io.IOException
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.expositionformats.ExpositionFormatWriter
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String CONTENT_TYPE
+	+++  NEW CONSTRUCTOR: PUBLIC(+) OpenMetrics2TextFormatWriter(io.prometheus.metrics.config.OpenMetrics2Properties, boolean, boolean)
+	+++  NEW METHOD: PUBLIC(+) boolean accepts(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter create()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.OpenMetrics2Properties getOpenMetrics2Properties()
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter$Builder setCreatedTimestampsEnabled(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter$Builder setExemplarsOnAllMetricTypesEnabled(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter$Builder setOpenMetrics2Properties(io.prometheus.metrics.config.OpenMetrics2Properties)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.expositionformats.ExpositionFormatWriter
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String CONTENT_TYPE
+	+++  NEW CONSTRUCTOR: PUBLIC(+) OpenMetricsTextFormatWriter(boolean, boolean)
+	+++  NEW METHOD: PUBLIC(+) boolean accepts(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter create()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter$Builder setCreatedTimestampsEnabled(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter$Builder setExemplarsOnAllMetricTypesEnabled(boolean)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusProtobufWriter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.expositionformats.ExpositionFormatWriter
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String CONTENT_TYPE
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusProtobufWriter()
+	+++  NEW METHOD: PUBLIC(+) boolean accepts(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) boolean isAvailable()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toDebugString(io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.expositionformats.ExpositionFormatWriter
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) java.lang.String CONTENT_TYPE
+	+++  NEW CONSTRUCTOR: PUBLIC(+) PrometheusTextFormatWriter(boolean)
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) boolean accepts(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter create()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
+	+++  NEW METHOD: PUBLIC(+) void writeCreated(java.io.Writer, io.prometheus.metrics.model.snapshots.MetricSnapshot, io.prometheus.metrics.config.EscapingScheme)
+		+++  NEW EXCEPTION: java.io.IOException
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter$Builder setIncludeCreatedTimestamps(boolean)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter$Builder setTimestampsInMs(boolean)
+		+++  NEW ANNOTATION: java.lang.Deprecated
+
+Semantic versioning suggestion: 0.1.0

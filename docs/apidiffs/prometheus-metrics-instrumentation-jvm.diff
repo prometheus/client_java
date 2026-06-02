@@ -1,0 +1,124 @@
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmBufferPoolMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmClassLoadingMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmClassLoadingMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmClassLoadingMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmClassLoadingMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmClassLoadingMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmCompilationMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmCompilationMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmCompilationMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmCompilationMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmCompilationMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmGarbageCollectorMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmGarbageCollectorMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmGarbageCollectorMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmGarbageCollectorMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmGarbageCollectorMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) JvmMetrics()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmNativeMemoryMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmNativeMemoryMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmNativeMemoryMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmNativeMemoryMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmNativeMemoryMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmRuntimeInfoMetric  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmRuntimeInfoMetric$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmRuntimeInfoMetric$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmRuntimeInfoMetric$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmRuntimeInfoMetric$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmThreadsMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmThreadsMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmThreadsMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.JvmThreadsMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.JvmThreadsMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.ProcessMetrics  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.ProcessMetrics$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.ProcessMetrics$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.jvm.ProcessMetrics$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.jvm.ProcessMetrics$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void register()
+	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
+
+Semantic versioning suggestion: 0.0.1
