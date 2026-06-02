@@ -4,18 +4,11 @@ name: Micrometer Compatibility
 on:
   pull_request:
   workflow_dispatch:
-    inputs:
-      micrometer-repository:
-        description: Micrometer repository to test, in owner/name form
-        required: false
-      micrometer-ref:
-        description: Micrometer branch, tag, or commit to test
-        required: false
 
 permissions: {}
 
 jobs:
-  micrometer-compatibility:
+  compat-test:
     name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
     strategy:
@@ -24,13 +17,14 @@ jobs:
         include:
           - name: upstream
             repository: micrometer-metrics/micrometer
-            ref: main
-          - name: opt-in
+            # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
+            ref: v1.16.5
+          - name: typed-descriptor
             repository: zeitlinger/micrometer
             # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prometheus-client-opt-in
             ref: 1af1b3185058941eea57dc467bfe0df5a4786fe4
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
@@ -46,6 +40,19 @@ jobs:
       - name: Run Micrometer compatibility tests
         working-directory: .mise/envs/micrometer
         env:
-          MICROMETER_REPOSITORY: ${{ inputs.micrometer-repository || matrix.repository }}
-          MICROMETER_REF: ${{ inputs.micrometer-ref || matrix.ref }}
+          MICROMETER_REPOSITORY: ${{ matrix.repository }}
+          MICROMETER_REF: ${{ matrix.ref }}
         run: mise compat-test
+
+  micrometer-compatibility:
+    name: micrometer-compatibility
+    runs-on: ubuntu-24.04
+    needs: compat-test
+    if: always()
+    steps:
+      - name: Aggregate matrix results
+        run: |
+          if [[ "${{ needs.compat-test.result }}" != "success" ]]; then
+            echo "compat-test matrix failed: ${{ needs.compat-test.result }}"
+            exit 1
+          fi
