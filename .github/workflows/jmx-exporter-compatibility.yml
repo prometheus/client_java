@@ -11,14 +11,9 @@ on:
         default: prometheus/jmx_exporter
       ref:
         description: JMX Exporter branch, tag, or commit to test
-        required: false
-        default: 1.5.0
+        required: true
 
 permissions: {}
-
-env:
-  # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
-  DEFAULT_JMX_EXPORTER_REF: 1.5.0
 
 jobs:
   jmx-exporter-compatibility:
@@ -39,5 +34,5 @@ jobs:
       - name: Run JMX Exporter compatibility tests
         env:
           JMX_EXPORTER_REPOSITORY: ${{ inputs.repository || 'prometheus/jmx_exporter' }}
-          JMX_EXPORTER_REF: ${{ inputs.ref || env.DEFAULT_JMX_EXPORTER_REF }}
+          JMX_EXPORTER_REF: ${{ inputs.ref }}
         run: mise run jmx-exporter:test

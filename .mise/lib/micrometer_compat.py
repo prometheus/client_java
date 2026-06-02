@@ -16,7 +16,11 @@ DEFAULT_MICROMETER_REPOSITORY = os.environ.get(
     "MICROMETER_REPOSITORY", "micrometer-metrics/micrometer"
 )
 DEFAULT_MICROMETER_REMOTE = os.environ.get("MICROMETER_REMOTE", "origin")
-DEFAULT_MICROMETER_REF = os.environ.get("MICROMETER_REF", "main")
+DEFAULT_MICROMETER_REF = (
+    os.environ.get("MICROMETER_REF")
+    or os.environ.get("DEFAULT_MICROMETER_REF")
+    or "main"
+)
 DEFAULT_INIT_SCRIPT = Path(
     os.environ.get("MICROMETER_INIT_SCRIPT", "/tmp/micrometer-prom-local.init.gradle")
 )

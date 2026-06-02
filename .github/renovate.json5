@@ -49,12 +49,22 @@
   customManagers: [
     {
       customType: "regex",
-      managerFilePatterns: ["/^\\.github\\/workflows\\/jmx-exporter-compatibility\\.yml$/"],
+      managerFilePatterns: ["/^mise\\.toml$/"],
       matchStrings: [
-        "DEFAULT_JMX_EXPORTER_REF:\\s*(?<currentValue>\\S+)",
+        "DEFAULT_JMX_EXPORTER_REF\\s*=\\s*\"(?<currentValue>\\S+)\"",
       ],
       datasourceTemplate: "github-tags",
       depNameTemplate: "prometheus/jmx_exporter",
+      versioningTemplate: "semver-coerced",
+    },
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^mise\\.toml$/"],
+      matchStrings: [
+        "DEFAULT_MICROMETER_REF\\s*=\\s*\"(?<currentValue>\\S+)\"",
+      ],
+      datasourceTemplate: "github-tags",
+      depNameTemplate: "micrometer-metrics/micrometer",
       versioningTemplate: "semver-coerced",
     },
   ],

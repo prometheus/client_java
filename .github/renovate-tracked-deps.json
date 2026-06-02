@@ -145,6 +145,10 @@
         "taplo",
         "typos",
         "zizmor"
+      ],
+      "regex": [
+        "micrometer-metrics/micrometer",
+        "prometheus/jmx_exporter"
       ]
     },
     "mvnw": {

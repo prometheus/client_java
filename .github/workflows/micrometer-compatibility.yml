@@ -11,8 +11,7 @@ on:
         default: micrometer-metrics/micrometer
       micrometer-ref:
         description: Micrometer branch, tag, or commit to test
-        required: false
-        default: main
+        required: true
 
 permissions: {}
 
@@ -34,6 +33,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Run Micrometer compatibility tests
         env:
-          MICROMETER_REPOSITORY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
-          MICROMETER_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.micrometer-ref || 'main' }}
+          MICROMETER_REPOSITORY: ${{ inputs.micrometer-repository || 'micrometer-metrics/micrometer' }}
+          MICROMETER_REF: ${{ inputs.micrometer-ref }}
         run: mise run micrometer:test

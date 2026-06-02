@@ -16,7 +16,11 @@ DEFAULT_JMX_EXPORTER_REPOSITORY = os.environ.get(
     "JMX_EXPORTER_REPOSITORY", "prometheus/jmx_exporter"
 )
 DEFAULT_JMX_EXPORTER_REMOTE = os.environ.get("JMX_EXPORTER_REMOTE", "origin")
-DEFAULT_JMX_EXPORTER_REF = os.environ.get("JMX_EXPORTER_REF", "main")
+DEFAULT_JMX_EXPORTER_REF = (
+    os.environ.get("JMX_EXPORTER_REF")
+    or os.environ.get("DEFAULT_JMX_EXPORTER_REF")
+    or "main"
+)
 DEFAULT_MAVEN_MODULES = os.environ.get(
     "JMX_EXPORTER_MAVEN_MODULES",
     "jmx_prometheus_common,jmx_prometheus_javaagent,jmx_prometheus_standalone",
