@@ -44,6 +44,20 @@
       matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
       groupName: "protobuf",
       separateMajorMinor: false,
+    },
+    {
+      description: "Isolate the api-diff baseline on renovate/api-diff-baseline so generate-api-diff-baseline can regenerate docs/apidiffs; merge manually after a close/reopen re-runs CI",
+      matchFileNames: ["pom.xml"],
+      matchPackageNames: ["io.prometheus:prometheus-metrics-core"],
+      groupName: "api-diff-baseline",
+      automerge: false,
+    },
+    {
+      "description": "Flint autofix: align extractVersion for protoc",
+      "extractVersion": "^(?<version>.+)\\.0\\.0$",
+      "matchDepNames": [
+        "protoc"
+      ]
     }
   ],
   customManagers: [
@@ -53,6 +67,14 @@
        "managerFilePatterns": ["/^mise\\.toml$/"],
        "matchStrings": [
          "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION\\s*=\\s*\"?(?<currentValue>[^@\"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?\\s"
+       ]
+     },
+     {
+       "customType": "regex",
+       "description": "update the api-diff baseline to the latest published release",
+       "managerFilePatterns": ["/^pom\\.xml$/"],
+       "matchStrings": [
+         "<!-- renovate: datasource=(?<datasource>[a-z-]+?) packageName=(?<packageName>.+?) -->\\s*<api\\.diff\\.baseline\\.version>(?<currentValue>[^<]+)</api\\.diff\\.baseline\\.version>"
        ]
      },
   ],

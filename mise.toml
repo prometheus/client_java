@@ -69,16 +69,19 @@ description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks."api-diff"]
-description = "Compare published API against the configured japicmp baseline"
+description = "Compare published API against the japicmp baseline and refresh docs/apidiffs"
 run = """
-BASELINE_VERSION="${API_DIFF_BASELINE_VERSION:-1.5.1}"
+# Baseline version comes from the <api.diff.baseline.version> property in pom.xml.
+# Set API_DIFF_BASELINE_VERSION only to override it ad hoc (e.g. workflow_dispatch).
+BASELINE_OVERRIDE="${API_DIFF_BASELINE_VERSION:+-Dapi.diff.baseline.version=${API_DIFF_BASELINE_VERSION}}"
 ./mvnw -B verify \
   -P 'api-diff,!examples-and-integration-tests' \
-  -Dapi.diff.baseline.version="${BASELINE_VERSION}" \
+  ${BASELINE_OVERRIDE} \
   -DskipTests \
   -Dcoverage.skip=true \
   -Dcheckstyle.skip=true \
   -Dwarnings=-nowarn
+./.github/scripts/sync-api-diffs.sh
 """
 
 [tasks."lint"]

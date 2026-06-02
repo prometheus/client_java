@@ -129,6 +129,12 @@ def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
             # our main artifacts, and our test sources target a newer release than
             # the compatibility JDK supports.
             "-Dmaven.test.skip=true",
+            # Deactivate the activeByDefault profiles that add test-only
+            # dependencies (incl. a test-jar). With maven.test.skip those are not
+            # built, so leaving the profile active breaks dependency resolution.
+            # Same approach the release task uses (-P 'release,!default').
+            "-P",
+            "!default",
             "-Dcoverage.skip=true",
             "-Dcheckstyle.skip=true",
             "-Dwarnings=-nowarn",
