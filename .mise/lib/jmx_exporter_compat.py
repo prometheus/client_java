@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -21,15 +22,22 @@ DEFAULT_JMX_EXPORTER_REF = (
     or os.environ.get("DEFAULT_JMX_EXPORTER_VERSION")
     or "main"
 )
-DEFAULT_MAVEN_MODULES = os.environ.get(
-    "JMX_EXPORTER_MAVEN_MODULES",
-    "jmx_prometheus_common,jmx_prometheus_javaagent,jmx_prometheus_standalone",
-)
 DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION")
 
+# Quick test configuration: the integration_test_suite runs one matrix cell
+# (single Java + Prometheus distribution) instead of the full smoke-test matrix.
+# The distributions are read from the checked-out jmx_exporter's run-quick-test.sh
+# so they stay aligned with upstream rather than drifting from a hardcoded copy.
+QUICK_TEST_SCRIPT = "run-quick-test.sh"
+QUICK_TEST_IMAGE_VARS = ("JAVA_DOCKER_IMAGES", "PROMETHEUS_DOCKER_IMAGES")
 
-def run_cmd(cmd: list[str], cwd: Optional[Path] = None) -> None:
-    subprocess.run(cmd, cwd=cwd, check=True)
+
+def run_cmd(
+    cmd: list[str],
+    cwd: Optional[Path] = None,
+    env: Optional[dict[str, str]] = None,
+) -> None:
+    subprocess.run(cmd, cwd=cwd, check=True, env=env)
 
 
 def jmx_exporter_repository_url(repository: str) -> str:
@@ -105,24 +113,44 @@ def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
     )
 
 
-def run_maven_test(
-    test_selector: Optional[str] = None,
+def quick_test_images(
     jmx_exporter_dir: Path = DEFAULT_JMX_EXPORTER_DIR,
-    maven_modules: str = DEFAULT_MAVEN_MODULES,
+) -> dict[str, str]:
+    """Read the quick test docker image pins from the checked-out jmx_exporter's
+    run-quick-test.sh. An explicit env var overrides the script value."""
+    script_path = jmx_exporter_dir / QUICK_TEST_SCRIPT
+    script = script_path.read_text()
+    images: dict[str, str] = {}
+    for var in QUICK_TEST_IMAGE_VARS:
+        override = os.environ.get(var)
+        if override:
+            images[var] = override
+            continue
+        match = re.search(rf'^\s*export\s+{var}="([^"]+)"', script, re.MULTILINE)
+        if not match:
+            raise RuntimeError(f"could not find {var} in {script_path}")
+        images[var] = match.group(1)
+    return images
+
+
+def run_maven_test(
+    jmx_exporter_dir: Path = DEFAULT_JMX_EXPORTER_DIR,
     prom_version: Optional[str] = None,
 ) -> None:
     if prom_version is None:
         prom_version = get_prom_version()
+    # Build the full reactor (including the integration_test_suite) the same way
+    # run-quick-test.sh does, but against our locally installed io.prometheus
+    # artifacts. The pinned distribution env vars keep this to the quick (single
+    # cell) matrix rather than the full smoke-test matrix.
+    env = {**os.environ, **quick_test_images(jmx_exporter_dir)}
     cmd = [
         "./mvnw",
         "-B",
-        "-pl",
-        maven_modules,
-        "-am",
+        "clean",
+        "install",
         f"-Dprometheus.metrics.version={prom_version}",
+        f"-Dparamixel.parallelism={os.cpu_count() or 1}",
         "-Djacoco.skip=true",
     ]
-    if test_selector:
-        cmd.append(f"-Dtest={test_selector}")
-    cmd.append("test")
-    run_cmd(cmd, cwd=jmx_exporter_dir)
+    run_cmd(cmd, cwd=jmx_exporter_dir, env=env)
