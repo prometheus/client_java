@@ -2,7 +2,7 @@
 # its spotless google-java-format predates JDK 25 support. Build it under an LTS
 # JDK the release supports instead.
 [tools]
-java = "temurin-21.0.11+10.0.LTS"
+java = "temurin-25.0.3+9.0.LTS"
 
 [tasks.compat-test]
 description = "Run JMX Exporter compatibility tests under a supported JDK"
