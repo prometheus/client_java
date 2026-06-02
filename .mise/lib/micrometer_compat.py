@@ -18,7 +18,7 @@ DEFAULT_MICROMETER_REPOSITORY = os.environ.get(
 DEFAULT_MICROMETER_REMOTE = os.environ.get("MICROMETER_REMOTE", "origin")
 DEFAULT_MICROMETER_REF = (
     os.environ.get("MICROMETER_REF")
-    or os.environ.get("DEFAULT_MICROMETER_REF")
+    or os.environ.get("DEFAULT_MICROMETER_VERSION")
     or "main"
 )
 DEFAULT_INIT_SCRIPT = Path(

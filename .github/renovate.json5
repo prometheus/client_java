@@ -37,35 +37,16 @@
       matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
       groupName: "protobuf",
       separateMajorMinor: false,
-    },
-    {
-      "description": "Flint autofix: align extractVersion for protoc",
-      "extractVersion": "^(?<version>.+)\\.0\\.0$",
-      "matchDepNames": [
-        "protoc"
-      ]
     }
   ],
   customManagers: [
-    {
-      customType: "regex",
-      managerFilePatterns: ["/^mise\\.toml$/"],
-      matchStrings: [
-        "DEFAULT_JMX_EXPORTER_REF\\s*=\\s*\"(?<currentValue>\\S+)\"",
-      ],
-      datasourceTemplate: "github-tags",
-      depNameTemplate: "prometheus/jmx_exporter",
-      versioningTemplate: "semver-coerced",
-    },
-    {
-      customType: "regex",
-      managerFilePatterns: ["/^mise\\.toml$/"],
-      matchStrings: [
-        "DEFAULT_MICROMETER_REF\\s*=\\s*\"(?<currentValue>\\S+)\"",
-      ],
-      datasourceTemplate: "github-tags",
-      depNameTemplate: "micrometer-metrics/micrometer",
-      versioningTemplate: "semver-coerced",
-    },
+  {
+       "customType": "regex",
+       "description": "update _VERSION variables in mise.toml",
+       "managerFilePatterns": ["/^mise\\.toml$/"],
+       "matchStrings": [
+         "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION\\s*=\\s*\"?(?<currentValue>[^@\"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?\\s"
+       ]
+     },
   ],
 }

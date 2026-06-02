@@ -147,6 +147,7 @@
         "zizmor"
       ],
       "regex": [
+        "grafana/docker-otel-lgtm",
         "micrometer-metrics/micrometer",
         "prometheus/jmx_exporter"
       ]

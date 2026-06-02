@@ -18,7 +18,7 @@ DEFAULT_JMX_EXPORTER_REPOSITORY = os.environ.get(
 DEFAULT_JMX_EXPORTER_REMOTE = os.environ.get("JMX_EXPORTER_REMOTE", "origin")
 DEFAULT_JMX_EXPORTER_REF = (
     os.environ.get("JMX_EXPORTER_REF")
-    or os.environ.get("DEFAULT_JMX_EXPORTER_REF")
+    or os.environ.get("DEFAULT_JMX_EXPORTER_VERSION")
     or "main"
 )
 DEFAULT_MAVEN_MODULES = os.environ.get(
