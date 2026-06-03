@@ -19,10 +19,10 @@ All metric types implement
 the [Collector](/client_java/api/io/prometheus/metrics/model/registry/Collector.html) interface,
 i.e. they provide
 a [collect()](</client_java/api/io/prometheus/metrics/model/registry/Collector.html#collect()>)
-method to produce snapshots. Implementers that do not provide metric type or label names (returning
-null from `getMetricType()` and `getLabelNames()`) are not validated at registration; they must
-avoid producing the same metric name and label schema as another collector, or exposition may be
-invalid.
+method to produce snapshots. Implementers expose their registration-time metadata via
+`getMetricFamilyDescriptor()` (or `getMetricFamilyDescriptors()` on `MultiCollector`). When that
+returns `null`, the collector is not validated at registration and must avoid producing the same
+metric name and label schema as another collector, or exposition may be invalid.
 
 ## prometheus-metrics-model
 
