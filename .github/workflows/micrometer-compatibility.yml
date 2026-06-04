@@ -25,7 +25,7 @@ jobs:
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
             repository: zeitlinger/micrometer
             # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prom-client-java-typed-family-descriptor
-            ref: 84092837e94d16de4d3bf95a4644498ce2ef49fd
+            ref: 09f32142f06b11a88afe41eab50daaf6c8d08efb
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
