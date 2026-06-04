@@ -24,8 +24,8 @@ jobs:
             # Prometheus client integration to typed descriptors by default.
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
             repository: zeitlinger/micrometer
-            # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prometheus-client-opt-in
-            ref: 1af1b3185058941eea57dc467bfe0df5a4786fe4
+            # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prom-client-java-typed-family-descriptor
+            ref: 84092837e94d16de4d3bf95a4644498ce2ef49fd
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
