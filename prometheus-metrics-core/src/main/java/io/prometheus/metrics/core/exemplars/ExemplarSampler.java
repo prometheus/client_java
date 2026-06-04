@@ -339,7 +339,7 @@ public class ExemplarSampler {
 
   private long updateCustomExemplar(int index, double value, Labels labels, long now) {
     if (!labels.contains(Exemplar.TRACE_ID) && !labels.contains(Exemplar.SPAN_ID)) {
-      labels = labels.merge(doSampleExemplar());
+      labels = mergeLabels(labels, doSampleExemplar());
     }
     customExemplars[index] =
         Exemplar.builder().value(value).labels(labels).timestampMillis(now).build();
@@ -410,6 +410,17 @@ public class ExemplarSampler {
       return base;
     }
     if (extra == null || extra.isEmpty()) {
+      return base;
+    }
+    return mergeLabels(base, extra);
+  }
+
+  /**
+   * Merge {@code extra} into {@code base}, dropping any label whose name already exists in {@code
+   * base}.
+   */
+  private static Labels mergeLabels(Labels base, Labels extra) {
+    if (extra.isEmpty()) {
       return base;
     }
     // Count name collisions with base in a single pass so we can merge exactly once below: base

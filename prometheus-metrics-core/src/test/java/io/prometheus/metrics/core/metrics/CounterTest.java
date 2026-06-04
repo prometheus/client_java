@@ -517,6 +517,23 @@ class CounterTest {
   }
 
   @Test
+  void callerLabelsWinOverGlobalSupplierInCustomExemplar() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(
+        () -> Labels.of("k", "global", "management_id", "mgmt-42"));
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.incWithExemplar(Labels.of("k", "caller"));
+
+    assertThat(openMetrics(counter))
+        .contains("k=\"caller\"")
+        .contains("management_id=\"mgmt-42\"")
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"")
+        .doesNotContain("k=\"global\"");
+  }
+
+  @Test
   void testExemplarSamplerDisabled() {
     Counter counter = Counter.builder().name("count_total").withoutExemplars().build();
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
