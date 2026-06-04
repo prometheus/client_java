@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -44,6 +45,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     implements GaugeDataPoint {
 
   @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final Supplier<Labels> exemplarLabelsSupplier;
 
   private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
@@ -56,6 +58,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     } else {
       exemplarSamplerConfig = null;
     }
+    exemplarLabelsSupplier = builder.exemplarLabelsSupplier;
   }
 
   @Override
@@ -110,7 +113,8 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
   @Override
   protected DataPoint newDataPoint() {
     if (exemplarSamplerConfig != null) {
-      return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
+      return new DataPoint(
+          new ExemplarSampler(exemplarSamplerConfig, null, exemplarLabelsSupplier));
     } else {
       return new DataPoint(null);
     }
