@@ -104,25 +104,39 @@ Validation of duplicate metric names and label schemas happens at registration t
 Built-in metrics (Counter, Gauge, Histogram, etc.) participate in this validation.
 
 Custom collectors that implement the `Collector` or `MultiCollector` interface can optionally
-implement `getPrometheusName()` and `getMetricType()` (and the MultiCollector per-name variants) so
-the registry can enforce consistency. **Validation is skipped when metric name or type is
-unavailable:** if `getPrometheusName()` or `getMetricType()` returns `null`, the registry does not
-validate that collector. If two such collectors produce the same metric name and same label set at
-scrape time, the exposition output may contain duplicate time series and be invalid for Prometheus.
+expose their registration-time metadata so the registry can enforce consistency. The recommended
+way is to override `getMetricFamilyDescriptor()` (or `getMetricFamilyDescriptors()` on
+`MultiCollector`) and return a `MetricFamilyDescriptor` describing the metric name, type, label
+names, and metadata (help, unit) the collector will emit at scrape time.
 
-When validation _is_ performed (name and type are non-null), **null label names are treated as an
-empty label schema:** `getLabelNames()` returning `null` is normalized to `Collections.emptySet()`
-and full label-schema validation and duplicate detection still apply. A collector that returns a
-non-null type but leaves `getLabelNames()` as `null` is still validated, with its labels treated as
-empty.
+```java
+@Override
+public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+  return MetricFamilyDescriptor.gauge("my_metric")
+      .help("Example metric")
+      .labelNames("region")
+      .build();
+}
+```
+
+The fragmented `getPrometheusName()`, `getMetricType()`, `getLabelNames()`, and `getMetadata()`
+methods (and their `MultiCollector` per-name variants) are deprecated. They remain bridged by a
+default implementation of `getMetricFamilyDescriptor()` for compatibility, so existing
+collectors keep working unchanged.
+
+**Validation is skipped when registration-time metadata is unavailable:** if
+`getMetricFamilyDescriptor()` returns `null` (the default when name or type is missing), the
+registry does not validate that collector. If two such collectors produce the same metric name and
+same label set at scrape time, the exposition output may contain duplicate time series and be
+invalid for Prometheus.
 
 This is also relevant for downstream adapter libraries that bridge to this registry. If an adapter
 implements `MultiCollector`, its registration-time metadata must match the metric families it will
-actually emit at scrape time. In practice, that means `getPrometheusNames()`, `getMetricType(...)`,
-`getLabelNames(...)`, and `getMetadata(...)` need to describe the same names, types, labels, and
-suffix behavior as the eventual `MetricSnapshot` output. Otherwise an adapter may pass or fail
-collision checks differently after upgrading to a newer client_java release, even if its scrape
-output logic did not change.
+actually emit at scrape time. In practice, the `MetricFamilyDescriptor`s returned from
+`getMetricFamilyDescriptors()` need to describe the same names, types, labels, and suffix behavior
+as the eventual `MetricSnapshot` output. Otherwise an adapter may pass or fail collision checks
+differently after upgrading to a newer client_java release, even if its scrape output logic did not
+change.
 
 ## Unregistering a Metric
 
