@@ -163,7 +163,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
                 ageBuckets);
       }
       if (exemplarSamplerConfig != null) {
-        exemplarSampler = new ExemplarSampler(exemplarSamplerConfig, exemplarLabelsSupplier);
+        exemplarSampler = new ExemplarSampler(exemplarSamplerConfig, null, exemplarLabelsSupplier);
       } else {
         exemplarSampler = null;
       }

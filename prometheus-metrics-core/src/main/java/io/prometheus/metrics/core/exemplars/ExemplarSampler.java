@@ -6,7 +6,6 @@ import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import java.util.ArrayList;
@@ -68,16 +67,11 @@ public class ExemplarSampler {
   }
 
   /**
-   * Constructor that accepts a supplier of additional labels to be merged into every
+   * Constructor that additionally accepts a supplier of labels to be merged into every
    * automatically-sampled exemplar. The supplier is called each time an exemplar is sampled from a
    * span context, so it can return dynamic values (e.g. a request-scoped identifier). The supplier
    * is only called when a valid, sampled span context is present.
    */
-  public ExemplarSampler(
-      ExemplarSamplerConfig config, @Nullable Supplier<Labels> additionalLabelsSupplier) {
-    this(config, null, additionalLabelsSupplier);
-  }
-
   public ExemplarSampler(
       ExemplarSamplerConfig config,
       @Nullable SpanContext spanContext,
@@ -411,19 +405,42 @@ public class ExemplarSampler {
     Labels extra;
     try {
       extra = supplier.get();
-    } catch (RuntimeException ignored) {
+    } catch (Throwable ignored) {
+      // A misbehaving supplier (any RuntimeException or Error) must never break metric collection.
       return base;
     }
     if (extra == null || extra.isEmpty()) {
       return base;
     }
-    Labels result = base;
-    for (Label label : extra) {
-      // Guard with contains() so the single-entry merge below can never throw on a duplicate name.
-      if (!result.contains(label.getName())) {
-        result = result.merge(Labels.of(label.getName(), label.getValue()));
+    // Count name collisions with base in a single pass so we can merge exactly once below: base
+    // (trace_id/span_id and any more-specific supplier) always wins, so colliding labels are
+    // dropped. extra is itself a valid Labels (no internal duplicates), so the surviving labels
+    // never collide with each other and merge() cannot throw on a duplicate name.
+    int size = extra.size();
+    int collisions = 0;
+    for (int i = 0; i < size; i++) {
+      if (base.contains(extra.getName(i))) {
+        collisions++;
       }
     }
-    return result;
+    if (collisions == 0) {
+      return base.merge(extra);
+    }
+    if (collisions == size) {
+      return base;
+    }
+    int kept = size - collisions;
+    String[] names = new String[kept];
+    String[] values = new String[kept];
+    int j = 0;
+    for (int i = 0; i < size; i++) {
+      String name = extra.getName(i);
+      if (!base.contains(name)) {
+        names[j] = name;
+        values[j] = extra.getValue(i);
+        j++;
+      }
+    }
+    return base.merge(names, values);
   }
 }

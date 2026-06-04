@@ -7,7 +7,6 @@ Comparing source compatibility of prometheus-metrics-core-1.7.1-SNAPSHOT.jar aga
 	+++  NEW METHOD: PUBLIC(+) STATIC(+) void setExemplarLabelsSupplier(java.util.function.Supplier<io.prometheus.metrics.model.snapshots.Labels>)
 ***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.core.exemplars.ExemplarSampler  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
-	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSampler(io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig, java.util.function.Supplier<io.prometheus.metrics.model.snapshots.Labels>)
 	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSampler(io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig, io.prometheus.metrics.tracer.common.SpanContext, java.util.function.Supplier<io.prometheus.metrics.model.snapshots.Labels>)
 ***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.core.metrics.Counter  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
