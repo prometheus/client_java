@@ -1,0 +1,2 @@
+Comparing source compatibility of prometheus-metrics-exposition-formats-1.6.2-SNAPSHOT.jar against prometheus-metrics-exposition-formats-1.6.1.jar
+No changes.
