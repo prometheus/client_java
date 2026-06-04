@@ -1,19 +1,2 @@
-Comparing source compatibility of prometheus-metrics-instrumentation-dropwizard-1.6.2-SNAPSHOT.jar against prometheus-metrics-instrumentation-dropwizard-1.6.1.jar
-+++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports  (not serializable)
-	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
-	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.MultiCollector
-	+++  NEW SUPERCLASS: io.prometheus.metrics.instrumentation.dropwizard5.internal.AbstractDropwizardExports
-	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(com.codahale.metrics.MetricRegistry)
-	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(com.codahale.metrics.MetricRegistry, com.codahale.metrics.MetricFilter)
-	+++  NEW CONSTRUCTOR: PUBLIC(+) DropwizardExports(com.codahale.metrics.MetricRegistry, com.codahale.metrics.MetricFilter, io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper)
-	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder builder()
-+++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder  (not serializable)
-	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
-	+++  NEW SUPERCLASS: java.lang.Object
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder customLabelMapper(io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder dropwizardRegistry(com.codahale.metrics.MetricRegistry)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder invalidMetricHandler(io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports$Builder metricFilter(com.codahale.metrics.MetricFilter)
-	+++  NEW METHOD: PUBLIC(+) void register()
-	+++  NEW METHOD: PUBLIC(+) void register(io.prometheus.metrics.model.registry.PrometheusRegistry)
-
+Comparing source compatibility of prometheus-metrics-instrumentation-dropwizard-1.7.1-SNAPSHOT.jar against prometheus-metrics-instrumentation-dropwizard-1.7.0.jar
+No changes.
