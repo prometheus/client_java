@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>client_java_parent</artifactId>
-    <version>1.6.2-SNAPSHOT</version>
+    <version>1.7.1-SNAPSHOT</version>
     <relativePath>prometheus-metrics-parent/pom.xml</relativePath>
   </parent>
 
@@ -30,7 +30,7 @@
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
     <!-- renovate: datasource=maven packageName=io.prometheus:prometheus-metrics-core -->
-    <api.diff.baseline.version>1.6.1</api.diff.baseline.version>
+    <api.diff.baseline.version>1.7.0</api.diff.baseline.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>

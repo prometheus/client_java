@@ -1,0 +1,353 @@
+Comparing source compatibility of prometheus-metrics-core-1.6.2-SNAPSHOT.jar against prometheus-metrics-core-1.6.1.jar
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.CounterDataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) double get()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) long getLongValue()
+	+++  NEW METHOD: PUBLIC(+) void inc()
+	+++  NEW METHOD: PUBLIC(+) void inc(long)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void inc(double)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(long, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void incWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.DataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.DistributionDataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.datapoints.Timer startTimer()
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.GaugeDataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) void dec()
+	+++  NEW METHOD: PUBLIC(+) void dec(double)
+	+++  NEW METHOD: PUBLIC(+) void decWithExemplar(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void decWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) double get()
+	+++  NEW METHOD: PUBLIC(+) void inc()
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void inc(double)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void incWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void set(double)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void setWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.datapoints.Timer startTimer()
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.StateSetDataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void setFalse(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) void setFalse(java.lang.Enum<?>)
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void setTrue(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) void setTrue(java.lang.Enum<?>)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.datapoints.Timer  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: java.io.Closeable
+	+++  NEW INTERFACE: java.lang.AutoCloseable
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) void close()
+	+++  NEW METHOD: PUBLIC(+) double observeDuration()
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.TimerApi  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.datapoints.Timer startTimer()
+	+++  NEW METHOD: PUBLIC(+) void time(java.lang.Runnable)
+	+++  NEW METHOD: PUBLIC(+) java.lang.Object time(java.util.function.Supplier<T>)
+		GENERIC TEMPLATES: +++ T:java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) java.lang.Object timeChecked(java.util.concurrent.Callable<T>)
+		+++  NEW EXCEPTION: java.lang.Exception
+		GENERIC TEMPLATES: +++ T:java.lang.Object
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.exemplars.ExemplarSampler  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSampler(io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig, io.prometheus.metrics.tracer.common.SpanContext)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSampler(io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.Exemplars collect()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void reset()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) int DEFAULT_MIN_RETENTION_PERIOD_SECONDS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) int DEFAULT_MAX_RETENTION_PERIOD_SECONDS
+	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSamplerConfig(io.prometheus.metrics.config.ExemplarsProperties, int)
+	+++  NEW CONSTRUCTOR: PUBLIC(+) ExemplarSamplerConfig(io.prometheus.metrics.config.ExemplarsProperties, double[])
+	+++  NEW METHOD: PUBLIC(+) double[] getHistogramClassicUpperBounds()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) long getMaxRetentionPeriodMillis()
+	+++  NEW METHOD: PUBLIC(+) long getMinRetentionPeriodMillis()
+	+++  NEW METHOD: PUBLIC(+) int getNumberOfExemplars()
+	+++  NEW METHOD: PUBLIC(+) long getSampleIntervalMillis()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Counter  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.CounterDataPoint
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Counter$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Counter$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) double get()
+	+++  NEW METHOD: PUBLIC(+) long getLongValue()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) void inc(long)
+	+++  NEW METHOD: PUBLIC(+) void inc(double)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(long, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Counter$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Counter build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Counter$Builder name(java.lang.String)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.CounterSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Builder callback(java.util.function.Consumer<io.prometheus.metrics.core.metrics.CounterWithCallback$Callback>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Builder name(java.lang.String)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.core.metrics.CounterWithCallback$Callback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void call(double, java.lang.String[])
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Gauge  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.GaugeDataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Gauge$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Gauge$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) double get()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) void inc(double)
+	+++  NEW METHOD: PUBLIC(+) void incWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) void set(double)
+	+++  NEW METHOD: PUBLIC(+) void setWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Gauge$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Gauge build()
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.GaugeSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback$Builder callback(java.util.function.Consumer<io.prometheus.metrics.core.metrics.GaugeWithCallback$Callback>)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.core.metrics.GaugeWithCallback$Callback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void call(double, java.lang.String[])
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DistributionDataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.HistogramSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric$Builder
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) double[] DEFAULT_CLASSIC_UPPER_BOUNDS
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder classicExponentialUpperBounds(double, double, int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder classicLinearUpperBounds(double, double, int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder classicOnly()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder classicUpperBounds(double[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties getDefaultProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeInitialSchema(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeMaxNumberOfBuckets(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeMaxZeroThreshold(double)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeMinZeroThreshold(double)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeOnly()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$Builder nativeResetDuration(long, java.util.concurrent.TimeUnit)
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Histogram$DataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DistributionDataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Info  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.MetricWithFixedMetadata
+	+++  NEW METHOD: PUBLIC(+) void addLabelValues(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Info$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Info$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.InfoSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) void remove(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) void setLabelValues(java.lang.String[])
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Info$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Info build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Info$Builder name(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Info$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.metrics.Metric  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect()
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.Metric
+	+++  NEW METHOD: PUBLIC(+) java.util.Set<java.lang.String> getLabelNames()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata getMetadata()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricFamilyDescriptor getMetricFamilyDescriptor()
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getPrometheusName()
+		+++  NEW ANNOTATION: java.lang.Deprecated
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ B:io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder<B,M>, +++ M:io.prometheus.metrics.core.metrics.MetricWithFixedMetadata
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.Metric$Builder
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder constLabels(io.prometheus.metrics.model.snapshots.Labels)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder help(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder labelNames(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder name(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.MetricWithFixedMetadata$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.SlidingWindow  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ T:java.lang.Object
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW CONSTRUCTOR: PUBLIC(+) SlidingWindow(java.lang.Class<T>, java.util.function.Supplier<T>, java.util.function.ObjDoubleConsumer<T>, long, int)
+	+++  NEW METHOD: PUBLIC(+) java.lang.Object current()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
++++  NEW CLASS: PUBLIC(+) ABSTRACT(+) io.prometheus.metrics.core.metrics.StatefulMetric  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	GENERIC TEMPLATES: +++ D:io.prometheus.metrics.core.datapoints.DataPoint, +++ T:D
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.MetricWithFixedMetadata
+	+++  NEW METHOD: PUBLIC(+) void clear()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) void initLabelValues(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.datapoints.DataPoint labelValues(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) void remove(java.lang.String[])
+	+++  NEW METHOD: PUBLIC(+) void removeIf(java.util.function.Function<java.util.List<java.lang.String>,java.lang.Boolean>)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.StateSet  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.StateSetDataPoint
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.StateSetSnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) void setFalse(java.lang.String)
+	+++  NEW METHOD: PUBLIC(+) void setTrue(java.lang.String)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.StateSet build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder states(java.lang.Class<? extends java.lang.Enum<? extends ?>>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder states(java.lang.String[])
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DistributionDataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Summary$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Summary$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
+	+++  NEW METHOD: PUBLIC(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.Summary$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.StatefulMetric$Builder
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) long DEFAULT_MAX_AGE_SECONDS
+	+++  NEW FIELD: PUBLIC(+) STATIC(+) FINAL(+) int DEFAULT_NUMBER_OF_AGE_BUCKETS
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.MetricsProperties getDefaultProperties()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary$Builder maxAgeSeconds(long)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary$Builder numberOfAgeBuckets(int)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary$Builder quantile(double)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary$Builder quantile(double, double)
++++* NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.Summary$DataPoint  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DistributionDataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.DataPoint
+	+++  NEW INTERFACE: io.prometheus.metrics.core.datapoints.TimerApi
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) long getCount()
+	+++  NEW METHOD: PUBLIC(+) double getSum()
+	+++  NEW METHOD: PUBLIC(+) void observe(double)
+	+++  NEW METHOD: PUBLIC(+) void observeWithExemplar(double, io.prometheus.metrics.model.snapshots.Labels)
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.Collector
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.SummarySnapshot collect()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.registry.MetricType getMetricType()
+		+++  NEW ANNOTATION: java.lang.Deprecated
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: io.prometheus.metrics.core.metrics.CallbackMetric$Builder
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback$Builder callback(java.util.function.Consumer<io.prometheus.metrics.core.metrics.SummaryWithCallback$Callback>)
++++  NEW INTERFACE: PUBLIC(+) ABSTRACT(+) STATIC(+) io.prometheus.metrics.core.metrics.SummaryWithCallback$Callback  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) ABSTRACT(+) void call(long, double, io.prometheus.metrics.model.snapshots.Quantiles, java.lang.String[])
+	+++  NEW ANNOTATION: java.lang.FunctionalInterface
+

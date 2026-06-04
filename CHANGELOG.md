@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.7.0](https://github.com/prometheus/client_java/compare/v1.6.1...v1.7.0) (2026-06-03)
+
+
+### Features
+
+* Add StableApi marker and API diff check ([#2168](https://github.com/prometheus/client_java/issues/2168)) ([768fd3a](https://github.com/prometheus/client_java/commit/768fd3a7aab5f11f3558a35c0d6257b5a217a078))
+* add typed metric family descriptors ([#2114](https://github.com/prometheus/client_java/issues/2114)) ([9c3b097](https://github.com/prometheus/client_java/commit/9c3b097f6842ffc08fb3a2ed00217c73a6c2b191))
+* track api-diff baseline via Renovate and store diffs in docs/apidiffs ([#2174](https://github.com/prometheus/client_java/issues/2174)) ([3adb890](https://github.com/prometheus/client_java/commit/3adb89078df4bf3d7739886612d4cf051176a6f3))
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.2.4 ([#2088](https://github.com/prometheus/client_java/issues/2088)) ([144eb61](https://github.com/prometheus/client_java/commit/144eb61030d412afe83631b8f341d2cb1595ab1c))
+* **deps:** update dependency io.dropwizard.metrics:metrics-core to v4.2.39 ([#2139](https://github.com/prometheus/client_java/issues/2139)) ([5817d13](https://github.com/prometheus/client_java/commit/5817d1395dc348b6634ea169264fd13f4ad56e82))
+* **deps:** update dependency io.dropwizard.metrics5:metrics-core to v5.0.7 ([#2140](https://github.com/prometheus/client_java/issues/2140)) ([261c451](https://github.com/prometheus/client_java/commit/261c4510eefe156ad688e019b9239cfcfd39bd2b))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.0-alpha ([#2126](https://github.com/prometheus/client_java/issues/2126)) ([b62b5d0](https://github.com/prometheus/client_java/commit/b62b5d0ab4b8d3a1335286bd3d36e8c9ac5aa269))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.0-alpha ([#2127](https://github.com/prometheus/client_java/issues/2127)) ([e11ce3d](https://github.com/prometheus/client_java/commit/e11ce3de19daf5acd2f73ffb90c96689c172f3c3))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.1-alpha ([#2132](https://github.com/prometheus/client_java/issues/2132)) ([b09be38](https://github.com/prometheus/client_java/commit/b09be3882f0ad95ff299db41d706a2e52faa7525))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.28.1-alpha ([#2133](https://github.com/prometheus/client_java/issues/2133)) ([a241c16](https://github.com/prometheus/client_java/commit/a241c165927d3cbb91b97eedd52de9c9eff595d0))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.22 ([#2099](https://github.com/prometheus/client_java/issues/2099)) ([22125c5](https://github.com/prometheus/client_java/commit/22125c5f531467030793fc48cb2308ff14bbcaa7))
+* **deps:** update jetty monorepo to v12.1.10 ([#2169](https://github.com/prometheus/client_java/issues/2169)) ([ddd3991](https://github.com/prometheus/client_java/commit/ddd3991096d409a3e58ae2003ce13457a51b8876))
+* **deps:** update jetty monorepo to v12.1.9 ([#2102](https://github.com/prometheus/client_java/issues/2102)) ([04bee70](https://github.com/prometheus/client_java/commit/04bee70efff866f8c4966643926905c28a4eae3a))
+* **deps:** update protobuf ([#2129](https://github.com/prometheus/client_java/issues/2129)) ([320538a](https://github.com/prometheus/client_java/commit/320538a09efad128c6d80bcc3d6eecca394603db))
+* Reduce allocations for classic histogram buckets  ([#2081](https://github.com/prometheus/client_java/issues/2081)) ([edd160a](https://github.com/prometheus/client_java/commit/edd160ab93254c80250d7cf58a1dcb399fef67a1))
+* restore legacy suffix compatibility ([#2100](https://github.com/prometheus/client_java/issues/2100)) ([b2ae70f](https://github.com/prometheus/client_java/commit/b2ae70ffd4ac0830fb567319beae9d1c3ad8bc2f))
+* restore reserved suffix stripping in `PrometheusNaming.sanitizeMetricName()` ([#2124](https://github.com/prometheus/client_java/issues/2124)) ([2d0f508](https://github.com/prometheus/client_java/commit/2d0f508efd2f5e009b6f09f6a9ccb451cf9f3b6f))
+
+
+### Performance Improvements
+
+* Refactored sorting to use optimized sort algorithms ([#2161](https://github.com/prometheus/client_java/issues/2161)) ([25b94fc](https://github.com/prometheus/client_java/commit/25b94fc16273659892af0132cedb71f57597adf7))
+
+
+### Documentation
+
+* clarify downstream adapter validation requirements ([#2101](https://github.com/prometheus/client_java/issues/2101)) ([ef8c75c](https://github.com/prometheus/client_java/commit/ef8c75cf352bddd0d3a2052c3f1b0c8b6103a6f4))
+* Document OM2  ([#2059](https://github.com/prometheus/client_java/issues/2059)) ([45d753c](https://github.com/prometheus/client_java/commit/45d753c418f005fbb17bf7caca3dc94655717687))
+* document PushGateway shading workaround ([#2106](https://github.com/prometheus/client_java/issues/2106)) ([8ca0eb8](https://github.com/prometheus/client_java/commit/8ca0eb8d79b800ad8d7a08f10762ed631f4f2a70))
+
 ## [1.6.1](https://github.com/prometheus/client_java/compare/v1.6.0...v1.6.1) (2026-04-27)
 
 > Note: With the OM2 metric-name preservation fix in this release, OpenMetrics 2.0 can now be
