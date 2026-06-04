@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -200,9 +201,29 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
       extends MetricWithFixedMetadata.Builder<B, M> {
 
     @Nullable protected Boolean exemplarsEnabled;
+    @Nullable protected Supplier<Labels> exemplarLabelsSupplier;
 
     protected Builder(List<String> illegalLabelNames, PrometheusProperties config) {
       super(illegalLabelNames, config);
+    }
+
+    /**
+     * Provide additional labels to be merged into every automatically-sampled exemplar of <em>this
+     * metric</em>. The supplier is called each time an exemplar is sampled, so it can return
+     * dynamic values (e.g. a request-scoped identifier from a thread-local). The supplier is only
+     * invoked when a valid, sampled span context is present; it has no effect when tracing is not
+     * active.
+     *
+     * <p>For a global supplier that applies to all metrics (including metrics registered by
+     * third-party libraries you do not control), see {@link
+     * io.prometheus.metrics.core.exemplars.ExemplarLabelsSupplier}. When both are configured, this
+     * per-metric supplier takes precedence over the global one on a label-name collision, and the
+     * reserved {@code trace_id}/{@code span_id} labels always win over both. Labels that collide
+     * are silently dropped.
+     */
+    public B exemplarLabelsSupplier(Supplier<Labels> supplier) {
+      this.exemplarLabelsSupplier = supplier;
+      return self();
     }
 
     /** Allow Exemplars for this metric. */
