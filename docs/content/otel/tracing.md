@@ -75,3 +75,43 @@ The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/cli
 directory has a complete end-to-end example, with a distributed Java application with two services,
 an OpenTelemetry collector, Prometheus, Tempo as a trace database, and Grafana dashboards. Use
 docker-compose as described in the example's readme to run the example and explore the results.
+
+## Adding custom labels to exemplars
+
+Automatically-sampled exemplars carry the `trace_id` and `span_id` labels. You can attach
+additional, custom labels (for example an internal identifier) to every automatically-sampled
+exemplar. There are two options.
+
+### Global (all metrics)
+
+Register a global supplier to add custom labels to the exemplars of _all_ metrics, including
+metrics registered by third-party libraries that you do not control. This is the right option when
+you cannot modify the code that creates the metric:
+
+```java
+ExemplarLabelsSupplier.setExemplarLabelsSupplier(
+    () -> Labels.of("management_id", currentManagementId()));
+```
+
+### Per metric
+
+If you only want the extra labels on a specific metric you define yourself, use the builder:
+
+```java
+Counter counter =
+    Counter.builder()
+        .name("requests_total")
+        .exemplarLabelsSupplier(() -> Labels.of("management_id", currentManagementId()))
+        .build();
+```
+
+### Notes
+
+- The supplier is invoked on the (rate-limited) hot path each time an exemplar is sampled, so it
+  should be cheap. It may return dynamic, request-scoped values (e.g. read from a thread-local).
+- Custom labels are only added when a valid, sampled span context is present; the supplier never
+  causes an exemplar to be created on its own.
+- Precedence on a label-name collision: the reserved `trace_id`/`span_id` labels always win, then
+  the per-metric supplier, then the global supplier. Colliding labels are silently dropped.
+- If the supplier throws, the exception is swallowed and the exemplar is created without the
+  additional labels, so a misbehaving supplier never breaks metric collection.

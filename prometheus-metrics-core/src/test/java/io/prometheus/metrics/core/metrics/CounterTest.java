@@ -8,6 +8,7 @@ import static org.assertj.core.data.Offset.offset;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.exemplars.ExemplarLabelsSupplier;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.Metrics;
@@ -54,6 +55,37 @@ class CounterTest {
   @AfterEach
   void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(null);
+  }
+
+  /** A {@link SpanContext} that always returns a fixed, sampled span. */
+  private static SpanContext sampledSpanContext(String traceId, String spanId) {
+    return new SpanContext() {
+      @Override
+      public String getCurrentTraceId() {
+        return traceId;
+      }
+
+      @Override
+      public String getCurrentSpanId() {
+        return spanId;
+      }
+
+      @Override
+      public boolean isCurrentSpanSampled() {
+        return true;
+      }
+
+      @Override
+      public void markCurrentSpanAsExemplar() {}
+    };
+  }
+
+  private static String openMetrics(Counter counter) throws Exception {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    new OpenMetricsTextFormatWriter(false, true)
+        .write(out, MetricSnapshots.of(counter.collect()), EscapingScheme.ALLOW_UTF8);
+    return out.toString();
   }
 
   private CounterSnapshot.CounterDataPointSnapshot getData(Counter counter, String... labels) {
@@ -377,6 +409,109 @@ class CounterTest {
 
     assertThat(out.toString())
         .contains("management_id=\"mgmt-42\"")
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"");
+  }
+
+  @Test
+  void globalExemplarLabelsSupplierAppearsInAutomaticallySampledExemplar() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("management_id", "mgmt-42"));
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.inc(); // automatic sampling path
+
+    assertThat(openMetrics(counter))
+        .contains("management_id=\"mgmt-42\"")
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"");
+  }
+
+  @Test
+  void globalAndPerMetricSuppliersBothApply() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("global_k", "g"));
+
+    Counter counter =
+        Counter.builder()
+            .name("requests_total")
+            .exemplarLabelsSupplier(() -> Labels.of("metric_k", "m"))
+            .build();
+    counter.inc();
+
+    assertThat(openMetrics(counter))
+        .contains("global_k=\"g\"")
+        .contains("metric_k=\"m\"")
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"");
+  }
+
+  @Test
+  void perMetricSupplierWinsOverGlobalOnCollision() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("k", "global"));
+
+    Counter counter =
+        Counter.builder()
+            .name("requests_total")
+            .exemplarLabelsSupplier(() -> Labels.of("k", "metric"))
+            .build();
+    counter.inc();
+
+    assertThat(openMetrics(counter)).contains("k=\"metric\"").doesNotContain("k=\"global\"");
+  }
+
+  @Test
+  void globalSupplierCollidingWithTraceIdIsDropped() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of(Exemplar.TRACE_ID, "evil"));
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.inc();
+
+    assertThat(openMetrics(counter))
+        .contains("trace_id=\"trace-abc\"")
+        .doesNotContain("trace_id=\"evil\"");
+  }
+
+  @Test
+  void globalSupplierThrowingDoesNotBreakCollection() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(
+        () -> {
+          throw new RuntimeException("boom");
+        });
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.inc();
+
+    assertThat(openMetrics(counter))
+        .contains("trace_id=\"trace-abc\"")
+        .contains("span_id=\"span-def\"");
+  }
+
+  @Test
+  void globalSupplierWithoutSpanContextProducesNoExemplar() {
+    SpanContextSupplier.setSpanContext(null);
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("management_id", "mgmt-42"));
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.inc();
+
+    assertThat(getData(counter).getExemplar()).isNull();
+  }
+
+  @Test
+  void globalSupplierMergedIntoCustomExemplar() throws Exception {
+    SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
+    ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("management_id", "mgmt-42"));
+
+    Counter counter = Counter.builder().name("requests_total").build();
+    counter.incWithExemplar(Labels.of("k", "v"));
+
+    assertThat(openMetrics(counter))
+        .contains("management_id=\"mgmt-42\"")
+        .contains("k=\"v\"")
         .contains("trace_id=\"trace-abc\"")
         .contains("span_id=\"span-def\"");
   }

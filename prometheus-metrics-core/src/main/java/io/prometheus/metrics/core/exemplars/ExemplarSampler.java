@@ -6,6 +6,7 @@ import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import java.util.ArrayList;
@@ -379,14 +380,14 @@ public class ExemplarSampler {
           String traceId = spanContext.getCurrentTraceId();
           if (spanId != null && traceId != null) {
             spanContext.markCurrentSpanAsExemplar();
-            Labels base = Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
-            if (additionalLabelsSupplier != null) {
-              Labels extra = additionalLabelsSupplier.get();
-              if (!extra.isEmpty()) {
-                return base.merge(extra);
-              }
-            }
-            return base;
+            Labels labels = Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
+            // Per-metric supplier first (more specific), then the global supplier. On a name
+            // collision the earlier (more specific) value is kept; the reserved trace_id/span_id
+            // labels always win over both.
+            labels = mergeAdditionalLabels(labels, additionalLabelsSupplier);
+            labels =
+                mergeAdditionalLabels(labels, ExemplarLabelsSupplier.getExemplarLabelsSupplier());
+            return labels;
           }
         }
       }
@@ -394,5 +395,35 @@ public class ExemplarSampler {
       // ignore
     }
     return Labels.EMPTY;
+  }
+
+  /**
+   * Merge labels from {@code supplier} into {@code base}, dropping any label whose name already
+   * exists in {@code base}. Never throws: a {@code null} supplier, a {@code null}/empty result, a
+   * colliding label name, or an exception thrown by the supplier all result in {@code base} being
+   * returned unchanged (minus the offending labels). A misbehaving supplier must never break metric
+   * collection.
+   */
+  private static Labels mergeAdditionalLabels(Labels base, @Nullable Supplier<Labels> supplier) {
+    if (supplier == null) {
+      return base;
+    }
+    Labels extra;
+    try {
+      extra = supplier.get();
+    } catch (RuntimeException ignored) {
+      return base;
+    }
+    if (extra == null || extra.isEmpty()) {
+      return base;
+    }
+    Labels result = base;
+    for (Label label : extra) {
+      // Guard with contains() so the single-entry merge below can never throw on a duplicate name.
+      if (!result.contains(label.getName())) {
+        result = result.merge(Labels.of(label.getName(), label.getValue()));
+      }
+    }
+    return result;
   }
 }
