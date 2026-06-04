@@ -1,0 +1,16 @@
+Comparing source compatibility of prometheus-metrics-simpleclient-bridge-1.6.2-SNAPSHOT.jar against prometheus-metrics-simpleclient-bridge-1.6.1.jar
++++  NEW CLASS: PUBLIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW INTERFACE: io.prometheus.metrics.model.registry.MultiCollector
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector$Builder builder(io.prometheus.metrics.config.PrometheusProperties)
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector$Builder builder()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricSnapshots collect()
++++  NEW CLASS: PUBLIC(+) STATIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector$Builder collectorRegistry(io.prometheus.client.CollectorRegistry)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector register()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.simpleclient.bridge.SimpleclientCollector register(io.prometheus.metrics.model.registry.PrometheusRegistry)
+
