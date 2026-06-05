@@ -33,7 +33,7 @@ LGTM_VERSION = "0.28.0"
 # stable Metrics class. Kept renovate-tracked so the target is current when we
 # switch the ref back to this release.
 # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
-DEFAULT_JMX_EXPORTER_VERSION = "1.5.0"
+DEFAULT_JMX_EXPORTER_VERSION = "v1.6.0"
 # renovate: datasource=github-tags depName=micrometer-metrics/micrometer versioning=semver-coerced
 DEFAULT_MICROMETER_VERSION = "v1.16.5"
 
