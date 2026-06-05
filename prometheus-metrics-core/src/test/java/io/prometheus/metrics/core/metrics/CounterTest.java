@@ -502,7 +502,7 @@ class CounterTest {
   }
 
   @Test
-  void globalSupplierMergedIntoCustomExemplar() throws Exception {
+  void globalSupplierDoesNotApplyToCustomExemplar() throws Exception {
     SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
     ExemplarLabelsSupplier.setExemplarLabelsSupplier(() -> Labels.of("management_id", "mgmt-42"));
 
@@ -510,14 +510,14 @@ class CounterTest {
     counter.incWithExemplar(Labels.of("k", "v"));
 
     assertThat(openMetrics(counter))
-        .contains("management_id=\"mgmt-42\"")
         .contains("k=\"v\"")
         .contains("trace_id=\"trace-abc\"")
-        .contains("span_id=\"span-def\"");
+        .contains("span_id=\"span-def\"")
+        .doesNotContain("management_id=\"mgmt-42\"");
   }
 
   @Test
-  void callerLabelsWinOverGlobalSupplierInCustomExemplar() throws Exception {
+  void callerControlsCustomExemplarLabels() throws Exception {
     SpanContextSupplier.setSpanContext(sampledSpanContext("trace-abc", "span-def"));
     ExemplarLabelsSupplier.setExemplarLabelsSupplier(
         () -> Labels.of("k", "global", "management_id", "mgmt-42"));
@@ -527,10 +527,10 @@ class CounterTest {
 
     assertThat(openMetrics(counter))
         .contains("k=\"caller\"")
-        .contains("management_id=\"mgmt-42\"")
         .contains("trace_id=\"trace-abc\"")
         .contains("span_id=\"span-def\"")
-        .doesNotContain("k=\"global\"");
+        .doesNotContain("k=\"global\"")
+        .doesNotContain("management_id=\"mgmt-42\"");
   }
 
   @Test

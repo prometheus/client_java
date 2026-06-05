@@ -339,7 +339,7 @@ public class ExemplarSampler {
 
   private long updateCustomExemplar(int index, double value, Labels labels, long now) {
     if (!labels.contains(Exemplar.TRACE_ID) && !labels.contains(Exemplar.SPAN_ID)) {
-      labels = mergeLabels(labels, doSampleExemplar());
+      labels = mergeLabels(labels, sampleTraceContextLabels());
     }
     customExemplars[index] =
         Exemplar.builder().value(value).labels(labels).timestampMillis(now).build();
@@ -358,6 +358,19 @@ public class ExemplarSampler {
   }
 
   private Labels doSampleExemplar() {
+    Labels labels = sampleTraceContextLabels();
+    if (labels.isEmpty()) {
+      return labels;
+    }
+    // Per-metric supplier first (more specific), then the global supplier. On a name
+    // collision the earlier (more specific) value is kept; the reserved trace_id/span_id
+    // labels always win over both.
+    labels = mergeAdditionalLabels(labels, additionalLabelsSupplier);
+    labels = mergeAdditionalLabels(labels, ExemplarLabelsSupplier.getExemplarLabelsSupplier());
+    return labels;
+  }
+
+  private Labels sampleTraceContextLabels() {
     // Using the qualified name so that Micrometer can exclude the dependency on
     // prometheus-metrics-tracer-initializer
     // as they provide their own implementation of SpanContextSupplier.
@@ -374,14 +387,7 @@ public class ExemplarSampler {
           String traceId = spanContext.getCurrentTraceId();
           if (spanId != null && traceId != null) {
             spanContext.markCurrentSpanAsExemplar();
-            Labels labels = Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
-            // Per-metric supplier first (more specific), then the global supplier. On a name
-            // collision the earlier (more specific) value is kept; the reserved trace_id/span_id
-            // labels always win over both.
-            labels = mergeAdditionalLabels(labels, additionalLabelsSupplier);
-            labels =
-                mergeAdditionalLabels(labels, ExemplarLabelsSupplier.getExemplarLabelsSupplier());
-            return labels;
+            return Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
           }
         }
       }
