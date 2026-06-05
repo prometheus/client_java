@@ -18,14 +18,52 @@ jobs:
     permissions: {}
 
     steps:
-      - name: Debug gpg key
+      - name: Verify release secrets
         env:
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_PASSWORD }}
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
         run: |
-          echo "${#GPG_SIGNING_KEY}"
-          echo "${GPG_SIGNING_KEY}" | gpg --batch --import-options import-show --import
+          fail() {
+            echo "::error::$1"
+            echo "::error::Fix: see '$2' in RELEASING.md"
+            exit 1
+          }
+
+          # Sonatype token
+          response=$(curl -s -u "${MAVEN_USERNAME}:${MAVEN_CENTRAL_TOKEN}" \
+            "https://central.sonatype.com/api/v1/publisher/status?id=test")
+          echo "Sonatype response: ${response}"
+          if echo "${response}" | grep -q "Invalid token"; then
+            fail "Sonatype Central token is invalid." \
+              "If the Sonatype Central Token is Invalid"
+          fi
+
+          # GPG key import
+          if ! echo "${GPG_SIGNING_KEY}" | gpg --batch --import 2>&1 | \
+              tee /tmp/gpg-import.log | grep -q "secret key imported\|secret keys read"; then
+            cat /tmp/gpg-import.log
+            fail "GPG_SIGNING_KEY did not import a secret key." \
+              "If the GPG Key Expired"
+          fi
+
+          # GPG passphrase
+          key_id=$(gpg --list-secret-keys --with-colons | \
+            awk -F: '/^sec:/ { print $5; exit }')
+          if [ -z "${key_id}" ]; then
+            fail "No secret key available after import." \
+              "If the GPG Key Expired"
+          fi
+          if ! echo "test" | gpg --batch --pinentry-mode loopback \
+              --passphrase "${GPG_SIGNING_PASSPHRASE}" \
+              -u "${key_id}" --clearsign >/dev/null 2>/tmp/gpg-sign.log; then
+            cat /tmp/gpg-sign.log
+            fail "GPG_SIGNING_PASSPHRASE does not match GPG_SIGNING_KEY." \
+              "If the GPG Key Expired"
+          fi
       - name: Checkout Plugin Repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ inputs.tag }}
           persist-credentials: false

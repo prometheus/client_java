@@ -44,6 +44,27 @@ the benchmarks before merging the release PR:
 mise run update-benchmarks
 ```
 
+## If the Sonatype Central Token is Invalid
+
+The release workflow verifies the token before deploy. If it fails:
+
+1. Sign in at <https://central.sonatype.com> and open
+   View Account -> Generate User Token.
+2. Copy the `username` and `password` values from the snippet.
+3. Update the secrets:
+   - <https://github.com/prometheus/client_java/settings/secrets/actions/SONATYPE_MAVEN_REPOSITORY_USERNAME>
+   - <https://github.com/prometheus/client_java/settings/secrets/actions/SONATYPE_MAVEN_REPOSITORY_PASSWORD>
+4. Verify locally:
+
+   ```shell
+   curl -i -u "$USER:$PASS" \
+     "https://central.sonatype.com/api/v1/publisher/status?id=test"
+   ```
+
+   `{"error":{"message":"Invalid token"}}` means the token is still
+   wrong. Any other response (including 404 for the test id) means the
+   token works.
+
 ## If the GPG Key Expired
 
 1. Generate a new key:
