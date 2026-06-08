@@ -52,7 +52,7 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yaml
   tempo:
-    image: grafana/tempo:3.0.0@sha256:78439f7f7cf3c97122846c13a832e060c6c7ef67dcc814dccf0a5f3f78393a93
+    image: grafana/tempo:3.0.1@sha256:0be6a4bfeef2b2c32261c4b4ec2596733bb858ccd4aa35964503f90b41bc9f8d
     network_mode: host
     volumes:
       - ./config/tempo-config.yaml:/config.yaml
