@@ -18,6 +18,7 @@ final class MetricMetadataSupport {
     return typedMetadata(name, help, null, "_info", ".info");
   }
 
+  @SuppressWarnings("deprecation")
   private static MetricMetadata typedMetadata(
       String originalName,
       @Nullable String help,

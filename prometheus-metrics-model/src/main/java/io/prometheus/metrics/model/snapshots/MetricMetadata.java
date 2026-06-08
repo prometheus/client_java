@@ -74,6 +74,82 @@ public final class MetricMetadata {
   }
 
   /**
+   * Creates a builder for {@link MetricMetadata}.
+   *
+   * <p>Use the builder instead of the multi-arg constructors for cleaner, more readable code:
+   *
+   * <pre>{@code
+   * MetricMetadata.builder()
+   *     .name("http_requests")
+   *     .help("Total HTTP requests")
+   *     .unit(Unit.BYTES)
+   *     .counterSuffix(true)
+   *     .build();
+   * }</pre>
+   */
+  @StableApi
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Builder for {@link MetricMetadata}. */
+  @StableApi
+  public static final class Builder {
+    @Nullable private String name;
+    @Nullable private String help;
+    @Nullable private Unit unit;
+    private boolean counterSuffix;
+
+    private Builder() {}
+
+    /** Required. The base metric name (without type suffix like {@code _total}). */
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    /** Optional. Human-readable description of the metric. */
+    public Builder help(String help) {
+      this.help = help;
+      return this;
+    }
+
+    /** Optional. The unit of measurement. Appended to the name if not already present. */
+    public Builder unit(Unit unit) {
+      this.unit = unit;
+      return this;
+    }
+
+    /**
+     * Optional. When {@code true}, the writer appends {@code _total} to the exposition name. Use
+     * this for counter metrics, especially UTF-8 names where the writer cannot infer it from the
+     * snapshot type alone.
+     */
+    public Builder counterSuffix(boolean counterSuffix) {
+      this.counterSuffix = counterSuffix;
+      return this;
+    }
+
+    /** Builds the {@link MetricMetadata}. Throws if {@code name} was not set. */
+    public MetricMetadata build() {
+      if (name == null) {
+        throw new IllegalArgumentException("name is required");
+      }
+      String baseName = name;
+      if (unit != null && !baseName.endsWith("_" + unit) && !baseName.endsWith("." + unit)) {
+        baseName = baseName + "_" + unit;
+      }
+      String expositionBaseName = baseName;
+      if (counterSuffix
+          && !expositionBaseName.endsWith("_total")
+          && !expositionBaseName.endsWith(".total")) {
+        expositionBaseName = expositionBaseName + "_total";
+      }
+      return new MetricMetadata(baseName, expositionBaseName, name, help, unit);
+    }
+  }
+
+  /**
    * Constructor with exposition base name.
    *
    * @param name the base name (with type suffixes stripped, e.g. "events" for a counter named
@@ -82,7 +158,9 @@ public final class MetricMetadata {
    *     format writers for smart-append logic
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
+   * @deprecated Use {@link #builder()} instead.
    */
+  @Deprecated
   public MetricMetadata(
       String name, String expositionBaseName, @Nullable String help, @Nullable Unit unit) {
     this(name, expositionBaseName, expositionBaseName, help, unit);
@@ -97,7 +175,9 @@ public final class MetricMetadata {
    * @param originalName the raw name as provided by the user, before any modification
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
+   * @deprecated Use {@link #builder()} instead.
    */
+  @Deprecated
   public MetricMetadata(
       String name,
       String expositionBaseName,
@@ -205,6 +285,7 @@ public final class MetricMetadata {
     }
   }
 
+  @SuppressWarnings("deprecation")
   MetricMetadata escape(EscapingScheme escapingScheme) {
     return new MetricMetadata(
         PrometheusNaming.escapeName(name, escapingScheme),

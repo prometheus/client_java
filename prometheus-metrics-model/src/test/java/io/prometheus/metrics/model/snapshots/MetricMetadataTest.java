@@ -83,6 +83,7 @@ class MetricMetadataTest {
     assertThat(sanitizeMetricName("my_counter_bytes", Unit.BYTES)).isEqualTo("my_counter_bytes");
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   void testFiveArgConstructor() {
     MetricMetadata metadata =
@@ -94,6 +95,7 @@ class MetricMetadataTest {
     assertThat(metadata.getUnit()).isEqualTo(Unit.BYTES);
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   void testFourArgConstructorDefaultsOriginalName() {
     MetricMetadata metadata = new MetricMetadata("req_bytes", "req_bytes", "help", Unit.BYTES);
@@ -106,5 +108,71 @@ class MetricMetadataTest {
     MetricMetadata metadata = new MetricMetadata("req_bytes", "help", Unit.BYTES);
     assertThat(metadata.getOriginalName()).isEqualTo("req_bytes");
     assertThat(metadata.getExpositionBaseName()).isEqualTo("req_bytes");
+  }
+
+  @Test
+  void builder_noUnit() {
+    MetricMetadata m = MetricMetadata.builder().name("requests").help("total requests").build();
+    assertThat(m.getName()).isEqualTo("requests");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests");
+    assertThat(m.getOriginalName()).isEqualTo("requests");
+    assertThat(m.getHelp()).isEqualTo("total requests");
+    assertThat(m.getUnit()).isNull();
+  }
+
+  @Test
+  void builder_unitAppendedWhenAbsent() {
+    MetricMetadata m = MetricMetadata.builder().name("requests").unit(Unit.BYTES).build();
+    assertThat(m.getName()).isEqualTo("requests_bytes");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests_bytes");
+    assertThat(m.getOriginalName()).isEqualTo("requests");
+  }
+
+  @Test
+  void builder_unitNotDuplicatedWhenPresent() {
+    MetricMetadata m = MetricMetadata.builder().name("requests_bytes").unit(Unit.BYTES).build();
+    assertThat(m.getName()).isEqualTo("requests_bytes");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests_bytes");
+    assertThat(m.getOriginalName()).isEqualTo("requests_bytes");
+  }
+
+  @Test
+  void builder_counterSuffixAppended() {
+    MetricMetadata m = MetricMetadata.builder().name("requests").counterSuffix(true).build();
+    assertThat(m.getName()).isEqualTo("requests");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests_total");
+    assertThat(m.getOriginalName()).isEqualTo("requests");
+  }
+
+  @Test
+  void builder_counterSuffixAndUnit() {
+    MetricMetadata m =
+        MetricMetadata.builder().name("requests").unit(Unit.BYTES).counterSuffix(true).build();
+    assertThat(m.getName()).isEqualTo("requests_bytes");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests_bytes_total");
+    assertThat(m.getOriginalName()).isEqualTo("requests");
+  }
+
+  @Test
+  void builder_utf8NameWithCounterSuffix() {
+    MetricMetadata m =
+        MetricMetadata.builder().name("my.requests").counterSuffix(true).build();
+    assertThat(m.getName()).isEqualTo("my.requests");
+    assertThat(m.getExpositionBaseName()).isEqualTo("my.requests_total");
+    assertThat(m.getPrometheusName()).isEqualTo("my_requests");
+    assertThat(m.getExpositionBasePrometheusName()).isEqualTo("my_requests_total");
+  }
+
+  @Test
+  void builder_nonCounterExpositionBaseEqualsName() {
+    MetricMetadata m = MetricMetadata.builder().name("active_connections").build();
+    assertThat(m.getExpositionBaseName()).isEqualTo(m.getName());
+  }
+
+  @Test
+  void builder_nameRequired() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> MetricMetadata.builder().help("help").build())
+        .withMessage("name is required");
   }
 }
