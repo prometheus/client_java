@@ -1,5 +1,6 @@
 [tools]
 "go:github.com/grafana/oats" = "0.7.0"
+aube = "latest"
 hugo = "0.163.0"
 java = "temurin-25.0.3+9.0.LTS"
 node = "24.16.0"
@@ -14,7 +15,7 @@ biome = "2.4.16"
 editorconfig-checker = "3.7.0"
 google-java-format = "1.35.0"
 lychee = "0.24.2"
-"npm:renovate" = "43.212.4"
+"npm:renovate" = { version = "43.212.4", allow_builds = ["re2"] }
 ruff = "0.15.16"
 rumdl = "0.2.9"
 shellcheck = "v0.11.0"
