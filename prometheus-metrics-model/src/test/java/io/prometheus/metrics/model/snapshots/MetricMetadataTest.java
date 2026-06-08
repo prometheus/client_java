@@ -155,8 +155,7 @@ class MetricMetadataTest {
 
   @Test
   void builder_utf8NameWithCounterSuffix() {
-    MetricMetadata m =
-        MetricMetadata.builder().name("my.requests").counterSuffix(true).build();
+    MetricMetadata m = MetricMetadata.builder().name("my.requests").counterSuffix(true).build();
     assertThat(m.getName()).isEqualTo("my.requests");
     assertThat(m.getExpositionBaseName()).isEqualTo("my.requests_total");
     assertThat(m.getPrometheusName()).isEqualTo("my_requests");
