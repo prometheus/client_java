@@ -18,7 +18,7 @@ jobs:
           - name: upstream
             repository: micrometer-metrics/micrometer
             # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
-            ref: v1.16.5
+            ref: v1.17.0
           - name: typed-descriptor
             # TODO: remove this temporary opt-in leg once Micrometer switches the
             # Prometheus client integration to typed descriptors by default.
