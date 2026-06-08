@@ -35,7 +35,7 @@ LGTM_VERSION = "0.28.0"
 # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
 DEFAULT_JMX_EXPORTER_VERSION = "v1.6.0"
 # renovate: datasource=github-tags depName=micrometer-metrics/micrometer versioning=semver-coerced
-DEFAULT_MICROMETER_VERSION = "v1.16.5"
+DEFAULT_MICROMETER_VERSION = "v1.17.0"
 
 [tasks.ci]
 description = "CI Build"
