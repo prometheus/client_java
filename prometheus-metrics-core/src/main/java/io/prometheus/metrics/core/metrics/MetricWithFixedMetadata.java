@@ -27,6 +27,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
   protected final MetricMetadata metadata;
   protected final String[] labelNames;
 
+  @SuppressWarnings("deprecation")
   protected MetricWithFixedMetadata(Builder<?, ?> builder) {
     super(builder);
     String name = makeName(builder.name, builder.unit);
