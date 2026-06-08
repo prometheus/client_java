@@ -17,10 +17,11 @@ DEFAULT_JMX_EXPORTER_REPOSITORY = os.environ.get(
     "JMX_EXPORTER_REPOSITORY", "prometheus/jmx_exporter"
 )
 DEFAULT_JMX_EXPORTER_REMOTE = os.environ.get("JMX_EXPORTER_REMOTE", "origin")
-# Test jmx_exporter main rather than the latest release: the integration_test_suite
-# only compiles against client_java once a release adopts the stable Metrics class
-# (see the tracking issue referenced in mise.toml's DEFAULT_JMX_EXPORTER_VERSION).
-DEFAULT_JMX_EXPORTER_REF = os.environ.get("JMX_EXPORTER_REF") or "main"
+DEFAULT_JMX_EXPORTER_REF = (
+    os.environ.get("JMX_EXPORTER_REF")
+    or os.environ.get("DEFAULT_JMX_EXPORTER_VERSION")
+    or "main"
+)
 DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION")
 
 # Quick test configuration: the integration_test_suite runs one matrix cell
