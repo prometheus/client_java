@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 /**
@@ -47,8 +48,10 @@ public class ExemplarSampler {
   private final SpanContext
       spanContext; // may be null, in that case SpanContextSupplier.getSpanContext() is used.
 
+  @Nullable private final Supplier<Labels> additionalLabelsSupplier;
+
   public ExemplarSampler(ExemplarSamplerConfig config) {
-    this(config, null);
+    this(config, null, null);
   }
 
   /**
@@ -60,10 +63,24 @@ public class ExemplarSampler {
    * SpanContextSupplier.getSpanContext()} is called to find a span context.
    */
   public ExemplarSampler(ExemplarSamplerConfig config, @Nullable SpanContext spanContext) {
+    this(config, spanContext, null);
+  }
+
+  /**
+   * Constructor that additionally accepts a supplier of labels to be merged into every
+   * automatically-sampled exemplar. The supplier is called each time an exemplar is sampled from a
+   * span context, so it can return dynamic values (e.g. a request-scoped identifier). The supplier
+   * is only called when a valid, sampled span context is present.
+   */
+  public ExemplarSampler(
+      ExemplarSamplerConfig config,
+      @Nullable SpanContext spanContext,
+      @Nullable Supplier<Labels> additionalLabelsSupplier) {
     this.config = config;
     this.exemplars = new Exemplar[config.getNumberOfExemplars()];
     this.customExemplars = new Exemplar[exemplars.length];
     this.spanContext = spanContext;
+    this.additionalLabelsSupplier = additionalLabelsSupplier;
   }
 
   public Exemplars collect() {
@@ -322,7 +339,7 @@ public class ExemplarSampler {
 
   private long updateCustomExemplar(int index, double value, Labels labels, long now) {
     if (!labels.contains(Exemplar.TRACE_ID) && !labels.contains(Exemplar.SPAN_ID)) {
-      labels = labels.merge(doSampleExemplar());
+      labels = mergeLabels(labels, sampleTraceContextLabels());
     }
     customExemplars[index] =
         Exemplar.builder().value(value).labels(labels).timestampMillis(now).build();
@@ -341,6 +358,19 @@ public class ExemplarSampler {
   }
 
   private Labels doSampleExemplar() {
+    Labels labels = sampleTraceContextLabels();
+    if (labels.isEmpty()) {
+      return labels;
+    }
+    // Per-metric supplier first (more specific), then the global supplier. On a name
+    // collision the earlier (more specific) value is kept; the reserved trace_id/span_id
+    // labels always win over both.
+    labels = mergeAdditionalLabels(labels, additionalLabelsSupplier);
+    labels = mergeAdditionalLabels(labels, ExemplarLabelsSupplier.getExemplarLabelsSupplier());
+    return labels;
+  }
+
+  private Labels sampleTraceContextLabels() {
     // Using the qualified name so that Micrometer can exclude the dependency on
     // prometheus-metrics-tracer-initializer
     // as they provide their own implementation of SpanContextSupplier.
@@ -365,5 +395,69 @@ public class ExemplarSampler {
       // ignore
     }
     return Labels.EMPTY;
+  }
+
+  /**
+   * Merge labels from {@code supplier} into {@code base}, dropping any label whose name already
+   * exists in {@code base}. Never throws: a {@code null} supplier, a {@code null}/empty result, a
+   * colliding label name, or an exception thrown by the supplier all result in {@code base} being
+   * returned unchanged (minus the offending labels). A misbehaving supplier must never break metric
+   * collection.
+   */
+  private static Labels mergeAdditionalLabels(Labels base, @Nullable Supplier<Labels> supplier) {
+    if (supplier == null) {
+      return base;
+    }
+    Labels extra;
+    try {
+      extra = supplier.get();
+    } catch (Throwable ignored) {
+      // A misbehaving supplier (any RuntimeException or Error) must never break metric collection.
+      return base;
+    }
+    if (extra == null || extra.isEmpty()) {
+      return base;
+    }
+    return mergeLabels(base, extra);
+  }
+
+  /**
+   * Merge {@code extra} into {@code base}, dropping any label whose name already exists in {@code
+   * base}.
+   */
+  private static Labels mergeLabels(Labels base, Labels extra) {
+    if (extra.isEmpty()) {
+      return base;
+    }
+    // Count name collisions with base in a single pass so we can merge exactly once below: base
+    // (trace_id/span_id and any more-specific supplier) always wins, so colliding labels are
+    // dropped. extra is itself a valid Labels (no internal duplicates), so the surviving labels
+    // never collide with each other and merge() cannot throw on a duplicate name.
+    int size = extra.size();
+    int collisions = 0;
+    for (int i = 0; i < size; i++) {
+      if (base.contains(extra.getName(i))) {
+        collisions++;
+      }
+    }
+    if (collisions == 0) {
+      return base.merge(extra);
+    }
+    if (collisions == size) {
+      return base;
+    }
+    int kept = size - collisions;
+    String[] names = new String[kept];
+    String[] values = new String[kept];
+    int j = 0;
+    for (int i = 0; i < size; i++) {
+      String name = extra.getName(i);
+      if (!base.contains(name)) {
+        names[j] = name;
+        values[j] = extra.getValue(i);
+        j++;
+      }
+    }
+    return base.merge(names, values);
   }
 }
