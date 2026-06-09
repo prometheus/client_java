@@ -5,7 +5,6 @@ import io.prometheus.metrics.config.EscapingScheme;
 import javax.annotation.Nullable;
 
 /** Immutable container for metric metadata: name, help, unit. */
-@StableApi
 public final class MetricMetadata {
 
   /**
@@ -51,11 +50,13 @@ public final class MetricMetadata {
   @Nullable private final Unit unit;
 
   /** See {@link #MetricMetadata(String, String, Unit)} */
+  @StableApi
   public MetricMetadata(String name) {
     this(name, null, null);
   }
 
   /** See {@link #MetricMetadata(String, String, Unit)} */
+  @StableApi
   public MetricMetadata(String name, String help) {
     this(name, help, null);
   }
@@ -69,6 +70,7 @@ public final class MetricMetadata {
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
    */
+  @StableApi
   public MetricMetadata(String name, @Nullable String help, @Nullable Unit unit) {
     this(name, name, help, unit);
   }
@@ -189,6 +191,7 @@ public final class MetricMetadata {
    * @param unit optional. May be {@code null}.
    * @deprecated Use {@link #builder()} instead.
    */
+  @StableApi
   @Deprecated
   public MetricMetadata(
       String name, String expositionBaseName, @Nullable String help, @Nullable Unit unit) {
@@ -206,6 +209,7 @@ public final class MetricMetadata {
    * @param unit optional. May be {@code null}.
    * @deprecated Use {@link #builder()} instead.
    */
+  @StableApi
   @Deprecated
   public MetricMetadata(
       String name,
@@ -230,6 +234,7 @@ public final class MetricMetadata {
    * <p>The name may contain any Unicode chars. Use {@link #getPrometheusName()} to get the name in
    * legacy Prometheus format, i.e. with all dots and all invalid chars replaced by underscores.
    */
+  @StableApi
   public String getName() {
     return name;
   }
@@ -239,6 +244,7 @@ public final class MetricMetadata {
    *
    * <p>This is used by Prometheus exposition formats.
    */
+  @StableApi
   public String getPrometheusName() {
     return prometheusName;
   }
@@ -248,6 +254,7 @@ public final class MetricMetadata {
    * called {@code Counter.builder().name("req").unit(BYTES)}, this returns "req" while {@link
    * #getName()} returns "req_bytes" and {@link #getExpositionBaseName()} returns "req_bytes".
    */
+  @StableApi
   public String getOriginalName() {
     return originalName;
   }
@@ -257,6 +264,7 @@ public final class MetricMetadata {
    * if the user called {@code Counter.builder().name("events_total")}, this returns "events_total"
    * while {@link #getName()} returns "events".
    */
+  @StableApi
   public String getExpositionBaseName() {
     return expositionBaseName;
   }
@@ -265,19 +273,23 @@ public final class MetricMetadata {
    * Same as {@link #getExpositionBaseName()} but with all invalid characters and dots replaced by
    * underscores.
    */
+  @StableApi
   public String getExpositionBasePrometheusName() {
     return expositionBasePrometheusName;
   }
 
+  @StableApi
   @Nullable
   public String getHelp() {
     return help;
   }
 
+  @StableApi
   public boolean hasUnit() {
     return unit != null;
   }
 
+  @StableApi
   @Nullable
   public Unit getUnit() {
     return unit;
