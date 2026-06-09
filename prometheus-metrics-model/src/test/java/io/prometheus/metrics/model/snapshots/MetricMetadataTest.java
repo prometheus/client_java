@@ -162,7 +162,6 @@ class MetricMetadataTest {
     assertThat(m.getExpositionBasePrometheusName()).isEqualTo("my_requests_total");
   }
 
-
   @Test
   void builder_customOriginalAndExpositionBaseName() {
     MetricMetadata m =
