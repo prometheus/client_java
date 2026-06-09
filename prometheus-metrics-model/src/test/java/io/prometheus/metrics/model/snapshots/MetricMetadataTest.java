@@ -162,6 +162,24 @@ class MetricMetadataTest {
     assertThat(m.getExpositionBasePrometheusName()).isEqualTo("my_requests_total");
   }
 
+
+  @Test
+  void builder_customOriginalAndExpositionBaseName() {
+    MetricMetadata m =
+        MetricMetadata.builder()
+            .name("requests_bytes")
+            .expositionBaseName("requests_total_bytes")
+            .originalName("requests_total")
+            .help("help")
+            .unit(Unit.BYTES)
+            .build();
+    assertThat(m.getName()).isEqualTo("requests_bytes");
+    assertThat(m.getExpositionBaseName()).isEqualTo("requests_total_bytes");
+    assertThat(m.getOriginalName()).isEqualTo("requests_total");
+    assertThat(m.getHelp()).isEqualTo("help");
+    assertThat(m.getUnit()).isEqualTo(Unit.BYTES);
+  }
+
   @Test
   void builder_nonCounterExpositionBaseEqualsName() {
     MetricMetadata m = MetricMetadata.builder().name("active_connections").build();

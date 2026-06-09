@@ -18,7 +18,6 @@ final class MetricMetadataSupport {
     return typedMetadata(name, help, null, "_info", ".info");
   }
 
-  @SuppressWarnings("deprecation")
   private static MetricMetadata typedMetadata(
       String originalName,
       @Nullable String help,
@@ -26,12 +25,13 @@ final class MetricMetadataSupport {
       String suffix,
       String dotSuffix) {
     String baseName = stripSuffix(originalName, suffix, dotSuffix);
-    return new MetricMetadata(
-        appendUnitIfMissing(baseName, unit),
-        appendUnitIfMissing(originalName, unit),
-        originalName,
-        help,
-        unit);
+    return MetricMetadata.builder()
+        .name(appendUnitIfMissing(baseName, unit))
+        .expositionBaseName(appendUnitIfMissing(originalName, unit))
+        .originalName(originalName)
+        .help(help)
+        .unit(unit)
+        .build();
   }
 
   private static String appendUnitIfMissing(String name, @Nullable Unit unit) {

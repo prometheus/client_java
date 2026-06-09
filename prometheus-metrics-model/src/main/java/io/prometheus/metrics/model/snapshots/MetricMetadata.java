@@ -93,9 +93,10 @@ public final class MetricMetadata {
   }
 
   /** Builder for {@link MetricMetadata}. */
-  @StableApi
   public static final class Builder {
     @Nullable private String name;
+    @Nullable private String expositionBaseName;
+    @Nullable private String originalName;
     @Nullable private String help;
     @Nullable private Unit unit;
     private boolean counterSuffix;
@@ -103,19 +104,35 @@ public final class MetricMetadata {
     private Builder() {}
 
     /** Required. The base metric name (without type suffix like {@code _total}). */
+    @StableApi
     public Builder name(String name) {
       this.name = name;
+      if (originalName == null) {
+        this.originalName = name;
+      }
+      return this;
+    }
+
+    public Builder expositionBaseName(String expositionBaseName) {
+      this.expositionBaseName = expositionBaseName;
+      return this;
+    }
+
+    public Builder originalName(String originalName) {
+      this.originalName = originalName;
       return this;
     }
 
     /** Optional. Human-readable description of the metric. */
-    public Builder help(String help) {
+    @StableApi
+    public Builder help(@Nullable String help) {
       this.help = help;
       return this;
     }
 
     /** Optional. The unit of measurement. Appended to the name if not already present. */
-    public Builder unit(Unit unit) {
+    @StableApi
+    public Builder unit(@Nullable Unit unit) {
       this.unit = unit;
       return this;
     }
@@ -125,27 +142,29 @@ public final class MetricMetadata {
      * this for counter metrics, especially UTF-8 names where the writer cannot infer it from the
      * snapshot type alone.
      */
+    @StableApi
     public Builder counterSuffix(boolean counterSuffix) {
       this.counterSuffix = counterSuffix;
       return this;
     }
 
     /** Builds the {@link MetricMetadata}. Throws if {@code name} was not set. */
+    @StableApi
     public MetricMetadata build() {
       if (name == null) {
         throw new IllegalArgumentException("name is required");
       }
-      String baseName = name;
-      if (unit != null && !baseName.endsWith("_" + unit) && !baseName.endsWith("." + unit)) {
-        baseName = baseName + "_" + unit;
-      }
-      String expositionBaseName = baseName;
+      String baseName = appendUnitIfMissing(name, unit);
+      String originalName = this.originalName == null ? name : this.originalName;
+      String expositionBaseName =
+          appendUnitIfMissing(
+              this.expositionBaseName == null ? baseName : this.expositionBaseName, unit);
       if (counterSuffix
           && !expositionBaseName.endsWith("_total")
           && !expositionBaseName.endsWith(".total")) {
         expositionBaseName = expositionBaseName + "_total";
       }
-      return new MetricMetadata(baseName, expositionBaseName, name, help, unit);
+      return new MetricMetadata(baseName, expositionBaseName, originalName, help, unit);
     }
   }
 
@@ -254,6 +273,13 @@ public final class MetricMetadata {
     return unit;
   }
 
+  private static String appendUnitIfMissing(String name, @Nullable Unit unit) {
+    if (unit != null && !name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
+      return name + "_" + unit;
+    }
+    return name;
+  }
+
   private void validate() {
     if (name == null) {
       throw new IllegalArgumentException("Missing required field: name is null");
@@ -285,13 +311,13 @@ public final class MetricMetadata {
     }
   }
 
-  @SuppressWarnings("deprecation")
   MetricMetadata escape(EscapingScheme escapingScheme) {
-    return new MetricMetadata(
-        PrometheusNaming.escapeName(name, escapingScheme),
-        PrometheusNaming.escapeName(expositionBaseName, escapingScheme),
-        PrometheusNaming.escapeName(originalName, escapingScheme),
-        help,
-        unit);
+    return MetricMetadata.builder()
+        .name(PrometheusNaming.escapeName(name, escapingScheme))
+        .expositionBaseName(PrometheusNaming.escapeName(expositionBaseName, escapingScheme))
+        .originalName(PrometheusNaming.escapeName(originalName, escapingScheme))
+        .help(help)
+        .unit(unit)
+        .build();
   }
 }
