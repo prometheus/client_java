@@ -59,8 +59,7 @@
     ".github/workflows/micrometer-compatibility.yml": {
       "regex": [
         "micrometer-metrics/micrometer",
-        "mise",
-        "zeitlinger/micrometer"
+        "mise"
       ]
     },
     ".github/workflows/native-tests.yml": {

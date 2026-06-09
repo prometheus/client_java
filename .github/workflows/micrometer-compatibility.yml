@@ -9,23 +9,7 @@ permissions: {}
 
 jobs:
   compat-test:
-    name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: upstream
-            repository: micrometer-metrics/micrometer
-            # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
-            ref: v1.17.0
-          - name: typed-descriptor
-            # TODO: remove this temporary opt-in leg once Micrometer switches the
-            # Prometheus client integration to typed descriptors by default.
-            # Follow-up: https://github.com/prometheus/client_java/issues/2182
-            repository: zeitlinger/micrometer
-            # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prom-client-java-typed-family-descriptor
-            ref: 09f32142f06b11a88afe41eab50daaf6c8d08efb
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -43,19 +27,7 @@ jobs:
       - name: Run Micrometer compatibility tests
         working-directory: .mise/envs/micrometer
         env:
-          MICROMETER_REPOSITORY: ${{ matrix.repository }}
-          MICROMETER_REF: ${{ matrix.ref }}
+          MICROMETER_REPOSITORY: micrometer-metrics/micrometer
+          # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
+          MICROMETER_REF: v1.17.0
         run: mise compat-test
-
-  micrometer-compatibility:
-    name: micrometer-compatibility
-    runs-on: ubuntu-24.04
-    needs: compat-test
-    if: always()
-    steps:
-      - name: Aggregate matrix results
-        run: |
-          if [[ "${{ needs.compat-test.result }}" != "success" ]]; then
-            echo "compat-test matrix failed: ${{ needs.compat-test.result }}"
-            exit 1
-          fi

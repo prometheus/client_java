@@ -85,13 +85,5 @@
          "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+)\\n\\s*ref:\\s*(?<currentValue>v[0-9][^\\s]*)",
        ],
      },
-     {
-       customType: "regex",
-       description: "pin the Micrometer typed-descriptor compatibility ref",
-       managerFilePatterns: ["/^\\.github\\/workflows\\/micrometer-compatibility\\.yml$/"],
-       matchStrings: [
-         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+) currentValue=(?<currentValue>\\S+)\\n\\s*ref:\\s*(?<currentDigest>[a-f0-9]{40})",
-       ],
-     },
   ],
 }
