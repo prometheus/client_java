@@ -113,11 +113,21 @@ public final class MetricMetadata {
       return this;
     }
 
+    /**
+     * Internal use only. Not part of the stable API.
+     *
+     * <p>Allows internal callers to preserve a separate exposition base name.
+     */
     public Builder expositionBaseName(String expositionBaseName) {
       this.expositionBaseName = expositionBaseName;
       return this;
     }
 
+    /**
+     * Internal use only. Not part of the stable API.
+     *
+     * <p>Allows internal callers to preserve the raw name before normalization.
+     */
     public Builder originalName(String originalName) {
       this.originalName = originalName;
       return this;
