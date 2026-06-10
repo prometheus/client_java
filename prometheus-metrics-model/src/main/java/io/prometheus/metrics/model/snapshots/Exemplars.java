@@ -24,6 +24,10 @@ public class Exemplars implements Iterable<Exemplar> {
   private final List<Exemplar> exemplars;
 
   private Exemplars(Collection<Exemplar> exemplars) {
+    if (exemplars.isEmpty()) {
+      this.exemplars = Collections.emptyList();
+      return;
+    }
     List<Exemplar> copy = new ArrayList<>(exemplars.size());
     for (Exemplar exemplar : exemplars) {
       if (exemplar == null) {
@@ -41,7 +45,7 @@ public class Exemplars implements Iterable<Exemplar> {
    * @param exemplars a copy of the exemplars collection will be created.
    */
   public static Exemplars of(Collection<Exemplar> exemplars) {
-    return new Exemplars(exemplars);
+    return exemplars.isEmpty() ? EMPTY : new Exemplars(exemplars);
   }
 
   /**
@@ -51,7 +55,7 @@ public class Exemplars implements Iterable<Exemplar> {
    * @param exemplars a copy of the exemplars array will be created.
    */
   public static Exemplars of(Exemplar... exemplars) {
-    return new Exemplars(Arrays.asList(exemplars));
+    return exemplars.length == 0 ? EMPTY : new Exemplars(Arrays.asList(exemplars));
   }
 
   @Override
