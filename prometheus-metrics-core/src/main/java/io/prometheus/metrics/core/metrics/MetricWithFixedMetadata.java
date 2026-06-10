@@ -36,7 +36,13 @@ public abstract class MetricWithFixedMetadata extends Metric {
     String originalName = builder.originalName;
     String expositionBaseName = makeExpositionBaseName(originalName, builder.unit);
     this.metadata =
-        new MetricMetadata(name, expositionBaseName, originalName, builder.help, builder.unit);
+        MetricMetadata.builder()
+            .name(name)
+            .expositionBaseName(expositionBaseName)
+            .originalName(originalName)
+            .help(builder.help)
+            .unit(builder.unit)
+            .build();
     this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
   }
 

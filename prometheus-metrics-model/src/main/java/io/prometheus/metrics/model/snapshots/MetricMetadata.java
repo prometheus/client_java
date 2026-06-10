@@ -5,7 +5,6 @@ import io.prometheus.metrics.config.EscapingScheme;
 import javax.annotation.Nullable;
 
 /** Immutable container for metric metadata: name, help, unit. */
-@StableApi
 public final class MetricMetadata {
 
   /**
@@ -51,11 +50,13 @@ public final class MetricMetadata {
   @Nullable private final Unit unit;
 
   /** See {@link #MetricMetadata(String, String, Unit)} */
+  @StableApi
   public MetricMetadata(String name) {
     this(name, null, null);
   }
 
   /** See {@link #MetricMetadata(String, String, Unit)} */
+  @StableApi
   public MetricMetadata(String name, String help) {
     this(name, help, null);
   }
@@ -69,8 +70,114 @@ public final class MetricMetadata {
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
    */
+  @StableApi
   public MetricMetadata(String name, @Nullable String help, @Nullable Unit unit) {
     this(name, name, help, unit);
+  }
+
+  /**
+   * Creates a builder for {@link MetricMetadata}.
+   *
+   * <p>Use the builder instead of the multi-arg constructors for cleaner, more readable code:
+   *
+   * <pre>{@code
+   * MetricMetadata.builder()
+   *     .name("http_requests")
+   *     .help("Total HTTP requests")
+   *     .unit(Unit.BYTES)
+   *     .counterSuffix(true)
+   *     .build();
+   * }</pre>
+   */
+  @StableApi
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /** Builder for {@link MetricMetadata}. */
+  public static final class Builder {
+    @Nullable private String name;
+    @Nullable private String expositionBaseName;
+    @Nullable private String originalName;
+    @Nullable private String help;
+    @Nullable private Unit unit;
+    private boolean counterSuffix;
+
+    private Builder() {}
+
+    /** Required. The base metric name (without type suffix like {@code _total}). */
+    @StableApi
+    public Builder name(String name) {
+      this.name = name;
+      if (originalName == null) {
+        this.originalName = name;
+      }
+      return this;
+    }
+
+    /**
+     * Internal use only. Not part of the stable API.
+     *
+     * <p>Allows internal callers to preserve a separate exposition base name.
+     */
+    public Builder expositionBaseName(String expositionBaseName) {
+      this.expositionBaseName = expositionBaseName;
+      return this;
+    }
+
+    /**
+     * Internal use only. Not part of the stable API.
+     *
+     * <p>Allows internal callers to preserve the raw name before normalization.
+     */
+    public Builder originalName(String originalName) {
+      this.originalName = originalName;
+      return this;
+    }
+
+    /** Optional. Human-readable description of the metric. */
+    @StableApi
+    public Builder help(@Nullable String help) {
+      this.help = help;
+      return this;
+    }
+
+    /** Optional. The unit of measurement. Appended to the name if not already present. */
+    @StableApi
+    public Builder unit(@Nullable Unit unit) {
+      this.unit = unit;
+      return this;
+    }
+
+    /**
+     * Optional. When {@code true}, the writer appends {@code _total} to the exposition name. Use
+     * this for counter metrics, especially UTF-8 names where the writer cannot infer it from the
+     * snapshot type alone.
+     */
+    @StableApi
+    public Builder counterSuffix(boolean counterSuffix) {
+      this.counterSuffix = counterSuffix;
+      return this;
+    }
+
+    /** Builds the {@link MetricMetadata}. Throws if {@code name} was not set. */
+    @StableApi
+    public MetricMetadata build() {
+      if (name == null) {
+        throw new IllegalArgumentException("name is required");
+      }
+      String baseName = appendUnitIfMissing(name, unit);
+      String originalName = this.originalName == null ? name : this.originalName;
+      String expositionBaseName =
+          appendUnitIfMissing(
+              this.expositionBaseName == null ? baseName : this.expositionBaseName, unit);
+      if (counterSuffix
+          && !expositionBaseName.endsWith("_total")
+          && !expositionBaseName.endsWith(".total")) {
+        expositionBaseName = expositionBaseName + "_total";
+      }
+      return new MetricMetadata(baseName, expositionBaseName, originalName, help, unit);
+    }
   }
 
   /**
@@ -82,7 +189,10 @@ public final class MetricMetadata {
    *     format writers for smart-append logic
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
+   * @deprecated Use {@link #builder()} instead.
    */
+  @StableApi
+  @Deprecated
   public MetricMetadata(
       String name, String expositionBaseName, @Nullable String help, @Nullable Unit unit) {
     this(name, expositionBaseName, expositionBaseName, help, unit);
@@ -97,7 +207,10 @@ public final class MetricMetadata {
    * @param originalName the raw name as provided by the user, before any modification
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
+   * @deprecated Use {@link #builder()} instead.
    */
+  @StableApi
+  @Deprecated
   public MetricMetadata(
       String name,
       String expositionBaseName,
@@ -121,6 +234,7 @@ public final class MetricMetadata {
    * <p>The name may contain any Unicode chars. Use {@link #getPrometheusName()} to get the name in
    * legacy Prometheus format, i.e. with all dots and all invalid chars replaced by underscores.
    */
+  @StableApi
   public String getName() {
     return name;
   }
@@ -130,6 +244,7 @@ public final class MetricMetadata {
    *
    * <p>This is used by Prometheus exposition formats.
    */
+  @StableApi
   public String getPrometheusName() {
     return prometheusName;
   }
@@ -139,6 +254,7 @@ public final class MetricMetadata {
    * called {@code Counter.builder().name("req").unit(BYTES)}, this returns "req" while {@link
    * #getName()} returns "req_bytes" and {@link #getExpositionBaseName()} returns "req_bytes".
    */
+  @StableApi
   public String getOriginalName() {
     return originalName;
   }
@@ -148,6 +264,7 @@ public final class MetricMetadata {
    * if the user called {@code Counter.builder().name("events_total")}, this returns "events_total"
    * while {@link #getName()} returns "events".
    */
+  @StableApi
   public String getExpositionBaseName() {
     return expositionBaseName;
   }
@@ -156,22 +273,33 @@ public final class MetricMetadata {
    * Same as {@link #getExpositionBaseName()} but with all invalid characters and dots replaced by
    * underscores.
    */
+  @StableApi
   public String getExpositionBasePrometheusName() {
     return expositionBasePrometheusName;
   }
 
+  @StableApi
   @Nullable
   public String getHelp() {
     return help;
   }
 
+  @StableApi
   public boolean hasUnit() {
     return unit != null;
   }
 
+  @StableApi
   @Nullable
   public Unit getUnit() {
     return unit;
+  }
+
+  private static String appendUnitIfMissing(String name, @Nullable Unit unit) {
+    if (unit != null && !name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
+      return name + "_" + unit;
+    }
+    return name;
   }
 
   private void validate() {
@@ -206,11 +334,12 @@ public final class MetricMetadata {
   }
 
   MetricMetadata escape(EscapingScheme escapingScheme) {
-    return new MetricMetadata(
-        PrometheusNaming.escapeName(name, escapingScheme),
-        PrometheusNaming.escapeName(expositionBaseName, escapingScheme),
-        PrometheusNaming.escapeName(originalName, escapingScheme),
-        help,
-        unit);
+    return MetricMetadata.builder()
+        .name(PrometheusNaming.escapeName(name, escapingScheme))
+        .expositionBaseName(PrometheusNaming.escapeName(expositionBaseName, escapingScheme))
+        .originalName(PrometheusNaming.escapeName(originalName, escapingScheme))
+        .help(help)
+        .unit(unit)
+        .build();
   }
 }
