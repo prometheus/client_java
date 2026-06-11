@@ -26,6 +26,11 @@
         "mise"
       ]
     },
+    ".github/workflows/bump-api-diff-baseline.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/generate-protobuf.yml": {
       "regex": [
         "mise"
