@@ -1,2 +1,2 @@
-Comparing source compatibility of prometheus-metrics-instrumentation-caffeine-1.8.0.jar against prometheus-metrics-instrumentation-caffeine-1.8.0.jar
+Comparing source compatibility of prometheus-metrics-instrumentation-caffeine-1.8.1-SNAPSHOT.jar against prometheus-metrics-instrumentation-caffeine-1.8.0.jar
 No changes.
