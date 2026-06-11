@@ -181,7 +181,7 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   @Test
-  void testInfoHelpNameMatchesMeterName() throws IOException {
+  void testInfoPreservesOriginalName() throws IOException {
     MetricSnapshots snapshots =
         MetricSnapshots.of(
             InfoSnapshot.builder()
@@ -195,12 +195,35 @@ class OpenMetrics2TextFormatWriterTest {
 
     String om2Output = writeWithOM2(snapshots);
 
-    // OM2: TYPE/HELP use the full name including _info (help name == meter name)
+    // OM2: preserve the original metric name without appending _info.
+    assertThat(om2Output)
+        .isEqualTo(
+            "# TYPE my info\n"
+                + "# HELP my Test info\n"
+                + "my{platform=\"linux\",version=\"1.0\"} 1\n"
+                + "# EOF\n");
+  }
+
+  @Test
+  void testInfoKeepsExistingInfoSuffix() throws IOException {
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            InfoSnapshot.builder()
+                .name("my_info")
+                .help("Test info")
+                .dataPoint(
+                    InfoSnapshot.InfoDataPointSnapshot.builder()
+                        .labels(Labels.of("version", "1.0"))
+                        .build())
+                .build());
+
+    String om2Output = writeWithOM2(snapshots);
+
     assertThat(om2Output)
         .isEqualTo(
             "# TYPE my_info info\n"
                 + "# HELP my_info Test info\n"
-                + "my_info{platform=\"linux\",version=\"1.0\"} 1\n"
+                + "my_info{version=\"1.0\"} 1\n"
                 + "# EOF\n");
   }
 

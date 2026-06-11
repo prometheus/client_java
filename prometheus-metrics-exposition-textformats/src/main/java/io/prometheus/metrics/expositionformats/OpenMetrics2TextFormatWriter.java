@@ -41,8 +41,8 @@ import javax.annotation.Nullable;
 
 /**
  * Write the OpenMetrics 2.0 text format. Unlike the OM1 writer, this writer outputs metric names as
- * provided by the user, without appending {@code _total} or unit suffixes. The {@code _info} suffix
- * is enforced per the OM2 spec (MUST). This is experimental and subject to change as the <a
+ * provided by the user, without appending {@code _total}, unit, or {@code _info} suffixes. This is
+ * experimental and subject to change as the <a
  * href="https://github.com/prometheus/docs/blob/main/docs/specs/om/open_metrics_spec_2_0.md">OpenMetrics
  * 2.0 specification</a> evolves.
  */
@@ -550,9 +550,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeInfo(Writer writer, InfoSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    // OM2 spec: Info MetricFamily name MUST end in _info.
-    // In OM2, TYPE/HELP use the same name as the data lines.
-    String infoName = ensureSuffix(getOriginalMetadataName(metadata, scheme), "_info");
+    String infoName = getOriginalMetadataName(metadata, scheme);
     writeMetadataWithName(writer, infoName, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
       writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme);
@@ -712,12 +710,5 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writeEscapedString(writer, metadata.getHelp());
       writer.write('\n');
     }
-  }
-
-  private static String ensureSuffix(String name, String suffix) {
-    if (name.endsWith(suffix)) {
-      return name;
-    }
-    return name + suffix;
   }
 }
