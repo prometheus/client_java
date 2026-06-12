@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>client_java_parent</artifactId>
-    <version>1.7.1-SNAPSHOT</version>
+    <version>1.8.1-SNAPSHOT</version>
     <relativePath>prometheus-metrics-parent/pom.xml</relativePath>
   </parent>
 
@@ -29,8 +29,8 @@
     <otel.instrumentation.version>2.28.1-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
-    <!-- renovate: datasource=maven packageName=io.prometheus:prometheus-metrics-core -->
-    <api.diff.baseline.version>1.7.0</api.diff.baseline.version>
+    <!-- Bumped by .github/workflows/bump-api-diff-baseline.yml after each release. -->
+    <api.diff.baseline.version>1.8.0</api.diff.baseline.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>

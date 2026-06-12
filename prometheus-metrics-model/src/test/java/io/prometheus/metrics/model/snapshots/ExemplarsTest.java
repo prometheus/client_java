@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.Collections;
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
@@ -52,5 +53,23 @@ class ExemplarsTest {
     assertThat(newest).isSameAs(result);
 
     assertThat(exemplars.getLatest()).isSameAs(newest);
+  }
+
+  @Test
+  void testEmptyReturnsSingleton() {
+    // Empty inputs short-circuit to the EMPTY singleton, avoiding allocations.
+    assertThat(Exemplars.of()).isSameAs(Exemplars.EMPTY);
+    assertThat(Exemplars.of(Collections.emptyList())).isSameAs(Exemplars.EMPTY);
+    assertThat(Exemplars.builder().build()).isSameAs(Exemplars.EMPTY);
+  }
+
+  @Test
+  void testEmptyIteratorIsSingleton() {
+    // Collections.emptyList().iterator() returns the JDK singleton empty iterator, so reading an
+    // empty Exemplars allocates no iterator.
+    assertThat(Exemplars.EMPTY.size()).isZero();
+    assertThat(Exemplars.EMPTY.iterator()).isSameAs(Collections.emptyIterator());
+    assertThat(Exemplars.EMPTY.get(0.0, Double.POSITIVE_INFINITY)).isNull();
+    assertThat(Exemplars.EMPTY.getLatest()).isNull();
   }
 }

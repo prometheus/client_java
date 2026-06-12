@@ -15,7 +15,8 @@ jobs:
     if: ${{ github.repository == 'prometheus/client_java' }}
     environment: release
     runs-on: ubuntu-24.04
-    permissions: {}
+    permissions:
+      actions: write # required to trigger bump-api-diff-baseline.yml via `gh workflow run`
 
     steps:
       - name: Verify release secrets
@@ -94,3 +95,11 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+
+      - name: Bump api-diff baseline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: >
+          gh workflow run bump-api-diff-baseline.yml
+          --repo "${GITHUB_REPOSITORY}" -f "tag=${TAG}"

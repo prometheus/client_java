@@ -1,0 +1,94 @@
+---
+name: Bump API Diff Baseline
+
+# After release.yml publishes to Maven Central, push a baseline bump and
+# regenerated docs/apidiffs onto release-please's open snapshot-bump PR branch
+# (release-please--branches--main). The user merges a single PR that bumps to
+# the next -SNAPSHOT *and* updates the api-diff baseline, so there is no window
+# where main has a stale baseline.
+#
+# If the snapshot PR branch no longer exists (already merged), this workflow
+# fails loudly — re-run via workflow_dispatch after recreating it, or bump
+# manually.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Released tag (e.g. v1.8.0)"
+        required: true
+
+permissions: {}
+
+env:
+  SNAPSHOT_BRANCH: release-please--branches--main
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # push to the snapshot PR branch
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ env.SNAPSHOT_BRANCH }}
+          persist-credentials: true
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          version: v2026.5.18
+          sha256: cfac593469d028d7ae5fe36e37bd7c59118b5238e92d8a876209578464f24a84
+      - name: Cache local Maven repository
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Compute versions and bump baseline
+        id: bump
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          NEW="${TAG#v}"
+          baseline() {
+            grep -oP '(?<=<api\.diff\.baseline\.version>)[^<]+' "$1"
+          }
+          OLD=$(baseline pom.xml)
+          if [[ -z "$OLD" ]]; then
+            echo "::error::Could not read api.diff.baseline.version"
+            exit 1
+          fi
+          if [[ "$OLD" == "$NEW" ]]; then
+            echo "Baseline already $NEW; nothing to do"
+            echo "skip=true" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          sed -i -E \
+            "s|(<api\.diff\.baseline\.version>)[^<]+(</api\.diff\.baseline\.version>)|\1${NEW}\2|" \
+            pom.xml
+          if [[ -d docs/apidiffs/current_vs_latest ]]; then
+            cp -r docs/apidiffs/current_vs_latest "docs/apidiffs/${NEW}_vs_${OLD}"
+          fi
+          echo "old=${OLD}" >>"$GITHUB_OUTPUT"
+          echo "new=${NEW}" >>"$GITHUB_OUTPUT"
+      - name: Regenerate docs/apidiffs
+        if: steps.bump.outputs.skip != 'true'
+        run: mise run api-diff
+      - name: Push to snapshot PR branch
+        if: steps.bump.outputs.skip != 'true'
+        env:
+          NEW: ${{ steps.bump.outputs.new }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pom.xml docs/apidiffs
+          OUTSIDE=$(git status --porcelain -- ':(exclude)pom.xml' ':(exclude)docs/apidiffs')
+          if [[ -n "$OUTSIDE" ]]; then
+            echo "::error::Unexpected changes outside pom.xml/docs/apidiffs:"
+            echo "$OUTSIDE"
+            exit 1
+          fi
+          git commit -m "chore: bump api-diff baseline to ${NEW}"
+          # Note: GITHUB_TOKEN pushes don't trigger CI re-runs on the PR.
+          # Close and reopen the snapshot PR to trigger CI after this commit.
+          git push origin "HEAD:${SNAPSHOT_BRANCH}"
