@@ -107,76 +107,76 @@ checksum = "sha256:22872cad20b8ce8ccab28c42ce17acc9aa64b82cbad7d130ee74196cd74cd
 url = "https://github.com/jonwiggins/xmloxide/releases/download/v0.4.3/xmllint_windows-x86-64.exe"
 
 [[tools."aqua:owenlamont/ryl"]]
-version = "0.14.0"
+version = "0.18.1"
 backend = "aqua:owenlamont/ryl"
 
 [tools."aqua:owenlamont/ryl"."platforms.linux-arm64"]
-checksum = "sha256:9f92c37a90cc75641a8c1432f2ac19f5e2263a5cecd31178eba8cd443098f242"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:145987f79f6ae4063530671549adf6d77fae74aab1fcfc6289e74e9775441dcf"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools."aqua:owenlamont/ryl"."platforms.linux-arm64-musl"]
-checksum = "sha256:9f92c37a90cc75641a8c1432f2ac19f5e2263a5cecd31178eba8cd443098f242"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:145987f79f6ae4063530671549adf6d77fae74aab1fcfc6289e74e9775441dcf"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools."aqua:owenlamont/ryl"."platforms.linux-x64"]
-checksum = "sha256:c6ab1fc5db429fb2979d61d30f047dfebcc47153e46cf85a890a8cbeec0a488a"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4ec8bd26035d2030dcdf3869f2a4bf7f75076aadbeebb27e59410290d2873bab"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools."aqua:owenlamont/ryl"."platforms.linux-x64-musl"]
-checksum = "sha256:c6ab1fc5db429fb2979d61d30f047dfebcc47153e46cf85a890a8cbeec0a488a"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:4ec8bd26035d2030dcdf3869f2a4bf7f75076aadbeebb27e59410290d2873bab"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools."aqua:owenlamont/ryl"."platforms.macos-arm64"]
-checksum = "sha256:e4ef9c18a172c858aa03708983fa729dd0858485b6e7507ee3842bea69b80050"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:526486a1642c4a79438e9e8e69c4e829904024138931f9f7415a78aaed336952"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools."aqua:owenlamont/ryl"."platforms.windows-x64"]
-checksum = "sha256:436e85e23d9df970597caab96cedd7b2b347a0f9931da17f4aa2dfae445aab31"
-url = "https://github.com/owenlamont/ryl/releases/download/v0.14.0/ryl-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:1a45f217c38e303cfe437da39716259545a105f808be4ac9798e3d91413ec41c"
+url = "https://github.com/owenlamont/ryl/releases/download/v0.18.1/ryl-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools.biome]]
-version = "2.4.16"
+version = "2.5.0"
 backend = "aqua:biomejs/biome"
 
 [tools.biome."platforms.linux-arm64"]
-checksum = "sha256:e81067782ddd9a9d45e13b8fe18bbef54c490cf26126f05d67bb370caf47502a"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-linux-arm64"
+checksum = "sha256:27c9bc5994dfb5711f5f09a4c3c35749ca9c4a898a063bb062e6b932dbc2571d"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-linux-arm64"
 provenance = "github-attestations"
 
 [tools.biome."platforms.linux-arm64-musl"]
-checksum = "sha256:f288ac4e33d35ef08ee333419525df8cf9e74a617447d651a3fad052a9612731"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-linux-arm64-musl"
+checksum = "sha256:fb6b47765cdc5bf4e5af9fdf18c17aa1306c8eb7f227a36d6580d67472a77dbb"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-linux-arm64-musl"
 provenance = "github-attestations"
 
 [tools.biome."platforms.linux-x64"]
-checksum = "sha256:f6904c208ce8884cf859460178f32f885250b375da1810c551912a029f4abf79"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-linux-x64"
+checksum = "sha256:e7df298f0551dd90bea4425779369aa3130d9817f4acc4f663ef63c327206a19"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-linux-x64"
 provenance = "github-attestations"
 
 [tools.biome."platforms.linux-x64-musl"]
-checksum = "sha256:e7102113e10c57772ce969ce088f54ec2cc37331bb4601e5f5369fd94a6fe1d9"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-linux-x64-musl"
+checksum = "sha256:16620d56fd50c5b3dc689a80611a2b58dd22a55918894b2520b534da877d2e66"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-linux-x64-musl"
 provenance = "github-attestations"
 
 [tools.biome."platforms.macos-arm64"]
-checksum = "sha256:8cf9e92a161e26bdbfc0896c208864e1de8b160dfb90f61040609c2743cf433b"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-darwin-arm64"
+checksum = "sha256:9b9e04f749db6b037b0ad38ba0c5cce63b185a7cc3b049e577dad3c18f4adb2c"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-darwin-arm64"
 provenance = "github-attestations"
 
 [tools.biome."platforms.macos-x64"]
-checksum = "sha256:42329e159a2f35b3776a01e7a16a53582d53e126fbc55bfdd5825e873a87b338"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-darwin-x64"
+checksum = "sha256:0c7002cc808eebabe7852c8417b9deb1a5615342e6881c588b49367c6c56db8c"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-darwin-x64"
 provenance = "github-attestations"
 
 [tools.biome."platforms.windows-x64"]
-checksum = "sha256:1247239dae8f57aafeaeb9914e30b92efcc51c632eee3be4463a95969558f6a3"
-url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.4.16/biome-win32-x64.exe"
+checksum = "sha256:84d4e71fdbb4b15b1aa83c1b1cc033aae9856d48a7a857c1381b1bd499430f7c"
+url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.0/biome-win32-x64.exe"
 provenance = "github-attestations"
 
 [[tools.editorconfig-checker]]
@@ -408,81 +408,81 @@ checksum = "sha256:d1cede9e308cc3eb072392af1c02ccae4bdd3d2f374ec2970dbd8cdfdaa91
 url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.0/protoc-35.0-win64.zip"
 
 [[tools.ruff]]
-version = "0.15.16"
+version = "0.15.17"
 backend = "aqua:astral-sh/ruff"
 
 [tools.ruff."platforms.linux-arm64"]
-checksum = "sha256:3b39fc2608e12c554d42f6950a5ea131db8d8a0736c8949b3581c361f9f011d4"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:211d610dd81ef472d3b1404b28eaa19a62cb41ab9374584847307b97821a4ab8"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-arm64-musl"]
-checksum = "sha256:3b39fc2608e12c554d42f6950a5ea131db8d8a0736c8949b3581c361f9f011d4"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:211d610dd81ef472d3b1404b28eaa19a62cb41ab9374584847307b97821a4ab8"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-x64"]
-checksum = "sha256:f52d90f8a6b1b3ad7d74301c3c796652e851d8f05b6ba26d139f05f4838cf412"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:cbf85fc152b7fc25cb27f0233b325e9c72cb26965152050164e7608b72515189"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-x64-musl"]
-checksum = "sha256:f52d90f8a6b1b3ad7d74301c3c796652e851d8f05b6ba26d139f05f4838cf412"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:cbf85fc152b7fc25cb27f0233b325e9c72cb26965152050164e7608b72515189"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.macos-arm64"]
-checksum = "sha256:9deb6c4c38c9324bfd98ea4efb40946aae99a987e7f9d1308a1291f14f6b46e2"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:81f372886fb7a0056949356c615fa689a091cf79b0b54ed914c810cdbc6d85e9"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.macos-x64"]
-checksum = "sha256:a8a7a60182f66b5995bd16e1831cf013e89558edf52135a1b6646f155f491f98"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:5522e517bd67ee8c2cb0d6a8298388d8edc8621a0bc5dc773f65e06c953693f6"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-x86_64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.windows-x64"]
-checksum = "sha256:b6c843fa84afb37af9d665a418324782ae18ea3dd1de775abfd7cf17f9431f85"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.16/ruff-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:08b6cb2bd20f3d19e3cf6e768d8d8105c8337de1c52e90c7dc1deea483d68c86"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.17/ruff-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools.rumdl]]
-version = "0.2.9"
+version = "v0.2.17"
 backend = "aqua:rvben/rumdl"
 
 [tools.rumdl."platforms.linux-arm64"]
-checksum = "sha256:a319a4934c43f0269e8805e773e8ea3be020f147a61c15e16d068b975fb5c280"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:373126181bd8da7a1571d8ab5a6a2f917122f803a419588007b8cc463dec8539"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.linux-arm64-musl"]
-checksum = "sha256:a319a4934c43f0269e8805e773e8ea3be020f147a61c15e16d068b975fb5c280"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:373126181bd8da7a1571d8ab5a6a2f917122f803a419588007b8cc463dec8539"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.linux-x64"]
-checksum = "sha256:dee92319de062a2d97fa72769eb15f0744241741d0b439fd69e0d58d0a03e505"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:8629b7e34fd722910b5412347ab22890a8c4c5740caa13660ea30ab7aeb85f53"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.linux-x64-musl"]
-checksum = "sha256:dee92319de062a2d97fa72769eb15f0744241741d0b439fd69e0d58d0a03e505"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:8629b7e34fd722910b5412347ab22890a8c4c5740caa13660ea30ab7aeb85f53"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.macos-arm64"]
-checksum = "sha256:772ccabd903bf9fc9844b706c14d433c4233202eef19e5c34561f516ae3b8f99"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:b458250418ac87d32031cd7bfcbb9daed085a325390995aa8253467797c97443"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.macos-x64"]
-checksum = "sha256:3939cc5606315a99f0878452c02eab1b8f1a844eed2452c36f838c37ce46b653"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:b30dd76a93c2b06330b65a75e533a34447762ca1407876e577e606b3fee1ea74"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-x86_64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.rumdl."platforms.windows-x64"]
-checksum = "sha256:cd4c42c26aa31ff62add313bb8ff6b0d1cbe2e043e8b42895736fa1d20a1755c"
-url = "https://github.com/rvben/rumdl/releases/download/v0.2.9/rumdl-v0.2.9-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:050bdfdb465f48b78f7f4310694fc38352ce10d08884ccaaa88d901ba2c72884"
+url = "https://github.com/rvben/rumdl/releases/download/v0.2.17/rumdl-v0.2.17-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools.shellcheck]]
