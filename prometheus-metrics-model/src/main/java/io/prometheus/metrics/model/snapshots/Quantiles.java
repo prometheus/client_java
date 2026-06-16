@@ -17,7 +17,7 @@ public class Quantiles implements Iterable<Quantile> {
 
   private Quantiles(List<Quantile> quantiles) {
     quantiles = new ArrayList<>(quantiles);
-    quantiles.sort(Comparator.comparing(Quantile::getQuantile));
+    quantiles.sort(Comparator.comparingDouble(Quantile::getQuantile));
     this.quantiles = Collections.unmodifiableList(quantiles);
     validate();
   }
