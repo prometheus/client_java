@@ -34,6 +34,11 @@ import java.util.ListIterator;
  */
 final class CKMSQuantiles {
 
+  @SuppressWarnings("ReferenceEquality")
+  private static boolean sameObject(Object left, Object right) {
+    return left == right;
+  }
+
   final Quantile[] quantiles;
 
   /** Total number of observations (not including those that are still in the buffer). */
@@ -203,7 +208,7 @@ final class CKMSQuantiles {
       right = left;
       left = descendingIterator.next();
       r = r - left.g;
-      if (left == samples.getFirst()) {
+      if (sameObject(left, samples.getFirst())) {
         // The min sample must never be merged.
         break;
       }
