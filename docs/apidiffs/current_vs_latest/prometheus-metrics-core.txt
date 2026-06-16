@@ -1,2 +1,4 @@
 Comparing source compatibility of prometheus-metrics-core-1.8.1-SNAPSHOT.jar against prometheus-metrics-core-1.8.0.jar
-No changes.
+***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.core.exemplars.ExemplarSampler  (not serializable)
+	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
+
