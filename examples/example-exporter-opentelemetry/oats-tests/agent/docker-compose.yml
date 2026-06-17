@@ -4,7 +4,7 @@ version: "3.4"
 services:
   java:
     build:
-      context: ../..
+      context: ../../examples/example-exporter-opentelemetry
       dockerfile: oats-tests/agent/Dockerfile
     environment:
       OTEL_SERVICE_NAME: "rolldice"
