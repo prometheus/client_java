@@ -1,4 +1,5 @@
 [tools]
+go = "1.25.4"
 "go:github.com/grafana/oats" = "0.7.0"
 hugo = "0.163.0"
 java = "temurin-25.0.3+9.0.LTS"
@@ -93,7 +94,23 @@ run = "flint run --fix"
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
 depends = "build"
-run = "oats -lgtm-version $LGTM_VERSION -timeout 5m examples/"
+run = """
+# renovate: datasource=github-releases depName=gcx packageName=grafana/gcx
+export GCX_VERSION=v0.4.0
+go install "github.com/grafana/gcx/cmd/gcx@${GCX_VERSION}"
+
+workdir="$(mktemp -d)"
+trap 'rm -rf "$workdir"' EXIT
+git clone --depth 1 --branch v2 https://github.com/grafana/oats "$workdir/oats-src"
+go build -o "$workdir/oats" "$workdir/oats-src/cmd/v2"
+
+REAL_GCX_BIN="$(go env GOPATH)/bin/gcx" \
+  "$workdir/oats" \
+  --config oats.toml \
+  --gcx ./ci/oats/gcx-wrapper.sh \
+  --no-cache \
+  --timeout=5m
+"""
 
 [tasks.javadoc]
 description = "Generate Javadoc"

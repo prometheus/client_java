@@ -103,6 +103,11 @@
         "maven"
       ]
     },
+    "ci/oats/docker-compose.lgtm.yml": {
+      "docker-compose": [
+        "docker.io/grafana/otel-lgtm"
+      ]
+    },
     "examples/example-custom-buckets/docker-compose.yaml": {
       "docker-compose": [
         "eclipse-temurin",
@@ -152,6 +157,7 @@
         "aqua:owenlamont/ryl",
         "biome",
         "editorconfig-checker",
+        "go",
         "go:github.com/grafana/oats",
         "google-java-format",
         "hugo",
@@ -169,6 +175,7 @@
         "zizmor"
       ],
       "regex": [
+        "gcx",
         "grafana/docker-otel-lgtm",
         "micrometer-metrics/micrometer",
         "prometheus/jmx_exporter"

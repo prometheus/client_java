@@ -1,10 +1,8 @@
-# OATS is an acceptance testing framework for OpenTelemetry -
-# https://github.com/grafana/oats/tree/main/yaml
-oats-schema-version: 2
-docker-compose:
-  files:
-    - ./docker-compose.yml
+oats: 2
+name: http protobuf exporter emits uptime metric
+seed:
+  type: app
 expected:
   metrics:
-    - promql: "uptime_seconds_total{}"
-      value: ">= 0"
+    - promql: 'uptime_seconds_total{}'
+      value: '>= 0'
