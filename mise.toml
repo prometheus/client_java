@@ -116,7 +116,7 @@ go install "github.com/grafana/gcx/cmd/gcx@${GCX_VERSION}"
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir" ${gotmp:+"$gotmp"}' EXIT
 git clone --depth 1 --branch v2 https://github.com/grafana/oats "$workdir/oats-src"
-GOWORK=off go build -o "$workdir/oats" "$workdir/oats-src/cmd/v2"
+GOWORK=off go -C "$workdir/oats-src" build -o "$workdir/oats" ./cmd/v2
 
 REAL_GCX_BIN="$(go env GOPATH)/bin/gcx" \
   "$workdir/oats" \
