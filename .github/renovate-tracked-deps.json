@@ -157,6 +157,7 @@
         "aqua:owenlamont/ryl",
         "biome",
         "editorconfig-checker",
+        "go:github.com/grafana/oats",
         "google-java-format",
         "hugo",
         "java",
