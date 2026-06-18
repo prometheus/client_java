@@ -4,7 +4,5 @@ seed:
   type: app
 expected:
   custom-checks:
+    - script: ./check_uptime_metric.py
     - script: ./service_instance_id_check.py
-  metrics:
-    - promql: 'uptime_seconds_total{}'
-      value: '>= 0'

@@ -3,6 +3,5 @@ name: http protobuf exporter emits uptime metric
 seed:
   type: app
 expected:
-  metrics:
-    - promql: 'uptime_seconds_total{}'
-      value: '>= 0'
+  custom-checks:
+    - script: ./check_uptime_metric.py
