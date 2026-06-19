@@ -1,28 +1,7 @@
+cases = [
+  "examples/example-exporter-opentelemetry/oats-tests/http/oats.yaml",
+  "examples/example-exporter-opentelemetry/oats-tests/agent/oats.yaml",
+]
+
 [meta]
 version = 2
-
-[[suite]]
-name = "example-exporter-http"
-cases = ["examples/example-exporter-opentelemetry/oats-tests/http/oats.yaml"]
-fixture = "example-exporter-http"
-tags = ["metrics", "http-protobuf"]
-
-[[suite]]
-name = "example-exporter-agent"
-cases = ["examples/example-exporter-opentelemetry/oats-tests/agent/oats.yaml"]
-fixture = "example-exporter-agent"
-tags = ["metrics", "custom-check", "javaagent"]
-
-[fixture.example-exporter-http]
-type = "compose"
-compose_files = [
-  "ci/oats/docker-compose.lgtm.yml",
-  "examples/example-exporter-opentelemetry/oats-tests/http/docker-compose.yml",
-]
-
-[fixture.example-exporter-agent]
-type = "compose"
-compose_files = [
-  "ci/oats/docker-compose.lgtm.yml",
-  "examples/example-exporter-opentelemetry/oats-tests/agent/docker-compose.yml",
-]

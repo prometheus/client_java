@@ -1,8 +1,14 @@
 oats: 2
 name: java agent exporter preserves target_info identity
+fixture:
+  type: compose
+  template: lgtm
+  compose_file: docker-compose.yml
 seed:
   type: app
 expected:
+  metrics:
+    - promql: 'uptime_seconds_total{}'
+      value: '>= 0'
   custom-checks:
-    - script: ./check_uptime_metric.py
     - script: ./service_instance_id_check.py
