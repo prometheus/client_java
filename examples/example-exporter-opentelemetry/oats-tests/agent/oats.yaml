@@ -10,5 +10,7 @@ expected:
   metrics:
     - promql: 'uptime_seconds_total{}'
       value: '>= 0'
-  custom-checks:
-    - script: ./service_instance_id_check.py
+    - promql: 'count(count by(instance) (target_info{service_name!="otelcol-contrib"}))'
+      value: '== 1'
+    - promql: 'count(target_info{service_name!="otelcol-contrib"})'
+      value: '== 2'
