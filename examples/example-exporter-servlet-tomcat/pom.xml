@@ -4,7 +4,7 @@
 
   <groupId>io.prometheus</groupId>
   <artifactId>example-exporter-servlet-tomcat</artifactId>
-  <version>1.7.1-SNAPSHOT</version>
+  <version>1.8.1-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>11.0.22</version>
+      <version>11.0.23</version>
     </dependency>
   </dependencies>
 

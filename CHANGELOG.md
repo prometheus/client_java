@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.8.0](https://github.com/prometheus/client_java/compare/v1.7.0...v1.8.0) (2026-06-11)
+
+
+### Features
+
+* Add custom labels to exemplars ([#2191](https://github.com/prometheus/client_java/issues/2191)) ([fd1f3e8](https://github.com/prometheus/client_java/commit/fd1f3e85177ec4d4e4922f22f3aa79dc2dd7e17e))
+* add MetricMetadata.Builder, deprecate wide constructors ([#2202](https://github.com/prometheus/client_java/issues/2202)) ([adeef32](https://github.com/prometheus/client_java/commit/adeef32f303a9dfadee9b7702b255db193c9c533))
+
+
+### Bug Fixes
+
+* Avoid unnuecessary exemplar allocations ([#2209](https://github.com/prometheus/client_java/issues/2209)) ([0b6a91f](https://github.com/prometheus/client_java/commit/0b6a91f2bafe0fa15f6fe828f315103d8c20f9f9))
+* **deps:** update spring boot to v4.1.0 ([#2213](https://github.com/prometheus/client_java/issues/2213)) ([df25c08](https://github.com/prometheus/client_java/commit/df25c0821605b7edf7b87b9874a65d3d529592a5))
+
+
+### Documentation
+
+* cover typed family descriptors and @StableApi since v1.6.1 ([#2181](https://github.com/prometheus/client_java/issues/2181)) ([7ca9f99](https://github.com/prometheus/client_java/commit/7ca9f99b8f1731315d2cf8f68247fc94174a8b3b))
+
 ## [1.7.0](https://github.com/prometheus/client_java/compare/v1.6.1...v1.7.0) (2026-06-03)
 
 

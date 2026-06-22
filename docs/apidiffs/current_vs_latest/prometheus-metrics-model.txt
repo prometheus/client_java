@@ -1,17 +1,4 @@
-Comparing source compatibility of prometheus-metrics-model-1.7.1-SNAPSHOT.jar against prometheus-metrics-model-1.7.0.jar
-***  MODIFIED CLASS: PUBLIC FINAL io.prometheus.metrics.model.snapshots.MetricMetadata  (not serializable)
+Comparing source compatibility of prometheus-metrics-model-1.8.1-SNAPSHOT.jar against prometheus-metrics-model-1.8.0.jar
+***  MODIFIED CLASS: PUBLIC FINAL io.prometheus.metrics.model.snapshots.Labels  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
-	===  UNCHANGED CONSTRUCTOR: PUBLIC MetricMetadata(java.lang.String, java.lang.String, java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
-		+++  NEW ANNOTATION: java.lang.Deprecated
-	===  UNCHANGED CONSTRUCTOR: PUBLIC MetricMetadata(java.lang.String, java.lang.String, java.lang.String, java.lang.String, io.prometheus.metrics.model.snapshots.Unit)
-		+++  NEW ANNOTATION: java.lang.Deprecated
-	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder builder()
-+++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder  (not serializable)
-	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
-	+++  NEW SUPERCLASS: java.lang.Object
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata build()
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder counterSuffix(boolean)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder help(java.lang.String)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder name(java.lang.String)
-	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.model.snapshots.MetricMetadata$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
 

@@ -15,7 +15,8 @@ jobs:
     if: ${{ github.repository == 'prometheus/client_java' }}
     environment: release
     runs-on: ubuntu-24.04
-    permissions: {}
+    permissions:
+      actions: write # required to trigger bump-api-diff-baseline.yml via `gh workflow run`
 
     steps:
       - name: Verify release secrets
@@ -63,22 +64,22 @@ jobs:
               "If the GPG Key Expired"
           fi
       - name: Checkout Plugin Repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ inputs.tag }}
           persist-credentials: false
 
-      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+      - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: v2026.5.18
-          sha256: cfac593469d028d7ae5fe36e37bd7c59118b5238e92d8a876209578464f24a84
+          version: v2026.6.12
+          sha256: ff0cf4917acc96b7ffdd0382261d17f405572e9240f95fafb980e44aaf60c514
           cache: false
 
       - name: Build release version
         run: mise run build-release
 
       - name: Set up Apache Maven Central
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5
         with:
           distribution: "temurin"
           java-version: "21"
@@ -94,3 +95,11 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+
+      - name: Bump api-diff baseline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: >
+          gh workflow run bump-api-diff-baseline.yml
+          --repo "${GITHUB_REPOSITORY}" -f "tag=${TAG}"

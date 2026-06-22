@@ -124,7 +124,7 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
       if (!PrometheusNaming.isValidLegacyLabelName(name)) {
-        if (prometheusNames == names) {
+        if (sameObject(prometheusNames, names)) {
           prometheusNames = Arrays.copyOf(names, names.length);
         }
         prometheusNames[i] = PrometheusNaming.prometheusName(name);
@@ -234,7 +234,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     }
     String[] names = new String[this.names.length + other.names.length];
     String[] prometheusNames = names;
-    if (this.names != this.prometheusNames || other.names != other.prometheusNames) {
+    if (!sameObject(this.names, this.prometheusNames)
+        || !sameObject(other.names, other.prometheusNames)) {
       prometheusNames = new String[names.length];
     }
     String[] values = new String[names.length];
@@ -244,28 +245,28 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
       if (thisPos >= this.names.length) {
         names[thisPos + otherPos] = other.names[otherPos];
         values[thisPos + otherPos] = other.values[otherPos];
-        if (prometheusNames != names) {
+        if (!sameObject(prometheusNames, names)) {
           prometheusNames[thisPos + otherPos] = other.prometheusNames[otherPos];
         }
         otherPos++;
       } else if (otherPos >= other.names.length) {
         names[thisPos + otherPos] = this.names[thisPos];
         values[thisPos + otherPos] = this.values[thisPos];
-        if (prometheusNames != names) {
+        if (!sameObject(prometheusNames, names)) {
           prometheusNames[thisPos + otherPos] = this.prometheusNames[thisPos];
         }
         thisPos++;
       } else if (this.prometheusNames[thisPos].compareTo(other.prometheusNames[otherPos]) < 0) {
         names[thisPos + otherPos] = this.names[thisPos];
         values[thisPos + otherPos] = this.values[thisPos];
-        if (prometheusNames != names) {
+        if (!sameObject(prometheusNames, names)) {
           prometheusNames[thisPos + otherPos] = this.prometheusNames[thisPos];
         }
         thisPos++;
       } else if (this.prometheusNames[thisPos].compareTo(other.prometheusNames[otherPos]) > 0) {
         names[thisPos + otherPos] = other.names[otherPos];
         values[thisPos + otherPos] = other.values[otherPos];
-        if (prometheusNames != names) {
+        if (!sameObject(prometheusNames, names)) {
           prometheusNames[thisPos + otherPos] = other.prometheusNames[otherPos];
         }
         otherPos++;
@@ -321,6 +322,11 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
   }
 
   // Looks like Java doesn't have a compareTo() method for arrays.
+  @SuppressWarnings("ReferenceEquality")
+  private static boolean sameObject(Object left, Object right) {
+    return left == right;
+  }
+
   private int compare(String[] array1, String[] array2) {
     int result;
     for (int i = 0; i < array1.length; i++) {
@@ -505,14 +511,14 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
         int j = i - 1;
         while (j >= left && compare(prometheusNames[j], prometheusName) > 0) {
           names[j + 1] = names[j];
-          if (prometheusNames != names) {
+          if (!sameObject(prometheusNames, names)) {
             prometheusNames[j + 1] = prometheusNames[j];
           }
           values[j + 1] = values[j];
           j--;
         }
         names[j + 1] = name;
-        if (prometheusNames != names) {
+        if (!sameObject(prometheusNames, names)) {
           prometheusNames[j + 1] = prometheusName;
         }
         values[j + 1] = value;
@@ -594,7 +600,7 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
       tmp = values[i];
       values[i] = values[j];
       values[j] = tmp;
-      if (prometheusNames != names) {
+      if (!sameObject(prometheusNames, names)) {
         tmp = prometheusNames[i];
         prometheusNames[i] = prometheusNames[j];
         prometheusNames[j] = tmp;

@@ -1,0 +1,2 @@
+Comparing source compatibility of prometheus-metrics-exposition-formats-no-protobuf-1.7.1-SNAPSHOT.jar against prometheus-metrics-exposition-formats-no-protobuf-1.7.0.jar
+No changes.

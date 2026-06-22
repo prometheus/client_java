@@ -36,6 +36,11 @@ import javax.annotation.Nullable;
 @StableApi
 public class ExemplarSampler {
 
+  @SuppressWarnings("ReferenceEquality")
+  private static boolean sameObject(Object left, Object right) {
+    return left == right;
+  }
+
   private final ExemplarSamplerConfig config;
   private final Exemplar[] exemplars;
   private final Exemplar[]
@@ -223,7 +228,7 @@ public class ExemplarSampler {
     int oldestIndex = -1;
     for (int i = 0; i < exemplars.length; i++) {
       Exemplar exemplar = exemplars[i];
-      if (exemplar != null && exemplar != smallest && exemplar != largest) {
+      if (exemplar != null && !sameObject(exemplar, smallest) && !sameObject(exemplar, largest)) {
         if (oldestTimestamp == 0 || exemplar.getTimestampMillis() < oldestTimestamp) {
           oldestTimestamp = exemplar.getTimestampMillis();
           oldestIndex = i;
