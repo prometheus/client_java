@@ -103,11 +103,6 @@
         "maven"
       ]
     },
-    "ci/oats/docker-compose.lgtm.yml": {
-      "docker-compose": [
-        "docker.io/grafana/otel-lgtm"
-      ]
-    },
     "examples/example-custom-buckets/docker-compose.yaml": {
       "docker-compose": [
         "eclipse-temurin",
