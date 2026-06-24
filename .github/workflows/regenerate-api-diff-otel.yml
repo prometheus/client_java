@@ -23,7 +23,7 @@ jobs:
           version: v2026.6.10
           sha256: 656131b5d995493c18b06c2135afda193f94a1848e0a4d1cb07a1161859d0c80
       - name: Cache local Maven repository
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
