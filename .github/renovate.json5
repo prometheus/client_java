@@ -45,13 +45,6 @@
       groupName: "protobuf",
       separateMajorMinor: false,
     },
-    {
-      "description": "Flint autofix: align extractVersion for protoc",
-      "extractVersion": "^(?<version>.+)\\.0\\.0$",
-      "matchDepNames": [
-        "protoc"
-      ]
-    }
   ],
   customManagers: [
   {
