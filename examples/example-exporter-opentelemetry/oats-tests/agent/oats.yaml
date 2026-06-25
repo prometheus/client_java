@@ -7,10 +7,27 @@ fixture:
 seed:
   type: app
 expected:
-  metrics:
-    - promql: 'uptime_seconds_total{}'
-      value: '>= 0'
-    - promql: 'count(count by(instance) (target_info{service_name!="otelcol-contrib"}))'
-      value: '== 1'
-    - promql: 'count(target_info{service_name!="otelcol-contrib"})'
-      value: '== 2'
+  custom-checks:
+    - script: |
+        set -eu
+        python3 - <<'PY'
+        import json, urllib.parse, urllib.request
+        q = urllib.parse.quote('uptime_seconds_total{job="rolldice"}')
+        with urllib.request.urlopen(f'http://localhost:9090/api/v1/query?query={q}') as r:
+            uptime = json.load(r)
+        result = uptime.get('data', {}).get('result', [])
+        if not result:
+            raise SystemExit('uptime_seconds_total missing from Prometheus')
+        if float(result[0]['value'][1]) < 0:
+            raise SystemExit('uptime_seconds_total must be >= 0')
+
+        q = urllib.parse.quote('target_info{service_name!="otelcol-contrib"}')
+        with urllib.request.urlopen(f'http://localhost:9090/api/v1/query?query={q}') as r:
+            target_info = json.load(r)
+        rows = target_info.get('data', {}).get('result', [])
+        if len(rows) != 2:
+            raise SystemExit(f'expected 2 non-collector target_info rows, got {len(rows)}')
+        instances = {row['metric'].get('instance') for row in rows}
+        if len(instances) != 1:
+            raise SystemExit(f'expected one shared instance across target_info rows, got {sorted(instances)}')
+        PY
