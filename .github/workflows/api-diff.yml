@@ -7,8 +7,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - labeled
-      - unlabeled
   workflow_dispatch:
     inputs:
       baseline_version:
@@ -29,8 +27,6 @@ jobs:
       # Empty unless overridden via workflow_dispatch; the api-diff task then
       # falls back to <api.diff.baseline.version> in pom.xml.
       API_DIFF_BASELINE_VERSION: ${{ inputs.baseline_version }}
-      BREAKING_API_CHANGE_ACCEPTED: >-
-        ${{ contains(github.event.pull_request.labels.*.name, 'breaking-api-change-accepted') }}
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -54,38 +50,3 @@ jobs:
             echo "Run 'mise run api-diff' locally and commit the updated docs/apidiffs."
             exit 1
           fi
-      - name: Fail on incompatible published API changes
-        run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          import sys
-          import xml.etree.ElementTree as ET
-
-          failures = []
-          for report in sorted(Path(".").glob("**/target/japicmp/api-diff.xml")):
-              parts = report.parts
-              module = "/".join(parts[: parts.index("target")])
-              tree = ET.parse(report)
-              for change in tree.findall(".//compatibilityChange"):
-                  binary = change.get("binaryCompatible") == "false"
-                  source = change.get("sourceCompatible") == "false"
-                  if binary or source:
-                      failures.append((module, change.get("type", "unknown")))
-
-          if not failures:
-              print("No incompatible published API changes detected.")
-              sys.exit(0)
-
-          print("Incompatible published API changes detected:")
-          for module, change_type in failures[:100]:
-              print(f"- {module}: {change_type}")
-          if len(failures) > 100:
-              print(f"... and {len(failures) - 100} more")
-          if os.environ.get("BREAKING_API_CHANGE_ACCEPTED") == "true":
-              print("Accepted by PR label `breaking-api-change-accepted`.")
-              sys.exit(0)
-          print("Run `mise run api-diff` locally for full japicmp output.")
-          print("Reports are written to `**/target/japicmp/*`.")
-          sys.exit(1)
-          PY

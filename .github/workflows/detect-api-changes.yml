@@ -1,0 +1,77 @@
+---
+name: Detect API Changes
+
+on:
+  # pull_request_target is used so the workflow can update labels and comments
+  # without checking out or executing code from the PR branch.
+  # zizmor: ignore[dangerous-triggers] -- this workflow only reads PR metadata
+  # via the GitHub API and never checks out or executes code from the PR branch.
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions: {}
+
+jobs:
+  detect-api-changes:
+    if: github.repository == 'prometheus/client_java'
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Check for API changes and update PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          MARKER="<!-- api-change-detector -->"
+
+          api_files=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate \
+            --jq '.[] | select(.filename | startswith("docs/apidiffs/current_vs_latest/")) | .filename')
+
+          comment_id=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"${MARKER}\")) | .id" | head -1)
+
+          if [[ -z "$api_files" ]]; then
+            echo "No API diff files changed."
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "api-change" 2>/dev/null || true
+            if [[ -n "$comment_id" ]]; then
+              gh api --method DELETE "repos/${REPO}/issues/comments/${comment_id}"
+            fi
+            exit 0
+          fi
+
+          echo "API diff files changed:"
+          echo "$api_files"
+
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "api-change"
+
+          modules=$(echo "$api_files" \
+            | sed 's|docs/apidiffs/current_vs_latest/||' \
+            | sed 's|\.txt$||' \
+            | sort \
+            | sed 's/^/- /')
+
+          body=$(cat <<EOF
+          ${MARKER}
+          ## :warning: API changes detected — maintainer review required
+
+          This PR modifies the published API diff for the following module(s):
+
+          ${modules}
+
+          Please review the changes in \`docs/apidiffs/current_vs_latest/\` carefully before approving.
+          EOF
+          )
+
+          if [[ -n "$comment_id" ]]; then
+            gh api --method PATCH "repos/${REPO}/issues/comments/${comment_id}" \
+              --field body="$body"
+          else
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$body"
+          fi
