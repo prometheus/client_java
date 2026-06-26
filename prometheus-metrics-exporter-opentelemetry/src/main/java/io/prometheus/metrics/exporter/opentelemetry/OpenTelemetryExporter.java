@@ -8,27 +8,35 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 
-@StableApi
 public class OpenTelemetryExporter implements AutoCloseable {
   private final MetricReader reader;
 
+  /**
+   * @deprecated This constructor is not part of the stable API. Use {@link #builder()} or {@link
+   *     #builder(PrometheusProperties)} instead.
+   */
+  @Deprecated
   public OpenTelemetryExporter(MetricReader reader) {
     this.reader = reader;
   }
 
+  @StableApi
   @Override
   public void close() {
     reader.shutdown();
   }
 
+  @StableApi
   public static Builder builder() {
     return new Builder(PrometheusProperties.get());
   }
 
+  @StableApi
   public static Builder builder(PrometheusProperties config) {
     return new Builder(config);
   }
 
+  @StableApi
   public static class Builder {
 
     private final PrometheusProperties config;
