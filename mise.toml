@@ -93,7 +93,39 @@ run = "flint run --fix"
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
 depends = "build"
-run = "oats -lgtm-version $LGTM_VERSION -timeout 5m examples/"
+run = """
+# renovate: datasource=github-releases depName=gcx packageName=grafana/gcx
+export GCX_VERSION=v0.4.0
+gotmp=""
+
+if ! command -v go >/dev/null 2>&1; then
+  goversion="1.25.4"
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64|amd64) goarch="amd64" ;;
+    aarch64|arm64) goarch="arm64" ;;
+    *) echo "unsupported architecture: $arch" >&2; exit 1 ;;
+  esac
+  gotmp="$(mktemp -d)"
+  curl -fsSL "https://go.dev/dl/go${goversion}.linux-${goarch}.tar.gz" -o "$gotmp/go.tgz"
+  tar -C "$gotmp" -xzf "$gotmp/go.tgz"
+  export PATH="$gotmp/go/bin:$PATH"
+fi
+
+go install "github.com/grafana/gcx/cmd/gcx@${GCX_VERSION}"
+
+workdir="$(mktemp -d)"
+trap 'rm -rf "$workdir" ${gotmp:+"$gotmp"}' EXIT
+git clone --depth 1 --branch v2 https://github.com/grafana/oats "$workdir/oats-src"
+GOWORK=off go -C "$workdir/oats-src" build -o "$workdir/oats" ./cmd/v2
+
+REAL_GCX_BIN="$(go env GOPATH)/bin/gcx" \
+  "$workdir/oats" \
+  --config oats.toml \
+  --gcx ./ci/oats/gcx-wrapper.sh \
+  --no-cache \
+  --timeout=5m
+"""
 
 [tasks.javadoc]
 description = "Generate Javadoc"
