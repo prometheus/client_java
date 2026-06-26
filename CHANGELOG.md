@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.8.1](https://github.com/prometheus/client_java/compare/v1.8.0...v1.8.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.29.0-alpha ([#2235](https://github.com/prometheus/client_java/issues/2235)) ([cf9f702](https://github.com/prometheus/client_java/commit/cf9f70219e103c6004d8c315fdcfab2cfd7c447d))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.23 ([#2241](https://github.com/prometheus/client_java/issues/2241)) ([a017f80](https://github.com/prometheus/client_java/commit/a017f80980d91a5fa8ffe930c820f836c3d1b2ff))
+* **deps:** update otel.instrumentation.version ([#2236](https://github.com/prometheus/client_java/issues/2236)) ([158230d](https://github.com/prometheus/client_java/commit/158230d2418a0b6d1b80c590e8fc63c9e444072c))
+* include license files in release source jars ([#2250](https://github.com/prometheus/client_java/issues/2250)) ([08cf925](https://github.com/prometheus/client_java/commit/08cf925b564247a497437e29e4a64ebb335cd328)), closes [#2216](https://github.com/prometheus/client_java/issues/2216)
+
 ## [1.8.0](https://github.com/prometheus/client_java/compare/v1.7.0...v1.8.0) (2026-06-11)
 
 
