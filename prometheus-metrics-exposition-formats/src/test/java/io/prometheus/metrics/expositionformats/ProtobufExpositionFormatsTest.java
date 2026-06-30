@@ -2,6 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.generated.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
@@ -42,26 +43,11 @@ class ProtobufExpositionFormatsTest extends ExpositionFormatsTest {
             .build();
 
     PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
+    Metrics.MetricFamily protobufData =
+        writer.convert(histogram, EscapingScheme.UNDERSCORE_ESCAPING);
 
     assertThat(
             writer.toDebugString(MetricSnapshots.of(histogram), EscapingScheme.UNDERSCORE_ESCAPING))
-        .isEqualTo(
-            "name: \"request_latency_seconds\"\n"
-                + "help: \"request latency\"\n"
-                + "type: HISTOGRAM\n"
-                + "metric {\n"
-                + "  histogram {\n"
-                + "    sample_count: 1\n"
-                + "    sample_sum: 0.123\n"
-                + "    schema: 5\n"
-                + "    zero_threshold: 2.938735877055719E-39\n"
-                + "    zero_count: 0\n"
-                + "    positive_span {\n"
-                + "      offset: -96\n"
-                + "      length: 1\n"
-                + "    }\n"
-                + "    positive_delta: 1\n"
-                + "  }\n"
-                + "}\n");
+        .isEqualTo(TextFormat.printer().printToString(protobufData));
   }
 }

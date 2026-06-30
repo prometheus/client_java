@@ -440,6 +440,9 @@
                 <excludes>
                   <exclude>io.prometheus.metrics.expositionformats.generated</exclude>
                   <exclude>io.prometheus.metrics.shaded</exclude>
+                  <exclude>
+                    io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter#OpenTelemetryExporter(io.prometheus.metrics.shaded.io_opentelemetry_*.sdk.metrics.export.MetricReader)
+                  </exclude>
                 </excludes>
                 <breakBuildOnModifications>false</breakBuildOnModifications>
                 <breakBuildOnBinaryIncompatibleModifications>

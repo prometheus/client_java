@@ -58,6 +58,7 @@ class PrometheusProtobufDebugFormat {
           "untyped",
           () -> appendUntyped(result, indent + INDENT, metric.getUntyped()));
     }
+    appendScalar(result, indent, "timestamp_ms", metric.hasTimestampMs(), metric.getTimestampMs());
     if (metric.hasHistogram()) {
       appendMessage(
           result,
@@ -65,7 +66,6 @@ class PrometheusProtobufDebugFormat {
           "histogram",
           () -> appendHistogram(result, indent + INDENT, metric.getHistogram()));
     }
-    appendScalar(result, indent, "timestamp_ms", metric.hasTimestampMs(), metric.getTimestampMs());
   }
 
   private static void appendLabel(StringBuilder result, String indent, Metrics.LabelPair label) {
@@ -124,22 +124,16 @@ class PrometheusProtobufDebugFormat {
       StringBuilder result, String indent, Metrics.Histogram histogram) {
     appendScalar(
         result, indent, "sample_count", histogram.hasSampleCount(), histogram.getSampleCount());
+    appendScalar(result, indent, "sample_sum", histogram.hasSampleSum(), histogram.getSampleSum());
+    for (Metrics.Bucket bucket : histogram.getBucketList()) {
+      appendMessage(result, indent, "bucket", () -> appendBucket(result, indent + INDENT, bucket));
+    }
     appendScalar(
         result,
         indent,
         "sample_count_float",
         histogram.hasSampleCountFloat(),
         histogram.getSampleCountFloat());
-    appendScalar(result, indent, "sample_sum", histogram.hasSampleSum(), histogram.getSampleSum());
-    for (Metrics.Bucket bucket : histogram.getBucketList()) {
-      appendMessage(result, indent, "bucket", () -> appendBucket(result, indent + INDENT, bucket));
-    }
-    appendTimestamp(
-        result,
-        indent,
-        "created_timestamp",
-        histogram.hasCreatedTimestamp(),
-        histogram.getCreatedTimestamp());
     appendScalar(result, indent, "schema", histogram.hasSchema(), histogram.getSchema());
     appendScalar(
         result,
@@ -156,10 +150,7 @@ class PrometheusProtobufDebugFormat {
         histogram.getZeroCountFloat());
     for (Metrics.BucketSpan span : histogram.getNegativeSpanList()) {
       appendMessage(
-          result,
-          indent,
-          "negative_span",
-          () -> appendBucketSpan(result, indent + INDENT, span));
+          result, indent, "negative_span", () -> appendBucketSpan(result, indent + INDENT, span));
     }
     for (int i = 0; i < histogram.getNegativeDeltaCount(); i++) {
       appendScalar(result, indent, "negative_delta", histogram.getNegativeDelta(i));
@@ -169,10 +160,7 @@ class PrometheusProtobufDebugFormat {
     }
     for (Metrics.BucketSpan span : histogram.getPositiveSpanList()) {
       appendMessage(
-          result,
-          indent,
-          "positive_span",
-          () -> appendBucketSpan(result, indent + INDENT, span));
+          result, indent, "positive_span", () -> appendBucketSpan(result, indent + INDENT, span));
     }
     for (int i = 0; i < histogram.getPositiveDeltaCount(); i++) {
       appendScalar(result, indent, "positive_delta", histogram.getPositiveDelta(i));
@@ -180,12 +168,15 @@ class PrometheusProtobufDebugFormat {
     for (int i = 0; i < histogram.getPositiveCountCount(); i++) {
       appendScalar(result, indent, "positive_count", histogram.getPositiveCount(i));
     }
+    appendTimestamp(
+        result,
+        indent,
+        "created_timestamp",
+        histogram.hasCreatedTimestamp(),
+        histogram.getCreatedTimestamp());
     for (Metrics.Exemplar exemplar : histogram.getExemplarsList()) {
       appendMessage(
-          result,
-          indent,
-          "exemplars",
-          () -> appendExemplar(result, indent + INDENT, exemplar));
+          result, indent, "exemplars", () -> appendExemplar(result, indent + INDENT, exemplar));
     }
   }
 
@@ -196,12 +187,6 @@ class PrometheusProtobufDebugFormat {
         "cumulative_count",
         bucket.hasCumulativeCount(),
         bucket.getCumulativeCount());
-    appendScalar(
-        result,
-        indent,
-        "cumulative_count_float",
-        bucket.hasCumulativeCountFloat(),
-        bucket.getCumulativeCountFloat());
     appendScalar(result, indent, "upper_bound", bucket.hasUpperBound(), bucket.getUpperBound());
     if (bucket.hasExemplar()) {
       appendMessage(
@@ -210,6 +195,12 @@ class PrometheusProtobufDebugFormat {
           "exemplar",
           () -> appendExemplar(result, indent + INDENT, bucket.getExemplar()));
     }
+    appendScalar(
+        result,
+        indent,
+        "cumulative_count_float",
+        bucket.hasCumulativeCountFloat(),
+        bucket.getCumulativeCountFloat());
   }
 
   private static void appendBucketSpan(
