@@ -1,7 +1,6 @@
 Comparing source compatibility of prometheus-metrics-exporter-opentelemetry-1.8.1-SNAPSHOT.jar against prometheus-metrics-exporter-opentelemetry-1.8.0.jar
-***! MODIFIED CLASS: PUBLIC io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter  (not serializable)
+***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
-	---! REMOVED CONSTRUCTOR: PUBLIC(-) OpenTelemetryExporter(io.prometheus.metrics.shaded.io_opentelemetry_2_28_1_alpha.sdk.metrics.export.MetricReader)
 ***  MODIFIED CLASS: PUBLIC STATIC io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter buildAndStart()
@@ -17,4 +16,3 @@ Comparing source compatibility of prometheus-metrics-exporter-opentelemetry-1.8.
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder serviceNamespace(java.lang.String)
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder serviceVersion(java.lang.String)
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder timeoutSeconds(int)
-
