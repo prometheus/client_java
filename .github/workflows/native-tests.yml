@@ -15,8 +15,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: v2026.6.12
-          sha256: ff0cf4917acc96b7ffdd0382261d17f405572e9240f95fafb980e44aaf60c514
+          version: v2026.6.14
+          sha256: 96ae1ef7b00a6ebbbec23ba1016d6e722f5e904966272f621d15326429e90d53
           working_directory: .mise/envs/native
       - name: Run native tests
         working-directory: .mise/envs/native
