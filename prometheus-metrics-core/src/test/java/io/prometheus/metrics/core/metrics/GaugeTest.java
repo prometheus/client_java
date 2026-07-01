@@ -82,12 +82,11 @@ class GaugeTest {
   }
 
   @Test
-  @SuppressWarnings("try")
-  public void testTimer() throws InterruptedException {
-    try (Timer ignored = noLabels.startTimer()) {
-      Thread.sleep(12);
-    }
-    assertThat(getValue(noLabels)).isGreaterThan(0.01);
+  void testTimer() {
+    Timer timer = noLabels.startTimer();
+    double duration = timer.observeDuration();
+    assertThat(duration).isPositive();
+    assertThat(getValue(noLabels)).isEqualTo(duration);
   }
 
   @Test
