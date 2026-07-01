@@ -1,0 +1,7 @@
+cases = [
+  "examples/example-exporter-opentelemetry/oats-tests/http/oats.yaml",
+  "examples/example-exporter-opentelemetry/oats-tests/agent/oats.yaml",
+]
+
+[meta]
+version = 2
