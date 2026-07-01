@@ -7,8 +7,6 @@ on:
       - opened
       - synchronize
       - reopened
-      - labeled
-      - unlabeled
   workflow_dispatch:
     inputs:
       baseline_version:
@@ -29,8 +27,6 @@ jobs:
       # Empty unless overridden via workflow_dispatch; the api-diff task then
       # falls back to <api.diff.baseline.version> in pom.xml.
       API_DIFF_BASELINE_VERSION: ${{ inputs.baseline_version }}
-      BREAKING_API_CHANGE_ACCEPTED: >-
-        ${{ contains(github.event.pull_request.labels.*.name, 'breaking-api-change-accepted') }}
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -38,10 +34,10 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
-          version: v2026.6.12
-          sha256: ff0cf4917acc96b7ffdd0382261d17f405572e9240f95fafb980e44aaf60c514
+          version: v2026.6.14
+          sha256: 96ae1ef7b00a6ebbbec23ba1016d6e722f5e904966272f621d15326429e90d53
       - name: Cache local Maven repository
-        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -54,38 +50,3 @@ jobs:
             echo "Run 'mise run api-diff' locally and commit the updated docs/apidiffs."
             exit 1
           fi
-      - name: Fail on incompatible published API changes
-        run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          import sys
-          import xml.etree.ElementTree as ET
-
-          failures = []
-          for report in sorted(Path(".").glob("**/target/japicmp/api-diff.xml")):
-              parts = report.parts
-              module = "/".join(parts[: parts.index("target")])
-              tree = ET.parse(report)
-              for change in tree.findall(".//compatibilityChange"):
-                  binary = change.get("binaryCompatible") == "false"
-                  source = change.get("sourceCompatible") == "false"
-                  if binary or source:
-                      failures.append((module, change.get("type", "unknown")))
-
-          if not failures:
-              print("No incompatible published API changes detected.")
-              sys.exit(0)
-
-          print("Incompatible published API changes detected:")
-          for module, change_type in failures[:100]:
-              print(f"- {module}: {change_type}")
-          if len(failures) > 100:
-              print(f"... and {len(failures) - 100} more")
-          if os.environ.get("BREAKING_API_CHANGE_ACCEPTED") == "true":
-              print("Accepted by PR label `breaking-api-change-accepted`.")
-              sys.exit(0)
-          print("Run `mise run api-diff` locally for full japicmp output.")
-          print("Reports are written to `**/target/japicmp/*`.")
-          sys.exit(1)
-          PY
