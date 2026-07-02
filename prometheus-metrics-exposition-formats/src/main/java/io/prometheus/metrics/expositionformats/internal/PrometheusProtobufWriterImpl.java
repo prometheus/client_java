@@ -3,7 +3,6 @@ package io.prometheus.metrics.expositionformats.internal;
 import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.timestampFromMillis;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
-import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.TextFormatUtil;
@@ -51,9 +50,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         stringBuilder.append(
-            TextFormat.printer()
-                .printToString(
-                    convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme)));
+            PrometheusProtobufDebugFormat.toDebugString(
+                convert(snapshot, s.getMetadata().getOriginalName(), escapingScheme)));
       }
     }
     return stringBuilder.toString();

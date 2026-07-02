@@ -46,13 +46,15 @@ jobs:
         run: mise run generate
       - name: Validate and export generated sources as a patch
         run: |
-          UNEXPECTED=$(git diff --name-only | grep -v '\.java$' || true)
+          CHANGED=$(git diff --name-only; git ls-files --others --exclude-standard)
+          UNEXPECTED=$(echo "$CHANGED" | sed '/^$/d' | grep -v '\.java$' || true)
           if [[ -n "$UNEXPECTED" ]]; then
             echo "::error::Unexpected files changed:"
             echo "$UNEXPECTED"
             exit 1
           fi
-          git diff --binary > /tmp/protobuf-sources.patch
+          git add -A -- '*.java'
+          git diff --cached --binary > /tmp/protobuf-sources.patch
       - name: Upload generated patch
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -83,11 +85,14 @@ jobs:
             echo "No generated changes to commit"
             exit 0
           fi
-          git apply "$PATCH"
+          git apply --index "$PATCH"
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+            exit 0
+          fi
           # Note: GITHUB_TOKEN pushes don't trigger CI re-runs.
           # Close and reopen the PR to trigger CI after this commit.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add '*.java'
           git commit -m "chore: regenerate protobuf sources"
           git push
