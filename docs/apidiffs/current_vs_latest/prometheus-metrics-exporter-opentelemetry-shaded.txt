@@ -16,3 +16,4 @@ Comparing source compatibility of prometheus-metrics-exporter-opentelemetry-1.8.
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder serviceNamespace(java.lang.String)
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder serviceVersion(java.lang.String)
 	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.opentelemetry.OpenTelemetryExporter$Builder timeoutSeconds(int)
+
