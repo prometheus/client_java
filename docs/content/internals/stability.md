@@ -29,4 +29,5 @@ are stored under `docs/apidiffs/`.
 
 Pull requests that change `docs/apidiffs/current_vs_latest/` are automatically labeled
 `api-change` for additional maintainer review. If the committed API diff contains breaking-change
-markers, the pull request is also labeled `breaking-api-change`.
+markers such as `***!`, `---!`, or `+++!`, the pull request is also labeled
+`breaking-api-change`.

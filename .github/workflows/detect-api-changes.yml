@@ -64,7 +64,7 @@ jobs:
           while IFS= read -r file; do
             [[ -z "$file" ]] && continue
             content=$(gh api \
-              -H "Accept: application/vnd.github.raw+json" \
+              -H "Accept: application/vnd.github.raw" \
               "repos/${REPO}/contents/${file}?ref=${HEAD_SHA}")
             if grep -Eq '^[[:space:]]*(\*\*\*!|---!|\+\+\+!)' <<<"$content"; then
               breaking_files+=("$file")
