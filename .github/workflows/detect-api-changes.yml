@@ -30,6 +30,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           MARKER="<!-- api-change-detector -->"
+          BREAKING_LABEL="breaking-api-change"
 
           api_files=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate \
             --jq '.[] | select(.filename | startswith("docs/apidiffs/current_vs_latest/")) | .filename')
@@ -40,6 +41,7 @@ jobs:
           if [[ -z "$api_files" ]]; then
             echo "No API diff files changed."
             gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "api-change" 2>/dev/null || true
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "$BREAKING_LABEL" 2>/dev/null || true
             if [[ -n "$comment_id" ]]; then
               gh api --method DELETE "repos/${REPO}/issues/comments/${comment_id}"
             fi
@@ -57,7 +59,44 @@ jobs:
             | sort \
             | sed 's/^/- /')
 
-          body=$(cat <<EOF
+          HEAD_SHA=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq .head.sha)
+          breaking_files=()
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            content=$(gh api \
+              -H "Accept: application/vnd.github.raw" \
+              "repos/${REPO}/contents/${file}?ref=${HEAD_SHA}")
+            if grep -Eq '^[[:space:]]*(\*\*\*!|---!|\+\+\+!)' <<<"$content"; then
+              breaking_files+=("$file")
+            fi
+          done <<<"$api_files"
+
+          if [[ ${#breaking_files[@]} -gt 0 ]]; then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "$BREAKING_LABEL"
+            breaking_modules=$(printf '%s\n' "${breaking_files[@]}" \
+              | sed 's|docs/apidiffs/current_vs_latest/||' \
+              | sed 's|\.txt$||' \
+              | sort \
+              | sed 's/^/- /')
+            body=$(cat <<EOF
+          ${MARKER}
+          ## :warning: Breaking API changes detected — maintainer review required
+
+          This PR modifies the published API diff for the following module(s):
+
+          ${modules}
+
+          The committed API diff contains breaking-change markers for:
+
+          ${breaking_modules}
+
+          Please review the changes in \`docs/apidiffs/current_vs_latest/\` carefully before approving.
+          EOF
+            )
+          else
+            gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "$BREAKING_LABEL" 2>/dev/null || true
+
+            body=$(cat <<EOF
           ${MARKER}
           ## :warning: API changes detected — maintainer review required
 
@@ -67,7 +106,8 @@ jobs:
 
           Please review the changes in \`docs/apidiffs/current_vs_latest/\` carefully before approving.
           EOF
-          )
+            )
+          fi
 
           if [[ -n "$comment_id" ]]; then
             gh api --method PATCH "repos/${REPO}/issues/comments/${comment_id}" \
