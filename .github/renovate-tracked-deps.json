@@ -73,6 +73,11 @@
         "mise"
       ]
     },
+    ".github/workflows/pr-benchmarks.yml": {
+      "regex": [
+        "mise"
+      ]
+    },
     ".github/workflows/regenerate-api-diff-otel.yml": {
       "regex": [
         "mise"
