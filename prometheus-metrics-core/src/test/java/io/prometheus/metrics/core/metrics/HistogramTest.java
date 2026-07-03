@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.CountDownLatch;
@@ -39,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -833,6 +836,36 @@ class HistogramTest {
       assertThat(result)
           .as("index=" + indexes[i] + ", schema=" + schemas[i])
           .isCloseTo(expectedUpperBounds[i], offset(0.0000000000001));
+    }
+  }
+
+  @Test
+  void testDoubleBucketWidthMergesNegativeIndexesCorrectly()
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    Histogram histogram = Histogram.builder().name("test").nativeOnly().build();
+    Histogram.DataPoint dataPoint = histogram.newDataPoint();
+
+    Method doubleBucketWidth =
+        Histogram.DataPoint.class.getDeclaredMethod("doubleBucketWidth", Map.class);
+    doubleBucketWidth.setAccessible(true);
+
+    int[] keys = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5};
+    int[] expectedMergedIndexes = {-2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3};
+
+    for (int i = 0; i < keys.length; i++) {
+      Map<Integer, LongAdder> buckets = new HashMap<>();
+      LongAdder adder = new LongAdder();
+      adder.add(7);
+      buckets.put(keys[i], adder);
+
+      doubleBucketWidth.invoke(dataPoint, buckets);
+
+      assertThat(buckets.keySet())
+          .as("merged index for original key " + keys[i])
+          .containsExactly(expectedMergedIndexes[i]);
+      assertThat(buckets.get(expectedMergedIndexes[i]).sum())
+          .as("count preserved for original key " + keys[i])
+          .isEqualTo(7);
     }
   }
 
