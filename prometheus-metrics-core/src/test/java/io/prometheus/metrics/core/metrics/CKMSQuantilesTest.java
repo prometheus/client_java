@@ -224,6 +224,106 @@ class CKMSQuantilesTest {
     validateResults(ckms);
   }
 
+  /**
+   * Reproducer for the quantile collapse bug: for a target quantile (q, epsilon) the error function
+   * allows samples below rank q*n to have g + delta up to 2*epsilon*(n-r)/(1-q). When 2*epsilon >=
+   * 1-q (as in (0.9, 0.05) or (0.99, 0.005) — both taken from real-world configurations) this is >=
+   * n-r, so (a) compress() merged almost all samples away and (b) get() stopped at the first
+   * freshly inserted sample (delta = f(r)-1) and returned the minimum observation for every
+   * quantile: get(0.9) == get(0.99) == 1.0 regardless of the input data.
+   */
+  @Test
+  void testTargetedQuantilesDoNotCollapse() {
+    Random random = new Random(42);
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
+    for (double value : shuffledValues(100 * 1000, random)) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /** Like {@link #testTargetedQuantilesDoNotCollapse()}, with a single targeted quantile. */
+  @Test
+  void testSingleTargetedQuantileDoesNotCollapse() {
+    Random random = new Random(43);
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.99, 0.005));
+    for (double value : shuffledValues(100 * 1000, random)) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /**
+   * Adding a well-behaved quantile (0.5, 0.05) to the collapsing configuration bounds the error
+   * function in the lower ranks, but before the fix get(0.99) still returned a value from around
+   * the 85th percentile: samples between rank 0.8*n and 0.99*n may have g + delta up to n-r, and
+   * the old stop condition in get() tripped on the first of them.
+   */
+  @Test
+  void testTargetedQuantilesWithMedian() {
+    Random random = new Random(44);
+    CKMSQuantiles ckms =
+        new CKMSQuantiles(
+            new Quantile(0.5, 0.05), new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
+    for (double value : shuffledValues(100 * 1000, random)) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /**
+   * Deterministic small-n case from the review of an earlier fix attempt
+   * (https://github.com/prometheus/client_java/pull/2316): with values 1..10,000 shuffled with seed
+   * 2, selecting the sample whose possible-rank interval is centered nearest the desired rank
+   * returned 9784 there, outside the accuracy window [9800, 10000]. The additional merge bound in
+   * compress() keeps enough resolution around the target rank for this case to pass.
+   */
+  @Test
+  void testSingleTargetedQuantileSmallN() {
+    Random random = new Random(2);
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.99, 0.005));
+    for (double value : shuffledValues(10 * 1000, random)) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /**
+   * Targets with quantile + epsilon >= 1 are the degenerate end of the collapsing family: the
+   * accuracy window's end is rank n itself, so a bound phrased as "a sample may not extend past the
+   * window's end" is no constraint at all, and freshly inserted samples with delta = f(r) - 1 have
+   * possible-rank intervals centered near rank n regardless of their position. Both the merge bound
+   * and the insert-time delta bound must be anchored at the window's start for these
+   * configurations.
+   */
+  @Test
+  void testTargetedQuantileWindowReachingMaximum() {
+    for (Quantile quantile : new Quantile[] {new Quantile(0.99, 0.01), new Quantile(0.95, 0.05)}) {
+      for (int seed = 0; seed < 5; seed++) {
+        Random random = new Random(seed);
+        CKMSQuantiles ckms = new CKMSQuantiles(quantile);
+        for (double value : shuffledValues(10 * 1000, random)) {
+          ckms.insert(value);
+        }
+        validateResults(ckms);
+      }
+    }
+  }
+
+  /**
+   * Descending input is the worst case for the collapsing configurations: every insert happens at
+   * the front of the sample list, where the error function is loosest. Before the insert-time delta
+   * bound, get(0.9) was off by 2.9 * epsilon here.
+   */
+  @Test
+  void testTargetedQuantilesDescendingInput() {
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
+    for (int value = 10 * 1000; value >= 1; value--) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
   @Test
   void testGetGaussian() {
     RandomGenerator rand = new JDKRandomGenerator();
