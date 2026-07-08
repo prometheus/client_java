@@ -31,8 +31,19 @@ jobs:
           RUN_URL: ${{ github.event.workflow_run.html_url }}
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
         run: |
-          PR_NUMBER=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}" --jq '.pull_requests[0].number')
           HEAD_SHA=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}" --jq '.head_sha')
+          PR_NUMBER=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}" --jq '.pull_requests[0].number')
+          # workflow_run.pull_requests is empty when the triggering run's head branch
+          # is not on the default branch (or the PR is from a fork). Fall back to
+          # resolving the PR from the head SHA.
+          if [[ -z "${PR_NUMBER}" || "${PR_NUMBER}" == "null" ]]; then
+            PR_NUMBER=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
+              --jq '.[] | select(.state == "open") | .number' | head -1)
+          fi
+          if [[ -z "${PR_NUMBER}" ]]; then
+            echo "Could not determine PR number for run ${RUN_ID} (head ${HEAD_SHA})." >&2
+            exit 1
+          fi
 
           COMMENT_ARTIFACT_ID=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/artifacts" \
             --jq '.artifacts[] | select(.name == "pr-benchmark-comment-pr-'"${PR_NUMBER}"'-'"${HEAD_SHA}"'") | .id' \
