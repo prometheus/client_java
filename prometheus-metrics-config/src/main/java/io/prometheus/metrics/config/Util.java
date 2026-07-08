@@ -24,7 +24,7 @@ class Util {
       String fullKey = prefix.isEmpty() ? propertyName : prefix + "." + propertyName;
       if (!"true".equalsIgnoreCase(property) && !"false".equalsIgnoreCase(property)) {
         throw new PrometheusPropertiesException(
-            String.format("%s: Expecting 'true' or 'false'. Found: %s", fullKey, property));
+            invalidValueMessage(fullKey, "Expecting 'true' or 'false'."));
       }
       return Boolean.parseBoolean(property);
     }
@@ -88,7 +88,7 @@ class Util {
           }
         } catch (NumberFormatException e) {
           throw new PrometheusPropertiesException(
-              fullKey + "=" + property + ": Expecting comma separated list of double values");
+              invalidValueMessage(fullKey, "Expecting comma separated list of double values"));
         }
       }
       return Arrays.asList(result);
@@ -130,7 +130,7 @@ class Util {
         return Integer.parseInt(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            fullKey + "=" + property + ": Expecting integer value");
+            invalidValueMessage(fullKey, "Expecting integer value"));
       }
     }
     return null;
@@ -146,7 +146,7 @@ class Util {
         return Double.parseDouble(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            fullKey + "=" + property + ": Expecting double value");
+            invalidValueMessage(fullKey, "Expecting double value"));
       }
     }
     return null;
@@ -162,7 +162,7 @@ class Util {
         return Long.parseLong(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            fullKey + "=" + property + ": Expecting long value");
+            invalidValueMessage(fullKey, "Expecting long value"));
       }
     }
     return null;
@@ -193,8 +193,12 @@ class Util {
     if (number != null && !predicate.test(number)) {
       String fullKey =
           (prefix == null || prefix.isEmpty()) ? propertyName : prefix + "." + propertyName;
-      String fullMessage = String.format("%s: %s Found: %s", fullKey, message, number);
-      throw new PrometheusPropertiesException(fullMessage);
+      throw new PrometheusPropertiesException(invalidValueMessage(fullKey, message));
     }
+  }
+
+  static String invalidValueMessage(String fullKey, String message) {
+    String separator = message.endsWith(".") ? " " : ". ";
+    return fullKey + ": " + message + separator + "Found: <redacted>";
   }
 }

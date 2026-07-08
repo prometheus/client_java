@@ -41,7 +41,7 @@ class UtilTest {
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> Util.loadOptionalDuration("", "foo", propertySource))
-        .withMessage("foo: Expecting value >= 0. Found: -1");
+        .withMessage("foo: Expecting value >= 0. Found: <redacted>");
   }
 
   @Test
@@ -51,6 +51,6 @@ class UtilTest {
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> Util.loadOptionalDuration("", "foo", propertySource))
-        .withMessage("foo=abc: Expecting long value");
+        .withMessage("foo: Expecting long value. Found: <redacted>");
   }
 }

@@ -171,7 +171,8 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    String body = run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    assertThat(body).doesNotContain("test");
   }
 
   @Test
@@ -234,7 +235,7 @@ class HTTPServerTest {
         "");
   }
 
-  private static void run(
+  private static String run(
       HTTPServer server, String path, int expectedStatusCode, String expectedBody)
       throws Exception {
     // we cannot use try-with-resources or even client.close(), or the test will fail with Java 17
@@ -248,6 +249,7 @@ class HTTPServerTest {
           client.send(request, HttpResponse.BodyHandlers.ofString());
       assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
       assertThat(response.body()).contains(expectedBody);
+      return response.body();
     } finally {
       server.stop();
     }

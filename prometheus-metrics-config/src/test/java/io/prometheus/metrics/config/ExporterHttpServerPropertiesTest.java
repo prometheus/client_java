@@ -18,7 +18,8 @@ class ExporterHttpServerPropertiesTest {
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> load(Map.of("io.prometheus.exporter.http_server.port", "0")))
-        .withMessage("io.prometheus.exporter.http_server.port: Expecting value > 0. Found: 0");
+        .withMessage(
+            "io.prometheus.exporter.http_server.port: Expecting value > 0. Found: <redacted>");
   }
 
   @Test
