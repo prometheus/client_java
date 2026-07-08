@@ -25,6 +25,7 @@ import java.net.http.HttpResponse;
 import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -159,6 +160,21 @@ class HTTPServerTest {
   }
 
   @Test
+  void defaultExecutorHasBoundedQueueAndNonBlockingRejection() throws Exception {
+    HTTPServer server = HTTPServer.builder().port(0).buildAndStart();
+    try {
+      assertThat(server.executorService).isInstanceOf(ThreadPoolExecutor.class);
+      ThreadPoolExecutor executor = (ThreadPoolExecutor) server.executorService;
+      assertThat(executor.getMaximumPoolSize()).isEqualTo(10);
+      assertThat(executor.getQueue().remainingCapacity()).isEqualTo(100);
+      assertThat(executor.getRejectedExecutionHandler())
+          .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
+    } finally {
+      server.stop();
+    }
+  }
+
+  @Test
   void registryThrows() throws Exception {
     HTTPServer server =
         HTTPServer.builder()
@@ -171,7 +187,13 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    run(
+        server,
+        "/metrics",
+        500,
+        "An internal error occurred while scraping metrics.",
+        "IllegalStateException",
+        "test");
   }
 
   @Test
@@ -237,6 +259,16 @@ class HTTPServerTest {
   private static void run(
       HTTPServer server, String path, int expectedStatusCode, String expectedBody)
       throws Exception {
+    run(server, path, expectedStatusCode, expectedBody, new String[0]);
+  }
+
+  private static void run(
+      HTTPServer server,
+      String path,
+      int expectedStatusCode,
+      String expectedBody,
+      String... unexpectedBody)
+      throws Exception {
     // we cannot use try-with-resources or even client.close(), or the test will fail with Java 17
     @SuppressWarnings("resource")
     final HttpClient client = HttpClient.newBuilder().build();
@@ -248,6 +280,9 @@ class HTTPServerTest {
           client.send(request, HttpResponse.BodyHandlers.ofString());
       assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
       assertThat(response.body()).contains(expectedBody);
+      if (unexpectedBody.length > 0) {
+        assertThat(response.body()).doesNotContain(unexpectedBody);
+      }
     } finally {
       server.stop();
     }
