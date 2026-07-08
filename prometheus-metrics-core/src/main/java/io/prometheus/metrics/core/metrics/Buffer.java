@@ -1,7 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static java.util.Objects.requireNonNull;
-
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +82,7 @@ class Buffer {
     reset = true;
   }
 
-  @SuppressWarnings("ThreadPriorityCheck")
+  @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
@@ -156,6 +154,6 @@ class Buffer {
     if (timedOut) {
       throw new IllegalStateException("Timed out while waiting for in-flight observations.");
     }
-    return requireNonNull(result);
+    return result;
   }
 }
