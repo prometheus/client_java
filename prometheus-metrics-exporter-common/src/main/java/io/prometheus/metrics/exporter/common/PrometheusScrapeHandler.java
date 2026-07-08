@@ -96,6 +96,14 @@ public class PrometheusScrapeHandler {
           }
         }
       }
+    } catch (IllegalArgumentException e) {
+      PrometheusHttpResponse response = exchange.getResponse();
+      response.setHeader("Content-Type", "text/plain; charset=utf-8");
+      String errorMessage = e.getMessage() == null ? "Invalid query parameters" : e.getMessage();
+      byte[] message = errorMessage.getBytes(StandardCharsets.UTF_8);
+      try (OutputStream outputStream = response.sendHeadersAndGetBody(400, message.length)) {
+        outputStream.write(message);
+      }
     } catch (IOException e) {
       exchange.handleException(e);
     } catch (RuntimeException e) {
