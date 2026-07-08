@@ -6,8 +6,6 @@ import io.prometheus.metrics.exporter.common.PrometheusHttpRequest;
 import io.prometheus.metrics.exporter.common.PrometheusHttpResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -92,26 +90,23 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
 
   @Override
   public void handleException(IOException e) throws IOException {
-    sendErrorResponseWithStackTrace(e);
+    sendErrorResponse(e);
   }
 
   @Override
   public void handleException(RuntimeException e) {
-    sendErrorResponseWithStackTrace(e);
+    sendErrorResponse(e);
   }
 
-  private void sendErrorResponseWithStackTrace(Exception requestHandlerException) {
+  private void sendErrorResponse(Exception requestHandlerException) {
     if (!responseSent) {
       responseSent = true;
       try {
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        printWriter.write("An Exception occurred while scraping metrics: ");
-        requestHandlerException.printStackTrace(new PrintWriter(printWriter));
-        byte[] stackTrace = stringWriter.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] message =
+            "An Exception occurred while scraping metrics.".getBytes(StandardCharsets.UTF_8);
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
-        httpExchange.sendResponseHeaders(500, stackTrace.length);
-        httpExchange.getResponseBody().write(stackTrace);
+        httpExchange.sendResponseHeaders(500, message.length);
+        httpExchange.getResponseBody().write(message);
       } catch (IOException errorWriterException) {
         // We want to avoid logging so that we don't mess with application logs when the HTTPServer
         // is used in a Java agent.

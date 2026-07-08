@@ -38,7 +38,7 @@ class OpenMetrics2PropertiesTest {
         .isThrownBy(
             () -> load(new HashMap<>(Map.of("io.prometheus.openmetrics2.enabled", "invalid"))))
         .withMessage(
-            "io.prometheus.openmetrics2.enabled: Expecting 'true' or 'false'. Found: invalid");
+            "io.prometheus.openmetrics2.enabled: Expecting 'true' or 'false'. Found: <redacted>");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -47,7 +47,7 @@ class OpenMetrics2PropertiesTest {
                         Map.of("io.prometheus.openmetrics2.content_negotiation", "invalid"))))
         .withMessage(
             "io.prometheus.openmetrics2.content_negotiation: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+                + " <redacted>");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -56,7 +56,7 @@ class OpenMetrics2PropertiesTest {
                         Map.of("io.prometheus.openmetrics2.composite_values", "invalid"))))
         .withMessage(
             "io.prometheus.openmetrics2.composite_values: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+                + " <redacted>");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -65,7 +65,7 @@ class OpenMetrics2PropertiesTest {
                         Map.of("io.prometheus.openmetrics2.exemplar_compliance", "invalid"))))
         .withMessage(
             "io.prometheus.openmetrics2.exemplar_compliance: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+                + " <redacted>");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -74,7 +74,7 @@ class OpenMetrics2PropertiesTest {
                         Map.of("io.prometheus.openmetrics2.native_histograms", "invalid"))))
         .withMessage(
             "io.prometheus.openmetrics2.native_histograms: Expecting 'true' or 'false'. Found:"
-                + " invalid");
+                + " <redacted>");
   }
 
   private static OpenMetrics2Properties load(Map<String, String> map) {

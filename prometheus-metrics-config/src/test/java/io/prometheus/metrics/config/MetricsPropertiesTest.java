@@ -47,11 +47,11 @@ class MetricsPropertiesTest {
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().summaryNumberOfAgeBuckets(0).build())
-        .withMessage("summary_number_of_age_buckets: Expecting value > 0. Found: 0");
+        .withMessage("summary_number_of_age_buckets: Expecting value > 0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().summaryQuantiles(2L).build())
-        .withMessage(".summary_quantiles: Expecting 0.0 <= quantile <= 1.0. Found: 2.0");
+        .withMessage(".summary_quantiles: Expecting 0.0 <= quantile <= 1.0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().summaryQuantileErrors(0.9).build())
@@ -114,24 +114,29 @@ class MetricsPropertiesTest {
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().histogramNativeInitialSchema(10).build())
         .withMessage(
-            "histogram_native_initial_schema: Expecting number between -4 and +8. Found: 10");
+            "histogram_native_initial_schema: Expecting number between -4 and +8. Found:"
+                + " <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().histogramNativeMinZeroThreshold(-1.0).build())
-        .withMessage("histogram_native_min_zero_threshold: Expecting value >= 0. Found: -1.0");
+        .withMessage(
+            "histogram_native_min_zero_threshold: Expecting value >= 0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().histogramNativeMaxZeroThreshold(-1.0).build())
-        .withMessage("histogram_native_max_zero_threshold: Expecting value >= 0. Found: -1.0");
+        .withMessage(
+            "histogram_native_max_zero_threshold: Expecting value >= 0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().histogramNativeMaxNumberOfBuckets(-1).build())
-        .withMessage("histogram_native_max_number_of_buckets: Expecting value >= 0. Found: -1");
+        .withMessage(
+            "histogram_native_max_number_of_buckets: Expecting value >= 0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () -> MetricsProperties.builder().histogramNativeResetDurationSeconds(-1L).build())
-        .withMessage("histogram_native_reset_duration_seconds: Expecting value >= 0. Found: -1");
+        .withMessage(
+            "histogram_native_reset_duration_seconds: Expecting value >= 0. Found: <redacted>");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(

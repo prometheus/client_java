@@ -7,4 +7,9 @@ class HttpServerIT extends ExporterIT {
   public HttpServerIT() throws IOException, URISyntaxException {
     super("exporter-httpserver-sample");
   }
+
+  @Override
+  String expectedErrorResponseBody() {
+    return "An Exception occurred while scraping metrics.";
+  }
 }

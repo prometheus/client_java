@@ -227,11 +227,8 @@ public class MetricsProperties {
       for (double quantile : summaryQuantiles) {
         if (quantile < 0 || quantile > 1) {
           throw new PrometheusPropertiesException(
-              prefix
-                  + "."
-                  + SUMMARY_QUANTILES
-                  + ": Expecting 0.0 <= quantile <= 1.0. Found: "
-                  + quantile);
+              Util.invalidValueMessage(
+                  prefix + "." + SUMMARY_QUANTILES, "Expecting 0.0 <= quantile <= 1.0."));
         }
       }
     }
