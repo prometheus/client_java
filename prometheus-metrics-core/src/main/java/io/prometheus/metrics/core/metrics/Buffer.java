@@ -1,7 +1,10 @@
 package io.prometheus.metrics.core.metrics;
 
+import static java.util.Objects.requireNonNull;
+
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,6 +21,7 @@ import java.util.function.Supplier;
 class Buffer {
 
   private static final long bufferActiveBit = 1L << 63;
+  private static final long DEFAULT_MAX_SPIN_WAIT_NANOS = TimeUnit.SECONDS.toNanos(1);
   // Tracking observation counts requires an AtomicLong for coordination between recording and
   // collecting. AtomicLong does much worse under contention than the LongAdder instances used
   // elsewhere to hold aggregated state. To improve, we stripe the AtomicLong into N instances,
@@ -34,8 +38,14 @@ class Buffer {
   ReentrantLock appendLock = new ReentrantLock();
   ReentrantLock runLock = new ReentrantLock();
   Condition bufferFilled = appendLock.newCondition();
+  private final long maxSpinWaitNanos;
 
   Buffer() {
+    this(DEFAULT_MAX_SPIN_WAIT_NANOS);
+  }
+
+  Buffer(long maxSpinWaitNanos) {
+    this.maxSpinWaitNanos = maxSpinWaitNanos;
     stripedObservationCounts = new AtomicLong[Runtime.getRuntime().availableProcessors()];
     for (int i = 0; i < stripedObservationCounts.length; i++) {
       stripedObservationCounts[i] = new AtomicLong(0);
@@ -82,6 +92,7 @@ class Buffer {
     double[] buffer;
     int bufferSize;
     T result;
+    boolean timedOut = false;
 
     runLock.lock();
     try {
@@ -91,14 +102,19 @@ class Buffer {
         expectedCount += observationCount.getAndAdd(bufferActiveBit);
       }
 
+      long deadline = System.nanoTime() + maxSpinWaitNanos;
       while (!complete.apply(expectedCount)) {
         // Wait until all in-flight threads have added their observations to the histogram /
         // summary.
         // we can't use a condition here, because the other thread doesn't have a lock as it's on
         // the fast path.
+        if (System.nanoTime() - deadline >= 0) {
+          timedOut = true;
+          break;
+        }
         Thread.yield();
       }
-      result = createResult.get();
+      result = timedOut ? null : createResult.get();
 
       // Signal that the buffer is inactive.
       long expectedBufferSize = 0;
@@ -137,6 +153,9 @@ class Buffer {
     for (int i = 0; i < bufferSize; i++) {
       observeFunction.accept(buffer[i]);
     }
-    return result;
+    if (timedOut) {
+      throw new IllegalStateException("Timed out while waiting for in-flight observations.");
+    }
+    return requireNonNull(result);
   }
 }
