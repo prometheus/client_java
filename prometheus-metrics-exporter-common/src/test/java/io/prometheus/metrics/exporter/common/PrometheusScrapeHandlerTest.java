@@ -177,7 +177,7 @@ class PrometheusScrapeHandlerTest {
     assertThat(exchange.getResponseCode()).isEqualTo(400);
     assertThat(exchange.getResponseHeaders().get("Content-Type"))
         .isEqualTo("text/plain; charset=utf-8");
-    assertThat(exchange.getResponseBody()).contains("Too many query parameters");
+    assertThat(exchange.getResponseBody()).isEqualTo("Invalid query parameters");
   }
 
   @Test
@@ -191,7 +191,7 @@ class PrometheusScrapeHandlerTest {
     handler.handleRequest(exchange);
 
     assertThat(exchange.getResponseCode()).isEqualTo(400);
-    assertThat(exchange.getResponseBody()).contains("Query string too long");
+    assertThat(exchange.getResponseBody()).isEqualTo("Invalid query parameters");
   }
 
   /** Test implementation of PrometheusHttpExchange for testing. */
