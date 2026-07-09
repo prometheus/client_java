@@ -32,11 +32,36 @@ jobs:
           CONCLUSION: ${{ github.event.workflow_run.conclusion }}
         run: |
           HEAD_SHA=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}" --jq '.head_sha')
-          PR_NUMBER=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}" --jq '.pull_requests[0].number')
-          # workflow_run.pull_requests is empty when the triggering run's head branch
-          # is not on the default branch (or the PR is from a fork). Fall back to
-          # resolving the PR from the head SHA.
-          if [[ -z "${PR_NUMBER}" || "${PR_NUMBER}" == "null" ]]; then
+          PR_NUMBER=$(gh api \
+            "repos/${REPO}/actions/runs/${RUN_ID}" \
+            --jq '.pull_requests[0].number // ""')
+
+          # workflow_run.pull_requests can be empty for forked PRs. Prefer the
+          # artifact name because the benchmark workflow had the PR number when it
+          # uploaded the artifacts, then fall back to the run head repository/branch.
+          if [[ -z "${PR_NUMBER}" ]]; then
+            PR_NUMBER=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/artifacts" \
+              --jq '.artifacts[].name
+                | select(startswith("pr-benchmark-") and endswith("-'"${HEAD_SHA}"'"))
+                | split("-")[4]' \
+              | sort -u | head -1)
+          fi
+          if [[ -z "${PR_NUMBER}" ]]; then
+            HEAD_OWNER=$(gh api \
+              "repos/${REPO}/actions/runs/${RUN_ID}" \
+              --jq '.head_repository.owner.login // ""')
+            HEAD_BRANCH=$(gh api \
+              "repos/${REPO}/actions/runs/${RUN_ID}" \
+              --jq '.head_branch // ""')
+            if [[ -n "${HEAD_OWNER}" && -n "${HEAD_BRANCH}" ]]; then
+              PR_NUMBER=$(gh api --method GET "repos/${REPO}/pulls" \
+                -f state=open \
+                -f head="${HEAD_OWNER}:${HEAD_BRANCH}" \
+                --jq '.[].number' \
+                | head -1)
+            fi
+          fi
+          if [[ -z "${PR_NUMBER}" ]]; then
             PR_NUMBER=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
               --jq '.[] | select(.state == "open") | .number' | head -1)
           fi
@@ -45,27 +70,33 @@ jobs:
             exit 1
           fi
 
+          COMMENT_ARTIFACT_NAME="pr-benchmark-comment-pr-${PR_NUMBER}-${HEAD_SHA}"
+          RESULTS_ARTIFACT_NAME="pr-benchmark-results-pr-${PR_NUMBER}-${HEAD_SHA}"
           COMMENT_ARTIFACT_ID=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/artifacts" \
-            --jq '.artifacts[] | select(.name == "pr-benchmark-comment-pr-'"${PR_NUMBER}"'-'"${HEAD_SHA}"'") | .id' \
+            --jq '.artifacts[]
+              | select(.name == "'"${COMMENT_ARTIFACT_NAME}"'")
+              | .id' \
             | head -1)
 
-          RESULTS_ARTIFACT_NAME="pr-benchmark-results-pr-${PR_NUMBER}-${HEAD_SHA}"
           MARKER="<!-- pr-benchmark-report -->"
 
           if [[ -n "${COMMENT_ARTIFACT_ID}" ]]; then
             gh api \
-              -H "Accept: application/octet-stream" \
-              "repos/${REPO}/actions/artifacts/${COMMENT_ARTIFACT_ID}/zip" > /tmp/pr-benchmark-comment.zip
-            unzip -p /tmp/pr-benchmark-comment.zip pr-benchmark-comment.md > /tmp/pr-benchmark-comment.md
+              "repos/${REPO}/actions/artifacts/${COMMENT_ARTIFACT_ID}/zip" \
+              > /tmp/pr-benchmark-comment.zip
+            unzip -p /tmp/pr-benchmark-comment.zip pr-benchmark-comment.md \
+              > /tmp/pr-benchmark-comment.md
             SUMMARY_BODY=$(cat /tmp/pr-benchmark-comment.md)
           else
-            SUMMARY_BODY="_Benchmark summary artifact was not found; see the workflow run for details._"
+            SUMMARY_BODY="_Benchmark summary artifact was not found; "
+            SUMMARY_BODY+="see the workflow run for details._"
           fi
 
           if [[ "${CONCLUSION}" == "success" ]]; then
             STATUS_LINE="Benchmark run succeeded for \`${HEAD_SHA}\`."
           else
-            STATUS_LINE="Benchmark run finished with conclusion \`${CONCLUSION}\` for \`${HEAD_SHA}\`."
+            STATUS_LINE="Benchmark run finished with conclusion \`${CONCLUSION}\` "
+            STATUS_LINE+="for \`${HEAD_SHA}\`."
           fi
 
           body=$(cat <<EOF
