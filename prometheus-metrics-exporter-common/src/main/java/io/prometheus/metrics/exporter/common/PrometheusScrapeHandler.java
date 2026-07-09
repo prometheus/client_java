@@ -60,10 +60,19 @@ public class PrometheusScrapeHandler {
   public void handleRequest(PrometheusHttpExchange exchange) throws IOException {
     try {
       PrometheusHttpRequest request = exchange.getRequest();
-      MetricSnapshots snapshots = scrape(request);
+      String[] includedNames = null;
+      String debugParam = null;
+      try {
+        includedNames = request.getParameterValues("name[]");
+        debugParam = request.getParameter("debug");
+      } catch (InvalidQueryParameterException e) {
+        writeInvalidQueryParametersResponse(exchange);
+        return;
+      }
+      MetricSnapshots snapshots = scrape(request, includedNames);
       String acceptHeader = request.getHeader("Accept");
       EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
-      if (writeDebugResponse(snapshots, escapingScheme, exchange)) {
+      if (writeDebugResponse(snapshots, escapingScheme, debugParam, exchange)) {
         return;
       }
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
@@ -136,9 +145,9 @@ public class PrometheusScrapeHandler {
     return result;
   }
 
-  private MetricSnapshots scrape(PrometheusHttpRequest request) {
+  private MetricSnapshots scrape(PrometheusHttpRequest request, @Nullable String[] includedNames) {
 
-    Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
+    Predicate<String> filter = makeNameFilter(includedNames);
     if (filter != null) {
       return registry.scrape(filter, request);
     } else {
@@ -147,9 +156,11 @@ public class PrometheusScrapeHandler {
   }
 
   private boolean writeDebugResponse(
-      MetricSnapshots snapshots, EscapingScheme escapingScheme, PrometheusHttpExchange exchange)
+      MetricSnapshots snapshots,
+      EscapingScheme escapingScheme,
+      @Nullable String debugParam,
+      PrometheusHttpExchange exchange)
       throws IOException {
-    String debugParam = exchange.getRequest().getParameter("debug");
     PrometheusHttpResponse response = exchange.getResponse();
     if (debugParam == null) {
       return false;
@@ -181,6 +192,16 @@ public class PrometheusScrapeHandler {
           break;
       }
       return true;
+    }
+  }
+
+  private void writeInvalidQueryParametersResponse(PrometheusHttpExchange exchange)
+      throws IOException {
+    PrometheusHttpResponse response = exchange.getResponse();
+    response.setHeader("Content-Type", "text/plain; charset=utf-8");
+    byte[] message = "Invalid query parameters".getBytes(StandardCharsets.UTF_8);
+    try (OutputStream outputStream = response.sendHeadersAndGetBody(400, message.length)) {
+      outputStream.write(message);
     }
   }
 

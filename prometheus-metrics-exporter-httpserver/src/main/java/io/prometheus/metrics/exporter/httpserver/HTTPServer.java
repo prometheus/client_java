@@ -12,14 +12,13 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -38,6 +37,10 @@ import javax.security.auth.Subject;
  */
 @StableApi
 public class HTTPServer implements Closeable {
+
+  private static final int DEFAULT_MIN_THREADS = 1;
+  private static final int DEFAULT_MAX_THREADS = 10;
+  private static final int DEFAULT_QUEUE_SIZE = 100;
 
   static {
     if (!System.getProperties().containsKey("sun.net.httpserver.maxReqTime")) {
@@ -153,20 +156,11 @@ public class HTTPServer implements Closeable {
             }
           }
         } else {
-          drainInputAndClose(exchange);
+          exchange.getRequestBody().close();
           exchange.sendResponseHeaders(403, -1);
         }
       }
     };
-  }
-
-  private void drainInputAndClose(HttpExchange httpExchange) throws IOException {
-    InputStream inputStream = httpExchange.getRequestBody();
-    byte[] b = new byte[4096];
-    while (inputStream.read(b) != -1) {
-      // nop
-    }
-    inputStream.close();
   }
 
   /** Stop the HTTP server. Same as {@link #close()}. */
@@ -337,13 +331,12 @@ public class HTTPServer implements Closeable {
         return executorService;
       } else {
         return new ThreadPoolExecutor(
-            1,
-            10,
+            DEFAULT_MIN_THREADS,
+            DEFAULT_MAX_THREADS,
             120,
             TimeUnit.SECONDS,
-            new SynchronousQueue<>(true),
-            NamedDaemonThreadFactory.defaultThreadFactory(true),
-            new BlockingRejectedExecutionHandler());
+            new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
+            NamedDaemonThreadFactory.defaultThreadFactory(true));
       }
     }
 

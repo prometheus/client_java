@@ -49,15 +49,42 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
   @SuppressWarnings("JdkObsolete")
   default String[] getParameterValues(String name) {
     try {
+      int maxQueryStringLength = 64 * 1024;
+      int maxQueryParameterCount = 1024;
       ArrayList<String> result = new ArrayList<>();
       String queryString = getQueryString();
       if (queryString != null) {
-        String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
+        if (queryString.length() > maxQueryStringLength) {
+          throw new InvalidQueryParameterException(
+              "Query string too long: "
+                  + queryString.length()
+                  + " characters (max "
+                  + maxQueryStringLength
+                  + ")");
+        }
+        int start = 0;
+        int parameterCount = 0;
+        for (int end = queryString.indexOf('&'); start <= queryString.length(); ) {
+          parameterCount++;
+          if (parameterCount > maxQueryParameterCount) {
+            throw new InvalidQueryParameterException(
+                "Too many query parameters: "
+                    + parameterCount
+                    + " (max "
+                    + maxQueryParameterCount
+                    + ")");
+          }
+          String pair =
+              end == -1 ? queryString.substring(start) : queryString.substring(start, end);
           int idx = pair.indexOf("=");
           if (idx != -1 && URLDecoder.decode(pair.substring(0, idx), "UTF-8").equals(name)) {
             result.add(URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
           }
+          if (end == -1) {
+            break;
+          }
+          start = end + 1;
+          end = queryString.indexOf('&', start);
         }
       }
       if (result.isEmpty()) {

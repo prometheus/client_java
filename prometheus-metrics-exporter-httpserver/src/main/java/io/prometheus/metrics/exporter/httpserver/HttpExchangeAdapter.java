@@ -6,8 +6,6 @@ import io.prometheus.metrics.exporter.common.PrometheusHttpRequest;
 import io.prometheus.metrics.exporter.common.PrometheusHttpResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -17,6 +15,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HttpExchangeAdapter implements PrometheusHttpExchange {
+
+  private static final Logger logger = Logger.getLogger(HttpExchangeAdapter.class.getName());
+  private static final byte[] ERROR_RESPONSE =
+      "An internal error occurred while scraping metrics.\n".getBytes(StandardCharsets.UTF_8);
 
   private final HttpExchange httpExchange;
   private final HttpRequest request = new HttpRequest();
@@ -92,52 +94,42 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
 
   @Override
   public void handleException(IOException e) throws IOException {
-    sendErrorResponseWithStackTrace(e);
+    sendErrorResponse(e);
   }
 
   @Override
   public void handleException(RuntimeException e) {
-    sendErrorResponseWithStackTrace(e);
+    sendErrorResponse(e);
   }
 
-  private void sendErrorResponseWithStackTrace(Exception requestHandlerException) {
+  private void sendErrorResponse(Exception requestHandlerException) {
     if (!responseSent) {
       responseSent = true;
+      logger.log(
+          Level.SEVERE,
+          "The Prometheus metrics HTTPServer caught an Exception during scrape.",
+          requestHandlerException);
       try {
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        printWriter.write("An Exception occurred while scraping metrics: ");
-        requestHandlerException.printStackTrace(new PrintWriter(printWriter));
-        byte[] stackTrace = stringWriter.toString().getBytes(StandardCharsets.UTF_8);
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
-        httpExchange.sendResponseHeaders(500, stackTrace.length);
-        httpExchange.getResponseBody().write(stackTrace);
+        httpExchange.sendResponseHeaders(500, ERROR_RESPONSE.length);
+        httpExchange.getResponseBody().write(ERROR_RESPONSE);
       } catch (IOException errorWriterException) {
-        // We want to avoid logging so that we don't mess with application logs when the HTTPServer
-        // is used in a Java agent.
-        // However, if we can't even send an error response to the client there's nothing we can do
-        // but logging a message.
-        Logger.getLogger(this.getClass().getName())
-            .log(
-                Level.SEVERE,
-                "The Prometheus metrics HTTPServer caught an Exception during scrape and "
-                    + "failed to send an error response to the client.",
-                errorWriterException);
-        Logger.getLogger(this.getClass().getName())
-            .log(
-                Level.SEVERE,
-                "Original Exception that caused the Prometheus scrape error:",
-                requestHandlerException);
+        // If we can't even send an error response to the client, logging is the only remaining
+        // signal.
+        logger.log(
+            Level.SEVERE,
+            "The Prometheus metrics HTTPServer caught an Exception during scrape and "
+                + "failed to send an error response to the client.",
+            errorWriterException);
       }
     } else {
       // If the exception occurs after response headers have been sent, it's too late to respond
       // with HTTP 500.
-      Logger.getLogger(this.getClass().getName())
-          .log(
-              Level.SEVERE,
-              "The Prometheus metrics HTTPServer caught an Exception while trying to send "
-                  + "the metrics response.",
-              requestHandlerException);
+      logger.log(
+          Level.SEVERE,
+          "The Prometheus metrics HTTPServer caught an Exception while trying to send "
+              + "the metrics response.",
+          requestHandlerException);
     }
   }
 
