@@ -19,14 +19,29 @@ jobs:
   benchmark:
     if: github.event.label.name == 'benchmark'
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: base
+            repository: ${{ github.repository }}
+            ref: ${{ github.event.pull_request.base.sha }}
+            sha: ${{ github.event.pull_request.base.sha }}
+          - name: head
+            repository: ${{ github.event.pull_request.head.repo.full_name }}
+            ref: ${{ github.event.pull_request.head.sha }}
+            sha: ${{ github.event.pull_request.head.sha }}
     permissions:
       contents: read # checkout only
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - name: Checkout PR head
+      - name: Checkout ${{ matrix.name }}
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ matrix.repository }}
+          ref: ${{ matrix.ref }}
           persist-credentials: false
           fetch-depth: 0
 
@@ -40,22 +55,71 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-pr-bench-maven-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-pr-bench-maven-${{ matrix.name }}-${{ matrix.sha }}
           restore-keys: |
             ${{ runner.os }}-pr-bench-maven-
             ${{ runner.os }}-maven-
 
-      - name: Run JMH benchmarks
+      - name: Run ${{ matrix.name }} JMH benchmarks
         run: mise run benchmark:ci-json
+
+      - name: Capture ${{ matrix.name }} runner info
+        run: |
+          python3 ./.mise/tasks/generate_benchmark_summary.py \
+            --write-system-info runner-info.json
+
+      - name: Upload ${{ matrix.name }} raw benchmark results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pr-benchmark-raw-${{ matrix.name }}-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          path: |
+            benchmark-results.json
+            runner-info.json
+          retention-days: 5
+
+  summarize:
+    if: github.event.label.name == 'benchmark'
+    runs-on: ubuntu-24.04
+    needs: benchmark
+    permissions:
+      contents: read # checkout only
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Download base benchmark results
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-benchmark-raw-base-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          path: /tmp/base-benchmark-results
+
+      - name: Download head benchmark results
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-benchmark-raw-head-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          path: /tmp/head-benchmark-results
 
       - name: Generate benchmark summary
         run: |
-          mise run benchmark:generate-summary \
-            --input benchmark-results.json \
+          python3 ./.mise/tasks/generate_benchmark_summary.py \
+            --input /tmp/head-benchmark-results/benchmark-results.json \
+            --baseline /tmp/base-benchmark-results/benchmark-results.json \
+            --system-info /tmp/head-benchmark-results/runner-info.json \
+            --baseline-system-info /tmp/base-benchmark-results/runner-info.json \
             --output-dir benchmark-results \
-            --commit-sha "${{ github.event.pull_request.head.sha }}"
+            --commit-sha "${{ github.event.pull_request.head.sha }}" \
+            --baseline-sha "${{ github.event.pull_request.base.sha }}"
         env:
           GITHUB_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_BASE_REPOSITORY: ${{ github.repository }}
 
       - name: Prepare PR comment summary
         run: |
@@ -64,13 +128,13 @@ jobs:
       - name: Upload PR benchmark results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: pr-benchmark-results-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          name: pr-benchmark-results-pr-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: benchmark-results
           retention-days: 5
 
       - name: Upload PR benchmark comment
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: pr-benchmark-comment-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+          name: pr-benchmark-comment-pr-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: pr-benchmark-comment.md
           retention-days: 5
