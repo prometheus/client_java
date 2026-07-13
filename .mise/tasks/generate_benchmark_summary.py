@@ -61,6 +61,11 @@ def parse_args():
         help="Baseline GitHub repository for commit links",
     )
     parser.add_argument(
+        "--comparison-note",
+        default=None,
+        help="Optional note to include in the benchmark comparison section",
+    )
+    parser.add_argument(
         "--system-info",
         default=None,
         help="Optional JSON file with system info for the measured run",
@@ -337,6 +342,7 @@ def generate_comparison_section(
     baseline_sha: str,
     repo: str,
     baseline_repo: str,
+    comparison_note: Optional[str] = None,
     system_info: Optional[Dict[str, str]] = None,
     baseline_system_info: Optional[Dict[str, str]] = None,
 ) -> List[str]:
@@ -353,6 +359,8 @@ def generate_comparison_section(
     md.append(f"- **Head:** {format_commit_link(commit_sha, repo)}")
     md.append(f"- **Base:** {format_commit_link(baseline_sha, baseline_repo)}")
     md.append("- **Change:** positive means the PR is faster than base.")
+    if comparison_note:
+        md.append(f"- **Note:** {comparison_note}")
     if baseline_system_info:
         md.append(f"- **Head runner:** {format_system_info(system_info)}")
         md.append(f"- **Base runner:** {format_system_info(baseline_system_info)}")
@@ -406,6 +414,7 @@ def generate_markdown(
     baseline_results: Optional[List] = None,
     baseline_sha: Optional[str] = None,
     baseline_repo: Optional[str] = None,
+    comparison_note: Optional[str] = None,
     system_info: Optional[Dict[str, str]] = None,
     baseline_system_info: Optional[Dict[str, str]] = None,
 ) -> str:
@@ -461,6 +470,7 @@ def generate_markdown(
                 baseline_sha,
                 repo,
                 baseline_repo,
+                comparison_note=comparison_note,
                 system_info=sysinfo,
                 baseline_system_info=baseline_system_info,
             )
@@ -671,6 +681,7 @@ def main():
         baseline_results=baseline_results,
         baseline_sha=baseline_sha,
         baseline_repo=baseline_repo,
+        comparison_note=args.comparison_note,
         system_info=system_info,
         baseline_system_info=baseline_system_info,
     )

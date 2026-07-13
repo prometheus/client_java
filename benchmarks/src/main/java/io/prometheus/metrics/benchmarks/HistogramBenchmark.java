@@ -47,6 +47,16 @@ public class HistogramBenchmark {
     }
   }
 
+  @State(Scope.Thread)
+  public static class PrometheusClassicHistogramPerThread {
+
+    final Histogram noLabels;
+
+    public PrometheusClassicHistogramPerThread() {
+      noLabels = Histogram.builder().name("test").help("help").classicOnly().build();
+    }
+  }
+
   @State(Scope.Benchmark)
   public static class PrometheusNativeHistogram {
 
@@ -137,6 +147,26 @@ public class HistogramBenchmark {
   @Threads(4)
   public Histogram prometheusClassic(
       RandomNumbers randomNumbers, PrometheusClassicHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i]);
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(1)
+  public Histogram prometheusClassicSingleThread(
+      RandomNumbers randomNumbers, PrometheusClassicHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i]);
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusClassicPerThread(
+      RandomNumbers randomNumbers, PrometheusClassicHistogramPerThread histogram) {
     for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
       histogram.noLabels.observe(randomNumbers.randomNumbers[i]);
     }
