@@ -1,6 +1,7 @@
 package io.prometheus.metrics.exporter.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Collections;
 import java.util.Enumeration;
@@ -78,6 +79,22 @@ class PrometheusHttpRequestTest {
         new TestPrometheusHttpRequest("name[]=value1&invalid&name[]=value2");
     String[] values = request.getParameterValues("name[]");
     assertThat(values).containsExactly("value1", "value2");
+  }
+
+  @Test
+  void testGetParameterValuesRejectsMalformedEncodedName() {
+    PrometheusHttpRequest request = new TestPrometheusHttpRequest("name%ZZ=value");
+
+    assertThatExceptionOfType(InvalidQueryParameterException.class)
+        .isThrownBy(() -> request.getParameterValues("name"));
+  }
+
+  @Test
+  void testGetParameterValuesRejectsMalformedEncodedValue() {
+    PrometheusHttpRequest request = new TestPrometheusHttpRequest("name=value%ZZ");
+
+    assertThatExceptionOfType(InvalidQueryParameterException.class)
+        .isThrownBy(() -> request.getParameterValues("name"));
   }
 
   /** Test implementation of PrometheusHttpRequest for testing default methods. */

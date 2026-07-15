@@ -3,7 +3,6 @@ package io.prometheus.metrics.exporter.common;
 import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.annotation.Nullable;
@@ -77,8 +76,9 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
           String pair =
               end == -1 ? queryString.substring(start) : queryString.substring(start, end);
           int idx = pair.indexOf("=");
-          if (idx != -1 && URLDecoder.decode(pair.substring(0, idx), "UTF-8").equals(name)) {
-            result.add(URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+          if (idx != -1
+              && InvalidQueryParameterException.urlDecode(pair.substring(0, idx)).equals(name)) {
+            result.add(InvalidQueryParameterException.urlDecode(pair.substring(idx + 1)));
           }
           if (end == -1) {
             break;

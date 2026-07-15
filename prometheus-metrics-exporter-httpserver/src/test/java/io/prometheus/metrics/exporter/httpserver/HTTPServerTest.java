@@ -46,7 +46,7 @@ class HTTPServerTest {
   }
 
   @Test
-  public void testSubjectDoAs() throws Exception {
+  void testSubjectDoAs() throws Exception {
     final String user = "joe";
     final Subject subject = new Subject();
     subject.getPrincipals().add(() -> user);
@@ -165,6 +165,7 @@ class HTTPServerTest {
     try {
       assertThat(server.executorService).isInstanceOf(ThreadPoolExecutor.class);
       ThreadPoolExecutor executor = (ThreadPoolExecutor) server.executorService;
+      assertThat(executor.getCorePoolSize()).isEqualTo(10);
       assertThat(executor.getMaximumPoolSize()).isEqualTo(10);
       assertThat(executor.getQueue().remainingCapacity()).isEqualTo(100);
       assertThat(executor.getRejectedExecutionHandler())

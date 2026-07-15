@@ -38,7 +38,7 @@ import javax.security.auth.Subject;
 @StableApi
 public class HTTPServer implements Closeable {
 
-  private static final int DEFAULT_MIN_THREADS = 1;
+  private static final int DEFAULT_MIN_THREADS = 10;
   private static final int DEFAULT_MAX_THREADS = 10;
   private static final int DEFAULT_QUEUE_SIZE = 100;
 
@@ -158,6 +158,7 @@ public class HTTPServer implements Closeable {
         } else {
           exchange.getRequestBody().close();
           exchange.sendResponseHeaders(403, -1);
+          exchange.close();
         }
       }
     };
