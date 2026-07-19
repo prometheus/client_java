@@ -48,7 +48,7 @@ public class CounterWithCallback extends CallbackMetric {
         (value, labelValues) -> {
           dataPoints.add(
               new CounterSnapshot.CounterDataPointSnapshot(
-                  value, makeLabels(labelValues), null, 0L));
+                  value, makeLabels(labelValues), null, 0L, metadata.getName()));
         });
     return new CounterSnapshot(metadata, dataPoints);
   }
