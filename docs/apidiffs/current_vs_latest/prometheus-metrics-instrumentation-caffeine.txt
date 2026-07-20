@@ -1,2 +1,6 @@
 Comparing source compatibility of prometheus-metrics-instrumentation-caffeine-1.8.1-SNAPSHOT.jar against prometheus-metrics-instrumentation-caffeine-1.8.0.jar
-No changes.
+===  UNCHANGED CLASS: PUBLIC io.prometheus.metrics.instrumentation.caffeine.CacheMetricsCollector  (not serializable)
+	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
+	===  UNCHANGED METHOD: PUBLIC com.github.benmanes.caffeine.cache.Cache<?,?><?,?> removeCache(java.lang.String)
+		+++  NEW ANNOTATION: javax.annotation.Nullable
+

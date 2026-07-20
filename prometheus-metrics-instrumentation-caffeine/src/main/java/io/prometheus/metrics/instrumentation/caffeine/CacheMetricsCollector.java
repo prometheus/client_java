@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Collect metrics from Caffeine's com.github.benmanes.caffeine.cache.Cache.
@@ -149,6 +150,7 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * @param cacheName cache to be removed
    */
+  @Nullable
   public Cache<?, ?> removeCache(String cacheName) {
     return children.remove(cacheName);
   }
