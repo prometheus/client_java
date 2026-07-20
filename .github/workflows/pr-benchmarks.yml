@@ -23,58 +23,80 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: base
-            repository: ${{ github.repository }}
-            ref: ${{ github.event.pull_request.base.sha }}
-            sha: ${{ github.event.pull_request.base.sha }}
-          - name: head
-            repository: ${{ github.event.pull_request.head.repo.full_name }}
-            ref: ${{ github.event.pull_request.head.sha }}
-            sha: ${{ github.event.pull_request.head.sha }}
+          - topic: counter
+            pattern: CounterBenchmark
+          - topic: histogram
+            pattern: HistogramBenchmark
+          - topic: exposition
+            pattern: HistogramTextFormatBenchmark|TextFormatUtilBenchmark
     permissions:
       contents: read # checkout only
     env:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
+      JMH_PATTERN: ${{ matrix.pattern }}
     steps:
-      - name: Checkout ${{ matrix.name }}
+      - name: Checkout PR base
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          repository: ${{ matrix.repository }}
-          ref: ${{ matrix.ref }}
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
           fetch-depth: 0
 
       - name: Setup mise
-        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
         with:
-          version: v2026.6.14
-          sha256: 96ae1ef7b00a6ebbbec23ba1016d6e722f5e904966272f621d15326429e90d53
+          version: v2026.7.5
+          sha256: 5f7ab76afdf0780d12edeaa67e908094e9ccf7924cfe203e415c1cfb87bbf778
 
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-pr-bench-maven-${{ matrix.name }}-${{ matrix.sha }}
+          key: ${{ runner.os }}-pr-bench-maven-${{ matrix.topic }}-${{ env.HEAD_SHA }}
           restore-keys: |
+            ${{ runner.os }}-pr-bench-maven-${{ matrix.topic }}-
             ${{ runner.os }}-pr-bench-maven-
             ${{ runner.os }}-maven-
 
-      - name: Run ${{ matrix.name }} JMH benchmarks
-        run: mise run benchmark:ci-json
-
-      - name: Capture ${{ matrix.name }} runner info
+      - name: Capture runner info
         run: |
           python3 ./.mise/tasks/generate_benchmark_summary.py \
-            --write-system-info runner-info.json
+            --write-system-info /tmp/runner-info.json
 
-      - name: Upload ${{ matrix.name }} raw benchmark results
+      - name: Run base ${{ matrix.topic }} benchmarks
+        run: mise run benchmark:ci-json
+        env:
+          JMH_ARGS: -f 3 -wi 3 -i 5 ${{ env.JMH_PATTERN }}
+
+      - name: Save base ${{ matrix.topic }} results
+        run: mv benchmark-results.json /tmp/base-results.json
+
+      - name: Checkout PR head
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Run head ${{ matrix.topic }} benchmarks
+        run: mise run benchmark:ci-json
+        env:
+          JMH_ARGS: -f 3 -wi 3 -i 5 ${{ env.JMH_PATTERN }}
+
+      - name: Save head ${{ matrix.topic }} results
+        run: mv benchmark-results.json /tmp/head-results.json
+
+      - name: Upload ${{ matrix.topic }} benchmark results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: pr-benchmark-raw-${{ matrix.name }}-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          name: pr-benchmark-topic-${{ matrix.topic }}-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: |
-            benchmark-results.json
-            runner-info.json
+            /tmp/base-results.json
+            /tmp/head-results.json
+            /tmp/runner-info.json
           retention-days: 5
 
   summarize:
@@ -95,28 +117,42 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Download base benchmark results
+      - name: Download topic benchmark results
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: pr-benchmark-raw-base-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
-          path: /tmp/base-benchmark-results
+          pattern: pr-benchmark-topic-*-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
+          path: /tmp/topic-benchmark-results
 
-      - name: Download head benchmark results
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: pr-benchmark-raw-head-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
-          path: /tmp/head-benchmark-results
+      - name: Merge topic benchmark results
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/topic-benchmark-results')
+          for name in ('base', 'head'):
+              files = sorted(root.glob(f'*/{name}-results.json'))
+              if not files:
+                  raise SystemExit(f'No {name} benchmark result files found')
+              merged = []
+              for file in files:
+                  with open(file, 'r') as f:
+                      merged.extend(json.load(f))
+              with open(f'/tmp/{name}-benchmark-results.json', 'w') as f:
+                  json.dump(merged, f)
+                  f.write('\n')
+          PY
 
       - name: Generate benchmark summary
         run: |
           python3 ./.mise/tasks/generate_benchmark_summary.py \
-            --input /tmp/head-benchmark-results/benchmark-results.json \
-            --baseline /tmp/base-benchmark-results/benchmark-results.json \
-            --system-info /tmp/head-benchmark-results/runner-info.json \
-            --baseline-system-info /tmp/base-benchmark-results/runner-info.json \
+            --input /tmp/head-benchmark-results.json \
+            --baseline /tmp/base-benchmark-results.json \
             --output-dir benchmark-results \
             --commit-sha "${{ github.event.pull_request.head.sha }}" \
-            --baseline-sha "${{ github.event.pull_request.base.sha }}"
+            --baseline-sha "${{ github.event.pull_request.base.sha }}" \
+            --comparison-note \
+              "Base and head are compared on the same runner within each topic."
         env:
           GITHUB_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
           GITHUB_BASE_REPOSITORY: ${{ github.repository }}
