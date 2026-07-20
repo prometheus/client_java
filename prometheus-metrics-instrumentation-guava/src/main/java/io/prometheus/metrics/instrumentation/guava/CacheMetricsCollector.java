@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.annotation.Nullable;
 
 /**
  * Collect metrics from Guava's com.google.common.cache.Cache.
@@ -100,6 +101,7 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * @param cacheName cache to be removed
    */
+  @Nullable
   public Cache<?, ?> removeCache(String cacheName) {
     return children.remove(cacheName);
   }
