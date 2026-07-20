@@ -12,6 +12,18 @@ Prometheus uses GitHub to manage reviews of pull requests.
   This will avoid unnecessary work and surely give you and us a good deal
   of inspiration.
 
+## Pull Request Titles
+
+Use a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary)-style
+title for pull requests:
+
+```text
+<type>[optional scope]: <description>
+```
+
+For example: `fix(metrics): handle empty scrapes`. Common types include `feat`, `fix`,
+`docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`, and `revert`.
+
 ## Signing Off Commits
 
 Every commit must include a `Signed-off-by` line, as required by the
