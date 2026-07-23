@@ -46,7 +46,9 @@ class Buffer {
   }
 
   Buffer(long maxSpinWaitNanos, int maxBufferSize, Runnable beforeAppendLock) {
-    if (maxBufferSize <= 0) throw new IllegalArgumentException("maxBufferSize must be positive");
+    if (maxBufferSize <= 0) {
+      throw new IllegalArgumentException("maxBufferSize must be positive");
+    }
     this.maxSpinWaitNanos = maxSpinWaitNanos;
     this.maxBufferSize = maxBufferSize;
     this.beforeAppendLock = beforeAppendLock;
@@ -65,19 +67,29 @@ class Buffer {
     long count = counter.incrementAndGet();
     boolean phaseChanged = appendPhase.get() != phase;
     appendersInFlight.decrementAndGet();
-    if (phaseChanged || (phase & 1L) != 0 || (count & bufferActiveBit) == 0) return false;
+    if (phaseChanged || (phase & 1L) != 0 || (count & bufferActiveBit) == 0) {
+      return false;
+    }
     Generation generation = activeGeneration;
-    if (generation == null) return false;
+    if (generation == null) {
+      return false;
+    }
     beforeAppendLock.run();
     appendLock.lock();
     try {
       Generation current = activeGeneration;
-      if (current != null && current != generation) generation = current;
-      if (!generation.active) return false;
+      if (current != null && current != generation) {
+        generation = current;
+      }
+      if (!generation.active) {
+        return false;
+      }
       while (generation.size >= maxBufferSize && generation.active) {
         bufferSpaceAvailable.awaitUninterruptibly();
       }
-      if (!generation.active) return false;
+      if (!generation.active) {
+        return false;
+      }
       if (generation.size >= generation.values.length) {
         int doubled =
             generation.values.length > maxBufferSize / 2
@@ -140,8 +152,9 @@ class Buffer {
       try {
         activeGeneration = generation;
         long total = 0;
-        for (AtomicLong counter : stripedObservationCounts)
+        for (AtomicLong counter : stripedObservationCounts) {
           total += counter.getAndAdd(bufferActiveBit);
+        }
         expectedCount = total - observationCountOffset;
       } finally {
         appendLock.unlock();
@@ -160,7 +173,9 @@ class Buffer {
       appendLock.lock();
       try {
         generation.active = false;
-        for (AtomicLong counter : stripedObservationCounts) counter.addAndGet(bufferActiveBit);
+        for (AtomicLong counter : stripedObservationCounts) {
+          counter.addAndGet(bufferActiveBit);
+        }
         if (reset) {
           observationCountOffset += expectedCount;
           reset = false;
@@ -175,9 +190,13 @@ class Buffer {
         appendLock.unlock();
       }
       appendPhase.incrementAndGet();
-      for (int i = 0; i < bufferSize; i++) observeFunction.accept(buffer[i]);
+      for (int i = 0; i < bufferSize; i++) {
+        observeFunction.accept(buffer[i]);
+      }
       if (timedOut && failOnTimeout) {
-        if (afterTimeout.apply(expectedCount)) return createResult.get();
+        if (afterTimeout.apply(expectedCount)) {
+          return createResult.get();
+        }
         throw new IllegalStateException("Timed out while waiting for in-flight observations.");
       }
       return result;
@@ -189,6 +208,8 @@ class Buffer {
   @SuppressWarnings("ThreadPriorityCheck")
   private void phaseTransition() {
     appendPhase.incrementAndGet();
-    while (appendersInFlight.get() != 0) Thread.yield();
+    while (appendersInFlight.get() != 0) {
+      Thread.yield();
+    }
   }
 }
