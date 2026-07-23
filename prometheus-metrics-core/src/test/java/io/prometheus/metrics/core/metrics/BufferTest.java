@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
@@ -112,5 +113,80 @@ class BufferTest {
     release.countDown();
     appender.join(5_000);
     assertThat(appended).hasValue(false);
+  }
+
+  @Test
+  void lateAppenderCannotBeAddedToTheNextGeneration() throws InterruptedException {
+    CountDownLatch firstRunStarted = new CountDownLatch(1);
+    CountDownLatch firstRunMayFinish = new CountDownLatch(1);
+    CountDownLatch stalled = new CountDownLatch(1);
+    CountDownLatch release = new CountDownLatch(1);
+    CountDownLatch secondRunStarted = new CountDownLatch(1);
+    AtomicBoolean appended = new AtomicBoolean();
+    AtomicLong completedObservations = new AtomicLong();
+    Buffer buffer =
+        new Buffer(
+            TimeUnit.SECONDS.toNanos(1),
+            16,
+            () -> {
+              stalled.countDown();
+              try {
+                release.await();
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              }
+            });
+    Thread firstRun =
+        new Thread(
+            () ->
+                buffer.run(
+                    ignored -> {
+                      firstRunStarted.countDown();
+                      return firstRunMayFinish.getCount() == 0;
+                    },
+                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                    ignored -> {}));
+    firstRun.start();
+    assertThat(firstRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
+
+    Thread appender =
+        new Thread(
+            () -> {
+              appended.set(buffer.append(1.0));
+              if (!appended.get()) {
+                buffer.observeDirect(
+                    () -> {
+                      completedObservations.incrementAndGet();
+                      return null;
+                    });
+              }
+            });
+    appender.start();
+    assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
+
+    firstRunMayFinish.countDown();
+    firstRun.join(5_000);
+    assertThat(firstRun.isAlive()).isFalse();
+
+    Thread secondRun =
+        new Thread(
+            () ->
+                buffer.run(
+                    expectedCount -> {
+                      secondRunStarted.countDown();
+                      return completedObservations.get() >= expectedCount;
+                    },
+                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                    ignored -> {}));
+    secondRun.start();
+    assertThat(secondRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
+    release.countDown();
+    appender.join(5_000);
+    secondRun.join(5_000);
+
+    assertThat(appender.isAlive()).isFalse();
+    assertThat(secondRun.isAlive()).isFalse();
+    assertThat(appended).isFalse();
+    assertThat(completedObservations).hasValue(1);
   }
 }

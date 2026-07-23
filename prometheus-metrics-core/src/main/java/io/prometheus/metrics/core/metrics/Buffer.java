@@ -27,6 +27,7 @@ class Buffer {
   private final AtomicLong[] stripedObservationCounts;
   private final AtomicLong appendersInFlight = new AtomicLong();
   private final AtomicLong appendPhase = new AtomicLong();
+  private final ReentrantLock observationLock = new ReentrantLock();
   private boolean reset;
   private long observationCountOffset;
   @Nullable private volatile Generation activeGeneration;
@@ -78,10 +79,7 @@ class Buffer {
     appendLock.lock();
     try {
       Generation current = activeGeneration;
-      if (current != null && current != generation) {
-        generation = current;
-      }
-      if (!generation.active) {
+      if (current != generation || !generation.active) {
         return false;
       }
       while (generation.size >= maxBufferSize && generation.active) {
@@ -115,12 +113,21 @@ class Buffer {
     reset = true;
   }
 
+  <T> T observeDirect(Supplier<T> observeFunction) {
+    observationLock.lock();
+    try {
+      return observeFunction.get();
+    } finally {
+      observationLock.unlock();
+    }
+  }
+
   @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
       Consumer<Double> observeFunction) {
-    return run(complete, createResult, observeFunction, true, complete);
+    return run(complete, createResult, observeFunction, true);
   }
 
   @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
@@ -129,21 +136,11 @@ class Buffer {
       Supplier<T> createResult,
       Consumer<Double> observeFunction,
       boolean failOnTimeout) {
-    return run(complete, createResult, observeFunction, failOnTimeout, complete);
-  }
-
-  @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
-  <T extends DataPointSnapshot> T run(
-      Function<Long, Boolean> complete,
-      Supplier<T> createResult,
-      Consumer<Double> observeFunction,
-      boolean failOnTimeout,
-      Function<Long, Boolean> afterTimeout) {
     Generation generation = new Generation();
     double[] buffer;
     int bufferSize;
     boolean timedOut = false;
-    T result;
+    T result = null;
     runLock.lock();
     try {
       phaseTransition();
@@ -168,35 +165,40 @@ class Buffer {
         }
         Thread.yield();
       }
-      result = timedOut ? null : createResult.get();
-      phaseTransition();
-      appendLock.lock();
+      observationLock.lock();
       try {
-        generation.active = false;
-        for (AtomicLong counter : stripedObservationCounts) {
-          counter.addAndGet(bufferActiveBit);
-        }
-        if (reset) {
-          observationCountOffset += expectedCount;
-          reset = false;
-        }
-        activeGeneration = null;
-        buffer = generation.values;
-        bufferSize = generation.size;
-        generation.values = new double[0];
-        generation.size = 0;
-        bufferSpaceAvailable.signalAll();
+        result = timedOut ? null : createResult.get();
       } finally {
-        appendLock.unlock();
-      }
-      appendPhase.incrementAndGet();
-      for (int i = 0; i < bufferSize; i++) {
-        observeFunction.accept(buffer[i]);
+        try {
+          phaseTransition();
+          appendLock.lock();
+          try {
+            generation.active = false;
+            for (AtomicLong counter : stripedObservationCounts) {
+              counter.addAndGet(bufferActiveBit);
+            }
+            if (reset) {
+              observationCountOffset += expectedCount;
+              reset = false;
+            }
+            activeGeneration = null;
+            buffer = generation.values;
+            bufferSize = generation.size;
+            generation.values = new double[0];
+            generation.size = 0;
+            bufferSpaceAvailable.signalAll();
+          } finally {
+            appendLock.unlock();
+          }
+          appendPhase.incrementAndGet();
+          for (int i = 0; i < bufferSize; i++) {
+            observeFunction.accept(buffer[i]);
+          }
+        } finally {
+          observationLock.unlock();
+        }
       }
       if (timedOut && failOnTimeout) {
-        if (afterTimeout.apply(expectedCount)) {
-          return createResult.get();
-        }
         throw new IllegalStateException("Timed out while waiting for in-flight observations.");
       }
       return result;
