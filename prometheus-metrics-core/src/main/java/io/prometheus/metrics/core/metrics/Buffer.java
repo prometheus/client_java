@@ -21,7 +21,9 @@ import javax.annotation.Nullable;
  */
 class Buffer {
   private static final long bufferActiveBit = 1L << 63;
-  private static final long DEFAULT_MAX_SPIN_WAIT_NANOS = TimeUnit.SECONDS.toNanos(1);
+  // Keep collection bounded without failing healthy scrapes during short periods of scheduler or
+  // CI-host contention.
+  private static final long DEFAULT_MAX_SPIN_WAIT_NANOS = TimeUnit.SECONDS.toNanos(5);
   private static final int DEFAULT_MAX_BUFFER_SIZE = 1_000_000;
   private static final int INITIAL_BUFFER_SIZE = 128;
 
