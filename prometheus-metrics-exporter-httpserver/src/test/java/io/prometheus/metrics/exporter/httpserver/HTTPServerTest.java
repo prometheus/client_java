@@ -171,7 +171,13 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    run(
+        server,
+        "/metrics",
+        500,
+        "An internal error occurred while scraping metrics.",
+        "IllegalStateException",
+        "test");
   }
 
   @Test
@@ -237,6 +243,16 @@ class HTTPServerTest {
   private static void run(
       HTTPServer server, String path, int expectedStatusCode, String expectedBody)
       throws Exception {
+    run(server, path, expectedStatusCode, expectedBody, new String[0]);
+  }
+
+  private static void run(
+      HTTPServer server,
+      String path,
+      int expectedStatusCode,
+      String expectedBody,
+      String... unexpectedBody)
+      throws Exception {
     // we cannot use try-with-resources or even client.close(), or the test will fail with Java 17
     @SuppressWarnings("resource")
     final HttpClient client = HttpClient.newBuilder().build();
@@ -248,6 +264,9 @@ class HTTPServerTest {
           client.send(request, HttpResponse.BodyHandlers.ofString());
       assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
       assertThat(response.body()).contains(expectedBody);
+      if (unexpectedBody.length > 0) {
+        assertThat(response.body()).doesNotContain(unexpectedBody);
+      }
     } finally {
       server.stop();
     }
