@@ -26,7 +26,7 @@
     <awaitility.version>4.3.0</awaitility.version>
     <wiremock.version>3.13.2</wiremock.version>
     <junit-jupiter.version>6.1.2</junit-jupiter.version>
-    <otel.instrumentation.version>2.29.0-alpha</otel.instrumentation.version>
+    <otel.instrumentation.version>2.30.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
     <!-- Bumped by .github/workflows/bump-api-diff-baseline.yml after each release. -->
@@ -129,7 +129,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.5.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
