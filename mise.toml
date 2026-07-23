@@ -94,12 +94,7 @@ run = "flint run --fix"
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
 depends = "build"
-run = """
-oats \
-  --config oats-config.yaml \
-  --no-cache \
-  --timeout=5m
-"""
+run = "oats --no-cache --lgtm-version $LGTM_VERSION --timeout 5m ."
 
 [tasks.javadoc]
 description = "Generate Javadoc"
