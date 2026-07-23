@@ -9,56 +9,89 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
-/**
- * Metrics support concurrent write and scrape operations.
- *
- * <p>This is implemented by switching to a Buffer when the scrape starts, and applying the values
- * from the buffer after the scrape ends.
- */
+/** Metrics support concurrent write and scrape operations. */
 class Buffer {
-
   private static final long bufferActiveBit = 1L << 63;
   private static final long DEFAULT_MAX_SPIN_WAIT_NANOS = TimeUnit.SECONDS.toNanos(1);
-  // Tracking observation counts requires an AtomicLong for coordination between recording and
-  // collecting. AtomicLong does much worse under contention than the LongAdder instances used
-  // elsewhere to hold aggregated state. To improve, we stripe the AtomicLong into N instances,
-  // where N is the number of available processors. Each record operation chooses the appropriate
-  // instance to use based on the modulo of its thread id and N. This is a more naive / simple
-  // implementation compared to the striping used under the hood in java.util.concurrent classes
-  // like LongAdder - contention and hot spots can still occur if recording thread ids happen to
-  // resolve to the same index. Further improvement is possible.
-  private final AtomicLong[] stripedObservationCounts;
-  private double[] observationBuffer = new double[0];
-  private int bufferPos = 0;
-  private boolean reset = false;
+  private static final int DEFAULT_MAX_BUFFER_SIZE = 1_000_000;
+  private static final int INITIAL_BUFFER_SIZE = 128;
 
+  private static final class Generation {
+    private double[] values = new double[0];
+    private int size;
+    private boolean active = true;
+  }
+
+  private final AtomicLong[] stripedObservationCounts;
+  private final AtomicLong appendersInFlight = new AtomicLong();
+  private final AtomicLong appendPhase = new AtomicLong();
+  private boolean reset;
+  private long observationCountOffset;
+  @Nullable private volatile Generation activeGeneration;
   ReentrantLock appendLock = new ReentrantLock();
   ReentrantLock runLock = new ReentrantLock();
-  Condition bufferFilled = appendLock.newCondition();
+  private final Condition bufferSpaceAvailable = appendLock.newCondition();
   private final long maxSpinWaitNanos;
+  private final int maxBufferSize;
+  private final Runnable beforeAppendLock;
 
   Buffer() {
-    this(DEFAULT_MAX_SPIN_WAIT_NANOS);
+    this(DEFAULT_MAX_SPIN_WAIT_NANOS, DEFAULT_MAX_BUFFER_SIZE, () -> {});
   }
 
   Buffer(long maxSpinWaitNanos) {
+    this(maxSpinWaitNanos, DEFAULT_MAX_BUFFER_SIZE, () -> {});
+  }
+
+  Buffer(long maxSpinWaitNanos, int maxBufferSize, Runnable beforeAppendLock) {
+    if (maxBufferSize <= 0) throw new IllegalArgumentException("maxBufferSize must be positive");
     this.maxSpinWaitNanos = maxSpinWaitNanos;
+    this.maxBufferSize = maxBufferSize;
+    this.beforeAppendLock = beforeAppendLock;
     stripedObservationCounts = new AtomicLong[Runtime.getRuntime().availableProcessors()];
     for (int i = 0; i < stripedObservationCounts.length; i++) {
-      stripedObservationCounts[i] = new AtomicLong(0);
+      stripedObservationCounts[i] = new AtomicLong();
     }
   }
 
   boolean append(double value) {
-    int index = stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length);
-    AtomicLong observationCountForThread = stripedObservationCounts[index];
-    long count = observationCountForThread.incrementAndGet();
-    if ((count & bufferActiveBit) == 0) {
-      return false; // sign bit not set -> buffer not active.
-    } else {
-      doAppend(value);
+    AtomicLong counter =
+        stripedObservationCounts[
+            stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length)];
+    appendersInFlight.incrementAndGet();
+    long phase = appendPhase.get();
+    long count = counter.incrementAndGet();
+    boolean phaseChanged = appendPhase.get() != phase;
+    appendersInFlight.decrementAndGet();
+    if (phaseChanged || (phase & 1L) != 0 || (count & bufferActiveBit) == 0) return false;
+    Generation generation = activeGeneration;
+    if (generation == null) return false;
+    beforeAppendLock.run();
+    appendLock.lock();
+    try {
+      Generation current = activeGeneration;
+      if (current != null && current != generation) generation = current;
+      if (!generation.active) return false;
+      while (generation.size >= maxBufferSize && generation.active) {
+        bufferSpaceAvailable.awaitUninterruptibly();
+      }
+      if (!generation.active) return false;
+      if (generation.size >= generation.values.length) {
+        int doubled =
+            generation.values.length > maxBufferSize / 2
+                ? maxBufferSize
+                : generation.values.length * 2;
+        generation.values =
+            Arrays.copyOf(
+                generation.values,
+                Math.min(maxBufferSize, Math.max(INITIAL_BUFFER_SIZE, Math.max(1, doubled))));
+      }
+      generation.values[generation.size++] = value;
       return true;
+    } finally {
+      appendLock.unlock();
     }
   }
 
@@ -66,22 +99,6 @@ class Buffer {
     return (int) Math.floorMod(threadId, stripeCount);
   }
 
-  private void doAppend(double amount) {
-    appendLock.lock();
-    try {
-      if (bufferPos >= observationBuffer.length) {
-        observationBuffer = Arrays.copyOf(observationBuffer, observationBuffer.length + 128);
-      }
-      observationBuffer[bufferPos] = amount;
-      bufferPos++;
-
-      bufferFilled.signalAll();
-    } finally {
-      appendLock.unlock();
-    }
-  }
-
-  /** Must be called by the runnable in the run() method. */
   void reset() {
     reset = true;
   }
@@ -91,25 +108,47 @@ class Buffer {
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
       Consumer<Double> observeFunction) {
+    return run(complete, createResult, observeFunction, true, complete);
+  }
+
+  @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
+  <T extends DataPointSnapshot> T run(
+      Function<Long, Boolean> complete,
+      Supplier<T> createResult,
+      Consumer<Double> observeFunction,
+      boolean failOnTimeout) {
+    return run(complete, createResult, observeFunction, failOnTimeout, complete);
+  }
+
+  @SuppressWarnings({"NullAway", "ThreadPriorityCheck"})
+  <T extends DataPointSnapshot> T run(
+      Function<Long, Boolean> complete,
+      Supplier<T> createResult,
+      Consumer<Double> observeFunction,
+      boolean failOnTimeout,
+      Function<Long, Boolean> afterTimeout) {
+    Generation generation = new Generation();
     double[] buffer;
     int bufferSize;
-    T result;
     boolean timedOut = false;
-
+    T result;
     runLock.lock();
     try {
-      // Signal that the buffer is active.
-      long expectedCount = 0L;
-      for (AtomicLong observationCount : stripedObservationCounts) {
-        expectedCount += observationCount.getAndAdd(bufferActiveBit);
+      phaseTransition();
+      long expectedCount;
+      appendLock.lock();
+      try {
+        activeGeneration = generation;
+        long total = 0;
+        for (AtomicLong counter : stripedObservationCounts)
+          total += counter.getAndAdd(bufferActiveBit);
+        expectedCount = total - observationCountOffset;
+      } finally {
+        appendLock.unlock();
       }
-
+      appendPhase.incrementAndGet();
       long deadline = System.nanoTime() + maxSpinWaitNanos;
       while (!complete.apply(expectedCount)) {
-        // Wait until all in-flight threads have added their observations to the histogram /
-        // summary.
-        // we can't use a condition here, because the other thread doesn't have a lock as it's on
-        // the fast path.
         if (System.nanoTime() - deadline >= 0) {
           timedOut = true;
           break;
@@ -117,47 +156,39 @@ class Buffer {
         Thread.yield();
       }
       result = timedOut ? null : createResult.get();
-
-      // Signal that the buffer is inactive.
-      long expectedBufferSize = 0;
-      if (reset) {
-        for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += observationCount.getAndSet(0) & ~bufferActiveBit;
-        }
-        reset = false;
-      } else {
-        for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += observationCount.addAndGet(bufferActiveBit);
-        }
-      }
-      expectedBufferSize -= expectedCount;
-
+      phaseTransition();
       appendLock.lock();
       try {
-        while (bufferPos < expectedBufferSize) {
-          // Wait until all in-flight threads have added their observations to the buffer.
-          bufferFilled.await();
+        generation.active = false;
+        for (AtomicLong counter : stripedObservationCounts) counter.addAndGet(bufferActiveBit);
+        if (reset) {
+          observationCountOffset += expectedCount;
+          reset = false;
         }
+        activeGeneration = null;
+        buffer = generation.values;
+        bufferSize = generation.size;
+        generation.values = new double[0];
+        generation.size = 0;
+        bufferSpaceAvailable.signalAll();
       } finally {
         appendLock.unlock();
       }
-
-      buffer = observationBuffer;
-      bufferSize = bufferPos;
-      observationBuffer = new double[0];
-      bufferPos = 0;
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      appendPhase.incrementAndGet();
+      for (int i = 0; i < bufferSize; i++) observeFunction.accept(buffer[i]);
+      if (timedOut && failOnTimeout) {
+        if (afterTimeout.apply(expectedCount)) return createResult.get();
+        throw new IllegalStateException("Timed out while waiting for in-flight observations.");
+      }
+      return result;
     } finally {
       runLock.unlock();
     }
+  }
 
-    for (int i = 0; i < bufferSize; i++) {
-      observeFunction.accept(buffer[i]);
-    }
-    if (timedOut) {
-      throw new IllegalStateException("Timed out while waiting for in-flight observations.");
-    }
-    return result;
+  @SuppressWarnings("ThreadPriorityCheck")
+  private void phaseTransition() {
+    appendPhase.incrementAndGet();
+    while (appendersInFlight.get() != 0) Thread.yield();
   }
 }

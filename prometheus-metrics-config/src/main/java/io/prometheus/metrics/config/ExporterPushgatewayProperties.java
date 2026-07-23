@@ -95,7 +95,7 @@ public class ExporterPushgatewayProperties {
       if (!scheme.equals("http") && !scheme.equals("https")) {
         throw new PrometheusPropertiesException(
             Util.invalidValueMessage(
-                PREFIX + "." + SCHEME, "Illegal value. Expecting 'http' or 'https'.", scheme));
+                PREFIX + "." + SCHEME, "Illegal value. Expecting 'http' or 'https'."));
       }
     }
 
@@ -120,8 +120,7 @@ public class ExporterPushgatewayProperties {
         throw new PrometheusPropertiesException(
             Util.invalidValueMessage(
                 PREFIX + "." + ESCAPING_SCHEME,
-                "Illegal value. Expecting 'allow-utf-8', 'values', 'underscores', or 'dots'.",
-                scheme));
+                "Illegal value. Expecting 'allow-utf-8', 'values', 'underscores', or 'dots'."));
     }
   }
 

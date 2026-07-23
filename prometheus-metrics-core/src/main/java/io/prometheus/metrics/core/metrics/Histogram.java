@@ -339,7 +339,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
                   createdTimeMillis);
             }
           },
-          v -> doObserve(v, true));
+          v -> doObserve(v, true),
+          true,
+          expectedCount -> count.sum() >= expectedCount);
     }
 
     private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {
@@ -444,7 +446,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
               }
               return null;
             },
-            v -> doObserve(v, true));
+            v -> doObserve(v, true),
+            false);
       } else if (nativeBucketCreated) {
         // If a new bucket was created we need to check if nativeMaxBuckets is exceeded
         // and scale down if so.
@@ -488,7 +491,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             doubleBucketWidth();
             return null;
           },
-          v -> doObserve(v, true));
+          v -> doObserve(v, true),
+          false);
     }
 
     // maybeReset is called in the synchronized block while new observations go into the buffer.

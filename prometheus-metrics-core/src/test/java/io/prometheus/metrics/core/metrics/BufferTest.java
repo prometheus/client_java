@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class BufferTest {
@@ -69,5 +70,47 @@ class BufferTest {
                     },
                     ignored -> {}))
         .withMessage("Timed out while waiting for in-flight observations.");
+  }
+
+  @Test
+  void stalledAppenderAfterStripeActivationDoesNotBlockRun() throws InterruptedException {
+    CountDownLatch started = new CountDownLatch(1);
+    CountDownLatch proceed = new CountDownLatch(1);
+    CountDownLatch stalled = new CountDownLatch(1);
+    CountDownLatch release = new CountDownLatch(1);
+    AtomicReference<Boolean> appended = new AtomicReference<>();
+    Buffer buffer =
+        new Buffer(
+            TimeUnit.SECONDS.toNanos(1),
+            16,
+            () -> {
+              stalled.countDown();
+              try {
+                release.await();
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              }
+            });
+    Thread runner =
+        new Thread(
+            () ->
+                buffer.run(
+                    ignored -> {
+                      started.countDown();
+                      return proceed.getCount() == 0;
+                    },
+                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                    ignored -> {}));
+    runner.start();
+    assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+    Thread appender = new Thread(() -> appended.set(buffer.append(1.0)));
+    appender.start();
+    assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
+    proceed.countDown();
+    runner.join(5_000);
+    assertThat(runner.isAlive()).isFalse();
+    release.countDown();
+    appender.join(5_000);
+    assertThat(appended).hasValue(false);
   }
 }

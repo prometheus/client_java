@@ -24,7 +24,7 @@ class Util {
       String fullKey = prefix.isEmpty() ? propertyName : prefix + "." + propertyName;
       if (!"true".equalsIgnoreCase(property) && !"false".equalsIgnoreCase(property)) {
         throw new PrometheusPropertiesException(
-            invalidValueMessage(fullKey, "Expecting 'true' or 'false'.", property));
+            invalidValueMessage(fullKey, "Expecting 'true' or 'false'."));
       }
       return Boolean.parseBoolean(property);
     }
@@ -88,8 +88,7 @@ class Util {
           }
         } catch (NumberFormatException e) {
           throw new PrometheusPropertiesException(
-              invalidValueMessage(
-                  fullKey, "Expecting comma separated list of double values", property));
+              invalidValueMessage(fullKey, "Expecting comma separated list of double values"));
         }
       }
       return Arrays.asList(result);
@@ -131,7 +130,7 @@ class Util {
         return Integer.parseInt(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            invalidValueMessage(fullKey, "Expecting integer value", property));
+            invalidValueMessage(fullKey, "Expecting integer value"));
       }
     }
     return null;
@@ -147,7 +146,7 @@ class Util {
         return Double.parseDouble(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            invalidValueMessage(fullKey, "Expecting double value", property));
+            invalidValueMessage(fullKey, "Expecting double value"));
       }
     }
     return null;
@@ -163,7 +162,7 @@ class Util {
         return Long.parseLong(property);
       } catch (NumberFormatException e) {
         throw new PrometheusPropertiesException(
-            invalidValueMessage(fullKey, "Expecting long value", property));
+            invalidValueMessage(fullKey, "Expecting long value"));
       }
     }
     return null;
@@ -199,51 +198,7 @@ class Util {
     }
   }
 
-  static String invalidValueMessage(String fullKey, String message, String found) {
-    String separator = message.endsWith(".") ? " " : ". ";
-    return fullKey + ": " + message + separator + "Found: " + escape(found);
-  }
-
-  static String escape(String value) {
-    StringBuilder result = new StringBuilder(value.length() + 2);
-    result.append('"');
-    int maxLength = Math.min(value.length(), 100);
-    for (int i = 0; i < maxLength; i++) {
-      char c = value.charAt(i);
-      switch (c) {
-        case '\b':
-          result.append("\\b");
-          break;
-        case '\t':
-          result.append("\\t");
-          break;
-        case '\n':
-          result.append("\\n");
-          break;
-        case '\f':
-          result.append("\\f");
-          break;
-        case '\r':
-          result.append("\\r");
-          break;
-        case '"':
-          result.append("\\\"");
-          break;
-        case '\\':
-          result.append("\\\\");
-          break;
-        default:
-          if (c < 0x20 || c == 0x7f) {
-            result.append(String.format("\\u%04x", (int) c));
-          } else {
-            result.append(c);
-          }
-      }
-    }
-    if (value.length() > maxLength) {
-      result.append("...");
-    }
-    result.append('"');
-    return result.toString();
+  static String invalidValueMessage(String fullKey, String message) {
+    return fullKey + ": " + message;
   }
 }

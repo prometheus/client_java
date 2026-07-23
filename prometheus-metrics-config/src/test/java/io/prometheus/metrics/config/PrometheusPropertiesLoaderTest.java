@@ -31,9 +31,8 @@ class PrometheusPropertiesLoaderTest {
   void cantLoadPropertiesFile() {
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> PrometheusPropertiesLoader.load(new Properties()))
-        .withMessage(
-            "Failed to read Prometheus properties from nonexistent.properties:"
-                + " nonexistent.properties");
+        .withMessage("Failed to read Prometheus properties file.")
+        .withMessageNotContaining("nonexistent.properties");
   }
 
   @Test
