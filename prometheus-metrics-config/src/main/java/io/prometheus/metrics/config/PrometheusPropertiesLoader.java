@@ -169,8 +169,7 @@ public class PrometheusPropertiesLoader {
       try (InputStream stream = Files.newInputStream(Paths.get(path))) {
         properties.load(stream);
       } catch (IOException e) {
-        throw new PrometheusPropertiesException(
-            "Failed to read Prometheus properties from " + path + ": " + e.getMessage(), e);
+        throw new PrometheusPropertiesException("Failed to read Prometheus properties file.", e);
       }
     }
     return properties;
