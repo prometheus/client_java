@@ -1,5 +1,6 @@
 [tools]
-"go:github.com/grafana/oats" = "0.7.0"
+"aqua:grafana/gcx" = "v0.5.0"
+"aqua:grafana/oats" = "0.8.0"
 hugo = "0.164.0"
 java = "temurin-25.0.3+9.0.LTS"
 node = "24.18.0"
@@ -93,7 +94,12 @@ run = "flint run --fix"
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
 depends = "build"
-run = "oats -lgtm-version $LGTM_VERSION -timeout 5m examples/"
+run = """
+oats \
+  --config oats-config.yaml \
+  --no-cache \
+  --timeout=5m
+"""
 
 [tasks.javadoc]
 description = "Generate Javadoc"
