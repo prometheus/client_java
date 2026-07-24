@@ -336,7 +336,7 @@ url_api = "https://api.github.com/repos/biomejs/biome/releases/assets/470058831"
 provenance = "github-attestations"
 
 [[tools."cargo:https://github.com/grafana/flint"]]
-version = "rev:3f8aa74"
+version = "rev:67309cf"
 backend = "cargo:https://github.com/grafana/flint"
 
 [[tools.editorconfig-checker]]
