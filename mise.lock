@@ -251,7 +251,7 @@ url = "https://github.com/editorconfig-checker/editorconfig-checker/releases/dow
 url_api = "https://api.github.com/repos/editorconfig-checker/editorconfig-checker/releases/assets/460248513"
 
 [[tools."go:github.com/grafana/oats"]]
-version = "0.7.0"
+version = "0.8.0"
 backend = "go:github.com/grafana/oats"
 
 [[tools.google-java-format]]
