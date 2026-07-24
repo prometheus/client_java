@@ -212,7 +212,7 @@ public class HTTPServer implements Closeable {
     @Nullable private HttpHandler defaultHandler = null;
     @Nullable private String metricsHandlerPath = null;
     @Nullable private Boolean registerHealthHandler = null;
-    private HttpErrorHandlingPolicy errorHandlingPolicy = HttpErrorHandlingPolicy.genericResponse();
+    private HttpErrorHandlingPolicy errorHandlingPolicy = HttpErrorHandlingPolicy.builder().build();
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -301,7 +301,7 @@ public class HTTPServer implements Closeable {
      * Configure how exceptions raised while scraping metrics are reported to the client and
      * optionally to a caller-supplied diagnostic sink.
      *
-     * <p>Default is {@link HttpErrorHandlingPolicy#genericResponse()}.
+     * <p>Default is {@code HttpErrorHandlingPolicy.builder().build()}.
      */
     public Builder errorHandlingPolicy(HttpErrorHandlingPolicy errorHandlingPolicy) {
       if (errorHandlingPolicy == null) {

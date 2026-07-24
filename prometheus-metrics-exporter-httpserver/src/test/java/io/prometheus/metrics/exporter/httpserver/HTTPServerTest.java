@@ -179,7 +179,7 @@ class HTTPServerTest {
             .port(0)
             .registry(throwingRegistry())
             .errorHandlingPolicy(
-                HttpErrorHandlingPolicy.genericResponseWithReporter(reportedError::set))
+                HttpErrorHandlingPolicy.builder().errorReporter(reportedError::set).build())
             .buildAndStart();
 
     run(
@@ -194,12 +194,13 @@ class HTTPServerTest {
   }
 
   @Test
-  void registryExceptionCanUseLegacyDetailedResponse() throws Exception {
+  void registryExceptionCanUseUnsafeDebugResponse() throws Exception {
     HTTPServer server =
         HTTPServer.builder()
             .port(0)
             .registry(throwingRegistry())
-            .errorHandlingPolicy(HttpErrorHandlingPolicy.legacyDetailedResponse())
+            .errorHandlingPolicy(
+                HttpErrorHandlingPolicy.builder().unsafeDebugResponse(true).build())
             .buildAndStart();
 
     run(

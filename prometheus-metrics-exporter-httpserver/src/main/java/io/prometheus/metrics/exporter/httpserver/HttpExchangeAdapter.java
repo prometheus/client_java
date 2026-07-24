@@ -24,7 +24,7 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
   private volatile boolean responseSent = false;
 
   public HttpExchangeAdapter(HttpExchange httpExchange) {
-    this(httpExchange, HttpErrorHandlingPolicy.genericResponse());
+    this(httpExchange, HttpErrorHandlingPolicy.builder().build());
   }
 
   HttpExchangeAdapter(HttpExchange httpExchange, HttpErrorHandlingPolicy errorHandlingPolicy) {
