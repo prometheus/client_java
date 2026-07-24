@@ -554,9 +554,9 @@ public class PushGateway {
             getEscapingScheme(properties),
             getConnectionTimeout(properties),
             getReadTimeout(properties));
-      } catch (MalformedURLException e) {
+      } catch (MalformedURLException | IllegalArgumentException e) {
         throw new PrometheusPropertiesException(
-            address + ": Invalid address. Expecting <host>:<port>");
+            "Invalid Pushgateway address. Expecting <host>:<port>");
       } catch (UnsupportedEncodingException e) {
         throw new RuntimeException(e); // cannot happen, UTF-8 is always supported
       }

@@ -51,6 +51,18 @@ class UtilTest {
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> Util.loadOptionalDuration("", "foo", propertySource))
-        .withMessage("foo=abc: Expecting long value");
+        .withMessage("foo: Expecting long value");
+  }
+
+  @Test
+  void invalidValueMessageRedactsRawValue() {
+    String secret = "bad\n\"secret-value";
+    Map<Object, Object> regularProperties = new HashMap<>(Map.of("foo", secret));
+    PropertySource propertySource = new PropertySource(regularProperties);
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(() -> Util.loadBoolean("", "foo", propertySource))
+        .withMessage("foo: Expecting 'true' or 'false'.")
+        .withMessageNotContaining(secret);
   }
 }
