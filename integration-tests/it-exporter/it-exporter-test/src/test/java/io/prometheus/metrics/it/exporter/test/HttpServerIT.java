@@ -13,7 +13,9 @@ class HttpServerIT extends ExporterIT {
   @Override
   protected void assertErrorResponseBody(String body) {
     assertThat(body)
-        .isEqualTo("An internal error occurred while scraping metrics.\n")
+        .isEqualTo(
+            "An internal error occurred while scraping metrics. "
+                + "Configure an HTTP error reporter for details.\n")
         .doesNotContain("Simulating an error.");
   }
 }
