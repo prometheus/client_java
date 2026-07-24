@@ -21,4 +21,12 @@
 
   <!-- Suppress all Javadoc checks for integration tests -->
   <suppress checks="Javadoc" files=".*[/\\]integration-tests[/\\].*"/>
+
+  <!-- The Maven Checkstyle plugin checks main sources only. Flint invokes the standalone CLI
+       with explicit Java files, so preserve the existing policy for test and archived sources. -->
+  <suppress checks=".*" files=".*[/\\]src[/\\]test[/\\]java[/\\].*"/>
+  <suppress checks=".*" files=".*[/\\]src[/\\]archive[/\\]java[/\\].*"/>
+
+  <!-- Example setup intentionally groups declarations before the simulated work that uses them. -->
+  <suppress checks="VariableDeclarationUsageDistance" files=".*[/\\]examples[/\\].*"/>
 </suppressions>

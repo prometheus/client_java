@@ -8,11 +8,12 @@ protoc = "35.1"
 
 # Linters
 actionlint = "1.7.12"
-"aqua:grafana/flint" = "0.22.9"
 "aqua:jonwiggins/xmloxide" = "v0.4.3"
 "aqua:owenlamont/ryl" = "0.21.0"
 biome = "2.5.3"
+"cargo:https://github.com/grafana/flint" = "rev:3619bdc"
 editorconfig-checker = "3.8.0"
+"github:checkstyle/checkstyle[matching=all.jar,rename_exe=checkstyle]" = "checkstyle-13.8.0"
 google-java-format = "1.35.0"
 lychee = "0.24.2"
 "npm:renovate" = "43.257.4"
