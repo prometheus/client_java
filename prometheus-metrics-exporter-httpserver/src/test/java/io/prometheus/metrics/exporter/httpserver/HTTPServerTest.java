@@ -25,6 +25,7 @@ import java.net.http.HttpResponse;
 import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,24 +161,53 @@ class HTTPServerTest {
 
   @Test
   void registryThrows() throws Exception {
-    HTTPServer server =
-        HTTPServer.builder()
-            .port(0)
-            .registry(
-                new PrometheusRegistry() {
-                  @Override
-                  public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
-                    throw new IllegalStateException("test");
-                  }
-                })
-            .buildAndStart();
+    HTTPServer server = HTTPServer.builder().port(0).registry(throwingRegistry()).buildAndStart();
     run(
         server,
         "/metrics",
         500,
-        "An internal error occurred while scraping metrics.",
+        "Configure an HTTP error reporter for details.",
         "IllegalStateException",
         "test");
+  }
+
+  @Test
+  void registryExceptionIsPassedToConfiguredReporter() throws Exception {
+    AtomicReference<Throwable> reportedError = new AtomicReference<>();
+    HTTPServer server =
+        HTTPServer.builder()
+            .port(0)
+            .registry(throwingRegistry())
+            .errorHandlingPolicy(
+                HttpErrorHandlingPolicy.genericResponseWithReporter(reportedError::set))
+            .buildAndStart();
+
+    run(
+        server,
+        "/metrics",
+        500,
+        "Configure an HTTP error reporter for details.",
+        "IllegalStateException",
+        "test");
+
+    assertThat(reportedError.get()).isInstanceOf(IllegalStateException.class).hasMessage("test");
+  }
+
+  @Test
+  void registryExceptionCanUseLegacyDetailedResponse() throws Exception {
+    HTTPServer server =
+        HTTPServer.builder()
+            .port(0)
+            .registry(throwingRegistry())
+            .errorHandlingPolicy(HttpErrorHandlingPolicy.legacyDetailedResponse())
+            .buildAndStart();
+
+    run(
+        server,
+        "/metrics",
+        500,
+        "IllegalStateException: test",
+        "Configure an HTTP error reporter for details.");
   }
 
   @Test
@@ -244,6 +274,15 @@ class HTTPServerTest {
       HTTPServer server, String path, int expectedStatusCode, String expectedBody)
       throws Exception {
     run(server, path, expectedStatusCode, expectedBody, new String[0]);
+  }
+
+  private static PrometheusRegistry throwingRegistry() {
+    return new PrometheusRegistry() {
+      @Override
+      public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
+        throw new IllegalStateException("test");
+      }
+    };
   }
 
   private static void run(

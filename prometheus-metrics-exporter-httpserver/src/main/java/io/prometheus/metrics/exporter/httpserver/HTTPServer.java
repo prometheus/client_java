@@ -61,7 +61,8 @@ public class HTTPServer implements Closeable {
       @Nullable String authenticatedSubjectAttributeName,
       @Nullable HttpHandler defaultHandler,
       @Nullable String metricsHandlerPath,
-      @Nullable Boolean registerHealthHandler) {
+      @Nullable Boolean registerHealthHandler,
+      HttpErrorHandlingPolicy errorHandlingPolicy) {
     if (httpServer.getAddress() == null) {
       throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
     }
@@ -85,7 +86,7 @@ public class HTTPServer implements Closeable {
     }
     registerHandler(
         metricsPath,
-        new MetricsHandler(config, registry),
+        new MetricsHandler(config, registry, errorHandlingPolicy),
         authenticator,
         authenticatedSubjectAttributeName);
     if (registerHealthHandler == null || registerHealthHandler) {
@@ -211,6 +212,7 @@ public class HTTPServer implements Closeable {
     @Nullable private HttpHandler defaultHandler = null;
     @Nullable private String metricsHandlerPath = null;
     @Nullable private Boolean registerHealthHandler = null;
+    private HttpErrorHandlingPolicy errorHandlingPolicy = HttpErrorHandlingPolicy.genericResponse();
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -295,6 +297,20 @@ public class HTTPServer implements Closeable {
       return this;
     }
 
+    /**
+     * Configure how exceptions raised while scraping metrics are reported to the client and
+     * optionally to a caller-supplied diagnostic sink.
+     *
+     * <p>Default is {@link HttpErrorHandlingPolicy#genericResponse()}.
+     */
+    public Builder errorHandlingPolicy(HttpErrorHandlingPolicy errorHandlingPolicy) {
+      if (errorHandlingPolicy == null) {
+        throw new NullPointerException("errorHandlingPolicy");
+      }
+      this.errorHandlingPolicy = errorHandlingPolicy;
+      return this;
+    }
+
     /** Build and start the HTTPServer. */
     public HTTPServer buildAndStart() throws IOException {
       if (registry == null) {
@@ -318,7 +334,8 @@ public class HTTPServer implements Closeable {
           authenticatedSubjectAttributeName,
           defaultHandler,
           metricsHandlerPath,
-          registerHealthHandler);
+          registerHealthHandler,
+          errorHandlingPolicy);
     }
 
     private InetSocketAddress makeInetSocketAddress() {

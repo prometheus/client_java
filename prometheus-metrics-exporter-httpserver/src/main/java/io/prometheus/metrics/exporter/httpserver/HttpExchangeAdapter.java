@@ -7,7 +7,6 @@ import io.prometheus.metrics.exporter.common.PrometheusHttpResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -17,16 +16,20 @@ import java.util.logging.Logger;
 public class HttpExchangeAdapter implements PrometheusHttpExchange {
 
   private static final Logger logger = Logger.getLogger(HttpExchangeAdapter.class.getName());
-  private static final byte[] ERROR_RESPONSE =
-      "An internal error occurred while scraping metrics.\n".getBytes(StandardCharsets.UTF_8);
 
   private final HttpExchange httpExchange;
+  private final HttpErrorHandlingPolicy errorHandlingPolicy;
   private final HttpRequest request = new HttpRequest();
   private final HttpResponse response = new HttpResponse();
   private volatile boolean responseSent = false;
 
   public HttpExchangeAdapter(HttpExchange httpExchange) {
+    this(httpExchange, HttpErrorHandlingPolicy.genericResponse());
+  }
+
+  HttpExchangeAdapter(HttpExchange httpExchange, HttpErrorHandlingPolicy errorHandlingPolicy) {
     this.httpExchange = httpExchange;
+    this.errorHandlingPolicy = errorHandlingPolicy;
   }
 
   public class HttpRequest implements PrometheusHttpRequest {
@@ -105,14 +108,12 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
   private void sendErrorResponse(Exception requestHandlerException) {
     if (!responseSent) {
       responseSent = true;
-      logger.log(
-          Level.SEVERE,
-          "The Prometheus metrics HTTPServer caught an Exception during scrape.",
-          requestHandlerException);
+      reportException(requestHandlerException);
+      byte[] errorResponse = errorHandlingPolicy.getErrorResponse(requestHandlerException);
       try {
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
-        httpExchange.sendResponseHeaders(500, ERROR_RESPONSE.length);
-        httpExchange.getResponseBody().write(ERROR_RESPONSE);
+        httpExchange.sendResponseHeaders(500, errorResponse.length);
+        httpExchange.getResponseBody().write(errorResponse);
       } catch (IOException errorWriterException) {
         // If we can't even send an error response to the client, logging is the only remaining
         // signal.
@@ -121,6 +122,10 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
             "The Prometheus metrics HTTPServer caught an Exception during scrape and "
                 + "failed to send an error response to the client.",
             errorWriterException);
+        logger.log(
+            Level.SEVERE,
+            "Original Exception that caused the Prometheus scrape error:",
+            requestHandlerException);
       }
     } else {
       // If the exception occurs after response headers have been sent, it's too late to respond
@@ -130,6 +135,15 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
           "The Prometheus metrics HTTPServer caught an Exception while trying to send "
               + "the metrics response.",
           requestHandlerException);
+    }
+  }
+
+  private void reportException(Exception requestHandlerException) {
+    try {
+      errorHandlingPolicy.report(requestHandlerException);
+    } catch (RuntimeException ignored) {
+      // A caller-supplied reporter must not prevent the safe error response from being sent or
+      // implicitly fall back to application logging.
     }
   }
 
