@@ -32,7 +32,6 @@
     <!-- Bumped by .github/workflows/bump-api-diff-baseline.yml after each release. -->
     <api.diff.baseline.version>1.8.0</api.diff.baseline.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
-    <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>
     <javadoc.skip>false</javadoc.skip>
     <warnings>-Werror</warnings>
@@ -182,28 +181,6 @@
       </plugins>
     </pluginManagement>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.6.0</version>
-        <configuration>
-          <consoleOutput>true</consoleOutput>
-          <configLocation>google_checks.xml</configLocation>
-          <configLocation>checkstyle.xml</configLocation>
-          <violationSeverity>warning</violationSeverity>
-          <failOnViolation>true</failOnViolation>
-          <skip>${checkstyle.skip}</skip>
-          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-          <excludes>**/generated/**,**/jmh_generated/*</excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

@@ -157,6 +157,7 @@
     "mise.toml": {
       "mise": [
         "actionlint",
+        "aqua:checkstyle/checkstyle",
         "aqua:grafana/gcx",
         "aqua:grafana/oats",
         "aqua:jonwiggins/xmloxide",
@@ -164,7 +165,6 @@
         "biome",
         "cargo:https://github.com/grafana/flint",
         "editorconfig-checker",
-        "github:checkstyle/checkstyle",
         "google-java-format",
         "hugo",
         "java",

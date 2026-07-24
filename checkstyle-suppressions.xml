@@ -22,8 +22,8 @@
   <!-- Suppress all Javadoc checks for integration tests -->
   <suppress checks="Javadoc" files=".*[/\\]integration-tests[/\\].*"/>
 
-  <!-- The Maven Checkstyle plugin checks main sources only. Flint invokes the standalone CLI
-       with explicit Java files, so preserve the existing policy for test and archived sources. -->
+  <!-- Preserve the repository's main-source-only Checkstyle policy when Flint invokes the
+       standalone CLI with explicit Java files. -->
   <suppress checks=".*" files=".*[/\\]src[/\\]test[/\\]java[/\\].*"/>
   <suppress checks=".*" files=".*[/\\]src[/\\]archive[/\\]java[/\\].*"/>
 
