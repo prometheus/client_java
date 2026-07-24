@@ -16,19 +16,19 @@ public class MetricsHandler implements HttpHandler {
   private final HttpErrorHandlingPolicy errorHandlingPolicy;
 
   public MetricsHandler() {
-    this(new PrometheusScrapeHandler(), HttpErrorHandlingPolicy.genericResponse());
+    this(new PrometheusScrapeHandler(), HttpErrorHandlingPolicy.builder().build());
   }
 
   public MetricsHandler(PrometheusRegistry registry) {
-    this(new PrometheusScrapeHandler(registry), HttpErrorHandlingPolicy.genericResponse());
+    this(new PrometheusScrapeHandler(registry), HttpErrorHandlingPolicy.builder().build());
   }
 
   public MetricsHandler(PrometheusProperties config) {
-    this(new PrometheusScrapeHandler(config), HttpErrorHandlingPolicy.genericResponse());
+    this(new PrometheusScrapeHandler(config), HttpErrorHandlingPolicy.builder().build());
   }
 
   public MetricsHandler(PrometheusProperties config, PrometheusRegistry registry) {
-    this(new PrometheusScrapeHandler(config, registry), HttpErrorHandlingPolicy.genericResponse());
+    this(new PrometheusScrapeHandler(config, registry), HttpErrorHandlingPolicy.builder().build());
   }
 
   MetricsHandler(

@@ -38,8 +38,9 @@ Configure a reporter to send exception details to an appropriate logging or tele
 HTTPServer server = HTTPServer.builder()
   .port(9400)
   .errorHandlingPolicy(
-    HttpErrorHandlingPolicy.genericResponseWithReporter(
-      error -> logger.log(Level.SEVERE, "Prometheus scrape failed", error)))
+    HttpErrorHandlingPolicy.builder()
+      .errorReporter(error -> logger.log(Level.SEVERE, "Prometheus scrape failed", error))
+      .build())
   .buildAndStart();
 ```
 
@@ -47,9 +48,18 @@ The reporter runs synchronously on the request thread and may be called concurre
 runtime exceptions do not prevent the generic HTTP 500 response from being sent. Rate limiting
 or deduplication can be implemented in the reporter when needed.
 
-`HttpErrorHandlingPolicy.legacyDetailedResponse()` restores the previous response containing the
-full exception stack trace. This can disclose application internals and must not be used for an
-endpoint reachable by untrusted clients.
+For local debugging, an unsafe response containing the full exception stack trace can be enabled
+explicitly:
+
+```java
+HttpErrorHandlingPolicy.builder()
+  .unsafeDebugResponse(true)
+  .build()
+```
+
+This setting is independent of the error reporter, so both can be configured when needed. The
+unsafe debug response can disclose application internals and must not be enabled for an endpoint
+reachable by untrusted clients.
 
 ## Authentication and HTTPS
 

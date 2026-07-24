@@ -2,9 +2,13 @@ Comparing source compatibility of prometheus-metrics-exporter-httpserver-1.8.1-S
 +++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy  (not serializable)
 	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
 	+++  NEW SUPERCLASS: java.lang.Object
-	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy genericResponse()
-	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy genericResponseWithReporter(java.util.function.Consumer<java.lang.Throwable>)
-	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy legacyDetailedResponse()
+	+++  NEW METHOD: PUBLIC(+) STATIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy$Builder builder()
++++  NEW CLASS: PUBLIC(+) STATIC(+) FINAL(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy$Builder  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy build()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy$Builder errorReporter(java.util.function.Consumer<java.lang.Throwable>)
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.exporter.httpserver.HttpErrorHandlingPolicy$Builder unsafeDebugResponse(boolean)
 ***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.exporter.httpserver.HTTPServer  (not serializable)
 	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
 ***  MODIFIED CLASS: PUBLIC STATIC io.prometheus.metrics.exporter.httpserver.HTTPServer$Builder  (not serializable)

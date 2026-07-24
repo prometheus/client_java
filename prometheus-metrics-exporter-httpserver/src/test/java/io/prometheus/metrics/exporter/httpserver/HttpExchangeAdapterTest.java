@@ -84,7 +84,8 @@ class HttpExchangeAdapterTest {
     AtomicReference<Throwable> reportedError = new AtomicReference<>();
     HttpExchangeAdapter adapter =
         new HttpExchangeAdapter(
-            httpExchange, HttpErrorHandlingPolicy.genericResponseWithReporter(reportedError::set));
+            httpExchange,
+            HttpErrorHandlingPolicy.builder().errorReporter(reportedError::set).build());
     IllegalStateException scrapeException = new IllegalStateException("secret failure");
 
     adapter.handleException(scrapeException);
@@ -102,10 +103,12 @@ class HttpExchangeAdapterTest {
     HttpExchangeAdapter adapter =
         new HttpExchangeAdapter(
             httpExchange,
-            HttpErrorHandlingPolicy.genericResponseWithReporter(
-                ignored -> {
-                  throw new IllegalStateException("reporter failed");
-                }));
+            HttpErrorHandlingPolicy.builder()
+                .errorReporter(
+                    ignored -> {
+                      throw new IllegalStateException("reporter failed");
+                    })
+                .build());
 
     adapter.handleException(new IllegalStateException("secret failure"));
 
@@ -117,21 +120,29 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  void legacyDetailedResponseIncludesStackTrace() {
+  void unsafeDebugResponseIncludesStackTraceAndInvokesReporter() {
     HttpExchange httpExchange = mock(HttpExchange.class);
     Headers headers = new Headers();
     ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
     when(httpExchange.getResponseHeaders()).thenReturn(headers);
     when(httpExchange.getResponseBody()).thenReturn(responseBody);
+    AtomicReference<Throwable> reportedError = new AtomicReference<>();
     HttpExchangeAdapter adapter =
-        new HttpExchangeAdapter(httpExchange, HttpErrorHandlingPolicy.legacyDetailedResponse());
+        new HttpExchangeAdapter(
+            httpExchange,
+            HttpErrorHandlingPolicy.builder()
+                .unsafeDebugResponse(true)
+                .errorReporter(reportedError::set)
+                .build());
 
-    adapter.handleException(new IllegalStateException("diagnostic detail"));
+    IllegalStateException scrapeException = new IllegalStateException("diagnostic detail");
+    adapter.handleException(scrapeException);
 
     String body = new String(responseBody.toByteArray(), StandardCharsets.UTF_8);
     assertThat(body)
         .contains("An Exception occurred while scraping metrics:")
         .contains("IllegalStateException: diagnostic detail")
         .contains("at ");
+    assertThat(reportedError.get()).isSameAs(scrapeException);
   }
 }
