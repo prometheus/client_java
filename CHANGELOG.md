@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.8.1](https://github.com/prometheus/client_java/compare/v1.8.0...v1.8.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* avoid protobuf debug reflection in native images ([#2251](https://github.com/prometheus/client_java/issues/2251)) ([7f899e7](https://github.com/prometheus/client_java/commit/7f899e79ded325256bd0e444e33696b5f194700d))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.29.0-alpha ([#2235](https://github.com/prometheus/client_java/issues/2235)) ([cf9f702](https://github.com/prometheus/client_java/commit/cf9f70219e103c6004d8c315fdcfab2cfd7c447d))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.30.0-alpha ([#2328](https://github.com/prometheus/client_java/issues/2328)) ([1ca2716](https://github.com/prometheus/client_java/commit/1ca27164b646266a10ead6ad1e2e6b5648567b2f))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.30.0-alpha ([#2330](https://github.com/prometheus/client_java/issues/2330)) ([07623c1](https://github.com/prometheus/client_java/commit/07623c14dedfeffed3eace5b8718127add250668))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.23 ([#2241](https://github.com/prometheus/client_java/issues/2241)) ([a017f80](https://github.com/prometheus/client_java/commit/a017f80980d91a5fa8ffe930c820f836c3d1b2ff))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.24 ([#2294](https://github.com/prometheus/client_java/issues/2294)) ([63967bd](https://github.com/prometheus/client_java/commit/63967bd36ebc638234742ec58ad28f6098a92b3a))
+* **deps:** update jetty monorepo to v12.1.11 ([#2279](https://github.com/prometheus/client_java/issues/2279)) ([4dc54da](https://github.com/prometheus/client_java/commit/4dc54da0c5b768fd66710bd3736b95116df445c5))
+* **deps:** update junit-framework monorepo to v6.1.2 ([#2300](https://github.com/prometheus/client_java/issues/2300)) ([5966d1d](https://github.com/prometheus/client_java/commit/5966d1d4fdfc30e3a7eb09b0a88da5b2e9dc07c5))
+* **deps:** update otel.instrumentation.version ([#2236](https://github.com/prometheus/client_java/issues/2236)) ([158230d](https://github.com/prometheus/client_java/commit/158230d2418a0b6d1b80c590e8fc63c9e444072c))
+* **deps:** update protobuf to v4.35.1 ([#2221](https://github.com/prometheus/client_java/issues/2221)) ([cf17073](https://github.com/prometheus/client_java/commit/cf17073eebbdf67bc67dcbea2af30f27a0190079))
+* include license files in release source jars ([#2250](https://github.com/prometheus/client_java/issues/2250)) ([08cf925](https://github.com/prometheus/client_java/commit/08cf925b564247a497437e29e4a64ebb335cd328)), closes [#2216](https://github.com/prometheus/client_java/issues/2216)
+* stabilize OpenTelemetry exporter builder API ([#2257](https://github.com/prometheus/client_java/issues/2257)) ([09e6e2d](https://github.com/prometheus/client_java/commit/09e6e2de9261122b2e03620f9c6264f389f2fd25))
+
+
+### Documentation
+
+* document semantic PR title guidance ([#2318](https://github.com/prometheus/client_java/issues/2318)) ([5e813a0](https://github.com/prometheus/client_java/commit/5e813a0a8cd488b678fcc55dca85bb8d5c84dbad))
+
 ## [1.8.0](https://github.com/prometheus/client_java/compare/v1.7.0...v1.8.0) (2026-06-11)
 
 
