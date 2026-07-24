@@ -1,0 +1,11 @@
+name: http protobuf exporter emits uptime metric
+fixture:
+  compose:
+    template: lgtm
+    file: docker-compose.yml
+seed:
+  type: app
+expected:
+  metrics:
+    - promql: "uptime_seconds_total{}"
+      value: ">= 0"

@@ -1,0 +1,6 @@
+meta:
+  version: 3
+
+cases:
+  - examples/example-exporter-opentelemetry/oats-tests/http/oats-case.yaml
+  - examples/example-exporter-opentelemetry/oats-tests/agent/oats-case.yaml

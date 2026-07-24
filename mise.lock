@@ -86,6 +86,91 @@ url = "https://github.com/grafana/flint/releases/download/v0.22.7/flint-x86_64-p
 url_api = "https://api.github.com/repos/grafana/flint/releases/assets/469229804"
 provenance = "github-attestations"
 
+[[tools."aqua:grafana/gcx"]]
+version = "v0.5.0"
+backend = "aqua:grafana/gcx"
+
+[tools."aqua:grafana/gcx"."platforms.linux-arm64"]
+checksum = "sha256:07811e994101abf3fe51b7d9d5bbcc045830382ece80f37af29d32234cbe4731"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583603"
+
+[tools."aqua:grafana/gcx"."platforms.linux-arm64-musl"]
+checksum = "sha256:07811e994101abf3fe51b7d9d5bbcc045830382ece80f37af29d32234cbe4731"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583603"
+
+[tools."aqua:grafana/gcx"."platforms.linux-x64"]
+checksum = "sha256:5c0ce026b0625da09ee976115799cba28e6c84375f802c64f7995c0ba87a83b6"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583622"
+
+[tools."aqua:grafana/gcx"."platforms.linux-x64-musl"]
+checksum = "sha256:5c0ce026b0625da09ee976115799cba28e6c84375f802c64f7995c0ba87a83b6"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583622"
+
+[tools."aqua:grafana/gcx"."platforms.macos-arm64"]
+checksum = "sha256:3835b426490dddbf0cd3cd4a96566ebb2b2a45121c3d61c518e8c3ae54d1ac0c"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583602"
+
+[tools."aqua:grafana/gcx"."platforms.macos-x64"]
+checksum = "sha256:40db287702572bc9e7c5decdd25cd054e8b076008b8f3d543eafa721441da4db"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583604"
+
+[tools."aqua:grafana/gcx"."platforms.windows-x64"]
+checksum = "sha256:e71bdc867b6d13399d4aad15a667c7bc5c6fbf37a187cb87dafeb61113c48921"
+url = "https://github.com/grafana/gcx/releases/download/v0.5.0/gcx_0.5.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/484583601"
+
+[[tools."aqua:grafana/oats"]]
+version = "0.8.0"
+backend = "aqua:grafana/oats"
+
+[tools."aqua:grafana/oats"."platforms.linux-arm64"]
+checksum = "sha256:82eaf1e836cea916b96cef6745423efd8256ceab64bbabd1fa8f13b3883a1212"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171323"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.linux-arm64-musl"]
+checksum = "sha256:82eaf1e836cea916b96cef6745423efd8256ceab64bbabd1fa8f13b3883a1212"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171323"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.linux-x64"]
+checksum = "sha256:ea4368c6d7f62244ce959ba60512f271d46d133b50350077257e2bb81c03a5ca"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171351"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.linux-x64-musl"]
+checksum = "sha256:ea4368c6d7f62244ce959ba60512f271d46d133b50350077257e2bb81c03a5ca"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171351"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.macos-arm64"]
+checksum = "sha256:156bb14787a09093de8ad0370c95e8104b771ca0b3ede382541f9837db797f27"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171322"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.macos-x64"]
+checksum = "sha256:034bc120d0d8bbf8aff05f61a6b569efec821df19bd25bb602ee77d4a6368235"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171352"
+provenance = "github-attestations"
+
+[tools."aqua:grafana/oats"."platforms.windows-x64"]
+checksum = "sha256:166a5577c66efa9e4d677856ae1780212ee27c081042c8d54db0c996019adbc0"
+url = "https://github.com/grafana/oats/releases/download/v0.8.0/oats_0.8.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/oats/releases/assets/487171324"
+provenance = "github-attestations"
+
 [[tools."aqua:jonwiggins/xmloxide"]]
 version = "v0.4.3"
 backend = "aqua:jonwiggins/xmloxide"
@@ -249,10 +334,6 @@ url_api = "https://api.github.com/repos/editorconfig-checker/editorconfig-checke
 checksum = "sha256:7ec31e1a6a9983aa2a4942cb66dfd35e8b61e76263460413988438ae1426906a"
 url = "https://github.com/editorconfig-checker/editorconfig-checker/releases/download/v3.8.0/ec-windows-amd64.zip"
 url_api = "https://api.github.com/repos/editorconfig-checker/editorconfig-checker/releases/assets/460248513"
-
-[[tools."go:github.com/grafana/oats"]]
-version = "0.7.0"
-backend = "go:github.com/grafana/oats"
 
 [[tools.google-java-format]]
 version = "1.35.0"
