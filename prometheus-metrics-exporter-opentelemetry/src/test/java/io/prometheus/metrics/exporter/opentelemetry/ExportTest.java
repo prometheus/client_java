@@ -12,6 +12,7 @@ import io.opentelemetry.sdk.testing.assertj.MetricAssert;
 import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.core.metrics.Histogram;
@@ -379,6 +380,46 @@ class ExportTest {
     List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
     assertThat(metrics).hasSize(1);
     OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("events_total");
+  }
+
+  @Test
+  void metricNameFilterExcludedNames() {
+    InMemoryMetricReader reader = InMemoryMetricReader.create();
+    PrometheusRegistry filteredRegistry = new PrometheusRegistry();
+    reader.register(
+        new PrometheusMetricProducer(
+            filteredRegistry,
+            InstrumentationScopeInfo.create("test"),
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            false,
+            ExporterFilterProperties.builder().excludedNames("secret_total").build()));
+
+    Counter.builder().name("secret").register(filteredRegistry).inc();
+    Counter.builder().name("public").register(filteredRegistry).inc();
+
+    List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
+    assertThat(metrics).hasSize(1);
+    OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("public");
+  }
+
+  @Test
+  void metricNameFilterAllowedPrefixes() {
+    InMemoryMetricReader reader = InMemoryMetricReader.create();
+    PrometheusRegistry filteredRegistry = new PrometheusRegistry();
+    reader.register(
+        new PrometheusMetricProducer(
+            filteredRegistry,
+            InstrumentationScopeInfo.create("test"),
+            Resource.create(Attributes.builder().put("staticRes", "value").build()),
+            false,
+            ExporterFilterProperties.builder().allowedPrefixes("http_").build()));
+
+    Counter.builder().name("http_requests").register(filteredRegistry).inc();
+    Counter.builder().name("jvm_threads").register(filteredRegistry).inc();
+
+    List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
+    assertThat(metrics).hasSize(1);
+    OpenTelemetryAssertions.assertThat(metrics.getFirst()).hasName("http_requests");
   }
 
   private MetricAssert metricAssert() {

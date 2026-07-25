@@ -41,7 +41,11 @@ public class OtelAutoConfig {
     boolean preserveNames = resolvePreserveNames(builder, config);
     reader.register(
         new PrometheusMetricProducer(
-            registry, instrumentationScopeInfo, getResourceField(sdk), preserveNames));
+            registry,
+            instrumentationScopeInfo,
+            getResourceField(sdk),
+            preserveNames,
+            config.getExporterFilterProperties()));
     return reader;
   }
 

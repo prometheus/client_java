@@ -7,7 +7,9 @@ import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.resources.ResourceBuilder;
+import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.exporter.opentelemetry.otelmodel.MetricDataFactory;
+import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -22,6 +24,7 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 class PrometheusMetricProducer implements CollectionRegistration {
@@ -30,29 +33,70 @@ class PrometheusMetricProducer implements CollectionRegistration {
   private final Resource resource;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
   private final boolean preserveNames;
+  @Nullable private final Predicate<String> nameFilter;
 
+  /**
+   * Creates a producer with no metric name filtering, i.e. all metrics in {@code registry} are
+   * exported.
+   */
   public PrometheusMetricProducer(
       PrometheusRegistry registry,
       InstrumentationScopeInfo instrumentationScopeInfo,
       Resource resource,
       boolean preserveNames) {
+    this(
+        registry,
+        instrumentationScopeInfo,
+        resource,
+        preserveNames,
+        ExporterFilterProperties.builder().build());
+  }
+
+  public PrometheusMetricProducer(
+      PrometheusRegistry registry,
+      InstrumentationScopeInfo instrumentationScopeInfo,
+      Resource resource,
+      boolean preserveNames,
+      ExporterFilterProperties filterProperties) {
     this.registry = registry;
     this.instrumentationScopeInfo = instrumentationScopeInfo;
     this.resource = resource;
     this.preserveNames = preserveNames;
+    this.nameFilter = makeNameFilter(filterProperties);
+  }
+
+  /**
+   * Builds a name filter from {@code io.prometheus.exporter.filter.*} properties, mirroring how
+   * {@code PrometheusScrapeHandler} builds its filter for the Servlet/HTTPServer exporters so that
+   * filtering config behaves consistently across exporters.
+   *
+   * <p>OpenTelemetry's own Views API also supports filtering and aggregation, and may be preferable
+   * for OpenTelemetry-specific deployments; this filter is intended for users who want the same
+   * {@code io.prometheus.exporter.filter.*} config to apply regardless of which exporter they use.
+   *
+   * @return {@code null} if no filter properties are set, to avoid the overhead of testing every
+   *     metric name against a filter that matches everything.
+   */
+  @Nullable
+  private static Predicate<String> makeNameFilter(ExporterFilterProperties props) {
+    if (props.getAllowedMetricNames() == null
+        && props.getExcludedMetricNames() == null
+        && props.getAllowedMetricNamePrefixes() == null
+        && props.getExcludedMetricNamePrefixes() == null) {
+      return null;
+    }
+    return MetricNameFilter.builder()
+        .nameMustBeEqualTo(props.getAllowedMetricNames())
+        .nameMustNotBeEqualTo(props.getExcludedMetricNames())
+        .nameMustStartWith(props.getAllowedMetricNamePrefixes())
+        .nameMustNotStartWith(props.getExcludedMetricNamePrefixes())
+        .build();
   }
 
   @Override
   public Collection<MetricData> collectAllMetrics() {
-    // Note: Currently all metrics from the registry are exported. To add metric filtering
-    // similar to the Servlet exporter, one could:
-    // 1. Add filter properties to ExporterOpenTelemetryProperties (allowedNames, excludedNames,
-    // etc.)
-    // 2. Convert these properties to a Predicate<String> using MetricNameFilter.builder()
-    // 3. Call registry.scrape(filter) instead of registry.scrape()
-    // OpenTelemetry also provides its own Views API for filtering and aggregation, which may be
-    // preferred for OpenTelemetry-specific deployments.
-    MetricSnapshots snapshots = registry.scrape();
+    MetricSnapshots snapshots =
+        nameFilter != null ? registry.scrape(nameFilter) : registry.scrape();
     Resource resourceWithTargetInfo = resource.merge(resourceFromTargetInfo(snapshots));
     InstrumentationScopeInfo scopeFromInfo = instrumentationScopeFromOtelScopeInfo(snapshots);
     List<MetricData> result = new ArrayList<>(snapshots.size());
