@@ -44,6 +44,9 @@ By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to
 the [OpenTelemetryExporter.Builder][builder-javadoc], or at runtime via
 [`io.prometheus.exporter.opentelemetry.*`][otel-properties] properties.
 
+The OpenTelemetry exporter also honors the shared [`io.prometheus.exporter.filter.*`][exporter-filter-properties] metric-name
+filter properties.
+
 In addition to the Prometheus Java client configuration, the exporter also recognizes standard
 OpenTelemetry configuration. For example, you can set
 the [OTEL_EXPORTER_OTLP_METRICS_ENDPOINT](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint)
@@ -62,4 +65,5 @@ OTel collector, and a Prometheus server.
 [builder-javadoc]: /client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html
 [opentelemetry-example]: https://github.com/prometheus/client_java/tree/main/examples/example-exporter-opentelemetry
 [otel-pipeline]: /client_java/images/otel-pipeline.png
+[exporter-filter-properties]: {{< relref "../config/config.md#exporter-filter-properties" >}}
 [otel-properties]: {{< relref "../config/config.md#exporter-opentelemetry-properties" >}}
