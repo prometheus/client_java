@@ -346,6 +346,9 @@ class OtelAutoConfigTest {
     }
   }
 
+  // MetricReader does not expose registered CollectionRegistrations, so this test locates the
+  // registered PrometheusMetricProducer reflectively to verify that OtelAutoConfig wires exporter
+  // filter properties through to it.
   private static PrometheusMetricProducer findPrometheusMetricProducer(Object object)
       throws IllegalAccessException {
     assertThat(object).isNotNull();
