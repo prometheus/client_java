@@ -35,34 +35,29 @@ class PrometheusMetricProducer implements CollectionRegistration {
   private final boolean preserveNames;
   @Nullable private final Predicate<String> nameFilter;
 
-  /**
-   * Creates a producer with no metric name filtering, i.e. all metrics in {@code registry} are
-   * exported.
-   */
-  public PrometheusMetricProducer(
-      PrometheusRegistry registry,
-      InstrumentationScopeInfo instrumentationScopeInfo,
-      Resource resource,
-      boolean preserveNames) {
-    this(
-        registry,
-        instrumentationScopeInfo,
-        resource,
-        preserveNames,
-        ExporterFilterProperties.builder().build());
-  }
-
-  public PrometheusMetricProducer(
+  private PrometheusMetricProducer(
       PrometheusRegistry registry,
       InstrumentationScopeInfo instrumentationScopeInfo,
       Resource resource,
       boolean preserveNames,
-      ExporterFilterProperties filterProperties) {
+      @Nullable Predicate<String> nameFilter) {
     this.registry = registry;
     this.instrumentationScopeInfo = instrumentationScopeInfo;
     this.resource = resource;
     this.preserveNames = preserveNames;
-    this.nameFilter = makeNameFilter(filterProperties);
+    this.nameFilter = nameFilter;
+  }
+
+  /**
+   * Creates a builder for a producer with no metric name filtering by default, i.e. all metrics in
+   * {@code registry} are exported unless filter properties are configured on the builder.
+   */
+  static Builder builder(
+      PrometheusRegistry registry,
+      InstrumentationScopeInfo instrumentationScopeInfo,
+      Resource resource,
+      boolean preserveNames) {
+    return new Builder(registry, instrumentationScopeInfo, resource, preserveNames);
   }
 
   /**
@@ -184,6 +179,39 @@ class PrometheusMetricProducer implements CollectionRegistration {
   private void addUnlessNull(List<MetricData> result, @Nullable MetricData data) {
     if (data != null) {
       result.add(data);
+    }
+  }
+
+  static class Builder {
+    private final PrometheusRegistry registry;
+    private final Resource resource;
+    private final InstrumentationScopeInfo instrumentationScopeInfo;
+    private final boolean preserveNames;
+    private ExporterFilterProperties filterProperties = ExporterFilterProperties.builder().build();
+
+    private Builder(
+        PrometheusRegistry registry,
+        InstrumentationScopeInfo instrumentationScopeInfo,
+        Resource resource,
+        boolean preserveNames) {
+      this.registry = registry;
+      this.instrumentationScopeInfo = instrumentationScopeInfo;
+      this.resource = resource;
+      this.preserveNames = preserveNames;
+    }
+
+    Builder exporterFilterProperties(ExporterFilterProperties filterProperties) {
+      this.filterProperties = filterProperties;
+      return this;
+    }
+
+    PrometheusMetricProducer build() {
+      return new PrometheusMetricProducer(
+          registry,
+          instrumentationScopeInfo,
+          resource,
+          preserveNames,
+          makeNameFilter(filterProperties));
     }
   }
 }

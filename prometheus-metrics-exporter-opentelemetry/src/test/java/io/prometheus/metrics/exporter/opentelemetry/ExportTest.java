@@ -47,11 +47,12 @@ class ExportTest {
     MetricReader reader = (MetricReader) field.get(testing);
 
     PrometheusMetricProducer prometheusMetricProducer =
-        new PrometheusMetricProducer(
-            registry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            false);
+        PrometheusMetricProducer.builder(
+                registry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                false)
+            .build();
 
     reader.register(prometheusMetricProducer);
   }
@@ -333,11 +334,12 @@ class ExportTest {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
     reader.register(
-        new PrometheusMetricProducer(
-            preserveRegistry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true));
+        PrometheusMetricProducer.builder(
+                preserveRegistry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                true)
+            .build());
 
     Counter.builder().name("req").unit(Unit.BYTES).register(preserveRegistry).inc();
 
@@ -351,11 +353,12 @@ class ExportTest {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
     reader.register(
-        new PrometheusMetricProducer(
-            preserveRegistry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true));
+        PrometheusMetricProducer.builder(
+                preserveRegistry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                true)
+            .build());
 
     Counter.builder().name("req_bytes").unit(Unit.BYTES).register(preserveRegistry).inc();
 
@@ -369,11 +372,12 @@ class ExportTest {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry preserveRegistry = new PrometheusRegistry();
     reader.register(
-        new PrometheusMetricProducer(
-            preserveRegistry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            true));
+        PrometheusMetricProducer.builder(
+                preserveRegistry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                true)
+            .build());
 
     Counter.builder().name("events_total").register(preserveRegistry).inc();
 
@@ -387,12 +391,14 @@ class ExportTest {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry filteredRegistry = new PrometheusRegistry();
     reader.register(
-        new PrometheusMetricProducer(
-            filteredRegistry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            false,
-            ExporterFilterProperties.builder().excludedNames("secret_total").build()));
+        PrometheusMetricProducer.builder(
+                filteredRegistry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                false)
+            .exporterFilterProperties(
+                ExporterFilterProperties.builder().excludedNames("secret_total").build())
+            .build());
 
     Counter.builder().name("secret").register(filteredRegistry).inc();
     Counter.builder().name("public").register(filteredRegistry).inc();
@@ -407,19 +413,21 @@ class ExportTest {
     InMemoryMetricReader reader = InMemoryMetricReader.create();
     PrometheusRegistry filteredRegistry = new PrometheusRegistry();
     reader.register(
-        new PrometheusMetricProducer(
-            filteredRegistry,
-            InstrumentationScopeInfo.create("test"),
-            Resource.create(Attributes.builder().put("staticRes", "value").build()),
-            false,
-            ExporterFilterProperties.builder().allowedPrefixes("http_").build()));
+        PrometheusMetricProducer.builder(
+                filteredRegistry,
+                InstrumentationScopeInfo.create("test"),
+                Resource.create(Attributes.builder().put("staticRes", "value").build()),
+                false)
+            .exporterFilterProperties(
+                ExporterFilterProperties.builder().allowedPrefixes("http_").build())
+            .build());
 
     Counter.builder().name("http_requests").register(filteredRegistry).inc();
     Counter.builder().name("jvm_threads").register(filteredRegistry).inc();
 
     List<MetricData> metrics = new ArrayList<>(reader.collectAllMetrics());
     assertThat(metrics).hasSize(1);
-    OpenTelemetryAssertions.assertThat(metrics.getFirst()).hasName("http_requests");
+    OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("http_requests");
   }
 
   private MetricAssert metricAssert() {
