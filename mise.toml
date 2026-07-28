@@ -8,14 +8,16 @@ protoc = "35.1"
 
 # Linters
 actionlint = "1.7.12"
-"aqua:grafana/flint" = "0.22.9"
+"aqua:grafana/flint" = "0.22.10"
 "aqua:jonwiggins/xmloxide" = "v0.4.3"
 "aqua:owenlamont/ryl" = "0.21.0"
 biome = "2.5.3"
+checkstyle = "13.8.0"
 editorconfig-checker = "3.8.0"
 google-java-format = "1.35.0"
 lychee = "0.24.2"
-"npm:renovate" = "43.257.4"
+# @yarnpkg/libzip 3.2.2 matches its upstream release but was published without provenance.
+"npm:renovate" = { version = "43.257.4", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
 ruff = "0.15.21"
 rumdl = "v0.2.31"
 shellcheck = "v0.11.0"
@@ -46,16 +48,16 @@ run = "./mvnw clean"
 
 [tasks.compile]
 description = "bare compile, ignoring formatting and linters"
-run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.generate]
 description = "regenerate protobuf sources"
-run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw test -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.test-all]
 description = "run all tests"
@@ -76,7 +78,6 @@ BASELINE_OVERRIDE="${API_DIFF_BASELINE_VERSION:+-Dapi.diff.baseline.version=${AP
   ${BASELINE_OVERRIDE} \
   -DskipTests \
   -Dcoverage.skip=true \
-  -Dcheckstyle.skip=true \
   -Dwarnings=-nowarn
 ./.github/scripts/sync-api-diffs.sh
 """

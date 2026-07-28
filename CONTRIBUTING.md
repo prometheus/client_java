@@ -89,14 +89,12 @@ mise --cd .mise/envs/native run native-test
 ### Avoid failures while running tests
 
 - Use `-Dcoverage.skip=true` to skip the coverage check during development.
-- Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
 Combine all with
 
 ```shell
-./mvnw install -DskipTests -Dcoverage.skip=true \
-  -Dcheckstyle.skip=true -Dwarnings=-nowarn
+./mvnw install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn
 ```
 
 or simply

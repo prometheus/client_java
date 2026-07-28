@@ -15,7 +15,7 @@ mise run ci
 # Quick compile without tests or checks (fastest)
 mise run compile
 
-# Run unit tests only (skips formatting/coverage/checkstyle)
+# Run unit tests only (skips formatting and coverage)
 mise run test
 
 # Run all tests including integration tests
@@ -23,15 +23,15 @@ mise run test-all
 
 # Run a single test class
 ./mvnw test -Dtest=CounterTest \
-  -Dcoverage.skip=true -Dcheckstyle.skip=true
+  -Dcoverage.skip=true
 
 # Run a single test method
 ./mvnw test -Dtest=CounterTest#testIncrement \
-  -Dcoverage.skip=true -Dcheckstyle.skip=true
+  -Dcoverage.skip=true
 
 # Run tests in a specific module
 ./mvnw test -pl prometheus-metrics-core \
-  -Dcoverage.skip=true -Dcheckstyle.skip=true
+  -Dcoverage.skip=true
 
 # Regenerate protobuf classes (after protobuf dep update)
 mise run generate

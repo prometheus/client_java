@@ -47,43 +47,49 @@ url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/3849249
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/flint"]]
-version = "0.22.9"
+version = "0.22.10"
 backend = "aqua:grafana/flint"
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64"]
-checksum = "sha256:aae323ea911f9a5012879b79fd3b913837d301098173684d5f9672b6d15c1193"
-url = "https://github.com/grafana/flint/releases/download/v0.22.9/flint-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/476876537"
+checksum = "sha256:6dec82cb6486b7e645e0b1674493497191d92a8e28c5c79194e5553882d213de"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750275"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64-musl"]
+checksum = "sha256:373060c08a4cdd905d6e8e83f62ef43da8778d9133cb66b7801f392587812e8f"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750193"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64"]
-checksum = "sha256:e7b0597d82568e441dab13091f674f15c36914b0f412c8fcc19d3ed880da320a"
-url = "https://github.com/grafana/flint/releases/download/v0.22.9/flint-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/476875905"
+checksum = "sha256:a9f7f3768ec02cdd082c12cea0e815fc142d3ee721f4d8485f4ba9fc2c7d0521"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491749844"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64-musl"]
+checksum = "sha256:3b174b31f10b1ded2cf0a54e8b62e5526713a49816c1fd74b00073519044f7bb"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750257"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-arm64"]
-checksum = "sha256:0370a9f0f16b262cb2c683cc2da539d39e131a3167ac44d3471b57135508b3b2"
-url = "https://github.com/grafana/flint/releases/download/v0.22.9/flint-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/476875995"
+checksum = "sha256:f9aa1a95aa5953f7f5a64c0d72f86e634c4930e9cb73422a95e342c6cb9be5d5"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750245"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-x64"]
-checksum = "sha256:b14167a1e47ac34439518680ff5df16554056c5099bafd650f01a37cf29b4a3a"
-url = "https://github.com/grafana/flint/releases/download/v0.22.9/flint-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/476878878"
+checksum = "sha256:b55731f1b74196afea675bdbd6ebbbd94171b4e9d31f79ecee36372bdf8818cf"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491752660"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.windows-x64"]
-checksum = "sha256:b5b9fb31413e11600ec0f8d4c0cf56c7698b1e38f156018364b3f1a2dcfbcbd0"
-url = "https://github.com/grafana/flint/releases/download/v0.22.9/flint-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/476892021"
+checksum = "sha256:494f16ad4d2d8eae137438832e544675d196a2887086ab8070a5a346d70650be"
+url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491751016"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
@@ -295,6 +301,45 @@ checksum = "sha256:04c9ca46af43a0d060b22b21f94c7e1a9e8c57963a09778b8ff1d808ed536
 url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5.3/biome-win32-x64.exe"
 url_api = "https://api.github.com/repos/biomejs/biome/releases/assets/470058831"
 provenance = "github-attestations"
+
+[[tools.checkstyle]]
+version = "13.8.0"
+backend = "aqua:checkstyle/checkstyle"
+
+[tools.checkstyle."platforms.linux-arm64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-arm64-musl"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-x64-musl"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.macos-arm64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.macos-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.windows-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
 
 [[tools.editorconfig-checker]]
 version = "3.8.0"
@@ -514,6 +559,9 @@ url = "https://nodejs.org/dist/v24.18.0/node-v24.18.0-win-x64.zip"
 [[tools."npm:renovate"]]
 version = "43.257.4"
 backend = "npm:renovate"
+
+[tools."npm:renovate".options]
+trust_policy_excludes = '["@yarnpkg/libzip@3.2.2"]'
 
 [[tools.protoc]]
 version = "35.1"
