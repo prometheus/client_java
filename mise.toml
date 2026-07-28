@@ -16,7 +16,8 @@ checkstyle = "13.8.0"
 editorconfig-checker = "3.8.0"
 google-java-format = "1.35.0"
 lychee = "0.24.2"
-"npm:renovate" = "43.257.4"
+# @yarnpkg/libzip 3.2.2 matches its upstream release but was published without provenance.
+"npm:renovate" = { version = "43.257.4", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
 ruff = "0.15.21"
 rumdl = "v0.2.31"
 shellcheck = "v0.11.0"
