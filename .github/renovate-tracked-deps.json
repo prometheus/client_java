@@ -157,13 +157,13 @@
     "mise.toml": {
       "mise": [
         "actionlint",
-        "github:checkstyle/checkstyle",
+        "aqua:grafana/flint",
         "aqua:grafana/gcx",
         "aqua:grafana/oats",
         "aqua:jonwiggins/xmloxide",
         "aqua:owenlamont/ryl",
         "biome",
-        "aqua:grafana/flint",
+        "checkstyle",
         "editorconfig-checker",
         "google-java-format",
         "hugo",

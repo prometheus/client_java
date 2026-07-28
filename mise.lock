@@ -302,6 +302,45 @@ url = "https://github.com/biomejs/biome/releases/download/%40biomejs/biome%402.5
 url_api = "https://api.github.com/repos/biomejs/biome/releases/assets/470058831"
 provenance = "github-attestations"
 
+[[tools.checkstyle]]
+version = "13.8.0"
+backend = "aqua:checkstyle/checkstyle"
+
+[tools.checkstyle."platforms.linux-arm64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-arm64-musl"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.linux-x64-musl"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.macos-arm64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.macos-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
+[tools.checkstyle."platforms.windows-x64"]
+checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
+url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
+url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
+
 [[tools.editorconfig-checker]]
 version = "3.8.0"
 backend = "aqua:editorconfig-checker/editorconfig-checker"
@@ -340,48 +379,6 @@ url_api = "https://api.github.com/repos/editorconfig-checker/editorconfig-checke
 checksum = "sha256:7ec31e1a6a9983aa2a4942cb66dfd35e8b61e76263460413988438ae1426906a"
 url = "https://github.com/editorconfig-checker/editorconfig-checker/releases/download/v3.8.0/ec-windows-amd64.zip"
 url_api = "https://api.github.com/repos/editorconfig-checker/editorconfig-checker/releases/assets/460248513"
-
-[[tools."github:checkstyle/checkstyle"]]
-version = "checkstyle-13.8.0"
-backend = "github:checkstyle/checkstyle"
-
-[tools."github:checkstyle/checkstyle".options]
-matching = "all.jar"
-
-[tools."github:checkstyle/checkstyle"."platforms.linux-arm64"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.linux-arm64-musl"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.linux-x64"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.linux-x64-musl"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.macos-arm64"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.macos-x64"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
-
-[tools."github:checkstyle/checkstyle"."platforms.windows-x64"]
-checksum = "sha256:cb0b1083eb5d3f9f0b7f0edd9a86d8dbe406bf44da73c3df869abace8cb8502c"
-url = "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-13.8.0/checkstyle-13.8.0-all.jar"
-url_api = "https://api.github.com/repos/checkstyle/checkstyle/releases/assets/474019260"
 
 [[tools.google-java-format]]
 version = "1.35.0"
