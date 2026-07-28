@@ -15,6 +15,9 @@ jobs:
     if: ${{ github.repository == 'prometheus/client_java' }}
     environment: release
     runs-on: ubuntu-24.04
+    env:
+      # Artifact releases pair a focused tool allowlist with cache: false.
+      MISE_ENABLE_TOOLS: java
     permissions:
       actions: write # required to trigger bump-api-diff-baseline.yml via `gh workflow run`
 
