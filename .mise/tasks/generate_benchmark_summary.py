@@ -18,12 +18,13 @@ This script:
 
 import argparse
 import json
+import math
 import os
 import shutil
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 
 def parse_args():
@@ -83,7 +84,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_system_info() -> Dict[str, str]:
+def get_system_info() -> dict[str, str]:
     """Capture system hardware information."""
     import multiprocessing
     import platform
@@ -92,7 +93,7 @@ def get_system_info() -> Dict[str, str]:
 
     try:
         info["cpu_cores"] = str(multiprocessing.cpu_count())
-    except Exception:
+    except NotImplementedError:
         pass
 
     try:
@@ -104,17 +105,16 @@ def get_system_info() -> Dict[str, str]:
     except FileNotFoundError:
         # macOS
         try:
-            import subprocess
-
             result = subprocess.run(
                 ["sysctl", "-n", "machdep.cpu.brand_string"],
                 capture_output=True,
+                check=False,
                 text=True,
                 timeout=5,
             )
             if result.returncode == 0:
                 info["cpu_model"] = result.stdout.strip()
-        except Exception:
+        except (OSError, subprocess.SubprocessError):
             pass
 
     try:
@@ -127,18 +127,17 @@ def get_system_info() -> Dict[str, str]:
     except FileNotFoundError:
         # macOS
         try:
-            import subprocess
-
             result = subprocess.run(
                 ["sysctl", "-n", "hw.memsize"],
                 capture_output=True,
+                check=False,
                 text=True,
                 timeout=5,
             )
             if result.returncode == 0:
                 bytes_mem = int(result.stdout.strip())
                 info["memory_gb"] = str(round(bytes_mem / 1024 / 1024 / 1024))
-        except Exception:
+        except (OSError, ValueError, subprocess.SubprocessError):
             pass
 
     info["os"] = f"{platform.system()} {platform.release()}"
@@ -146,7 +145,7 @@ def get_system_info() -> Dict[str, str]:
     return info
 
 
-def read_system_info(path: Optional[str]) -> Dict[str, str]:
+def read_system_info(path: str | None) -> dict[str, str]:
     """Read system info from JSON, or capture it from the current host."""
     if not path:
         return get_system_info()
@@ -163,7 +162,7 @@ def write_system_info(path: str) -> None:
         f.write("\n")
 
 
-def format_system_info(sysinfo: Optional[Dict[str, str]]) -> str:
+def format_system_info(sysinfo: dict[str, str] | None) -> str:
     """Format captured system info for markdown."""
     if not sysinfo:
         return "unknown"
@@ -179,23 +178,22 @@ def format_system_info(sysinfo: Optional[Dict[str, str]]) -> str:
     return ", ".join(parts) if parts else "unknown"
 
 
-def get_commit_sha(provided_sha: Optional[str]) -> str:
+def get_commit_sha(provided_sha: str | None) -> str:
     """Get commit SHA from argument, git, or return 'local'."""
     if provided_sha:
         return provided_sha
 
     try:
-        import subprocess
-
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             capture_output=True,
+            check=False,
             text=True,
             timeout=5,
         )
         if result.returncode == 0:
             return result.stdout.strip()
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         pass
 
     return "local"
@@ -221,7 +219,7 @@ def format_error(error) -> str:
     """Format error value, handling NaN."""
     try:
         error_val = float(error)
-        if error_val != error_val:  # NaN check
+        if math.isnan(error_val):
             return ""
         elif error_val >= 1_000:
             return f"± {error_val / 1_000:.2f}K"
@@ -244,18 +242,18 @@ def short_benchmark_name(name: str) -> str:
     return name.replace("io.prometheus.metrics.benchmarks.", "")
 
 
-def metric_score(result: Dict) -> Optional[float]:
+def metric_score(result: dict) -> float | None:
     """Extract a benchmark score as a finite float."""
     try:
         score = float(result.get("primaryMetric", {}).get("score"))
-        if score == score:
+        if not math.isnan(score):
             return score
     except (ValueError, TypeError):
         pass
     return None
 
 
-def score_interval(result: Dict) -> Optional[Tuple[float, float]]:
+def score_interval(result: dict) -> tuple[float, float] | None:
     """Extract the JMH confidence interval for a benchmark result."""
     metric = result.get("primaryMetric", {})
     confidence = metric.get("scoreConfidence")
@@ -263,7 +261,7 @@ def score_interval(result: Dict) -> Optional[Tuple[float, float]]:
         try:
             low = float(confidence[0])
             high = float(confidence[1])
-            if low == low and high == high:
+            if not math.isnan(low) and not math.isnan(high):
                 return min(low, high), max(low, high)
         except (ValueError, TypeError):
             pass
@@ -273,21 +271,21 @@ def score_interval(result: Dict) -> Optional[Tuple[float, float]]:
         return None
     try:
         error = float(metric.get("scoreError"))
-        if error == error:
+        if not math.isnan(error):
             return score - error, score + error
     except (ValueError, TypeError):
         pass
     return None
 
 
-def lower_is_better(result: Dict) -> bool:
+def lower_is_better(result: dict) -> bool:
     """Return true for JMH modes where lower score is better."""
     mode = str(result.get("mode", ""))
     unit = str(result.get("primaryMetric", {}).get("scoreUnit", ""))
     return mode in {"avgt", "sample", "ss"} or unit.endswith("/op")
 
 
-def comparison_status(head: Dict, baseline: Dict) -> str:
+def comparison_status(head: dict, baseline: dict) -> str:
     """Classify a benchmark comparison using confidence intervals."""
     head_interval = score_interval(head)
     baseline_interval = score_interval(baseline)
@@ -317,7 +315,7 @@ def comparison_status(head: Dict, baseline: Dict) -> str:
     return "faster" if head_score > baseline_score else "slower"
 
 
-def performance_change(head: Dict, baseline: Dict) -> Optional[float]:
+def performance_change(head: dict, baseline: dict) -> float | None:
     """Return percent performance change, with positive meaning faster."""
     head_score = metric_score(head)
     baseline_score = metric_score(baseline)
@@ -328,7 +326,7 @@ def performance_change(head: Dict, baseline: Dict) -> Optional[float]:
     return (head_score / float(baseline_score) - 1) * 100
 
 
-def format_change(change: Optional[float]) -> str:
+def format_change(change: float | None) -> str:
     """Format a percent performance change."""
     if change is None:
         return ""
@@ -336,16 +334,16 @@ def format_change(change: Optional[float]) -> str:
 
 
 def generate_comparison_section(
-    results: List,
-    baseline_results: List,
+    results: list,
+    baseline_results: list,
     commit_sha: str,
     baseline_sha: str,
     repo: str,
     baseline_repo: str,
-    comparison_note: Optional[str] = None,
-    system_info: Optional[Dict[str, str]] = None,
-    baseline_system_info: Optional[Dict[str, str]] = None,
-) -> List[str]:
+    comparison_note: str | None = None,
+    system_info: dict[str, str] | None = None,
+    baseline_system_info: dict[str, str] | None = None,
+) -> list[str]:
     """Generate a base-vs-head benchmark comparison section."""
     by_name = {b.get("benchmark", ""): b for b in results if b.get("benchmark")}
     baseline_by_name = {
@@ -408,15 +406,15 @@ def generate_comparison_section(
 
 
 def generate_markdown(
-    results: List,
+    results: list,
     commit_sha: str,
     repo: str,
-    baseline_results: Optional[List] = None,
-    baseline_sha: Optional[str] = None,
-    baseline_repo: Optional[str] = None,
-    comparison_note: Optional[str] = None,
-    system_info: Optional[Dict[str, str]] = None,
-    baseline_system_info: Optional[Dict[str, str]] = None,
+    baseline_results: list | None = None,
+    baseline_sha: str | None = None,
+    baseline_repo: str | None = None,
+    comparison_note: str | None = None,
+    system_info: dict[str, str] | None = None,
+    baseline_system_info: dict[str, str] | None = None,
 ) -> str:
     """Generate markdown summary from JMH results."""
     datetime_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -477,12 +475,12 @@ def generate_markdown(
         )
 
     # Group by benchmark class
-    benchmarks_by_class: Dict[str, List] = {}
+    benchmarks_by_class: dict[str, list] = {}
     for b in results:
         name = b.get("benchmark", "")
         parts = name.rsplit(".", 1)
         if len(parts) == 2:
-            class_name, method = parts
+            class_name, _method = parts
             class_short = class_name.split(".")[-1]
         else:
             class_short = "Other"
@@ -563,7 +561,7 @@ def generate_markdown(
 
         try:
             error_val = float(error)
-            if error_val != error_val:  # NaN
+            if math.isnan(error_val):
                 error_str = ""
             else:
                 error_str = f"± {error_val:.3f}"
