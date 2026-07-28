@@ -157,7 +157,7 @@
     "mise.toml": {
       "mise": [
         "actionlint",
-        "aqua:checkstyle/checkstyle",
+        "github:checkstyle/checkstyle",
         "aqua:grafana/gcx",
         "aqua:grafana/oats",
         "aqua:jonwiggins/xmloxide",
