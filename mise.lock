@@ -560,6 +560,9 @@ url = "https://nodejs.org/dist/v24.18.0/node-v24.18.0-win-x64.zip"
 version = "43.257.4"
 backend = "npm:renovate"
 
+[tools."npm:renovate".options]
+trust_policy_excludes = '["@yarnpkg/libzip@3.2.2"]'
+
 [[tools.protoc]]
 version = "35.1"
 backend = "aqua:protocolbuffers/protobuf/protoc"
