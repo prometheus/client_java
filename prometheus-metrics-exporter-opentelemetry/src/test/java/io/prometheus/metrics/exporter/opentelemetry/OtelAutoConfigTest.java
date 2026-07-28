@@ -7,11 +7,21 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.internal.AutoConfigureUtil;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions;
+import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesLoader;
+import io.prometheus.metrics.core.metrics.Counter;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,21 +77,16 @@ class OtelAutoConfigTest {
             "values from builder",
             new TestCase()
                 .expectedProperties(
-                    Map.of(
-                        "otel.exporter.otlp.protocol",
-                        Optional.of("http/protobuf"),
-                        "otel.exporter.otlp.endpoint",
-                        Optional.of("http://builder:4318"),
-                        "otel.exporter.otlp.headers",
-                        Optional.of("h=builder-v"),
-                        "otel.metric.export.interval",
-                        Optional.of("2s"),
-                        "otel.exporter.otlp.timeout",
-                        Optional.of("3s"),
-                        "otel.service.name",
-                        Optional.of("builder-service")))
+                    ImmutableMap.<String, Optional<String>>builder()
+                        .put("otel.exporter.otlp.protocol", Optional.of("http/protobuf"))
+                        .put("otel.exporter.otlp.endpoint", Optional.of("http://builder:4318"))
+                        .put("otel.exporter.otlp.headers", Optional.of("h=builder-v"))
+                        .put("otel.metric.export.interval", Optional.of("2s"))
+                        .put("otel.exporter.otlp.timeout", Optional.of("3s"))
+                        .put("otel.service.name", Optional.of("builder-service"))
+                        .build())
                 .expectedResourceAttributes(
-                    Map.of(
+                    ImmutableMap.of(
                         "key",
                         "builder-value",
                         "service.name",
@@ -314,6 +319,61 @@ class OtelAutoConfigTest {
     PrometheusProperties config =
         PrometheusProperties.builder().exporterOpenTelemetryProperties(otelProps).build();
     assertThat(OtelAutoConfig.resolvePreserveNames(builder, config)).isTrue();
+  }
+
+  @Test
+  void createReaderUsesExporterFilterProperties() throws IllegalAccessException {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    PrometheusProperties config =
+        PrometheusProperties.builder()
+            .exporterFilterProperties(
+                ExporterFilterProperties.builder().excludedNames("secret_total").build())
+            .build();
+    OpenTelemetryExporter.Builder builder =
+        OpenTelemetryExporter.builder(config).registry(registry);
+    MetricReader reader = OtelAutoConfig.createReader(builder, config, registry);
+
+    try {
+      Counter.builder().name("secret").register(registry).inc();
+      Counter.builder().name("public").register(registry).inc();
+
+      PrometheusMetricProducer producer = findPrometheusMetricProducer(reader);
+      List<MetricData> metrics = new ArrayList<>(producer.collectAllMetrics());
+      assertThat(metrics).hasSize(1);
+      OpenTelemetryAssertions.assertThat(metrics.get(0)).hasName("public");
+    } finally {
+      reader.shutdown();
+    }
+  }
+
+  // MetricReader does not expose registered CollectionRegistrations, so this test locates the
+  // registered PrometheusMetricProducer reflectively to verify that OtelAutoConfig wires exporter
+  // filter properties through to it.
+  private static PrometheusMetricProducer findPrometheusMetricProducer(Object object)
+      throws IllegalAccessException {
+    assertThat(object).isNotNull();
+    for (Field field : object.getClass().getDeclaredFields()) {
+      field.setAccessible(true);
+      Object value = field.get(object);
+      if (value instanceof PrometheusMetricProducer) {
+        return (PrometheusMetricProducer) value;
+      }
+      if (value instanceof CollectionRegistration) {
+        return findPrometheusMetricProducer(value);
+      }
+      if (value instanceof Iterable<?>) {
+        for (Object element : (Iterable<?>) value) {
+          if (element instanceof PrometheusMetricProducer) {
+            return (PrometheusMetricProducer) element;
+          }
+          if (element instanceof CollectionRegistration) {
+            return findPrometheusMetricProducer(element);
+          }
+        }
+      }
+    }
+    throw new AssertionError(
+        "Did not find PrometheusMetricProducer in " + object.getClass().getName());
   }
 
   private static ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties(
