@@ -16,6 +16,7 @@ jobs:
     environment: release
     runs-on: ubuntu-24.04
     env:
+      # Keep artifact releases isolated from unrelated mise tools and caches.
       MISE_ENABLE_TOOLS: java
     permissions:
       actions: write # required to trigger bump-api-diff-baseline.yml via `gh workflow run`
