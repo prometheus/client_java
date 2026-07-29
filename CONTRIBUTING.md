@@ -73,6 +73,13 @@ This requires native lint tools,
 which you can install with `mise run setup:native-lint-tools`.
 These are optional but catch formatting and lint issues before CI.
 
+## API Design
+
+For internal or SDK-facing classes, prefer static factories and builders over
+adding new public constructors. Constructors are difficult to evolve
+compatibly, so keep them non-public unless they are intentionally part of the
+stable API.
+
 ## Running Tests
 
 If you're getting errors when running tests:
