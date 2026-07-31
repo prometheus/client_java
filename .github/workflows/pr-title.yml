@@ -14,6 +14,4 @@ jobs:
     permissions:
       pull-requests: read # action-semantic-pull-request reads the PR title
     steps:
-      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - uses: grafana/shared-workflows/actions/lint-pr-title@823ed150196915a86971ab4beb899b0c80d835fe # lint-pr-title/v1.2.3
