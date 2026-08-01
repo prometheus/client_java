@@ -94,12 +94,13 @@ public class Volume {
   }
 
   private boolean deleteRecursively(File file) {
+    boolean deleted = true;
     File[] allContents = file.listFiles();
     if (allContents != null) {
       for (File child : allContents) {
-        deleteRecursively(child);
+        deleted &= deleteRecursively(child);
       }
     }
-    return file.delete();
+    return deleted && file.delete();
   }
 }
