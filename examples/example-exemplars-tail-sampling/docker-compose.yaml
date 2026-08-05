@@ -59,7 +59,7 @@ services:
     command:
       - --config.file=/config.yaml
   grafana:
-    image: grafana/grafana:13.1.1@sha256:7cb8c64c4d57a57e734073f3cc94620adb24a0acb929bd80ba9f14017e3a975b
+    image: grafana/grafana:13.1.2@sha256:d177053ab62253815f130d81504f77063baf5fd4ca93299d6048453bd31e047a
     network_mode: host
     ports:
       - "3000:3000"
