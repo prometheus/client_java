@@ -6,6 +6,7 @@ import io.prometheus.metrics.annotations.StableApi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
@@ -26,10 +27,10 @@ public class MetricNameFilter implements Predicate<String> {
       Collection<String> nameIsNotEqualTo,
       Collection<String> nameStartsWith,
       Collection<String> nameDoesNotStartWith) {
-    this.nameIsEqualTo = unmodifiableCollection(new ArrayList<>(nameIsEqualTo));
-    this.nameIsNotEqualTo = unmodifiableCollection(new ArrayList<>(nameIsNotEqualTo));
-    this.nameStartsWith = unmodifiableCollection(new ArrayList<>(nameStartsWith));
-    this.nameDoesNotStartWith = unmodifiableCollection(new ArrayList<>(nameDoesNotStartWith));
+    this.nameIsEqualTo = unmodifiableCollection(new LinkedHashSet<>(nameIsEqualTo));
+    this.nameIsNotEqualTo = unmodifiableCollection(new LinkedHashSet<>(nameIsNotEqualTo));
+    this.nameStartsWith = unmodifiableCollection(new LinkedHashSet<>(nameStartsWith));
+    this.nameDoesNotStartWith = unmodifiableCollection(new LinkedHashSet<>(nameDoesNotStartWith));
   }
 
   @Override
@@ -42,6 +43,9 @@ public class MetricNameFilter implements Predicate<String> {
 
   private boolean matchesNameEqualTo(String metricName) {
     if (nameIsEqualTo.isEmpty()) {
+      return true;
+    }
+    if (nameIsEqualTo.contains(metricName)) {
       return true;
     }
     for (String name : nameIsEqualTo) {
@@ -57,6 +61,9 @@ public class MetricNameFilter implements Predicate<String> {
   private boolean matchesNameNotEqualTo(String metricName) {
     if (nameIsNotEqualTo.isEmpty()) {
       return false;
+    }
+    if (nameIsNotEqualTo.contains(metricName)) {
+      return true;
     }
     for (String name : nameIsNotEqualTo) {
       // The following ignores suffixes like _total.
