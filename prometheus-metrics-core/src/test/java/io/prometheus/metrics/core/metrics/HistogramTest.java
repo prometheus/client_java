@@ -1599,6 +1599,57 @@ class HistogramTest {
   }
 
   @Test
+  void testClassicOnlyObserveMultithreaded()
+      throws InterruptedException, ExecutionException, TimeoutException {
+    Histogram histogram =
+        Histogram.builder().name("test").classicOnly().labelNames("status").build();
+    int nThreads = 8;
+    DistributionDataPoint obs = histogram.labelValues("200");
+    ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+    CompletionService<List<HistogramSnapshot>> completionService =
+        new ExecutorCompletionService<>(executor);
+    CountDownLatch startSignal = new CountDownLatch(nThreads);
+    for (int t = 0; t < nThreads; t++) {
+      completionService.submit(
+          () -> {
+            List<HistogramSnapshot> snapshots = new ArrayList<>();
+            startSignal.countDown();
+            startSignal.await();
+            for (int i = 0; i < 10; i++) {
+              for (int j = 0; j < 1000; j++) {
+                obs.observe(1.1);
+              }
+              snapshots.add(histogram.collect());
+            }
+            return snapshots;
+          });
+    }
+    long maxCount = 0;
+    for (int i = 0; i < nThreads; i++) {
+      Future<List<HistogramSnapshot>> future = completionService.take();
+      List<HistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
+      long count = 0;
+      for (HistogramSnapshot snapshot : snapshots) {
+        assertThat(snapshot.getDataPoints().size()).isOne();
+        HistogramSnapshot.HistogramDataPointSnapshot data =
+            snapshot.getDataPoints().stream().findFirst().orElseThrow(RuntimeException::new);
+        assertThat(data.getCount()).isGreaterThanOrEqualTo(count + 1000);
+        assertThat(data.getSum()).isCloseTo(data.getCount() * 1.1, offset(0.0000001));
+        count = data.getCount();
+      }
+      if (count > maxCount) {
+        maxCount = count;
+      }
+    }
+    assertThat(maxCount).isEqualTo(nThreads * 10_000L);
+    assertThat(obs.getCount()).isEqualTo(nThreads * 10_000L);
+    assertThat(obs.getSum()).isCloseTo(nThreads * 10_000L * 1.1, offset(0.0000001));
+    assertThat(nThreads * 10_000).isEqualTo(getBucket(histogram, 2.5, "status", "200").getCount());
+    executor.shutdown();
+    assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+  }
+
+  @Test
   void testNativeResetDuration() {
     // Test that nativeResetDuration can be configured without error and the histogram
     // functions correctly. The reset duration schedules internal reset behavior but
