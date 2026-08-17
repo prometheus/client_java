@@ -376,43 +376,43 @@ url = "https://github.com/google/google-java-format/releases/download/v1.36.1/go
 url_api = "https://api.github.com/repos/google/google-java-format/releases/assets/495658633"
 
 [[tools.hugo]]
-version = "0.164.0"
+version = "0.165.0"
 backend = "aqua:gohugoio/hugo"
 
 [tools.hugo."platforms.linux-arm64"]
-checksum = "sha256:948ee5f0ed30175f31937d592d63a2712f0761a69f1cbe812f780eb918a08b8e"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320173"
+checksum = "sha256:65c9fdd75e82d5f1eaf565f6e9fede6c0ceecaa267798e10c73068986996b77d"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697401"
 
 [tools.hugo."platforms.linux-arm64-musl"]
-checksum = "sha256:948ee5f0ed30175f31937d592d63a2712f0761a69f1cbe812f780eb918a08b8e"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320173"
+checksum = "sha256:65c9fdd75e82d5f1eaf565f6e9fede6c0ceecaa267798e10c73068986996b77d"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697401"
 
 [tools.hugo."platforms.linux-x64"]
-checksum = "sha256:d9c8b17285ea4ec004d9f814273ea910f2051ce02c284993fd1f91ba455ae50d"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320170"
+checksum = "sha256:5c3a37a5450b3e386e5b75a87a790fea2d04a796d75e171216c80ef48a32b432"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697404"
 
 [tools.hugo."platforms.linux-x64-musl"]
-checksum = "sha256:d9c8b17285ea4ec004d9f814273ea910f2051ce02c284993fd1f91ba455ae50d"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320170"
+checksum = "sha256:5c3a37a5450b3e386e5b75a87a790fea2d04a796d75e171216c80ef48a32b432"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697404"
 
 [tools.hugo."platforms.macos-arm64"]
-checksum = "sha256:c994e2cc6946838bb76521039509a7ce71282827e7035e344b6c225a83a5d0d3"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_darwin-universal.pkg"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320272"
+checksum = "sha256:10ea75335975a13d0e73ac298402179335c55fa4e99d1687452d9cfa70b30d16"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_darwin-universal.pkg"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697483"
 
 [tools.hugo."platforms.macos-x64"]
-checksum = "sha256:c994e2cc6946838bb76521039509a7ce71282827e7035e344b6c225a83a5d0d3"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_darwin-universal.pkg"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320272"
+checksum = "sha256:10ea75335975a13d0e73ac298402179335c55fa4e99d1687452d9cfa70b30d16"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_darwin-universal.pkg"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697483"
 
 [tools.hugo."platforms.windows-x64"]
-checksum = "sha256:dadf3499d4c6a27f6bc9d56d5a992ba62d82a74a3771fcc165c364ec1eeaac1c"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.164.0/hugo_0.164.0_windows-amd64.zip"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/468320283"
+checksum = "sha256:bdd9cc7837a42389067b2d0df7858d5878ceddef21307c2dd27fa10885fbbcf9"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.165.0/hugo_0.165.0_windows-amd64.zip"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/511697493"
 
 [[tools.java]]
 version = "temurin-25.0.3+9.0.LTS"
