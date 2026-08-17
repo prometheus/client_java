@@ -15,7 +15,9 @@ biome = "2.5.8"
 editorconfig-checker = "3.11.1"
 google-java-format = "1.36.1"
 lychee = "0.24.2"
-"npm:renovate" = "44.29.4"
+# @yarnpkg/libzip 3.2.2 is npm-signed and matches Yarn's release commit, but
+# was published without provenance; mise's no-downgrade policy otherwise rejects Renovate.
+"npm:renovate" = { version = "44.29.4", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
 ruff = "0.16.3"
 rumdl = "v0.2.55"
 shellcheck = "v0.11.0"
