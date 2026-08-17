@@ -125,6 +125,13 @@ commits. CI will fail if these checks fail.
   - Build succeeds (tests are skipped;
     run `mise run test` or `mise run test-all` for tests)
 
+## API Design
+
+- For internal or SDK-facing classes, prefer static factories and builders
+  over adding new public constructors.
+- Keep constructors non-public unless they are intentionally part of the
+  stable API.
+
 ## Testing
 
 - JUnit 5 (Jupiter) with `@Test` annotations

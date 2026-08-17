@@ -66,7 +66,7 @@ class TestRunBenchmarksFiltering(unittest.TestCase):
         updated = update_pre_blocks_under_module(self.module_path, self.table)
         # All three files should be updated
         self.assertEqual(
-            set(os.path.basename(p) for p in updated),
+            {os.path.basename(p) for p in updated},
             {
                 os.path.basename(self.files["CounterBenchmark"]),
                 os.path.basename(self.files["HistogramBenchmark"]),

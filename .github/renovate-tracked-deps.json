@@ -158,11 +158,12 @@
       "mise": [
         "actionlint",
         "aqua:grafana/flint",
+        "aqua:grafana/gcx",
+        "aqua:grafana/oats",
         "aqua:jonwiggins/xmloxide",
         "aqua:owenlamont/ryl",
         "biome",
         "editorconfig-checker",
-        "go:github.com/grafana/oats",
         "google-java-format",
         "hugo",
         "java",

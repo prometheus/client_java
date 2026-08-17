@@ -7,8 +7,6 @@ import re
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional
-
 
 DEFAULT_JMX_EXPORTER_DIR = Path(
     os.environ.get("JMX_EXPORTER_DIR", "/tmp/jmx-exporter-compat")
@@ -34,8 +32,8 @@ QUICK_TEST_IMAGE_VARS = ("JAVA_DOCKER_IMAGES", "PROMETHEUS_DOCKER_IMAGES")
 
 def run_cmd(
     cmd: list[str],
-    cwd: Optional[Path] = None,
-    env: Optional[dict[str, str]] = None,
+    cwd: Path | None = None,
+    env: dict[str, str] | None = None,
 ) -> None:
     subprocess.run(cmd, cwd=cwd, check=True, env=env)
 
@@ -59,10 +57,12 @@ def check_clean_worktree(jmx_exporter_dir: Path) -> None:
         )
 
 
-def get_prom_version(root_dir: Path = Path.cwd()) -> str:
+def get_prom_version(root_dir: Path | None = None) -> str:
     configured_version = DEFAULT_PROM_VERSION
     if configured_version:
         return configured_version
+    if root_dir is None:
+        root_dir = Path.cwd()
     pom = ET.parse(root_dir / "pom.xml")
     root = pom.getroot()
     version = root.findtext("./{*}version")
@@ -96,7 +96,9 @@ def prepare_repo(
     )
 
 
-def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
+def install_local_artifacts(root_dir: Path | None = None) -> None:
+    if root_dir is None:
+        root_dir = Path.cwd()
     run_cmd(
         [
             "./mvnw",
@@ -141,7 +143,7 @@ def quick_test_images(
 
 def run_maven_test(
     jmx_exporter_dir: Path = DEFAULT_JMX_EXPORTER_DIR,
-    prom_version: Optional[str] = None,
+    prom_version: str | None = None,
 ) -> None:
     if prom_version is None:
         prom_version = get_prom_version()

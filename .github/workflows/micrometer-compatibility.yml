@@ -25,15 +25,15 @@ jobs:
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
             repository: zeitlinger/micrometer
             # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prom-client-java-typed-family-descriptor
-            ref: 8f90b70807f5a063c592e3b17ef3b908be894086
+            ref: f240f0978366378dae66ac005ea1d2ef65708ff3
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
+      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
         with:
-          version: v2026.7.5
-          sha256: 5f7ab76afdf0780d12edeaa67e908094e9ccf7924cfe203e415c1cfb87bbf778
+          version: v2026.8.6
+          sha256: 96f6f1f416d868b78addd22746eefc7f4bf7820c6a3afa392a9f653f708c1644
           working_directory: .mise/envs/micrometer
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
