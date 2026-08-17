@@ -29,10 +29,9 @@ import re
 import shlex
 import subprocess
 import sys
-from typing import List, Optional
 
 
-def run_cmd(cmd: List[str], cwd: Optional[str] = None) -> str:
+def run_cmd(cmd: list[str], cwd: str | None = None) -> str:
     """Run a command, stream stdout/stderr to the console for progress, and return the full output.
 
     This replaces the previous blocking subprocess.run approach so users can see build / JMH
@@ -47,7 +46,7 @@ def run_cmd(cmd: List[str], cwd: Optional[str] = None) -> str:
         print(f"Command not found: {cmd[0]}")
         raise
 
-    output_lines: List[str] = []
+    output_lines: list[str] = []
     try:
         assert proc.stdout is not None
         # Stream lines as they appear and capture them for returning
@@ -94,7 +93,7 @@ def find_benchmarks_jar(module: str) -> str:
     return jar
 
 
-def run_jmh(jar: str, java_cmd: str, extra_args: Optional[str]) -> str:
+def run_jmh(jar: str, java_cmd: str, extra_args: str | None) -> str:
     args = [java_cmd, "-jar", jar, "-rf", "text"]
     if extra_args:
         args += shlex.split(extra_args)
@@ -128,7 +127,7 @@ def extract_first_table(jmh_output: str) -> str:
     return table
 
 
-def filter_table_for_class(table: str, class_name: str) -> Optional[str]:
+def filter_table_for_class(table: str, class_name: str) -> str | None:
     """
     Return a table string that contains only the header and the lines belonging to `class_name`.
     If no matching lines are found, return None.
@@ -157,16 +156,19 @@ def filter_table_for_class(table: str, class_name: str) -> Optional[str]:
     return header + "\n" + "\n".join(matched)
 
 
-def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
+def update_pre_blocks_under_module(module: str, table: str) -> list[str]:
     # Find files under module and update any <pre>...</pre> block that contains 'thrpt'
     updated_files = []
     for path in glob.glob(os.path.join(module, "**"), recursive=True):
         if os.path.isdir(path):
             continue
+        content = None
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
-        except Exception:
+        except (OSError, UnicodeError):
+            pass
+        if content is None:
             continue
         # quick filter
         if "<pre>" not in content or "thrpt" not in content:
@@ -188,10 +190,10 @@ def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
         # This will match patterns like: " * <pre>... </pre>" and capture the prefix (e.g. " * ")
         pattern = re.compile(r"(?m)^(?P<prefix>[ \t]*\*[ \t]*)<pre>[\s\S]*?</pre>")
 
-        def repl(m: re.Match) -> str:
+        def repl(m: re.Match, replacement_table: str = filtered_table) -> str:
             prefix = m.group("prefix")
             # Build the new block with the same prefix on each line
-            lines = filtered_table.splitlines()
+            lines = replacement_table.splitlines()
             replaced = prefix + "<pre>\n"
             for ln in lines:
                 replaced += prefix + ln.rstrip() + "\n"
@@ -207,7 +209,7 @@ def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
     return updated_files
 
 
-def main(argv: List[str]):
+def main(argv: list[str]):
     parser = argparse.ArgumentParser()
     parser.add_argument("--mvnw", default="./mvnw", help="Path to maven wrapper")
     parser.add_argument(

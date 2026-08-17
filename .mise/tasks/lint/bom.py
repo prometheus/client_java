@@ -7,7 +7,6 @@ import re
 import sys
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import List
 
 ROOT = Path(__file__).resolve().parents[3]  # repo root (.. from .mise/tasks/lint)
 IGNORE_DIRS = {"prometheus-metrics-parent"}
@@ -31,7 +30,7 @@ def first_artifact_id(pom_file: Path) -> str:
     return matches[1].strip()
 
 
-def add_dir(dir_path: Path, want: List[str]):
+def add_dir(dir_path: Path, want: list[str]):
     if not dir_path.is_dir():
         raise FileNotFoundError(f"Directory {dir_path} does not exist.")
 
@@ -49,8 +48,8 @@ def add_dir(dir_path: Path, want: List[str]):
     want.append(artifact_id)
 
 
-def collect_want(root: Path) -> List[str]:
-    want: List[str] = []
+def collect_want(root: Path) -> list[str]:
+    want: list[str] = []
     # top-level prometheus-metrics*
     for entry in sorted(root.iterdir()):
         if entry.is_dir() and fnmatch(entry.name, f"{MODULE_PREFIX}*"):
@@ -68,14 +67,15 @@ def collect_want(root: Path) -> List[str]:
     return want_unique
 
 
-def collect_have(bom_pom: Path) -> List[str]:
+def collect_have(bom_pom: Path) -> list[str]:
     if not bom_pom.is_file():
         raise FileNotFoundError(f"BOM file {bom_pom} does not exist.")
 
     text = bom_pom.read_text(encoding="utf-8")
     # find artifactId values that start with MODULE_PREFIX
     matches = re.findall(
-        r"<artifactId>\s*(%s[^<\s]*)\s*</artifactId>" % re.escape(MODULE_PREFIX), text
+        rf"<artifactId>\s*({re.escape(MODULE_PREFIX)}[^<\s]*)\s*</artifactId>",
+        text,
     )
     return sorted(matches)
 
@@ -108,7 +108,7 @@ def main() -> int:
         else:
             return 0
 
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         print(e, file=sys.stderr)
         return 1
 

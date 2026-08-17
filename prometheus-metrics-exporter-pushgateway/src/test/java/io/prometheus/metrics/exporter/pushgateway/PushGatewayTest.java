@@ -6,6 +6,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import io.prometheus.metrics.config.EscapingScheme;
+import io.prometheus.metrics.config.PrometheusPropertiesException;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.IOException;
@@ -46,6 +47,15 @@ class PushGatewayTest {
                   .address("::")
                   .build(); // ":" is interpreted as port number, so parsing fails
             });
+  }
+
+  @Test
+  void testInvalidURLDoesNotExposeCredentials() {
+    String secretAddress = "user:secret@[::";
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(() -> PushGateway.builder().address(secretAddress).build())
+        .withMessage("Invalid Pushgateway address. Expecting <host>:<port>")
+        .withMessageNotContaining("secret");
   }
 
   @Test

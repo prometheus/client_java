@@ -15,6 +15,9 @@ jobs:
     if: ${{ github.repository == 'prometheus/client_java' }}
     environment: release
     runs-on: ubuntu-24.04
+    env:
+      # Artifact releases pair a focused tool allowlist with cache: false.
+      MISE_ENABLE_TOOLS: java
     permissions:
       actions: write # required to trigger bump-api-diff-baseline.yml via `gh workflow run`
 
@@ -69,17 +72,17 @@ jobs:
           ref: ${{ inputs.tag }}
           persist-credentials: false
 
-      - uses: jdx/mise-action@9e7f7633ff6f6d6048a9418a68d48f288f50eb14 # v4.2.3
+      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
         with:
-          version: v2026.7.15
-          sha256: 9a729bbe121135da0c717d86d3328f21de5efcc6fa27ac8487ef481e428008d3
+          version: v2026.8.6
+          sha256: 96f6f1f416d868b78addd22746eefc7f4bf7820c6a3afa392a9f653f708c1644
           cache: false
 
       - name: Build release version
         run: mise run build-release
 
       - name: Set up Apache Maven Central
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: "temurin"
           java-version: "21"

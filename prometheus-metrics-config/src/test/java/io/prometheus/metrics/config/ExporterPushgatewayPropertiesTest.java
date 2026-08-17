@@ -27,7 +27,7 @@ class ExporterPushgatewayPropertiesTest {
         .isThrownBy(() -> load(Map.of("io.prometheus.exporter.pushgateway.scheme", "foo")))
         .withMessage(
             "io.prometheus.exporter.pushgateway.scheme: Illegal value. Expecting 'http' or 'https'."
-                + " Found: foo");
+                + "");
   }
 
   @Test
@@ -60,7 +60,7 @@ class ExporterPushgatewayPropertiesTest {
             () -> load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "invalid")))
         .withMessage(
             "io.prometheus.exporter.pushgateway.escaping_scheme: Illegal value. Expecting"
-                + " 'allow-utf-8', 'values', 'underscores', or 'dots'. Found: invalid");
+                + " 'allow-utf-8', 'values', 'underscores', or 'dots'.");
   }
 
   @Test
