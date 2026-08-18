@@ -6,8 +6,6 @@ import os
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional
-
 
 DEFAULT_MICROMETER_DIR = Path(
     os.environ.get("MICROMETER_DIR", "/tmp/micrometer-compat")
@@ -27,7 +25,7 @@ DEFAULT_INIT_SCRIPT = Path(
 DEFAULT_PROM_VERSION = os.environ.get("PROM_VERSION")
 
 
-def run_cmd(cmd: list[str], cwd: Optional[Path] = None) -> None:
+def run_cmd(cmd: list[str], cwd: Path | None = None) -> None:
     subprocess.run(cmd, cwd=cwd, check=True)
 
 
@@ -49,10 +47,12 @@ def check_clean_worktree(micrometer_dir: Path) -> None:
         )
 
 
-def get_prom_version(root_dir: Path = Path.cwd()) -> str:
+def get_prom_version(root_dir: Path | None = None) -> str:
     configured_version = DEFAULT_PROM_VERSION
     if configured_version:
         return configured_version
+    if root_dir is None:
+        root_dir = Path.cwd()
     pom = ET.parse(root_dir / "pom.xml")
     root = pom.getroot()
     version = root.findtext("./{*}version")
@@ -64,7 +64,7 @@ def get_prom_version(root_dir: Path = Path.cwd()) -> str:
 
 
 def write_init_script(
-    init_script: Path = DEFAULT_INIT_SCRIPT, prom_version: Optional[str] = None
+    init_script: Path = DEFAULT_INIT_SCRIPT, prom_version: str | None = None
 ) -> None:
     if prom_version is None:
         prom_version = get_prom_version()
@@ -120,7 +120,9 @@ def prepare_repo(
     )
 
 
-def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
+def install_local_artifacts(root_dir: Path | None = None) -> None:
+    if root_dir is None:
+        root_dir = Path.cwd()
     run_cmd(
         [
             "./mvnw",
@@ -144,7 +146,7 @@ def install_local_artifacts(root_dir: Path = Path.cwd()) -> None:
 
 
 def run_gradle_test(
-    test_selector: Optional[str] = None,
+    test_selector: str | None = None,
     micrometer_dir: Path = DEFAULT_MICROMETER_DIR,
     init_script: Path = DEFAULT_INIT_SCRIPT,
 ) -> None:

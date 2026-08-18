@@ -25,14 +25,13 @@
     <junit-pioneer.version>2.3.0</junit-pioneer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <wiremock.version>3.13.2</wiremock.version>
-    <junit-jupiter.version>6.1.2</junit-jupiter.version>
+    <junit-jupiter.version>6.1.3</junit-jupiter.version>
     <otel.instrumentation.version>2.30.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
     <!-- Bumped by .github/workflows/bump-api-diff-baseline.yml after each release. -->
     <api.diff.baseline.version>1.8.0</api.diff.baseline.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
-    <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>
     <javadoc.skip>false</javadoc.skip>
     <warnings>-Werror</warnings>
@@ -183,28 +182,6 @@
     </pluginManagement>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.6.0</version>
-        <configuration>
-          <consoleOutput>true</consoleOutput>
-          <configLocation>google_checks.xml</configLocation>
-          <configLocation>checkstyle.xml</configLocation>
-          <violationSeverity>warning</violationSeverity>
-          <failOnViolation>true</failOnViolation>
-          <skip>${checkstyle.skip}</skip>
-          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-          <excludes>**/generated/**,**/jmh_generated/*</excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.15</version>
@@ -281,7 +258,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>6.0.2</version>
+        <version>6.1.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>

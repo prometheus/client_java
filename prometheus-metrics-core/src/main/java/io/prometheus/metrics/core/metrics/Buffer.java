@@ -43,7 +43,7 @@ class Buffer {
   }
 
   boolean append(double value) {
-    int index = Math.abs((int) Thread.currentThread().getId()) % stripedObservationCounts.length;
+    int index = stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length);
     AtomicLong observationCountForThread = stripedObservationCounts[index];
     long count = observationCountForThread.incrementAndGet();
     if ((count & bufferActiveBit) == 0) {
@@ -52,6 +52,10 @@ class Buffer {
       doAppend(value);
       return true;
     }
+  }
+
+  static int stripeIndex(long threadId, int stripeCount) {
+    return (int) Math.floorMod(threadId, stripeCount);
   }
 
   private void doAppend(double amount) {
