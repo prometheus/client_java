@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
+import javax.annotation.Nullable;
 import org.openjdk.jcstress.annotations.Actor;
 import org.openjdk.jcstress.annotations.Arbiter;
 import org.openjdk.jcstress.annotations.Expect;
@@ -7,10 +8,12 @@ import org.openjdk.jcstress.annotations.JCStressTest;
 import org.openjdk.jcstress.annotations.Outcome;
 import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
-import javax.annotation.Nullable;
 
 @JCStressTest
-@Outcome(id = "0, 1", expect = Expect.ACCEPTABLE, desc = "A paused writer is skipped and collected after it resumes.")
+@Outcome(
+    id = "0, 1",
+    expect = Expect.ACCEPTABLE,
+    desc = "A paused writer is skipped and collected after it resumes.")
 @State
 public class ClassicOnlyAccumulatorStalledWriterTest {
   private final ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);

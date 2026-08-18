@@ -9,7 +9,10 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.JD_Result;
 
 @JCStressTest
-@Outcome(id = "2, 3.0", expect = Expect.ACCEPTABLE, desc = "Concurrent observations are visible with coherent count and sum.")
+@Outcome(
+    id = "2, 3.0",
+    expect = Expect.ACCEPTABLE,
+    desc = "Concurrent observations are visible with coherent count and sum.")
 @State
 public class ClassicOnlyAccumulatorNoLossTest {
   private final ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);

@@ -9,7 +9,10 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 @JCStressTest
-@Outcome(id = "1, 1", expect = Expect.ACCEPTABLE, desc = "A completed observation is published to a subsequent snapshot.")
+@Outcome(
+    id = "1, 1",
+    expect = Expect.ACCEPTABLE,
+    desc = "A completed observation is published to a subsequent snapshot.")
 @State
 public class ClassicOnlyAccumulatorPublicationTest {
   private final ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);

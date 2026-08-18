@@ -9,7 +9,10 @@ import org.openjdk.jcstress.annotations.State;
 import org.openjdk.jcstress.infra.results.J_Result;
 
 @JCStressTest
-@Outcome(id = "2", expect = Expect.ACCEPTABLE, desc = "A reclaimed thread cell is re-registered without losing observations.")
+@Outcome(
+    id = "2",
+    expect = Expect.ACCEPTABLE,
+    desc = "A reclaimed thread cell is re-registered without losing observations.")
 @State
 public class ClassicOnlyAccumulatorReRegistrationTest {
   private final ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);
