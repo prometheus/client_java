@@ -21,17 +21,10 @@
   <properties>
     <java.version>25</java.version>
     <junit-jupiter.version>6.1.3</junit-jupiter.version>
-    <protobuf-java.version>4.35.1</protobuf-java.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <!-- Align Spring Boot's managed runtime with the generated classes used by reactor tests. -->
-      <dependency>
-        <groupId>com.google.protobuf</groupId>
-        <artifactId>protobuf-java</artifactId>
-        <version>${protobuf-java.version}</version>
-      </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
@@ -97,6 +90,19 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- Run after package so reactor dependencies resolve to their shaded artifacts. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
