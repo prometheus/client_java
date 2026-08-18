@@ -41,7 +41,13 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
     }
   }
 
-  /** See {@code jakarta.servlet.ServletRequest.getParameterValues(String)} */
+  /**
+   * See {@code jakarta.servlet.ServletRequest.getParameterValues(String)}.
+   *
+   * <p>For safety, query strings are limited to 65,536 characters and 1,024 {@code &}-separated
+   * parameter pairs. Requests that exceed either limit or contain invalid percent-encoding are
+   * rejected by the scrape handler with HTTP {@code 400 Bad Request}.
+   */
   @Override
   @Nullable
   // decode with Charset is only available in Java 10+, but we want to support Java 8
