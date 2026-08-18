@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Experimental accumulator for classic-only histogram data points.
  *
- * <p>Each recording thread owns a cell with two buffers. A snapshot advances the global epoch,
- * waits only for observations that had already entered the previous epoch, and then drains the
- * inactive buffers. Recording threads therefore never contend on a shared monitor.
+ * <p>Each recording thread owns a cell with two buffers. A snapshot advances the global epoch and
+ * drains inactive buffers that are not being written. It does not wait for a paused recorder;
+ * recording threads therefore never contend on a shared monitor or stall a scrape.
  *
  * <p>Cells remain registered until both buffers have been collected, after which they can be
  * reclaimed and re-registered if their recording thread is reused. A cell is static and does not
@@ -68,7 +68,7 @@ final class ClassicOnlyAccumulator {
         buffer.count++;
         return;
       } finally {
-        // Publishes all plain writes above to a snapshot waiting on writingEpoch.
+        // Publishes all plain writes above to a snapshot observing writingEpoch.
         cell.writingEpoch = NOT_WRITING;
       }
     }

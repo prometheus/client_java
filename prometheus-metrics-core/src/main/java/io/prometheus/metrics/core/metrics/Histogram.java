@@ -232,8 +232,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     @Override
     public double getSum() {
       if (classicOnlyAccumulator != null) {
-        // A paused recorder may make this exact value temporarily stale. The next call retries
-        // its buffer rather than blocking the scrape indefinitely.
+        // A paused recorder may make this exact value temporarily stale. A later snapshot, after
+        // the intervening buffer rotation, retries its buffer rather than blocking the scrape.
         return classicOnlyAccumulator.snapshot().sum;
       }
       return sum.sum();
@@ -242,8 +242,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     @Override
     public long getCount() {
       if (classicOnlyAccumulator != null) {
-        // A paused recorder may make this exact value temporarily stale. The next call retries
-        // its buffer rather than blocking the scrape indefinitely.
+        // A paused recorder may make this exact value temporarily stale. A later snapshot, after
+        // the intervening buffer rotation, retries its buffer rather than blocking the scrape.
         return classicOnlyAccumulator.snapshot().count;
       }
       return count.sum();
@@ -315,8 +315,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
       Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
       if (classicOnlyAccumulator != null) {
-        // collect() is intentionally allowed to return a stale snapshot for a paused recorder;
-        // the following collection retries its buffer without an unbounded wait.
+        // collect() is intentionally allowed to return a stale snapshot for a paused recorder; a
+        // later collection, after the intervening buffer rotation, retries its buffer.
         ClassicOnlyAccumulator.Snapshot snapshot = classicOnlyAccumulator.snapshot();
         return new HistogramSnapshot.HistogramDataPointSnapshot(
             ClassicHistogramBuckets.of(classicUpperBounds, snapshot.buckets),
