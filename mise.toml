@@ -12,6 +12,7 @@ actionlint = "1.7.12"
 "aqua:jonwiggins/xmloxide" = "v0.5.0"
 "aqua:owenlamont/ryl" = "0.21.0"
 biome = "2.5.8"
+checkstyle = "13.8.0"
 editorconfig-checker = "3.11.1"
 google-java-format = "1.36.1"
 lychee = "0.24.2"
@@ -48,16 +49,16 @@ run = "./mvnw clean"
 
 [tasks.compile]
 description = "bare compile, ignoring formatting and linters"
-run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.generate]
 description = "regenerate protobuf sources"
-run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw test -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.test-all]
 description = "run all tests"
@@ -78,7 +79,6 @@ BASELINE_OVERRIDE="${API_DIFF_BASELINE_VERSION:+-Dapi.diff.baseline.version=${AP
   ${BASELINE_OVERRIDE} \
   -DskipTests \
   -Dcoverage.skip=true \
-  -Dcheckstyle.skip=true \
   -Dwarnings=-nowarn
 ./.github/scripts/sync-api-diffs.sh
 """

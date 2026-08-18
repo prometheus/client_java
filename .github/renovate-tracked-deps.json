@@ -163,6 +163,7 @@
         "aqua:jonwiggins/xmloxide",
         "aqua:owenlamont/ryl",
         "biome",
+        "checkstyle",
         "editorconfig-checker",
         "google-java-format",
         "hugo",
