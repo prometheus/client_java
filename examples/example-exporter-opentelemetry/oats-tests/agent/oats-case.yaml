@@ -1,0 +1,20 @@
+name: java agent exporter preserves target_info identity
+fixture:
+  compose:
+    template: lgtm
+    file: docker-compose.yml
+seed:
+  type: app
+expected:
+  metrics:
+    - promql: "uptime_seconds_total{}"
+      value: ">= 0"
+    - promql: 'count(target_info{service_name!="otelcol-contrib"})'
+      value: "== 2"
+    - promql: 'count(count by (instance) (target_info{service_name!="otelcol-contrib"}))'
+      value: "== 1"
+  custom-checks:
+    - script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+        curl -fsS "${OATS_GRAFANA_URL:?}/api/health" >/dev/null
