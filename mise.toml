@@ -1,7 +1,7 @@
 monorepo_root = true
 
 [monorepo]
-config_roots = [".mise/envs/native"]
+config_roots = [".mise/envs/*"]
 
 [tools]
 "aqua:grafana/gcx" = "v1.1.0"
