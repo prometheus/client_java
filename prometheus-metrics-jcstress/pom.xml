@@ -45,16 +45,6 @@
             <arg>--should-stop=ifError=FLOW</arg>
             <arg>-XDcompilePolicy=simple</arg>
             <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
-            <arg>
-              -Xplugin:ErrorProne
-              -Xep:AlmostJavadoc:OFF
-              -Xep:MissingSummary:OFF
-              -Xep:LongDoubleConversion:OFF
-              -Xep:StringSplitter:OFF
-              -Xep:ThreadPriorityCheck:OFF
-              -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*|.*/target/generated-sources/.*)
-              -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
-            </arg>
           </compilerArgs>
           <annotationProcessorPaths combine.children="append">
             <path>
