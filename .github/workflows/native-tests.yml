@@ -17,7 +17,5 @@ jobs:
         with:
           version: v2026.8.6
           sha256: 96f6f1f416d868b78addd22746eefc7f4bf7820c6a3afa392a9f653f708c1644
-          working_directory: .mise/envs/native
       - name: Run native tests
-        working-directory: .mise/envs/native
-        run: mise native-test
+        run: mise //.mise/envs/native:native-test

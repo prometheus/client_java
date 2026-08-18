@@ -2,10 +2,9 @@
 java = "oracle-graalvm-25.0.1"
 
 [tasks.native-test]
-depends = "build"
+depends = "//:build"
 # Native Test uses Surefire, so explicitly select the Failsafe-named test class.
 run = '''
-repo_root="$MISE_PROJECT_ROOT/../../.."
-cd "$repo_root/integration-tests/it-spring-boot-smoke-test"
-"$repo_root/mvnw" test -PnativeTest -Dtest=ApplicationIT
+cd "$MISE_MONOREPO_ROOT/integration-tests/it-spring-boot-smoke-test"
+"$MISE_MONOREPO_ROOT/mvnw" test -PnativeTest -Dtest=ApplicationIT
 '''
