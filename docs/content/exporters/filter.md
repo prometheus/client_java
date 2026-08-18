@@ -18,3 +18,12 @@ params:
     - jvm_threads_current
     - jvm_threads_daemon
 ```
+
+## Query parameter limits
+
+For safety, exporters limit the query string to 65,536 characters and accept at most 1,024
+query parameters. The parameter limit counts every `&`-separated pair, including repeated
+parameters and empty pairs.
+
+If a request exceeds either limit or contains invalid percent-encoding, the `/metrics` endpoint
+returns HTTP `400 Bad Request` with the plain-text response `Invalid query parameters`.
