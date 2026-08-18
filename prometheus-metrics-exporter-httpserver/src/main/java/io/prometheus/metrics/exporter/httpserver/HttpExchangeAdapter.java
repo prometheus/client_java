@@ -27,7 +27,8 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
     this(httpExchange, HttpErrorHandlingPolicy.builder().build());
   }
 
-  HttpExchangeAdapter(HttpExchange httpExchange, HttpErrorHandlingPolicy errorHandlingPolicy) {
+  public HttpExchangeAdapter(
+      HttpExchange httpExchange, HttpErrorHandlingPolicy errorHandlingPolicy) {
     this.httpExchange = httpExchange;
     this.errorHandlingPolicy = errorHandlingPolicy;
   }
@@ -108,7 +109,6 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
   private void sendErrorResponse(Exception requestHandlerException) {
     if (!responseSent) {
       responseSent = true;
-      reportException(requestHandlerException);
       byte[] errorResponse = errorHandlingPolicy.getErrorResponse(requestHandlerException);
       try {
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
@@ -122,19 +122,26 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
             "The Prometheus metrics HTTPServer caught an Exception during scrape and "
                 + "failed to send an error response to the client.",
             errorWriterException);
-        logger.log(
-            Level.SEVERE,
-            "Original Exception that caused the Prometheus scrape error:",
-            requestHandlerException);
+        if (!errorHandlingPolicy.hasErrorReporter()) {
+          logger.log(
+              Level.SEVERE,
+              "Original Exception that caused the Prometheus scrape error:",
+              requestHandlerException);
+        }
       }
+      reportException(requestHandlerException);
     } else {
       // If the exception occurs after response headers have been sent, it's too late to respond
       // with HTTP 500.
-      logger.log(
-          Level.SEVERE,
-          "The Prometheus metrics HTTPServer caught an Exception while trying to send "
-              + "the metrics response.",
-          requestHandlerException);
+      if (errorHandlingPolicy.hasErrorReporter()) {
+        reportException(requestHandlerException);
+      } else {
+        logger.log(
+            Level.SEVERE,
+            "The Prometheus metrics HTTPServer caught an Exception while trying to send "
+                + "the metrics response.",
+            requestHandlerException);
+      }
     }
   }
 

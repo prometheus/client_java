@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
@@ -17,16 +19,18 @@ import javax.annotation.Nullable;
 @StableApi
 public final class HttpErrorHandlingPolicy {
 
+  private static final Logger logger = Logger.getLogger(HttpErrorHandlingPolicy.class.getName());
+
   private static final byte[] GENERIC_RESPONSE =
       ("An internal error occurred while scraping metrics. "
               + "Configure an HTTP error reporter for details.\n")
           .getBytes(StandardCharsets.UTF_8);
 
   private final boolean unsafeDebugResponse;
-  @Nullable private final Consumer<Throwable> errorReporter;
+  @Nullable private final Consumer<? super Exception> errorReporter;
 
   private HttpErrorHandlingPolicy(
-      boolean unsafeDebugResponse, @Nullable Consumer<Throwable> errorReporter) {
+      boolean unsafeDebugResponse, @Nullable Consumer<? super Exception> errorReporter) {
     this.unsafeDebugResponse = unsafeDebugResponse;
     this.errorReporter = errorReporter;
   }
@@ -53,17 +57,30 @@ public final class HttpErrorHandlingPolicy {
     return stringWriter.toString().getBytes(StandardCharsets.UTF_8);
   }
 
-  void report(Throwable error) {
+  void report(Exception error) {
     if (errorReporter != null) {
       errorReporter.accept(error);
     }
+  }
+
+  boolean hasErrorReporter() {
+    return errorReporter != null;
+  }
+
+  /**
+   * Returns a synchronous reporter that logs scrape exceptions at {@link Level#SEVERE} using JUL.
+   *
+   * <p>Reporting is opt-in; the default policy does not log scrape exceptions.
+   */
+  public static Consumer<Throwable> julReporter() {
+    return error -> logger.log(Level.SEVERE, "Prometheus scrape failed", error);
   }
 
   /** Builder for {@link HttpErrorHandlingPolicy}. */
   public static final class Builder {
 
     private boolean unsafeDebugResponse = false;
-    @Nullable private Consumer<Throwable> errorReporter;
+    @Nullable private Consumer<? super Exception> errorReporter;
 
     private Builder() {}
 
@@ -74,7 +91,7 @@ public final class HttpErrorHandlingPolicy {
      * must be safe to call concurrently. Runtime exceptions thrown by the reporter are isolated
      * from HTTP response handling.
      */
-    public Builder errorReporter(Consumer<Throwable> errorReporter) {
+    public Builder errorReporter(Consumer<? super Exception> errorReporter) {
       if (errorReporter == null) {
         throw new NullPointerException("errorReporter");
       }

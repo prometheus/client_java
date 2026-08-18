@@ -11,7 +11,12 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import org.junit.jupiter.api.Test;
 
 class HttpExchangeAdapterTest {
@@ -94,6 +99,26 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
+  void reporterRunsAfterErrorResponseWasSent() throws Exception {
+    HttpExchange httpExchange = mock(HttpExchange.class);
+    Headers headers = new Headers();
+    ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+    when(httpExchange.getResponseHeaders()).thenReturn(headers);
+    when(httpExchange.getResponseBody()).thenReturn(responseBody);
+    AtomicBoolean reporterRanAfterResponse = new AtomicBoolean();
+    HttpExchangeAdapter adapter =
+        new HttpExchangeAdapter(
+            httpExchange,
+            HttpErrorHandlingPolicy.builder()
+                .errorReporter(ignored -> reporterRanAfterResponse.set(responseBody.size() > 0))
+                .build());
+
+    adapter.handleException(new IllegalStateException("secret failure"));
+
+    assertThat(reporterRanAfterResponse).isTrue();
+  }
+
+  @Test
   void reporterFailureDoesNotPreventGenericResponse() {
     HttpExchange httpExchange = mock(HttpExchange.class);
     Headers headers = new Headers();
@@ -144,5 +169,58 @@ class HttpExchangeAdapterTest {
         .contains("IllegalStateException: diagnostic detail")
         .contains("at ");
     assertThat(reportedError.get()).isSameAs(scrapeException);
+  }
+
+  @Test
+  void configuredReporterHandlesExceptionAfterResponseHeadersWereSent() throws Exception {
+    HttpExchange httpExchange = mock(HttpExchange.class);
+    Headers headers = new Headers();
+    ByteArrayOutputStream responseBody = new ByteArrayOutputStream();
+    when(httpExchange.getResponseHeaders()).thenReturn(headers);
+    when(httpExchange.getResponseBody()).thenReturn(responseBody);
+    AtomicReference<Exception> reportedError = new AtomicReference<>();
+    HttpExchangeAdapter adapter =
+        new HttpExchangeAdapter(
+            httpExchange,
+            HttpErrorHandlingPolicy.builder().errorReporter(reportedError::set).build());
+
+    adapter.getResponse().sendHeadersAndGetBody(200, 0);
+    IllegalStateException scrapeException = new IllegalStateException("secret failure");
+    adapter.handleException(scrapeException);
+
+    assertThat(reportedError.get()).isSameAs(scrapeException);
+    verify(httpExchange).sendResponseHeaders(200, 0);
+  }
+
+  @Test
+  void julReporterLogsAtSevere() {
+    Logger logger = Logger.getLogger(HttpErrorHandlingPolicy.class.getName());
+    AtomicReference<LogRecord> record = new AtomicReference<>();
+    Handler handler =
+        new Handler() {
+          @Override
+          public void publish(LogRecord logRecord) {
+            record.set(logRecord);
+          }
+
+          @Override
+          public void flush() {}
+
+          @Override
+          public void close() {}
+        };
+    boolean useParentHandlers = logger.getUseParentHandlers();
+    logger.setUseParentHandlers(false);
+    logger.addHandler(handler);
+    try {
+      IllegalStateException scrapeException = new IllegalStateException("secret failure");
+      HttpErrorHandlingPolicy.julReporter().accept(scrapeException);
+      assertThat(record.get()).isNotNull();
+      assertThat(record.get().getLevel()).isEqualTo(Level.SEVERE);
+      assertThat(record.get().getThrown()).isSameAs(scrapeException);
+    } finally {
+      logger.removeHandler(handler);
+      logger.setUseParentHandlers(useParentHandlers);
+    }
   }
 }

@@ -31,7 +31,7 @@ public class MetricsHandler implements HttpHandler {
     this(new PrometheusScrapeHandler(config, registry), HttpErrorHandlingPolicy.builder().build());
   }
 
-  MetricsHandler(
+  public MetricsHandler(
       PrometheusProperties config,
       PrometheusRegistry registry,
       HttpErrorHandlingPolicy errorHandlingPolicy) {
