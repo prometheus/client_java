@@ -44,11 +44,11 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
   /**
    * See {@code jakarta.servlet.ServletRequest.getParameterValues(String)}.
    *
-   * <p>For safety, the default implementation applies two fixed limits: {@code
-   * maxQueryStringLength = 64 * 1024} (65,536 characters) and {@code maxQueryParameterCount =
-   * 1024} ({@code &}-separated parameter pairs). These implementation values are not exposed as
-   * runtime configuration. Requests that exceed either limit or contain invalid percent-encoding
-   * are rejected by the scrape handler with HTTP {@code 400 Bad Request}.
+   * <p>For safety, the default implementation applies two fixed limits: {@code maxQueryStringLength
+   * = 64 * 1024} (65,536 characters) and {@code maxQueryParameterCount = 1024} ({@code &}-separated
+   * parameter pairs). These implementation values are not exposed as runtime configuration.
+   * Requests that exceed either limit or contain invalid percent-encoding are rejected by the
+   * scrape handler with HTTP {@code 400 Bad Request}.
    */
   @Override
   @Nullable
