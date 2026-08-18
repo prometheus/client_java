@@ -38,6 +38,66 @@ class ClassicOnlyAccumulatorTest {
   }
 
   @Test
+  void stalledCellDoesNotPreventHealthyCellsFromBeingCollected() throws Exception {
+    ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);
+    accumulator.observe(0, 1.0);
+    for (int i = 0; i < 4; i++) {
+      Thread recorder = new Thread(() -> accumulator.observe(0, 1.0));
+      recorder.start();
+      recorder.join();
+    }
+
+    Object stalledCell = onlyCell(accumulator);
+    Field writingEpoch = stalledCell.getClass().getDeclaredField("writingEpoch");
+    writingEpoch.setAccessible(true);
+    writingEpoch.setLong(stalledCell, 0);
+
+    ClassicOnlyAccumulator.Snapshot first = accumulator.snapshot();
+    // The four healthy cells are drained even though the first cell consumes its own wait budget.
+    assertThat(first.count).isEqualTo(4);
+
+    writingEpoch.setLong(stalledCell, -1);
+    accumulator.snapshot();
+    ClassicOnlyAccumulator.Snapshot finalSnapshot = accumulator.snapshot();
+    assertThat(finalSnapshot.count).isEqualTo(5);
+  }
+
+  @Test
+  void activeWriterCanResumeAfterAStaleSnapshot() throws Exception {
+    ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);
+    accumulator.observe(0, 1.0);
+    Object cell = onlyCell(accumulator);
+    Field writingEpoch = cell.getClass().getDeclaredField("writingEpoch");
+    writingEpoch.setAccessible(true);
+    CountDownLatch entered = new CountDownLatch(1);
+    CountDownLatch release = new CountDownLatch(1);
+    Thread writer =
+        new Thread(
+            () -> {
+              try {
+                writingEpoch.setLong(cell, 0);
+                entered.countDown();
+                release.await();
+                writingEpoch.setLong(cell, -1);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+              } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+              }
+            });
+    writer.start();
+    entered.await();
+
+    ClassicOnlyAccumulator.Snapshot stale = accumulator.snapshot();
+    assertThat(stale.count).isZero();
+    release.countDown();
+    writer.join();
+    accumulator.snapshot();
+    ClassicOnlyAccumulator.Snapshot resumed = accumulator.snapshot();
+    assertThat(resumed.count).isEqualTo(1);
+  }
+
+  @Test
   void emptyCellsAreReclaimedAndCanBeReused() throws Exception {
     ClassicOnlyAccumulator accumulator = new ClassicOnlyAccumulator(1);
     accumulator.observe(0, 1.0);

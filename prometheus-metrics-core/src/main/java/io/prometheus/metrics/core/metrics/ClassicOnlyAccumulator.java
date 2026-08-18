@@ -2,7 +2,6 @@ package io.prometheus.metrics.core.metrics;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -22,9 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 final class ClassicOnlyAccumulator {
 
   private static final long NOT_WRITING = -1;
-  // A stalled recorder must not make a scrape wait indefinitely. The next snapshot will retry
-  // the buffer after the recorder has left its epoch.
-  private static final long SNAPSHOT_WAIT_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
   private final int bucketCount;
   private final AtomicLong epoch = new AtomicLong();
@@ -78,14 +74,17 @@ final class ClassicOnlyAccumulator {
     }
   }
 
-  @SuppressWarnings({"ModifyCollectionInEnhancedForLoop", "ThreadPriorityCheck"})
+  @SuppressWarnings("ModifyCollectionInEnhancedForLoop")
   synchronized Snapshot snapshot() {
+    // A snapshot is intentionally allowed to be stale for a cell whose recorder is paused. Do not
+    // wait here: this keeps collect(), getCount(), and getSum() bounded by the registered-cell and
+    // bucket counts, independent of writer stalls, while a subsequent snapshot includes the
+    // delayed observation after the recorder publishes NOT_WRITING.
     long inactiveEpoch = epoch.getAndIncrement();
     int inactiveBuffer = (int) (inactiveEpoch & 1);
-    long waitDeadline = System.nanoTime() + SNAPSHOT_WAIT_NANOS;
 
     for (Cell cell : cells) {
-      if (!awaitInactiveBuffer(cell, inactiveBuffer, waitDeadline)) {
+      if (!canDrainInactiveBuffer(cell, inactiveBuffer)) {
         // The writer may be paused indefinitely. Leave this buffer untouched; a later snapshot
         // will collect it after the writer has published NOT_WRITING.
         continue;
@@ -113,21 +112,12 @@ final class ClassicOnlyAccumulator {
     return new Snapshot(collectedBuckets.clone(), collectedCount, collectedSum);
   }
 
-  @SuppressWarnings("ThreadPriorityCheck")
-  private boolean awaitInactiveBuffer(Cell cell, int inactiveBuffer, long waitDeadline) {
-    while (true) {
-      long writingEpoch = cell.writingEpoch;
-      // An old writer can still be in the same parity after a pair of epoch flips. It is not
-      // enough to compare with inactiveEpoch: draining while that writer is active would race
-      // with its plain bucket writes.
-      if (writingEpoch == NOT_WRITING || (writingEpoch & 1) != inactiveBuffer) {
-        return true;
-      }
-      if (System.nanoTime() >= waitDeadline) {
-        return false;
-      }
-      Thread.yield();
-    }
+  private static boolean canDrainInactiveBuffer(Cell cell, int inactiveBuffer) {
+    long writingEpoch = cell.writingEpoch;
+    // An old writer can still be in the same parity after a pair of epoch flips. It is not enough
+    // to compare with the current epoch: draining while that writer is active would race with its
+    // plain bucket writes.
+    return writingEpoch == NOT_WRITING || (writingEpoch & 1) != inactiveBuffer;
   }
 
   private static boolean isEmpty(CellBuffer buffer) {
