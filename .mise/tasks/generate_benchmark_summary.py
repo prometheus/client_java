@@ -26,6 +26,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+PRACTICAL_CHANGE_THRESHOLD = 5.0
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -285,34 +287,53 @@ def lower_is_better(result: dict) -> bool:
     return mode in {"avgt", "sample", "ss"} or unit.endswith("/op")
 
 
+def benchmark_metadata(result: dict) -> dict:
+    """Return metadata that must match for a base/head comparison."""
+    primary_metric = result.get("primaryMetric", {})
+    return {
+        "jmhVersion": result.get("jmhVersion"),
+        "mode": result.get("mode"),
+        "threads": result.get("threads"),
+        "forks": result.get("forks"),
+        "warmupIterations": result.get("warmupIterations"),
+        "warmupTime": result.get("warmupTime"),
+        "measurementIterations": result.get("measurementIterations"),
+        "measurementTime": result.get("measurementTime"),
+        "jdkVersion": result.get("jdkVersion"),
+        "scoreUnit": primary_metric.get("scoreUnit"),
+        "params": result.get("params", {}),
+    }
+
+
+def comparable_metadata(head: dict, baseline: dict) -> bool:
+    """Return whether two results describe the same benchmark configuration."""
+    return benchmark_metadata(head) == benchmark_metadata(baseline)
+
+
 def comparison_status(head: dict, baseline: dict) -> str:
-    """Classify a benchmark comparison using confidence intervals."""
+    """Classify a benchmark comparison using confidence intervals and a threshold."""
     head_interval = score_interval(head)
     baseline_interval = score_interval(baseline)
     head_score = metric_score(head)
     baseline_score = metric_score(baseline)
-    if head_score is None or baseline_score is None:
-        return ""
+    if (
+        not comparable_metadata(head, baseline)
+        or head_score is None
+        or baseline_score is None
+    ):
+        return "inconclusive"
 
-    is_lower_better = lower_is_better(head)
-    if head_interval and baseline_interval:
-        head_low, head_high = head_interval
-        baseline_low, baseline_high = baseline_interval
-        if is_lower_better:
-            if head_high < baseline_low:
-                return "faster"
-            if head_low > baseline_high:
-                return "slower"
-        else:
-            if head_low > baseline_high:
-                return "faster"
-            if head_high < baseline_low:
-                return "slower"
+    change = performance_change(head, baseline)
+    if change is None or head_interval is None or baseline_interval is None:
+        return "inconclusive"
+
+    head_low, head_high = head_interval
+    baseline_low, baseline_high = baseline_interval
+    intervals_overlap = head_low <= baseline_high and baseline_low <= head_high
+    if intervals_overlap or abs(change) < PRACTICAL_CHANGE_THRESHOLD:
         return "within noise"
 
-    if is_lower_better:
-        return "faster" if head_score < baseline_score else "slower"
-    return "faster" if head_score > baseline_score else "slower"
+    return "meaningful improvement" if change > 0 else "meaningful regression"
 
 
 def performance_change(head: dict, baseline: dict) -> float | None:
@@ -373,7 +394,7 @@ def generate_comparison_section(
         md.append("")
         return md
 
-    md.append("| Benchmark | PR | Base | Change | Result |")
+    md.append("| Benchmark | PR | Base | Head vs base | Regression verdict |")
     md.append("|:----------|---:|-----:|-------:|:-------|")
 
     for name in common_names:
@@ -396,7 +417,9 @@ def generate_comparison_section(
         md.append("")
         if missing_in_base:
             missing = ", ".join(short_benchmark_name(name) for name in missing_in_base)
-            md.append(f"- Benchmarks only in PR results: {missing}")
+            md.append(
+                f"- Benchmarks only in PR results (listed separately below): {missing}"
+            )
         if missing_in_head:
             missing = ", ".join(short_benchmark_name(name) for name in missing_in_head)
             md.append(f"- Benchmarks only in base results: {missing}")
@@ -474,9 +497,25 @@ def generate_markdown(
             )
         )
 
+    # A benchmark without a base counterpart cannot receive a regression verdict.
+    # Keep it out of the comparison-oriented head table and list it separately.
+    baseline_names = {
+        b.get("benchmark", "") for b in (baseline_results or []) if b.get("benchmark")
+    }
+    if baseline_results:
+        comparable_results = [
+            b for b in results if b.get("benchmark", "") in baseline_names
+        ]
+        head_only_results = [
+            b for b in results if b.get("benchmark", "") not in baseline_names
+        ]
+    else:
+        comparable_results = results
+        head_only_results = []
+
     # Group by benchmark class
     benchmarks_by_class: dict[str, list] = {}
-    for b in results:
+    for b in comparable_results:
         name = b.get("benchmark", "")
         parts = name.rsplit(".", 1)
         if len(parts) == 2:
@@ -502,16 +541,10 @@ def generate_markdown(
             reverse=True,
         )
 
-        md.append("| Benchmark | Score | Error | Units | Within run |")
-        md.append("|:----------|------:|------:|:------|:-----------|")
+        md.append("| Benchmark | Score | Error | Units |")
+        md.append("|:----------|------:|------:|:------|")
 
-        best_score = (
-            sorted_benchmarks[0].get("primaryMetric", {}).get("score", 1)
-            if sorted_benchmarks
-            else 1
-        )
-
-        for i, b in enumerate(sorted_benchmarks):
+        for b in sorted_benchmarks:
             name = b.get("benchmark", "").split(".")[-1]
             score = b.get("primaryMetric", {}).get("score", 0)
             error = b.get("primaryMetric", {}).get("scoreError", 0)
@@ -520,23 +553,28 @@ def generate_markdown(
             score_fmt = format_score(score)
             error_fmt = format_error(error)
 
-            # Calculate relative performance as multiplier
-            try:
-                if i == 0:
-                    relative_fmt = "**fastest**"
-                else:
-                    multiplier = float(best_score) / float(score)
-                    if multiplier >= 10:
-                        relative_fmt = f"{multiplier:.0f}x slower"
-                    else:
-                        relative_fmt = f"{multiplier:.1f}x slower"
-            except (ValueError, TypeError, ZeroDivisionError):
-                relative_fmt = ""
+            md.append(f"| {name} | {score_fmt} | {error_fmt} | {unit} |")
 
+        md.append("")
+
+    if head_only_results:
+        md.append("## New benchmarks in PR head")
+        md.append("")
+        md.append(
+            "These benchmarks have no base counterpart; scores are descriptive only "
+            "and have no regression verdict."
+        )
+        md.append("")
+        md.append("| Benchmark | Score | Error | Units |")
+        md.append("|:----------|------:|------:|:------|")
+        for b in sorted(head_only_results, key=lambda x: x.get("benchmark", "")):
+            name = short_benchmark_name(b.get("benchmark", ""))
+            score = b.get("primaryMetric", {}).get("score", 0)
+            error = b.get("primaryMetric", {}).get("scoreError", 0)
+            unit = b.get("primaryMetric", {}).get("scoreUnit", "ops/s")
             md.append(
-                f"| {name} | {score_fmt} | {error_fmt} | {unit} | {relative_fmt} |"
+                f"| {name} | {format_score(score)} | {format_error(error)} | {unit} |"
             )
-
         md.append("")
 
     md.append("### Raw Results")
@@ -581,12 +619,14 @@ def generate_markdown(
     md.append("- **Error** = 99.9% confidence interval")
     if baseline_results:
         md.append(
-            "- **Comparison with base** uses JMH confidence intervals when "
-            'available; overlapping intervals are marked "within noise".'
+            "- **Regression verdict** requires comparable benchmark metadata, "
+            "non-overlapping JMH confidence intervals, and a change of at least "
+            f"{PRACTICAL_CHANGE_THRESHOLD:.0f}%; otherwise it is marked "
+            '"within noise" or "inconclusive".'
         )
     md.append(
-        "- **Within run** compares benchmarks in the same result set, not against "
-        "the base commit."
+        "- Scores for different benchmark methods are not ranked against one another; "
+        "they may measure different workloads."
     )
     md.append("")
 
