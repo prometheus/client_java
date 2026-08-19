@@ -273,7 +273,7 @@ def score_interval(result: dict) -> tuple[float, float] | None:
         return None
     try:
         error = float(metric.get("scoreError"))
-        if not math.isnan(error):
+        if math.isfinite(error) and error >= 0:
             return score - error, score + error
     except (ValueError, TypeError):
         pass

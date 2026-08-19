@@ -100,6 +100,12 @@ class TestBenchmarkComparison(unittest.TestCase):
             comparison_status(result(score=float("inf")), result()), "inconclusive"
         )
 
+    def test_invalid_fallback_uncertainty_is_inconclusive(self):
+        for error in (float("inf"), float("-inf"), -1.0):
+            head = result(error=error)
+            head["primaryMetric"].pop("scoreConfidence")
+            self.assertEqual(comparison_status(head, result()), "inconclusive", error)
+
     def test_missing_confidence_interval_is_inconclusive(self):
         head = result(score=106, error=None)
         self.assertEqual(comparison_status(head, result()), "inconclusive")
