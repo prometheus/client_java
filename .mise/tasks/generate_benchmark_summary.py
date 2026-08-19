@@ -248,7 +248,7 @@ def metric_score(result: dict) -> float | None:
     """Extract a benchmark score as a finite float."""
     try:
         score = float(result.get("primaryMetric", {}).get("score"))
-        if not math.isnan(score):
+        if math.isfinite(score):
             return score
     except (ValueError, TypeError):
         pass
@@ -263,7 +263,7 @@ def score_interval(result: dict) -> tuple[float, float] | None:
         try:
             low = float(confidence[0])
             high = float(confidence[1])
-            if not math.isnan(low) and not math.isnan(high):
+            if math.isfinite(low) and math.isfinite(high):
                 return min(low, high), max(low, high)
         except (ValueError, TypeError):
             pass
@@ -287,18 +287,34 @@ def lower_is_better(result: dict) -> bool:
     return mode in {"avgt", "sample", "ss"} or unit.endswith("/op")
 
 
+def normalize_jvm_args(value) -> list:
+    """Normalize optional JMH JVM argument fields for metadata comparison."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
 def benchmark_metadata(result: dict) -> dict:
     """Return metadata that must match for a base/head comparison."""
     primary_metric = result.get("primaryMetric", {})
     return {
         "jmhVersion": result.get("jmhVersion"),
         "mode": result.get("mode"),
+        "vmName": result.get("vmName"),
+        "vmVersion": result.get("vmVersion"),
+        "jvmArgs": normalize_jvm_args(result.get("jvmArgs")),
+        "jvmArgsPrepend": normalize_jvm_args(result.get("jvmArgsPrepend")),
+        "jvmArgsAppend": normalize_jvm_args(result.get("jvmArgsAppend")),
         "threads": result.get("threads"),
         "forks": result.get("forks"),
         "warmupIterations": result.get("warmupIterations"),
         "warmupTime": result.get("warmupTime"),
+        "warmupBatchSize": result.get("warmupBatchSize"),
         "measurementIterations": result.get("measurementIterations"),
         "measurementTime": result.get("measurementTime"),
+        "measurementBatchSize": result.get("measurementBatchSize"),
         "jdkVersion": result.get("jdkVersion"),
         "scoreUnit": primary_metric.get("scoreUnit"),
         "params": result.get("params", {}),
@@ -340,7 +356,12 @@ def performance_change(head: dict, baseline: dict) -> float | None:
     """Return percent performance change, with positive meaning faster."""
     head_score = metric_score(head)
     baseline_score = metric_score(baseline)
-    if head_score is None or baseline_score in (None, 0):
+    if (
+        head_score is None
+        or baseline_score is None
+        or head_score == 0
+        or baseline_score == 0
+    ):
         return None
     if lower_is_better(head):
         return (float(baseline_score) / head_score - 1) * 100
@@ -352,6 +373,27 @@ def format_change(change: float | None) -> str:
     if change is None:
         return ""
     return f"{change:+.1f}%"
+
+
+def metric_direction_note(results: list) -> str:
+    """Describe whether scores represent throughput or latency."""
+    directions = {
+        "latency" if lower_is_better(result) else "throughput" for result in results
+    }
+    if directions == {"throughput"}:
+        return (
+            "Throughput scores are higher-is-better; positive Head vs base deltas "
+            "indicate faster performance."
+        )
+    if directions == {"latency"}:
+        return (
+            "Latency scores are lower-is-better; positive Head vs base deltas "
+            "indicate faster performance."
+        )
+    return (
+        "Throughput scores are higher-is-better and latency scores are "
+        "lower-is-better; positive Head vs base deltas indicate faster performance."
+    )
 
 
 def generate_comparison_section(
@@ -377,7 +419,7 @@ def generate_comparison_section(
     md.append("")
     md.append(f"- **Head:** {format_commit_link(commit_sha, repo)}")
     md.append(f"- **Base:** {format_commit_link(baseline_sha, baseline_repo)}")
-    md.append("- **Change:** positive means the PR is faster than base.")
+    md.append(f"- **Metric direction:** {metric_direction_note(results)}")
     if comparison_note:
         md.append(f"- **Note:** {comparison_note}")
     if baseline_system_info:
@@ -615,7 +657,10 @@ def generate_markdown(
 
     md.append("## Notes")
     md.append("")
-    md.append("- **Score** = Throughput in operations per second (higher is better)")
+    md.append(
+        "- **Score** = the JMH primary metric; "
+        "throughput is higher-is-better and latency is lower-is-better."
+    )
     md.append("- **Error** = 99.9% confidence interval")
     if baseline_results:
         md.append(
