@@ -23,5 +23,18 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- `NoProtobufIT` runs its sample application from the shaded jar that
+    `it-exporter-no-protobuf` leaves in `target`, a dependency Maven cannot
+    infer: it derives the reactor build order only from directly declared
+    dependencies. This declaration gives it that order; without it serial
+    builds work only by accident of the module ordering in `../pom.xml`, while
+    `mvn -T` races against the sample module and `mvn -am` skips it
+    entirely. -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>it-exporter-no-protobuf</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
