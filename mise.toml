@@ -13,7 +13,7 @@ protoc = "36.0"
 
 # Linters
 actionlint = "1.7.12"
-"aqua:grafana/flint" = "0.22.10"
+"aqua:grafana/flint" = "0.22.11"
 "aqua:jonwiggins/xmloxide" = "v0.5.0"
 "aqua:owenlamont/ryl" = "0.21.0"
 biome = "2.5.8"
