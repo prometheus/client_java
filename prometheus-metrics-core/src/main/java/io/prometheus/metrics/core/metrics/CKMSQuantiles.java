@@ -147,43 +147,71 @@ final class CKMSQuantiles {
       return samples.getLast().value;
     }
 
-    int r = 0; // sum of g's left of the current sample
     int desiredRank = (int) Math.ceil(q * n);
-    int upperBound = desiredRank + f(desiredRank) / 2;
 
-    ListIterator<Sample> iterator = samples.listIterator();
-    while (iterator.hasNext()) {
-      Sample sample = iterator.next();
-      if (r + sample.g + sample.delta > upperBound) {
-        iterator.previous(); // roll back the item.next() above
-        if (iterator.hasPrevious()) {
-          Sample result = iterator.previous();
-          return result.value;
-        } else {
-          return sample.value;
-        }
+    // Return the sample whose possible-rank interval [rMin, rMax] is centered closest to the
+    // desired rank. rMin is the sum of the g's up to and including the sample, rMax is rMin+delta.
+    //
+    // The previous implementation stopped at the first sample whose maximum rank
+    // (r + g + delta) exceeded desiredRank + f(desiredRank)/2 and returned the preceding sample.
+    // That rule only works while g + delta stays small for all samples up to the target rank.
+    // For a targeted quantile with 2*epsilon >= 1-quantile the error function allows delta of
+    // order n at low ranks, so a freshly inserted low-rank sample (delta = f(r) - 1) makes the
+    // scan stop far too early and return a value near the minimum observation. See issue #2292.
+    Sample result = samples.getFirst();
+    double smallestDistance = Double.POSITIVE_INFINITY;
+    int r = 0; // sum of g's left of the current sample
+    for (Sample sample : samples) {
+      int rMin = r + sample.g;
+      double center = rMin + sample.delta / 2.0;
+      double distance = Math.abs(center - desiredRank);
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        result = sample;
       }
       r += sample.g;
     }
-    return samples.getLast().value;
+    return result.value;
   }
 
   /** Error function, as in definition 5 of the paper. */
   int f(int r) {
+    return f(r, r);
+  }
+
+  /**
+   * Minimum of the error function {@link #f(int)} over the rank interval {@code [lo, hi]}.
+   *
+   * <p>Each targeted quantile contributes a V-shaped error curve whose global minimum {@code
+   * 2*epsilon*n} is at rank {@code quantile*n}, so the minimum over the interval is reached at an
+   * interior target (when the interval straddles it) or otherwise at the endpoint nearest the
+   * target. {@link #compress()} uses this so that a merged sample can never span a target
+   * quantile's rank with a width coarser than that quantile's accuracy window (see issue #2292).
+   * With {@code lo == hi} this reduces to the plain error function at a single rank.
+   */
+  int f(int lo, int hi) {
     int minResult = Integer.MAX_VALUE;
     for (Quantile q : quantiles) {
       if (q.quantile == 0 || q.quantile == 1) {
         continue;
       }
+      double target = q.quantile * n;
       int result;
-      // We had a numerical error here with the following example:
-      // quantile = 0.95, epsilon = 0.01, (n-r) = 30.
-      // The expected result of (2*0.01*30)/(1-0.95) is 12. The actual result is 11.99999999999999.
-      // To avoid running into these types of error we add 0.00000000001 before rounding down.
-      if (r >= q.quantile * n) {
-        result = (int) (q.v * r + 0.00000000001);
+      if (target > lo && target < hi) {
+        // The interval straddles this quantile's target rank: use its tightest tolerance.
+        result = (int) (2.0 * q.epsilon * n + 0.00000000001);
       } else {
-        result = (int) (q.u * (n - r) + 0.00000000001);
+        int probe = target <= lo ? lo : hi;
+        // We had a numerical error here with the following example:
+        // quantile = 0.95, epsilon = 0.01, (n-r) = 30.
+        // The expected result of (2*0.01*30)/(1-0.95) is 12. The actual result is
+        // 11.99999999999999. To avoid running into these types of error we add 0.00000000001
+        // before rounding down.
+        if (probe >= q.quantile * n) {
+          result = (int) (q.v * probe + 0.00000000001);
+        } else {
+          result = (int) (q.u * (n - probe) + 0.00000000001);
+        }
       }
       if (result < minResult) {
         minResult = result;
@@ -212,7 +240,11 @@ final class CKMSQuantiles {
         // The min sample must never be merged.
         break;
       }
-      if (left.g + right.g + right.delta < f(r)) {
+      // The merged sample would span the ranks [r, r + left.g + right.g + right.delta]. Bounding
+      // the merge by the error function over that whole interval (rather than only at its left
+      // edge r) prevents a single sample from spanning across the accuracy window of a target
+      // quantile, which used to collapse the sketch when 2*epsilon >= 1-quantile (see issue #2292).
+      if (left.g + right.g + right.delta < f(r, r + left.g + right.g + right.delta)) {
         right.g += left.g;
         descendingIterator.remove();
         left = right;

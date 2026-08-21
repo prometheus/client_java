@@ -301,6 +301,39 @@ class CKMSQuantilesTest {
     }
   }
 
+  // Regression test for https://github.com/prometheus/client_java/issues/2292.
+  // When 2*epsilon >= 1-quantile (here with equality for both quantiles) the sketch used to
+  // collapse: every quantile reported the minimum observation. We insert the values 1..100_000 in
+  // random order so that the true rank of each value equals its value, and check that the reported
+  // quantiles are within the CKMS accuracy window instead of returning the minimum.
+  @Test
+  void testBoundaryEpsilonDoesNotCollapseToMinimum() {
+    Random random = new Random(42);
+    Quantile p90 = new Quantile(0.9, 0.05); // 2*epsilon == 1-quantile
+    Quantile p99 = new Quantile(0.99, 0.005); // 2*epsilon == 1-quantile
+    CKMSQuantiles ckms = new CKMSQuantiles(p90, p99);
+    List<Double> input = shuffledValues(100_000, random);
+    for (double v : input) {
+      ckms.insert(v);
+    }
+    validateResults(ckms);
+    // Before the fix both of these returned 1.0 (the minimum observation).
+    assertThat(ckms.get(0.9)).isCloseTo(90_000, offset(2 * 0.05 * 100_000));
+    assertThat(ckms.get(0.99)).isCloseTo(99_000, offset(2 * 0.005 * 100_000));
+  }
+
+  // A single targeted quantile at the boundary reproduces the collapse too (see issue #2292).
+  @Test
+  void testSingleBoundaryQuantile() {
+    Random random = new Random(42);
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.99, 0.005));
+    for (double v : shuffledValues(100_000, random)) {
+      ckms.insert(v);
+    }
+    validateResults(ckms);
+    assertThat(ckms.get(0.99)).isCloseTo(99_000, offset(2 * 0.005 * 100_000));
+  }
+
   private List<Double> shuffledValues(int n, Random random) {
     List<Double> result = new ArrayList<>(n);
     for (int i = 0; i < n; i++) {
