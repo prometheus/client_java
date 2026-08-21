@@ -16,6 +16,9 @@ exclude = [
   # excluding links to pull requests and issues is done for performance
   "^https://github.com/prometheus/client_java/(issues|pull)/\\d+$",
 
+  # Slack workspace links return 403 to unauthenticated link checkers
+  "^https://cloud-native\\.slack\\.com/?$",
+
   # exclude localhost URLs as they require running services
   "^http://localhost",
   "^https://localhost",
