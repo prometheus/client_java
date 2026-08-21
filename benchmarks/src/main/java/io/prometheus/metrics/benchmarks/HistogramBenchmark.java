@@ -10,9 +10,12 @@ import io.opentelemetry.sdk.metrics.View;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
 import io.prometheus.metrics.core.metrics.Histogram;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.Arrays;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 
@@ -54,6 +57,24 @@ public class HistogramBenchmark {
 
     public PrometheusClassicHistogramPerThread() {
       noLabels = Histogram.builder().name("test").help("help").classicOnly().build();
+    }
+  }
+
+  @State(Scope.Benchmark)
+  public static class PrometheusClassicHistogramAfterThreadChurn {
+
+    final Histogram noLabels = Histogram.builder().name("test").help("help").classicOnly().build();
+
+    @Setup(Level.Invocation)
+    public void createShortLivedRecorders() throws InterruptedException {
+      Thread[] recorders = new Thread[1_000];
+      for (int i = 0; i < 1_000; i++) {
+        recorders[i] = new Thread(() -> noLabels.observe(1.0));
+        recorders[i].start();
+      }
+      for (Thread recorder : recorders) {
+        recorder.join();
+      }
     }
   }
 
@@ -171,6 +192,18 @@ public class HistogramBenchmark {
       histogram.noLabels.observe(randomNumbers.randomNumbers[i]);
     }
     return histogram.noLabels;
+  }
+
+  @Benchmark
+  public long prometheusClassicGetCountAfterThreadChurn(
+      PrometheusClassicHistogramAfterThreadChurn histogram) {
+    return histogram.noLabels.getCount();
+  }
+
+  @Benchmark
+  public MetricSnapshot prometheusClassicCollectAfterThreadChurn(
+      PrometheusClassicHistogramAfterThreadChurn histogram) {
+    return histogram.noLabels.collect();
   }
 
   @Benchmark
