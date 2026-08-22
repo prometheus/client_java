@@ -152,10 +152,13 @@ final class CKMSQuantiles {
       return samples.getLast().value;
     }
 
-    // Return the value of the sample whose possible rank range is centered closest to the
-    // desired rank. The true rank of samples.get(i) is somewhere in
-    // [r(i) , r(i) + delta(i)] with r(i) = g(0) + ... + g(i), so the best point estimate
-    // of its rank is the center of that interval.
+    // Return the value of the sample that minimizes the worst-case rank error. The true rank
+    // of samples.get(i) is somewhere in [r(i), r(i) + delta(i)] with
+    // r(i) = g(0) + ... + g(i), so if that sample is picked the rank error can be as large as
+    // max(|r(i) - desiredRank|, |r(i) + delta(i) - desiredRank|), which equals the distance
+    // of the interval's center from the desired rank plus half the interval's width. Wide
+    // samples are penalized by their width: a narrow sample slightly off-center beats a wide
+    // sample whose center happens to fall near the desired rank.
     //
     // Note that the previous implementation ("stop at the first sample with
     // r + g + delta > desiredRank + f(desiredRank)/2 and return the value of the sample
@@ -168,14 +171,14 @@ final class CKMSQuantiles {
     // returned a value from a far lower quantile than requested. For example, with
     // quantiles {(0.9, 0.05), (0.99, 0.005)} get(0.99) returned the minimum observation.
     // Sample widths are additionally bounded by maxWidthNotCrossingTargets at insert and
-    // merge time, so near a target quantile the interval centers are tight estimates.
+    // merge time, so near a target quantile the possible-rank intervals are tight.
     int r = 0; // sum of g's left of the current sample
     int desiredRank = (int) Math.ceil(q * n);
     double bestDistance = Double.MAX_VALUE;
     Sample bestSample = samples.getFirst();
     for (Sample sample : samples) {
       double rankEstimate = r + sample.g + sample.delta / 2.0;
-      double distance = Math.abs(rankEstimate - desiredRank);
+      double distance = Math.abs(rankEstimate - desiredRank) + sample.delta / 2.0;
       if (distance < bestDistance) {
         bestDistance = distance;
         bestSample = sample;

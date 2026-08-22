@@ -289,6 +289,23 @@ class CKMSQuantilesTest {
   }
 
   /**
+   * Counterexample: with a single well-behaved quantile (0.5, 0.025) and values 1..257 shuffled
+   * with seed 5, an earlier revision that selected the sample whose possible-rank interval is
+   * centered nearest the desired rank returned 121, outside the accuracy window [122, 135].
+   * Selecting the sample that minimizes the worst-case rank error (center distance plus half the
+   * interval's width) returns 132.
+   */
+  @Test
+  void testMedianSmallN() {
+    Random random = new Random(5);
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.5, 0.025));
+    for (double value : shuffledValues(257, random)) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /**
    * Targets with quantile + epsilon >= 1 are the degenerate end of the collapsing family: the
    * accuracy window's end is rank n itself, so a bound phrased as "a sample may not extend past the
    * window's end" is no constraint at all, and freshly inserted samples with delta = f(r) - 1 have
@@ -319,6 +336,35 @@ class CKMSQuantilesTest {
   void testTargetedQuantilesDescendingInput() {
     CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
     for (int value = 10 * 1000; value >= 1; value--) {
+      ckms.insert(value);
+    }
+    validateResults(ckms);
+  }
+
+  /**
+   * At larger n, descending input can still exceed the 1 * epsilon rank bound (up to 1.75 * epsilon
+   * observed across the configurations tested): sample widths are bounded when they are created,
+   * but with descending input a sample's rank grows by 1 per insert while the accuracy windows move
+   * right by only quantile ± epsilon per insert, so old samples drift towards the windows and their
+   * width bound erodes. This is not a regression: the previous implementation exceeded 1 * epsilon
+   * on descending input for every configuration tested, in this exact case by 18 * epsilon for
+   * get(0.9) and 198 * epsilon for get(0.99). This test pins the remaining gap to at most 2 *
+   * epsilon.
+   */
+  @Test
+  void testTargetedQuantilesDescendingInputLargeN() {
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
+    for (int value = 100 * 1000; value >= 1; value--) {
+      ckms.insert(value);
+    }
+    validateResults(ckms, 2);
+  }
+
+  /** Ascending input order, the counterpart of {@link #testTargetedQuantilesDescendingInput()}. */
+  @Test
+  void testTargetedQuantilesAscendingInput() {
+    CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.9, 0.05), new Quantile(0.99, 0.005));
+    for (int value = 1; value <= 10 * 1000; value++) {
       ckms.insert(value);
     }
     validateResults(ckms);
@@ -432,11 +478,21 @@ class CKMSQuantilesTest {
   }
 
   /**
-   * The values that we insert in these tests are always the numbers from 1 to n, in random order.
-   * So we can trivially calculate the range of acceptable results for each quantile. We check if
-   * the value returned by get() is within the range of acceptable results.
+   * The values that we insert in these tests are always the numbers from 1 to n, in some order. So
+   * we can trivially calculate the range of acceptable results for each quantile. We check if the
+   * value returned by get() is within the documented q ± epsilon rank bound (floor/ceil because
+   * ranks are integers).
    */
   private void validateResults(CKMSQuantiles ckms) {
+    validateResults(ckms, 1);
+  }
+
+  /**
+   * Only pass an epsilonFactor other than 1 for the known descending-input gap (see {@link
+   * #testTargetedQuantilesDescendingInputLargeN()}); everything else must meet the documented
+   * bound.
+   */
+  private void validateResults(CKMSQuantiles ckms, double epsilonFactor) {
     for (Quantile q : ckms.quantiles) {
       double actual = ckms.get(q.quantile);
       double lowerBound, upperBound;
@@ -447,8 +503,8 @@ class CKMSQuantilesTest {
         lowerBound = ckms.n;
         upperBound = ckms.n;
       } else {
-        lowerBound = Math.floor(ckms.n * (q.quantile - 2 * q.epsilon));
-        upperBound = Math.ceil(ckms.n * (q.quantile + 2 * q.epsilon));
+        lowerBound = Math.floor(ckms.n * (q.quantile - epsilonFactor * q.epsilon));
+        upperBound = Math.ceil(ckms.n * (q.quantile + epsilonFactor * q.epsilon));
       }
       boolean ok = actual >= lowerBound && actual <= upperBound;
       if (!ok) {
