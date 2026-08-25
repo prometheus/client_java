@@ -17,7 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class ApplicationTest {
+class ApplicationIT {
+  @Test
+  void testUsesShadedProtobufRuntime() {
+    assertThat(Metrics.MetricFamily.class.getSuperclass().getName())
+        .startsWith("io.prometheus.metrics.shaded.com_google_protobuf_");
+  }
+
   @Test
   void testPrometheusProtobufFormat() throws IOException {
     ExporterTest.Response response =

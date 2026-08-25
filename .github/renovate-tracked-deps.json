@@ -12,85 +12,218 @@
       ]
     },
     ".github/workflows/acceptance-tests.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/api-diff.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/approve-workflows.yml": {
+      "github-actions": [
+        "prometheus/promci",
+        "ubuntu"
       ]
     },
     ".github/workflows/build.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/bump-api-diff-baseline.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/codeql.yml": {
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/setup-java",
+        "github/codeql-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/detect-api-changes.yml": {
+      "github-actions": [
+        "ubuntu"
       ]
     },
     ".github/workflows/generate-protobuf.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/upload-artifact",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/github-pages.yaml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/checkout",
+        "actions/configure-pages",
+        "actions/deploy-pages",
+        "actions/upload-pages-artifact",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/issue-management-stale-action.yml": {
+      "github-actions": [
+        "actions/stale",
+        "ubuntu"
       ]
     },
     ".github/workflows/java-version-matrix-tests.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/jmx-exporter-compatibility.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/lint.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/micrometer-compatibility.yml": {
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ],
       "regex": [
         "micrometer-metrics/micrometer",
-        "mise",
         "zeitlinger/micrometer"
       ]
     },
+    ".github/workflows/multi-version-test.yml": {
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/setup-java",
+        "ubuntu"
+      ]
+    },
     ".github/workflows/native-tests.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/nightly-benchmarks.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/upload-artifact",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/pr-benchmark-report.yml": {
+      "github-actions": [
+        "ubuntu"
       ]
     },
     ".github/workflows/pr-benchmarks.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/upload-artifact",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/pr-title.yml": {
+      "github-actions": [
+        "grafana/shared-workflows",
+        "ubuntu"
       ]
     },
     ".github/workflows/regenerate-api-diff-otel.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/upload-artifact",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/release-please.yml": {
+      "github-actions": [
+        "googleapis/release-please-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/release.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/checkout",
+        "actions/setup-java",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
+      ]
+    },
+    ".github/workflows/scorecard.yml": {
+      "github-actions": [
+        "actions/checkout",
+        "actions/upload-artifact",
+        "github/codeql-action",
+        "ossf/scorecard-action",
+        "ubuntu"
       ]
     },
     ".github/workflows/test-release-build.yml": {
-      "regex": [
-        "mise"
+      "github-actions": [
+        "actions/cache",
+        "actions/checkout",
+        "jdx/mise",
+        "jdx/mise-action",
+        "ubuntu"
       ]
     },
     ".mise/envs/jmx-exporter/mise.toml": {
@@ -195,6 +328,77 @@
       "maven-wrapper": [
         "maven-wrapper"
       ]
+    }
+  },
+  "actionMeta": {
+    "actions/cache": {
+      "packageName": "actions/cache",
+      "refKind": "version-tag"
+    },
+    "actions/checkout": {
+      "packageName": "actions/checkout",
+      "refKind": "version-tag"
+    },
+    "actions/configure-pages": {
+      "packageName": "actions/configure-pages",
+      "refKind": "version-tag"
+    },
+    "actions/deploy-pages": {
+      "packageName": "actions/deploy-pages",
+      "refKind": "version-tag"
+    },
+    "actions/download-artifact": {
+      "packageName": "actions/download-artifact",
+      "refKind": "version-tag"
+    },
+    "actions/setup-java": {
+      "packageName": "actions/setup-java",
+      "refKind": "version-tag"
+    },
+    "actions/stale": {
+      "packageName": "actions/stale",
+      "refKind": "version-tag"
+    },
+    "actions/upload-artifact": {
+      "packageName": "actions/upload-artifact",
+      "refKind": "version-tag"
+    },
+    "actions/upload-pages-artifact": {
+      "packageName": "actions/upload-pages-artifact",
+      "refKind": "version-tag"
+    },
+    "github/codeql-action/analyze": {
+      "packageName": "github/codeql-action",
+      "refKind": "version-tag"
+    },
+    "github/codeql-action/init": {
+      "packageName": "github/codeql-action",
+      "refKind": "version-tag"
+    },
+    "github/codeql-action/upload-sarif": {
+      "packageName": "github/codeql-action",
+      "refKind": "version-tag"
+    },
+    "googleapis/release-please-action": {
+      "packageName": "googleapis/release-please-action",
+      "refKind": "version-tag"
+    },
+    "grafana/shared-workflows/actions/lint-pr-title": {
+      "packageName": "grafana/shared-workflows",
+      "refKind": "version-tag",
+      "compatibility": "lint-pr-title"
+    },
+    "jdx/mise-action": {
+      "packageName": "jdx/mise-action",
+      "refKind": "version-tag"
+    },
+    "ossf/scorecard-action": {
+      "packageName": "ossf/scorecard-action",
+      "refKind": "version-tag"
+    },
+    "prometheus/promci/approve_workflows": {
+      "packageName": "prometheus/promci",
+      "refKind": "version-tag"
     }
   }
 }

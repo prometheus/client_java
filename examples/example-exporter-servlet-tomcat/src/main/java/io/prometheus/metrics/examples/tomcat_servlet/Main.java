@@ -24,10 +24,10 @@ public class Main {
     Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
 
     Tomcat.addServlet(ctx, "hello", new HelloWorldServlet());
-    ctx.addServletMappingDecoded("/*", "hello");
+    ctx.addServletMapping("/*", "hello");
 
     Tomcat.addServlet(ctx, "metrics", new PrometheusMetricsServlet());
-    ctx.addServletMappingDecoded("/metrics", "metrics");
+    ctx.addServletMapping("/metrics", "metrics");
 
     tomcat.getConnector();
     tomcat.start();
