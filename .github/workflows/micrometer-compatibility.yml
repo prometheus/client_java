@@ -19,13 +19,13 @@ jobs:
             repository: micrometer-metrics/micrometer
             # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
             ref: v1.17.1
-          - name: typed-descriptor
-            # TODO: remove this temporary opt-in leg once Micrometer switches the
-            # Prometheus client integration to typed descriptors by default.
+          - name: upstream-main
+            # Track upstream main until the typed-descriptor change is included
+            # in a Micrometer release.
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
-            repository: zeitlinger/micrometer
-            # renovate: datasource=git-refs depName=zeitlinger/micrometer packageName=https://github.com/zeitlinger/micrometer currentValue=feat/prom-client-java-typed-family-descriptor
-            ref: f240f0978366378dae66ac005ea1d2ef65708ff3
+            repository: micrometer-metrics/micrometer
+            # renovate: datasource=git-refs depName=micrometer-metrics/micrometer packageName=https://github.com/micrometer-metrics/micrometer currentValue=main
+            ref: 912539f48a1873db3f9ad57111fe2daddab58ac5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
