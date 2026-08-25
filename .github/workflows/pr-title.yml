@@ -6,10 +6,12 @@ on:
     types:
       - opened
       - edited
+      - reopened
+      - synchronize
 permissions: {}
 
 jobs:
-  lint:
+  pr-title:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read # action-semantic-pull-request reads the PR title

@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
@@ -34,7 +35,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-@WireMockTest(httpPort = 4317)
+@WireMockTest
 class ExemplarTest {
   private static final String ENDPOINT_PATH = "/v1/metrics";
   private static final int TIMEOUT = 3;
@@ -45,10 +46,10 @@ class ExemplarTest {
   private OpenTelemetryExporter openTelemetryExporter;
 
   @BeforeEach
-  void setUp() {
+  void setUp(WireMockRuntimeInfo wireMockRuntimeInfo) {
     openTelemetryExporter =
         OpenTelemetryExporter.builder()
-            .endpoint("http://localhost:4317")
+            .endpoint(wireMockRuntimeInfo.getHttpBaseUrl())
             .protocol("http/protobuf")
             .intervalSeconds(1)
             .buildAndStart();
