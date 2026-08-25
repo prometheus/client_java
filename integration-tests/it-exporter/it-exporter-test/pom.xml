@@ -29,5 +29,36 @@
       <version>${guava.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- Each integration test runs its sample application from the shaded jar
+    that the corresponding module leaves in `target`, a dependency Maven cannot
+    infer: it derives the reactor build order only from directly declared
+    dependencies. These declarations give it that order; without them serial
+    builds work only by accident of the module ordering in `../pom.xml`, while
+    `mvn -T` races against the sample modules and `mvn -am` skips them
+    entirely. -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>it-exporter-servlet-tomcat-sample</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>it-exporter-servlet-jetty-sample</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>it-exporter-httpserver-sample</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>it-exporter-duplicate-metrics-sample</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

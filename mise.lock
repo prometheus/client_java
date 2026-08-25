@@ -47,89 +47,89 @@ url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/3849249
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/flint"]]
-version = "0.22.10"
+version = "0.22.11"
 backend = "aqua:grafana/flint"
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64"]
-checksum = "sha256:6dec82cb6486b7e645e0b1674493497191d92a8e28c5c79194e5553882d213de"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750275"
+checksum = "sha256:a197969873591f857833f7c71ab66506a4050e0a12cf1872b09741652d20e99c"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522530497"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64-musl"]
-checksum = "sha256:373060c08a4cdd905d6e8e83f62ef43da8778d9133cb66b7801f392587812e8f"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750193"
+checksum = "sha256:1797194efc0843a0a2c001a235ca91cc09aee9a5a7dc74d25c190ae42445099b"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522530700"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64"]
-checksum = "sha256:a9f7f3768ec02cdd082c12cea0e815fc142d3ee721f4d8485f4ba9fc2c7d0521"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491749844"
+checksum = "sha256:8c2400345fee126864183b96f8ec8a0f646b2c09abcd9ff25c7a0e56caa6f822"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522529698"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64-musl"]
-checksum = "sha256:3b174b31f10b1ded2cf0a54e8b62e5526713a49816c1fd74b00073519044f7bb"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750257"
+checksum = "sha256:bde67006096e2c38d4140d6362a6a83a9047cbe8bd1e4fcdeb7e7c0166b0f02c"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522530534"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-arm64"]
-checksum = "sha256:f9aa1a95aa5953f7f5a64c0d72f86e634c4930e9cb73422a95e342c6cb9be5d5"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491750245"
+checksum = "sha256:a93e428a2561af80bad79810ce23dbab13e9d39519bfdbb6625e902d2b06f8fa"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522531026"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-x64"]
-checksum = "sha256:b55731f1b74196afea675bdbd6ebbbd94171b4e9d31f79ecee36372bdf8818cf"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491752660"
+checksum = "sha256:c42ceb2cc835ec37b04f78215c243ebd24109f713757fbfffe7e4bc0c537a2ac"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522533290"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.windows-x64"]
-checksum = "sha256:494f16ad4d2d8eae137438832e544675d196a2887086ab8070a5a346d70650be"
-url = "https://github.com/grafana/flint/releases/download/v0.22.10/flint-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/491751016"
+checksum = "sha256:7474be1f55fc003dedf5e49da55f65b490f7783b49e6322cfabfb95930baba1a"
+url = "https://github.com/grafana/flint/releases/download/v0.22.11/flint-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522531464"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
-version = "v1.1.0"
+version = "v1.1.1"
 backend = "aqua:grafana/gcx"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64"]
-checksum = "sha256:4d39b70a5691045b7e381fd37976b75988926931f6cf184698444099099692e1"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303325"
+checksum = "sha256:1a22326fe1e87544bb771d4ea33439a1235c40b52200c67727b694371afdde42"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415494"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64-musl"]
-checksum = "sha256:4d39b70a5691045b7e381fd37976b75988926931f6cf184698444099099692e1"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303325"
+checksum = "sha256:1a22326fe1e87544bb771d4ea33439a1235c40b52200c67727b694371afdde42"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415494"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64"]
-checksum = "sha256:0c7867e99f5786b7e1b5ea449cf540c14b67f40c1c92c0f93031eaa2e0c38df9"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303327"
+checksum = "sha256:7fe8778f5a67e8b60576baa99c39d2eef692082985019b53a57889bde03fb5ed"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415474"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64-musl"]
-checksum = "sha256:0c7867e99f5786b7e1b5ea449cf540c14b67f40c1c92c0f93031eaa2e0c38df9"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303327"
+checksum = "sha256:7fe8778f5a67e8b60576baa99c39d2eef692082985019b53a57889bde03fb5ed"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415474"
 
 [tools."aqua:grafana/gcx"."platforms.macos-arm64"]
-checksum = "sha256:a1e1e62b54700d829ece3cc4a013570e0eff3c872e8c11991866ed58a6701709"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303326"
+checksum = "sha256:2deccb9b57a914cb8a5ae17a32e360e48ecc152d64c8903732fd303644c3e3e9"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415471"
 
 [tools."aqua:grafana/gcx"."platforms.macos-x64"]
-checksum = "sha256:94324fd3d052eee604df58af41ef125ac5cfc6d878fcb615b34012e21a6bc7f5"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303329"
+checksum = "sha256:4da05f2ac1b7126d2c8741830eaabde9112b9b11c36cb677d949a2c00ec7b6d1"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415495"
 
 [tools."aqua:grafana/gcx"."platforms.windows-x64"]
-checksum = "sha256:21039e34896c0bafaf044cee0de7545d3ccda2f05ed0f13404685b1e09fd3cb0"
-url = "https://github.com/grafana/gcx/releases/download/v1.1.0/gcx_1.1.0_windows_amd64.zip"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/514303368"
+checksum = "sha256:e5976b9f144f106b1d32406985c24a1c551a1f43cc1f8954ff6900614e1fe92b"
+url = "https://github.com/grafana/gcx/releases/download/v1.1.1/gcx_1.1.1_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/527415473"
 
 [[tools."aqua:grafana/oats"]]
 version = "0.10.0"
@@ -564,43 +564,43 @@ backend = "npm:renovate"
 trust_policy_excludes = '["@yarnpkg/libzip@3.2.2"]'
 
 [[tools.protoc]]
-version = "35.1"
+version = "36.0"
 backend = "aqua:protocolbuffers/protobuf/protoc"
 
 [tools.protoc."platforms.linux-arm64"]
-checksum = "sha256:01bf9d08808c7f96678b63f4bd8efa559bb4f83d5a7a270d5edaf507f9d5d9cf"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-linux-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060236"
+checksum = "sha256:4a00ec5e256d20a3deadd9e77d56da0ac04c72367c3c959f6d08e110a368400a"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-linux-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522289978"
 
 [tools.protoc."platforms.linux-arm64-musl"]
-checksum = "sha256:01bf9d08808c7f96678b63f4bd8efa559bb4f83d5a7a270d5edaf507f9d5d9cf"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-linux-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060236"
+checksum = "sha256:4a00ec5e256d20a3deadd9e77d56da0ac04c72367c3c959f6d08e110a368400a"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-linux-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522289978"
 
 [tools.protoc."platforms.linux-x64"]
-checksum = "sha256:6930ebf62bd4ea607b98fff052596c6ee564b9835b4ce172c75a3f53ae9d91b7"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-linux-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060247"
+checksum = "sha256:bc8211ce760bd43ee21ddc145d6d9dbaeeabae205267a79d9054a240e367d4b4"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-linux-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522290000"
 
 [tools.protoc."platforms.linux-x64-musl"]
-checksum = "sha256:6930ebf62bd4ea607b98fff052596c6ee564b9835b4ce172c75a3f53ae9d91b7"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-linux-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060247"
+checksum = "sha256:bc8211ce760bd43ee21ddc145d6d9dbaeeabae205267a79d9054a240e367d4b4"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-linux-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522290000"
 
 [tools.protoc."platforms.macos-arm64"]
-checksum = "sha256:193289af0470c6a1aada357d4fba0bbf8d78bfaac8b5e42ca30af2ef75583de2"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-osx-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060249"
+checksum = "sha256:b6bc4afdcb880124bf342851d05155b6e3d9b6e661236d87b9c614250d26ae00"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-osx-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522290002"
 
 [tools.protoc."platforms.macos-x64"]
-checksum = "sha256:537d73604a344ded6fc94e98e07e529d4fe3e4a0b09e59905353950fafc2a1f7"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-osx-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060254"
+checksum = "sha256:2847d952ecd1c466769ae3ca319c9cd34c3613542eba335dc9b02c49537f6c70"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-osx-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522290007"
 
 [tools.protoc."platforms.windows-x64"]
-checksum = "sha256:5d3ff218d7d91eea95f7569bcb5a98f3030f8996d44151279d9772edcff76082"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-win64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/445060259"
+checksum = "sha256:510fb2369a4720adb457783768c5e1481a0e1137d9e7694478dfe9b8fe445dc1"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.0/protoc-36.0-win64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/522290018"
 
 [[tools.ruff]]
 version = "0.16.3"

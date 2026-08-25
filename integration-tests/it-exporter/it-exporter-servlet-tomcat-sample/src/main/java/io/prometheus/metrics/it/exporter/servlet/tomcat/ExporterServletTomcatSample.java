@@ -78,7 +78,7 @@ public class ExporterServletTomcatSample {
     tomcat.setBaseDir(tmpDir.toFile().getAbsolutePath());
     Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
     Tomcat.addServlet(ctx, "metrics", new PrometheusMetricsServlet());
-    ctx.addServletMappingDecoded("/metrics", "metrics");
+    ctx.addServletMapping("/metrics", "metrics");
 
     tomcat.getConnector();
     tomcat.start();

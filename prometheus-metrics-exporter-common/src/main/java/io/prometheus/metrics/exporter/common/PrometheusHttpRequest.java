@@ -3,7 +3,6 @@ package io.prometheus.metrics.exporter.common;
 import io.prometheus.metrics.annotations.StableApi;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.annotation.Nullable;
@@ -42,22 +41,58 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
     }
   }
 
-  /** See {@code jakarta.servlet.ServletRequest.getParameterValues(String)} */
+  /**
+   * See {@code jakarta.servlet.ServletRequest.getParameterValues(String)}.
+   *
+   * <p>For safety, the default implementation applies two fixed limits: {@code maxQueryStringLength
+   * = 64 * 1024} (65,536 characters) and {@code maxQueryParameterCount = 1024} ({@code &}-separated
+   * parameter pairs). These implementation values are not exposed as runtime configuration.
+   * Requests that exceed either limit or contain invalid percent-encoding are rejected by the
+   * scrape handler with HTTP {@code 400 Bad Request}.
+   */
   @Override
   @Nullable
   // decode with Charset is only available in Java 10+, but we want to support Java 8
   @SuppressWarnings("JdkObsolete")
   default String[] getParameterValues(String name) {
     try {
+      int maxQueryStringLength = 64 * 1024;
+      int maxQueryParameterCount = 1024;
       ArrayList<String> result = new ArrayList<>();
       String queryString = getQueryString();
       if (queryString != null) {
-        String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-          int idx = pair.indexOf("=");
-          if (idx != -1 && URLDecoder.decode(pair.substring(0, idx), "UTF-8").equals(name)) {
-            result.add(URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+        if (queryString.length() > maxQueryStringLength) {
+          throw new InvalidQueryParameterException(
+              "Query string too long: "
+                  + queryString.length()
+                  + " characters (max "
+                  + maxQueryStringLength
+                  + ")");
+        }
+        int start = 0;
+        int parameterCount = 0;
+        for (int end = queryString.indexOf('&'); start <= queryString.length(); ) {
+          parameterCount++;
+          if (parameterCount > maxQueryParameterCount) {
+            throw new InvalidQueryParameterException(
+                "Too many query parameters: "
+                    + parameterCount
+                    + " (max "
+                    + maxQueryParameterCount
+                    + ")");
           }
+          String pair =
+              end == -1 ? queryString.substring(start) : queryString.substring(start, end);
+          int idx = pair.indexOf("=");
+          if (idx != -1
+              && InvalidQueryParameterException.urlDecode(pair.substring(0, idx)).equals(name)) {
+            result.add(InvalidQueryParameterException.urlDecode(pair.substring(idx + 1)));
+          }
+          if (end == -1) {
+            break;
+          }
+          start = end + 1;
+          end = queryString.indexOf('&', start);
         }
       }
       if (result.isEmpty()) {
