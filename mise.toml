@@ -1,17 +1,23 @@
+monorepo_root = true
+
+[monorepo]
+config_roots = [".mise/envs/*"]
+
 [tools]
-"aqua:grafana/gcx" = "v1.1.0"
+"aqua:grafana/gcx" = "v1.1.1"
 "aqua:grafana/oats" = "0.10.0"
 hugo = "0.165.0"
 java = "temurin-25.0.3+9.0.LTS"
 node = "24.19.0"
-protoc = "35.1"
+protoc = "36.0"
 
 # Linters
 actionlint = "1.7.12"
-"aqua:grafana/flint" = "0.22.10"
+"aqua:grafana/flint" = "0.22.11"
 "aqua:jonwiggins/xmloxide" = "v0.5.0"
 "aqua:owenlamont/ryl" = "0.21.0"
 biome = "2.5.8"
+checkstyle = "13.8.0"
 editorconfig-checker = "3.11.1"
 google-java-format = "1.36.1"
 lychee = "0.24.2"
@@ -29,12 +35,12 @@ zizmor = "1.29.0"
 [env]
 FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION = "0.30.2"
+LGTM_VERSION = "0.31.0"
 # Latest JMX Exporter release; used as the default ref for the compatibility job.
 # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
 DEFAULT_JMX_EXPORTER_VERSION = "v1.6.0"
 # renovate: datasource=github-tags depName=micrometer-metrics/micrometer versioning=semver-coerced
-DEFAULT_MICROMETER_VERSION = "v1.17.0"
+DEFAULT_MICROMETER_VERSION = "v1.17.1"
 
 [tasks.ci]
 description = "CI Build"
@@ -48,16 +54,16 @@ run = "./mvnw clean"
 
 [tasks.compile]
 description = "bare compile, ignoring formatting and linters"
-run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.generate]
 description = "regenerate protobuf sources"
-run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw clean install -DskipTests -Dcoverage.skip=true -Dwarnings=-nowarn"
 env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw test -Dcoverage.skip=true -Dwarnings=-nowarn"
 
 [tasks.test-all]
 description = "run all tests"
@@ -78,7 +84,6 @@ BASELINE_OVERRIDE="${API_DIFF_BASELINE_VERSION:+-Dapi.diff.baseline.version=${AP
   ${BASELINE_OVERRIDE} \
   -DskipTests \
   -Dcoverage.skip=true \
-  -Dcheckstyle.skip=true \
   -Dwarnings=-nowarn
 ./.github/scripts/sync-api-diffs.sh
 """

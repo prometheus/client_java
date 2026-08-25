@@ -2,4 +2,4 @@
 exclude = ["docs/themes/**", "mvnw", "simpleclient-archive/**"]
 
 [checks.renovate-deps]
-exclude_managers = ["github-actions", "github-runners", "maven"]
+exclude_managers = ["github-runners", "maven"]

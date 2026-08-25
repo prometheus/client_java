@@ -164,6 +164,36 @@ class PrometheusScrapeHandlerTest {
     assertThat(body).doesNotContain("metric_three");
   }
 
+  @Test
+  void testRejectsTooManyQueryParameters() throws IOException {
+    StringBuilder queryString = new StringBuilder("name[]=test_counter");
+    for (int i = 0; i < 1024; i++) {
+      queryString.append("&name[]=metric_").append(i);
+    }
+
+    TestHttpExchange exchange = new TestHttpExchange("GET", queryString.toString());
+    handler.handleRequest(exchange);
+
+    assertThat(exchange.getResponseCode()).isEqualTo(400);
+    assertThat(exchange.getResponseHeaders().get("Content-Type"))
+        .isEqualTo("text/plain; charset=utf-8");
+    assertThat(exchange.getResponseBody()).isEqualTo("Invalid query parameters");
+  }
+
+  @Test
+  void testRejectsTooLongQueryString() throws IOException {
+    StringBuilder queryString = new StringBuilder("name[]=");
+    for (int i = 0; i < 64 * 1024; i++) {
+      queryString.append("a");
+    }
+
+    TestHttpExchange exchange = new TestHttpExchange("GET", queryString.toString());
+    handler.handleRequest(exchange);
+
+    assertThat(exchange.getResponseCode()).isEqualTo(400);
+    assertThat(exchange.getResponseBody()).isEqualTo("Invalid query parameters");
+  }
+
   /** Test implementation of PrometheusHttpExchange for testing. */
   private static class TestHttpExchange implements PrometheusHttpExchange {
     private final TestHttpRequest request;
@@ -216,7 +246,7 @@ class PrometheusScrapeHandlerTest {
     }
 
     public String getResponseBody() {
-      return rawResponseBody.toString(StandardCharsets.UTF_8);
+      return new String(rawResponseBody.toByteArray(), StandardCharsets.UTF_8);
     }
 
     public boolean isGzipCompressed() {
