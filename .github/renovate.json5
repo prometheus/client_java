@@ -12,6 +12,14 @@
   labels: ["dependencies"],
   packageRules: [
     {
+      description: "Update component-prefixed shared-workflow action tags",
+      matchManagers: ["github-actions"],
+      matchPackageNames: ["grafana/shared-workflows"],
+      matchCurrentValue: "/^.+[-/]v?\\d+\\.\\d+(?:\\.\\d+)?$/",
+      overrideDatasource: "github-tags",
+      versioning: "regex:^(?<compatibility>.*)[-/]v?(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?$",
+    },
+    {
       matchFileNames: ["mise.toml"],
       matchDepNames: ["java"],
       groupName: "java temurin",
