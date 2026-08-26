@@ -53,6 +53,14 @@
       groupName: "protobuf",
       separateMajorMinor: false,
     },
+    {
+      description: "Update the Micrometer typed-descriptor compatibility ref weekly",
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["git-refs"],
+      matchDepNames: ["micrometer-metrics/micrometer"],
+      matchCurrentValue: ["main"],
+      schedule: ["on sunday"],
+    },
   ],
   customManagers: [
   {
