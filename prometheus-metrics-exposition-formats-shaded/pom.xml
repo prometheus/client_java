@@ -66,15 +66,26 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <!-- Required for OSGi: textformats loads protobuf impl via Class.forName -->
             <Export-Package>
-              io.prometheus.metrics.expositionformats.generated*;version="${project.version}"
+              io.prometheus.metrics.expositionformats.generated*
             </Export-Package>
+            <!-- Required for OSGi: textformats loads protobuf impl via Class.forName -->
             <_exportcontents>
-              io.prometheus.metrics.expositionformats.internal;version="${project.version}"
+              io.prometheus.metrics.expositionformats.internal
             </_exportcontents>
+            <Import-Package>
+              !com.google.protobuf,*
+            </Import-Package>
           </instructions>
         </configuration>
+        <executions>
+          <execution>
+            <!-- Write MANIFEST.MF in process-classes for OSGi header tests. -->
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

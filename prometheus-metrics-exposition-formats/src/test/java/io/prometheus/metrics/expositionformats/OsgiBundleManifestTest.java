@@ -9,7 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import org.junit.jupiter.api.Test;
@@ -18,20 +20,48 @@ class OsgiBundleManifestTest {
 
   private static final String INTERNAL_PACKAGE =
       "io.prometheus.metrics.expositionformats.internal";
+  private static final String GENERATED_PREFIX =
+      "io.prometheus.metrics.expositionformats.generated";
+  private static final String SHADED_BSN = "io.prometheus.metrics-exposition-formats";
+  private static final String TEXTFORMATS_BSN = "io.prometheus.metrics-exposition-textformats";
 
   @Test
   void formatsBundleExportsInternalPackage() throws Exception {
     Manifest manifest = loadBundleManifest(PrometheusProtobufWriterImpl.class);
     assertThat(bundleSymbolicName(manifest)).contains("exposition-formats");
-    assertThat(packageNames(manifest, "Export-Package")).contains(INTERNAL_PACKAGE);
+    List<PackageClause> exported = parsePackageHeader(manifest, "Export-Package");
+    assertThat(names(exported)).contains(INTERNAL_PACKAGE);
+    assertThat(exported).anyMatch(clause -> clause.name.startsWith(GENERATED_PREFIX));
+    for (PackageClause clause : exported) {
+      if (!INTERNAL_PACKAGE.equals(clause.name) && !clause.name.startsWith(GENERATED_PREFIX)) {
+        continue;
+      }
+      assertThat(clause.attributes.get("version"))
+          .as("version of %s", clause.name)
+          .isNotBlank()
+          .doesNotContain(".SNAPSHOT")
+          .doesNotContain("-SNAPSHOT");
+    }
   }
 
   @Test
-  void textformatsBundleImportsInternalPackage() throws Exception {
+  void textformatsBundleImportsInternalPackageOptionally() throws Exception {
     Manifest manifest = loadBundleManifest(PrometheusProtobufWriter.class);
-    assertThat(bundleSymbolicName(manifest))
-        .isEqualTo("io.prometheus.metrics-exposition-textformats");
-    assertThat(packageNames(manifest, "Import-Package")).contains(INTERNAL_PACKAGE);
+    assertThat(bundleSymbolicName(manifest)).isEqualTo(TEXTFORMATS_BSN);
+    PackageClause internal =
+        requireClause(parsePackageHeader(manifest, "Import-Package"), INTERNAL_PACKAGE);
+    assertThat(internal.directives.get("resolution")).isEqualTo("optional");
+  }
+
+  @Test
+  void protobufImportMatchesShading() throws Exception {
+    Manifest manifest = loadBundleManifest(PrometheusProtobufWriterImpl.class);
+    List<String> imported = names(parsePackageHeader(manifest, "Import-Package"));
+    if (SHADED_BSN.equals(bundleSymbolicName(manifest))) {
+      assertThat(imported).doesNotContain("com.google.protobuf");
+    } else {
+      assertThat(imported).contains("com.google.protobuf");
+    }
   }
 
   private static String bundleSymbolicName(Manifest manifest) {
@@ -59,36 +89,92 @@ class OsgiBundleManifestTest {
     }
   }
 
-  /** OSGi headers are comma-separated clauses; attributes may contain quoted commas. */
-  private static List<String> packageNames(Manifest manifest, String header) {
-    String value = manifest.getMainAttributes().getValue(header);
-    assertThat(value).as("%s", header).isNotBlank();
+  private static PackageClause requireClause(List<PackageClause> clauses, String packageName) {
+    return clauses.stream()
+        .filter(clause -> packageName.equals(clause.name))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("missing package clause " + packageName));
+  }
+
+  private static List<String> names(List<PackageClause> clauses) {
     List<String> names = new ArrayList<>();
-    int i = 0;
-    int n = value.length();
-    while (i < n) {
-      while (i < n && value.charAt(i) == ' ') {
-        i++;
-      }
-      int start = i;
-      while (i < n) {
-        char c = value.charAt(i);
-        if (c == ';' || c == ',') {
-          break;
-        }
-        i++;
-      }
-      names.add(value.substring(start, i).trim());
-      boolean inQuote = false;
-      while (i < n) {
-        char c = value.charAt(i++);
-        if (c == '"') {
-          inQuote = !inQuote;
-        } else if (!inQuote && c == ',') {
-          break;
-        }
-      }
+    for (PackageClause clause : clauses) {
+      names.add(clause.name);
     }
     return names;
+  }
+
+  /** OSGi headers are comma-separated clauses; attributes may contain quoted commas. */
+  private static List<PackageClause> parsePackageHeader(Manifest manifest, String header) {
+    String value = manifest.getMainAttributes().getValue(header);
+    assertThat(value).as("%s", header).isNotBlank();
+    List<PackageClause> clauses = new ArrayList<>();
+    for (String rawClause : splitRespectingQuotes(value, ',')) {
+      List<String> parts = splitRespectingQuotes(rawClause, ';');
+      if (parts.isEmpty()) {
+        continue;
+      }
+      String name = parts.get(0).trim();
+      if (name.isEmpty()) {
+        continue;
+      }
+      Map<String, String> attributes = new LinkedHashMap<>();
+      Map<String, String> directives = new LinkedHashMap<>();
+      for (int i = 1; i < parts.size(); i++) {
+        String part = parts.get(i).trim();
+        int directiveEq = part.indexOf(":=");
+        int attributeEq = part.indexOf('=');
+        if (directiveEq >= 0 && (attributeEq < 0 || directiveEq <= attributeEq)) {
+          directives.put(
+              part.substring(0, directiveEq).trim(),
+              unquote(part.substring(directiveEq + 2).trim()));
+        } else if (attributeEq >= 0) {
+          attributes.put(
+              part.substring(0, attributeEq).trim(),
+              unquote(part.substring(attributeEq + 1).trim()));
+        }
+      }
+      clauses.add(new PackageClause(name, attributes, directives));
+    }
+    return clauses;
+  }
+
+  private static List<String> splitRespectingQuotes(String value, char separator) {
+    List<String> parts = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    boolean inQuote = false;
+    for (int i = 0; i < value.length(); i++) {
+      char c = value.charAt(i);
+      if (c == '"') {
+        inQuote = !inQuote;
+        current.append(c);
+      } else if (!inQuote && c == separator) {
+        parts.add(current.toString());
+        current.setLength(0);
+      } else {
+        current.append(c);
+      }
+    }
+    parts.add(current.toString());
+    return parts;
+  }
+
+  private static String unquote(String value) {
+    if (value.length() >= 2 && value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+      return value.substring(1, value.length() - 1);
+    }
+    return value;
+  }
+
+  static final class PackageClause {
+    final String name;
+    final Map<String, String> attributes;
+    final Map<String, String> directives;
+
+    PackageClause(String name, Map<String, String> attributes, Map<String, String> directives) {
+      this.name = name;
+      this.attributes = attributes;
+      this.directives = directives;
+    }
   }
 }
