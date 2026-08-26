@@ -33,4 +33,14 @@ class MetricsHandlerTest {
 
     verify(properties).getExporterProperties();
   }
+
+  @Test
+  void policyConfiguringCtorIsPublicAndUsesPolicy() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    HttpErrorHandlingPolicy policy = HttpErrorHandlingPolicy.builder().build();
+
+    assertThat(new MetricsHandler(PrometheusProperties.get(), registry, policy))
+        .extracting("errorHandlingPolicy")
+        .isSameAs(policy);
+  }
 }
