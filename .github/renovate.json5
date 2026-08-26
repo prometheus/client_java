@@ -1,91 +1,137 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "config:recommended", "github>grafana/flint#v0.22.11"],
-  platformCommit: "enabled",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    'config:recommended',
+    'github>grafana/flint#v0.22.11',
+  ],
+  platformCommit: 'enabled',
   automerge: true,
   ignorePaths: [
-    "**/simpleclient-archive/**",
+    '**/simpleclient-archive/**',
     // old projects
     // agent resources packages an OTel API that is the minimum required API version
-    "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
+    '**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml',
   ],
-  labels: ["dependencies"],
+  labels: [
+    'dependencies',
+  ],
   packageRules: [
     {
-      description: "Update component-prefixed shared-workflow action tags",
-      matchManagers: ["github-actions"],
-      matchPackageNames: ["grafana/shared-workflows"],
-      matchCurrentValue: "/^.+[-/]v?\\d+\\.\\d+(?:\\.\\d+)?$/",
-      overrideDatasource: "github-tags",
-      versioning: "regex:^(?<compatibility>.*)[-/]v?(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?$",
+      description: 'Update component-prefixed shared-workflow action tags',
+      matchManagers: [
+        'github-actions',
+      ],
+      matchPackageNames: [
+        'grafana/shared-workflows',
+      ],
+      matchCurrentValue: '/^.+[-/]v?\\d+\\.\\d+(?:\\.\\d+)?$/',
+      overrideDatasource: 'github-tags',
+      versioning: 'regex:^(?<compatibility>.*)[-/]v?(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?$',
     },
     {
-      matchFileNames: ["mise.toml"],
-      matchDepNames: ["java"],
-      groupName: "java temurin",
-      additionalBranchPrefix: "temurin-",
+      matchFileNames: [
+        'mise.toml',
+      ],
+      matchDepNames: [
+        'java',
+      ],
+      groupName: 'java temurin',
+      additionalBranchPrefix: 'temurin-',
     },
     {
-      matchFileNames: [".mise/envs/native/mise.toml"],
-      matchDepNames: ["java"],
-      groupName: "java graalvm",
-      additionalBranchPrefix: "graalvm-",
+      matchFileNames: [
+        '.mise/envs/native/mise.toml',
+      ],
+      matchDepNames: [
+        'java',
+      ],
+      groupName: 'java graalvm',
+      additionalBranchPrefix: 'graalvm-',
     },
     {
-      description: "Compat tests pin an LTS JDK the upstream release supports; block major JDK bumps that would break those builds",
-      matchFileNames: [".mise/envs/jmx-exporter/mise.toml", ".mise/envs/micrometer/mise.toml"],
-      matchDepNames: ["java"],
-      matchUpdateTypes: ["major"],
+      description: 'Compat tests pin an LTS JDK the upstream release supports; block major JDK bumps that would break those builds',
+      matchFileNames: [
+        '.mise/envs/jmx-exporter/mise.toml',
+        '.mise/envs/micrometer/mise.toml',
+      ],
+      matchDepNames: [
+        'java',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
       enabled: false,
     },
     {
-      matchPackageNames: ["io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"],
+      matchPackageNames: [
+        'io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha',
+      ],
       ignoreUnstable: false,
     },
     {
       enabled: false,
-      description: "Ignore internal project modules",
-      matchPackageNames: ["/^io\\.prometheus:(prometheus-metrics-bom|examples|example-.+|integration-tests|it-.+)$/"],
+      description: 'Ignore internal project modules',
+      matchPackageNames: [
+        '/^io\\.prometheus:(prometheus-metrics-bom|examples|example-.+|integration-tests|it-.+)$/',
+      ],
     },
     {
-      description: "Group protobuf-java and protoc together so generated code can be updated in one PR",
-      matchDepNames: ["com.google.protobuf:protobuf-java", "protoc"],
-      groupName: "protobuf",
+      description: 'Group protobuf-java and protoc together so generated code can be updated in one PR',
+      matchDepNames: [
+        'com.google.protobuf:protobuf-java',
+        'protoc',
+      ],
+      groupName: 'protobuf',
       separateMajorMinor: false,
     },
     {
-      description: "Update the Micrometer typed-descriptor compatibility ref weekly",
-      matchManagers: ["custom.regex"],
-      matchDatasources: ["git-refs"],
-      matchDepNames: ["micrometer-metrics/micrometer"],
-      matchCurrentValue: ["main"],
-      schedule: ["on sunday"],
+      description: 'Update the Micrometer typed-descriptor compatibility ref weekly',
+      matchManagers: [
+        'custom.regex',
+      ],
+      matchDatasources: [
+        'git-refs',
+      ],
+      matchDepNames: [
+        'micrometer-metrics/micrometer',
+      ],
+      matchCurrentValue: 'main',
+      schedule: [
+        'on sunday',
+      ],
     },
   ],
   customManagers: [
-  {
-       "customType": "regex",
-       "description": "update _VERSION variables in mise.toml",
-       "managerFilePatterns": ["/^mise\\.toml$/"],
-       "matchStrings": [
-         "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION\\s*=\\s*\"?(?<currentValue>[^@\"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\"?\\s"
-       ]
-     },
-     {
-       customType: "regex",
-       description: "track the latest Micrometer release for upstream compatibility",
-       managerFilePatterns: ["/^\\.github\\/workflows\\/micrometer-compatibility\\.yml$/"],
-       matchStrings: [
-         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+)\\n\\s*ref:\\s*(?<currentValue>v[0-9][^\\s]*)",
-       ],
-     },
-     {
-       customType: "regex",
-       description: "pin the Micrometer typed-descriptor compatibility ref",
-       managerFilePatterns: ["/^\\.github\\/workflows\\/micrometer-compatibility\\.yml$/"],
-       matchStrings: [
-         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+) currentValue=(?<currentValue>\\S+)\\n\\s*ref:\\s*(?<currentDigest>[a-f0-9]{40})",
-       ],
-     },
+    {
+      customType: 'regex',
+      description: 'update _VERSION variables in mise.toml',
+      managerFilePatterns: [
+        '/^mise\\.toml$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION\\s*=\\s*"?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s',
+      ],
+    },
+    {
+      customType: 'regex',
+      description: 'track the latest Micrometer release for upstream compatibility',
+      managerFilePatterns: [
+        '/^\\.github\\/workflows\\/micrometer-compatibility\\.yml$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+)\\n\\s*ref:\\s*(?<currentValue>v[0-9][^\\s]*)',
+      ],
+    },
+    {
+      customType: 'regex',
+      description: 'pin the Micrometer typed-descriptor compatibility ref',
+      managerFilePatterns: [
+        '/^\\.github\\/workflows\\/micrometer-compatibility\\.yml$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) packageName=(?<packageName>\\S+) currentValue=(?<currentValue>\\S+)\\n\\s*ref:\\s*(?<currentDigest>[a-f0-9]{40})',
+      ],
+    },
   ],
 }
