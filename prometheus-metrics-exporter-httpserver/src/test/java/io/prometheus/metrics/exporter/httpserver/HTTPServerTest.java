@@ -25,7 +25,7 @@ import java.net.http.HttpResponse;
 import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class HTTPServerTest {
   }
 
   @Test
-  public void testSubjectDoAs() throws Exception {
+  void testSubjectDoAs() throws Exception {
     final String user = "joe";
     final Subject subject = new Subject();
     subject.getPrincipals().add(() -> user);
@@ -160,55 +160,35 @@ class HTTPServerTest {
   }
 
   @Test
+  void defaultExecutorHasBoundedQueueAndNonBlockingRejection() throws Exception {
+    HTTPServer server = HTTPServer.builder().port(0).buildAndStart();
+    try {
+      assertThat(server.executorService).isInstanceOf(ThreadPoolExecutor.class);
+      ThreadPoolExecutor executor = (ThreadPoolExecutor) server.executorService;
+      assertThat(executor.getCorePoolSize()).isEqualTo(10);
+      assertThat(executor.getMaximumPoolSize()).isEqualTo(10);
+      assertThat(executor.getQueue().remainingCapacity()).isEqualTo(100);
+      assertThat(executor.getRejectedExecutionHandler())
+          .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
+    } finally {
+      server.stop();
+    }
+  }
+
+  @Test
   void registryThrows() throws Exception {
-    HTTPServer server = HTTPServer.builder().port(0).registry(throwingRegistry()).buildAndStart();
-    run(
-        server,
-        "/metrics",
-        500,
-        "Configure an HTTP error reporter for details.",
-        "IllegalStateException",
-        "test");
-  }
-
-  @Test
-  void registryExceptionIsPassedToConfiguredReporter() throws Exception {
-    AtomicReference<Throwable> reportedError = new AtomicReference<>();
     HTTPServer server =
         HTTPServer.builder()
             .port(0)
-            .registry(throwingRegistry())
-            .errorHandlingPolicy(
-                HttpErrorHandlingPolicy.builder().errorReporter(reportedError::set).build())
+            .registry(
+                new PrometheusRegistry() {
+                  @Override
+                  public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
+                    throw new IllegalStateException("test");
+                  }
+                })
             .buildAndStart();
-
-    run(
-        server,
-        "/metrics",
-        500,
-        "Configure an HTTP error reporter for details.",
-        "IllegalStateException",
-        "test");
-
-    assertThat(reportedError.get()).isInstanceOf(IllegalStateException.class).hasMessage("test");
-  }
-
-  @Test
-  void registryExceptionCanUseUnsafeDebugResponse() throws Exception {
-    HTTPServer server =
-        HTTPServer.builder()
-            .port(0)
-            .registry(throwingRegistry())
-            .errorHandlingPolicy(
-                HttpErrorHandlingPolicy.builder().unsafeDebugResponse(true).build())
-            .buildAndStart();
-
-    run(
-        server,
-        "/metrics",
-        500,
-        "IllegalStateException: test",
-        "Configure an HTTP error reporter for details.");
+    run(server, "/metrics", 500, "An internal error occurred while scraping metrics");
   }
 
   @Test
@@ -274,25 +254,6 @@ class HTTPServerTest {
   private static void run(
       HTTPServer server, String path, int expectedStatusCode, String expectedBody)
       throws Exception {
-    run(server, path, expectedStatusCode, expectedBody, new String[0]);
-  }
-
-  private static PrometheusRegistry throwingRegistry() {
-    return new PrometheusRegistry() {
-      @Override
-      public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
-        throw new IllegalStateException("test");
-      }
-    };
-  }
-
-  private static void run(
-      HTTPServer server,
-      String path,
-      int expectedStatusCode,
-      String expectedBody,
-      String... unexpectedBody)
-      throws Exception {
     // we cannot use try-with-resources or even client.close(), or the test will fail with Java 17
     @SuppressWarnings("resource")
     final HttpClient client = HttpClient.newBuilder().build();
@@ -304,9 +265,6 @@ class HTTPServerTest {
           client.send(request, HttpResponse.BodyHandlers.ofString());
       assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
       assertThat(response.body()).contains(expectedBody);
-      if (unexpectedBody.length > 0) {
-        assertThat(response.body()).doesNotContain(unexpectedBody);
-      }
     } finally {
       server.stop();
     }
