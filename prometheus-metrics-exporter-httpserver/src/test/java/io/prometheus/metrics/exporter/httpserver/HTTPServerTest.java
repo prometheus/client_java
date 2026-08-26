@@ -188,7 +188,7 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    run(server, "/metrics", 500, "An internal error occurred while scraping metrics");
   }
 
   @Test
