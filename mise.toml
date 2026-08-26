@@ -1,8 +1,3 @@
-monorepo_root = true
-
-[monorepo]
-config_roots = [".mise/envs/*"]
-
 [tools]
 "aqua:grafana/gcx" = "v1.2.0"
 "aqua:grafana/oats" = "0.10.0"
@@ -72,6 +67,32 @@ run = "./mvnw verify"
 [tasks.build]
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
+
+[tasks.native-test]
+description = "Run GraalVM native tests"
+depends = "build"
+tools.java = "oracle-graalvm-25.0.1"
+# Native Test uses Surefire, so explicitly select the Failsafe-named test class.
+run = '''
+cd "$MISE_CONFIG_ROOT/integration-tests/it-spring-boot-smoke-test"
+"$MISE_CONFIG_ROOT/mvnw" test -PnativeTest -Dtest=ApplicationIT
+'''
+
+[tasks."jmx-exporter:compat-test"]
+description = "Run JMX Exporter compatibility tests under a supported JDK"
+# The pinned JMX Exporter release does not build on the primary JDK (Java 25):
+# its spotless google-java-format predates JDK 25 support. Build it under an LTS
+# JDK the release supports instead.
+tools.java = "temurin-21.0.11+10.0.LTS"
+run = "python3 .mise/tasks/jmx-exporter/test.py"
+
+[tasks."micrometer:compat-test"]
+description = "Run Micrometer compatibility tests under a supported JDK"
+# The pinned Micrometer release does not build on the primary JDK (Java 25):
+# its bundled Kotlin compiler predates JDK 25 support. Build it under an LTS JDK
+# the release supports instead.
+tools.java = "temurin-21.0.11+10.0.LTS"
+run = "python3 .mise/tasks/micrometer/test.py"
 
 [tasks."api-diff"]
 description = "Compare published API against the japicmp baseline and refresh docs/apidiffs"
