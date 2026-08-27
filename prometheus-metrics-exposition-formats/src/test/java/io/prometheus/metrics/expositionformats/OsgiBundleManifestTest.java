@@ -18,8 +18,7 @@ import org.junit.jupiter.api.Test;
 
 class OsgiBundleManifestTest {
 
-  private static final String INTERNAL_PACKAGE =
-      "io.prometheus.metrics.expositionformats.internal";
+  private static final String INTERNAL_PACKAGE = "io.prometheus.metrics.expositionformats.internal";
   private static final String GENERATED_PREFIX =
       "io.prometheus.metrics.expositionformats.generated";
   private static final String SHADED_BSN = "io.prometheus.metrics-exposition-formats";
