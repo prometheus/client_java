@@ -225,7 +225,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
     private SummarySnapshot.SummaryDataPointSnapshot collect(Labels labels) {
       return buffer.run(
-          expectedCount -> count.sum() >= expectedCount,
+          expectedCount -> count.sum() == expectedCount,
           // Note: Exemplars are currently hard-coded as empty for Summary metrics.
           // While exemplars are sampled during observe() and observeWithExemplar() calls
           // via the exemplarSampler field, they are not included in the snapshot to maintain

@@ -27,7 +27,6 @@ class BufferTest {
   void timeoutDeactivatesBufferAndReplaysBufferedObservations() throws InterruptedException {
     Buffer buffer = new Buffer(TimeUnit.SECONDS.toNanos(1));
     CountDownLatch spinWaitStarted = new CountDownLatch(1);
-    AtomicBoolean keepWaiting = new AtomicBoolean(true);
     List<Double> replayedObservations = new ArrayList<>();
     AtomicBoolean timedOut = new AtomicBoolean(false);
 
@@ -38,14 +37,16 @@ class BufferTest {
                 buffer.run(
                     expectedCount -> {
                       spinWaitStarted.countDown();
-                      return !keepWaiting.get();
+                      return false;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
                     replayedObservations::add);
               } catch (IllegalStateException expected) {
                 timedOut.set(true);
               }
-            });
+            },
+            "buffer-timeout-runner");
+    runner.setDaemon(true);
     runner.start();
 
     assertThat(spinWaitStarted.await(5, TimeUnit.SECONDS)).isTrue();
@@ -71,6 +72,111 @@ class BufferTest {
                     },
                     ignored -> {}))
         .withMessage("Timed out while waiting for in-flight observations.");
+  }
+
+  @Test
+  void fullBufferUnblocksAppenderWhenGenerationIsDeactivated() throws InterruptedException {
+    CountDownLatch runStarted = new CountDownLatch(1);
+    CountDownLatch secondAppenderEntered = new CountDownLatch(1);
+    AtomicLong beforeAppendCount = new AtomicLong();
+    AtomicReference<Boolean> appended = new AtomicReference<>();
+    AtomicBoolean timedOut = new AtomicBoolean();
+    Buffer buffer =
+        new Buffer(
+            TimeUnit.MILLISECONDS.toNanos(250),
+            1,
+            () -> {
+              if (beforeAppendCount.incrementAndGet() == 2) {
+                secondAppenderEntered.countDown();
+              }
+            });
+    Thread runner =
+        new Thread(
+            () -> {
+              try {
+                buffer.run(
+                    ignored -> {
+                      runStarted.countDown();
+                      return false;
+                    },
+                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                    ignored -> {});
+              } catch (IllegalStateException expected) {
+                timedOut.set(true);
+              }
+            },
+            "buffer-full-runner");
+    runner.setDaemon(true);
+    runner.start();
+    assertThat(runStarted.await(5, TimeUnit.SECONDS)).isTrue();
+    assertThat(buffer.append(1.0)).isTrue();
+
+    Thread appender = new Thread(() -> appended.set(buffer.append(2.0)), "buffer-full-appender");
+    appender.setDaemon(true);
+    appender.start();
+    assertThat(secondAppenderEntered.await(5, TimeUnit.SECONDS)).isTrue();
+    runner.join(5_000);
+    appender.join(5_000);
+
+    assertThat(timedOut).isTrue();
+    assertThat(appender.isAlive()).isFalse();
+    assertThat(appended).hasValue(false);
+  }
+
+  @Test
+  void interruptedAppenderLeavesBoundedBufferWait() throws InterruptedException {
+    CountDownLatch runStarted = new CountDownLatch(1);
+    CountDownLatch secondAppenderEntered = new CountDownLatch(1);
+    AtomicLong beforeAppendCount = new AtomicLong();
+    AtomicBoolean interrupted = new AtomicBoolean();
+    AtomicReference<Boolean> appended = new AtomicReference<>();
+    Buffer buffer =
+        new Buffer(
+            TimeUnit.SECONDS.toNanos(1),
+            1,
+            () -> {
+              if (beforeAppendCount.incrementAndGet() == 2) {
+                secondAppenderEntered.countDown();
+              }
+            });
+    Thread runner =
+        new Thread(
+            () -> {
+              try {
+                buffer.run(
+                    ignored -> {
+                      runStarted.countDown();
+                      return false;
+                    },
+                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                    ignored -> {});
+              } catch (IllegalStateException expected) {
+                // The runner is only used to hold the generation open for this test.
+              }
+            },
+            "buffer-interrupt-runner");
+    runner.setDaemon(true);
+    runner.start();
+    assertThat(runStarted.await(5, TimeUnit.SECONDS)).isTrue();
+    assertThat(buffer.append(1.0)).isTrue();
+
+    Thread appender =
+        new Thread(
+            () -> {
+              appended.set(buffer.append(2.0));
+              interrupted.set(Thread.currentThread().isInterrupted());
+            },
+            "buffer-interrupt-appender");
+    appender.setDaemon(true);
+    appender.start();
+    assertThat(secondAppenderEntered.await(5, TimeUnit.SECONDS)).isTrue();
+    appender.interrupt();
+    appender.join(5_000);
+    runner.join(5_000);
+
+    assertThat(appender.isAlive()).isFalse();
+    assertThat(appended).hasValue(false);
+    assertThat(interrupted).isTrue();
   }
 
   @Test
@@ -101,10 +207,13 @@ class BufferTest {
                       return proceed.getCount() == 0;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}));
+                    ignored -> {}),
+            "buffer-stalled-runner");
+    runner.setDaemon(true);
     runner.start();
     assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
-    Thread appender = new Thread(() -> appended.set(buffer.append(1.0)));
+    Thread appender = new Thread(() -> appended.set(buffer.append(1.0)), "buffer-stalled-appender");
+    appender.setDaemon(true);
     appender.start();
     assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
     proceed.countDown();
@@ -145,7 +254,9 @@ class BufferTest {
                       return firstRunMayFinish.getCount() == 0;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}));
+                    ignored -> {}),
+            "buffer-first-runner");
+    firstRun.setDaemon(true);
     firstRun.start();
     assertThat(firstRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -160,7 +271,9 @@ class BufferTest {
                       return null;
                     });
               }
-            });
+            },
+            "buffer-late-appender");
+    appender.setDaemon(true);
     appender.start();
     assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -177,7 +290,9 @@ class BufferTest {
                       return completedObservations.get() >= expectedCount;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}));
+                    ignored -> {}),
+            "buffer-second-runner");
+    secondRun.setDaemon(true);
     secondRun.start();
     assertThat(secondRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
     release.countDown();
