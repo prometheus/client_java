@@ -36,15 +36,21 @@
       matchDepNames: [
         'java',
       ],
+      matchDepTypes: [
+        'tools',
+      ],
       groupName: 'java temurin',
       additionalBranchPrefix: 'temurin-',
     },
     {
       matchFileNames: [
-        '.mise/envs/native/mise.toml',
+        'mise.toml',
       ],
       matchDepNames: [
         'java',
+      ],
+      matchDepTypes: [
+        'task-native-test-tools',
       ],
       groupName: 'java graalvm',
       additionalBranchPrefix: 'graalvm-',
@@ -52,11 +58,14 @@
     {
       description: 'Compat tests pin an LTS JDK the upstream release supports; block major JDK bumps that would break those builds',
       matchFileNames: [
-        '.mise/envs/jmx-exporter/mise.toml',
-        '.mise/envs/micrometer/mise.toml',
+        'mise.toml',
       ],
       matchDepNames: [
         'java',
+      ],
+      matchDepTypes: [
+        'task-jmx-exporter:compat-test-tools',
+        'task-micrometer:compat-test-tools',
       ],
       matchUpdateTypes: [
         'major',

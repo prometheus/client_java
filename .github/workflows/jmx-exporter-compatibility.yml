@@ -26,15 +26,13 @@ jobs:
         with:
           version: v2026.8.11
           sha256: 3d825b8341925abb398fba6fd8dcd7d6e92ade6820d892da62992e0765638e66
-          working_directory: .mise/envs/jmx-exporter
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Run JMX Exporter compatibility tests
-        working-directory: .mise/envs/jmx-exporter
         env:
           JMX_EXPORTER_REPOSITORY: ${{ inputs.repository || 'prometheus/jmx_exporter' }}
           JMX_EXPORTER_REF: ${{ inputs.ref }}
-        run: mise compat-test
+        run: mise run jmx-exporter:compat-test
