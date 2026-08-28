@@ -49,9 +49,6 @@ class Buffer {
   // available processors. This is simpler than the striping used by LongAdder, so hot spots remain
   // possible when several recording threads resolve to the same stripe.
   private final AtomicLong[] stripedObservationCounts;
-  // phaseTransition() waits for appenders that are between entering append() and updating their
-  // stripe. This closes the handoff window around the collector's getAndAdd(BUFFER_ACTIVE_BIT).
-  private final AtomicLong appendersInFlight = new AtomicLong();
   private final ReentrantLock observationLock = new ReentrantLock();
   private boolean reset;
   private long observationCountOffset;
@@ -88,16 +85,10 @@ class Buffer {
     AtomicLong counter =
         stripedObservationCounts[
             stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length)];
-    appendersInFlight.incrementAndGet();
-    long count;
-    try {
-      count = counter.incrementAndGet();
-    } finally {
-      appendersInFlight.decrementAndGet();
-    }
-    // The active bit is the exact handoff decision. In particular, do not use the phase transition
-    // as an additional gate: an observation that increments its stripe in that window must either
-    // be included in expectedCount or be buffered in the current generation.
+    long count = counter.incrementAndGet();
+    // The active bit is the exact handoff decision. An observation either increments its stripe
+    // before the collector's getAndAdd(BUFFER_ACTIVE_BIT) and takes the direct path, or sees the
+    // active bit and is buffered in the current generation.
     if ((count & BUFFER_ACTIVE_BIT) == 0) {
       return false;
     }
@@ -183,7 +174,6 @@ class Buffer {
     T result = null;
     runLock.lock();
     try {
-      phaseTransition();
       long expectedCount;
       appendLock.lock();
       try {
@@ -209,7 +199,6 @@ class Buffer {
         result = timedOut ? null : createResult.get();
       } finally {
         try {
-          phaseTransition();
           appendLock.lock();
           try {
             generation.active = false;
@@ -244,19 +233,6 @@ class Buffer {
       return result;
     } finally {
       runLock.unlock();
-    }
-  }
-
-  @SuppressWarnings("ThreadPriorityCheck")
-  private void phaseTransition() {
-    long deadline = System.nanoTime() + maxSpinWaitNanos;
-    while (appendersInFlight.get() != 0) {
-      if (System.nanoTime() - deadline >= 0) {
-        // A late appender uses the active-bit decision and generation identity, so proceeding is
-        // safe even if a suspended appender did not reach its stripe in time.
-        return;
-      }
-      Thread.yield();
     }
   }
 }

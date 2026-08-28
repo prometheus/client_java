@@ -180,51 +180,6 @@ class BufferTest {
   }
 
   @Test
-  void stalledAppenderAfterStripeActivationDoesNotBlockRun() throws InterruptedException {
-    CountDownLatch started = new CountDownLatch(1);
-    CountDownLatch proceed = new CountDownLatch(1);
-    CountDownLatch stalled = new CountDownLatch(1);
-    CountDownLatch release = new CountDownLatch(1);
-    AtomicReference<Boolean> appended = new AtomicReference<>();
-    Buffer buffer =
-        new Buffer(
-            TimeUnit.SECONDS.toNanos(1),
-            16,
-            () -> {
-              stalled.countDown();
-              try {
-                release.await();
-              } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-              }
-            });
-    Thread runner =
-        new Thread(
-            () ->
-                buffer.run(
-                    ignored -> {
-                      started.countDown();
-                      return proceed.getCount() == 0;
-                    },
-                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}),
-            "buffer-stalled-runner");
-    runner.setDaemon(true);
-    runner.start();
-    assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
-    Thread appender = new Thread(() -> appended.set(buffer.append(1.0)), "buffer-stalled-appender");
-    appender.setDaemon(true);
-    appender.start();
-    assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
-    proceed.countDown();
-    runner.join(5_000);
-    assertThat(runner.isAlive()).isFalse();
-    release.countDown();
-    appender.join(5_000);
-    assertThat(appended).hasValue(false);
-  }
-
-  @Test
   void lateAppenderCannotBeAddedToTheNextGeneration() throws InterruptedException {
     CountDownLatch firstRunStarted = new CountDownLatch(1);
     CountDownLatch firstRunMayFinish = new CountDownLatch(1);
@@ -287,7 +242,7 @@ class BufferTest {
                 buffer.run(
                     expectedCount -> {
                       secondRunStarted.countDown();
-                      return completedObservations.get() >= expectedCount;
+                      return completedObservations.get() == expectedCount;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
                     ignored -> {}),
