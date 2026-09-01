@@ -116,20 +116,25 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
             "Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
       }
     }
-    return data.computeIfAbsent(
-        Arrays.asList(labelValues),
-        l -> {
-          for (int i = 0; i < l.size(); i++) {
-            if (l.get(i) == null) {
-              throw new IllegalArgumentException(
-                  "null label value for metric "
-                      + metadata.getName()
-                      + " and label "
-                      + labelNames[i]);
-            }
-          }
-          return newDataPoint();
-        });
+    List<String> key = Arrays.asList(labelValues);
+    // Fast path: the data point for these label values almost always already exists, since the same
+    // label combinations are reused across updates. A plain get() avoids constructing the
+    // computeIfAbsent mapping function on every call - it captures `this`, so it would otherwise be
+    // allocated on each call (even on a hit) on this very hot path.
+    T dataPoint = data.get(key);
+    if (dataPoint != null) {
+      return dataPoint;
+    }
+    // Miss: validate the raw label values outside the ConcurrentHashMap computeIfAbsent lock, and
+    // without List indirection. A null-containing key is never inserted, so a null label value
+    // always reaches this branch and throws.
+    for (int i = 0; i < labelValues.length; i++) {
+      if (labelValues[i] == null) {
+        throw new IllegalArgumentException(
+            "null label value for metric " + metadata.getName() + " and label " + labelNames[i]);
+      }
+    }
+    return data.computeIfAbsent(key, l -> newDataPoint());
   }
 
   /**
