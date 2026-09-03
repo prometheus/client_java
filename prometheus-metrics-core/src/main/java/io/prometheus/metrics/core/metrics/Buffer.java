@@ -95,43 +95,47 @@ class Buffer {
         expectedCount += observationCount.getAndAdd(bufferActiveBit);
       }
 
-      while (!complete.apply(expectedCount)) {
-        // Wait until all in-flight threads have added their observations to the histogram /
-        // summary.
-        // we can't use a condition here, because the other thread doesn't have a lock as it's on
-        // the fast path.
-        Thread.yield();
-      }
-      result = createResult.get();
-
-      // Signal that the buffer is inactive.
-      long expectedBufferSize = 0;
-      if (reset) {
-        for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += observationCount.getAndSet(0) & ~bufferActiveBit;
-        }
-        reset = false;
-      } else {
-        for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += observationCount.addAndGet(bufferActiveBit);
-        }
-      }
-      expectedBufferSize -= expectedCount;
-
-      appendLock.lock();
       try {
-        while (bufferPos < expectedBufferSize) {
-          // Wait until all in-flight threads have added their observations to the buffer.
-          bufferFilled.await();
+        while (!complete.apply(expectedCount)) {
+          // Wait until all in-flight threads have added their observations to the histogram /
+          // summary.
+          // we can't use a condition here, because the other thread doesn't have a lock as it's on
+          // the fast path.
+          Thread.yield();
         }
+        result = createResult.get();
       } finally {
-        appendLock.unlock();
-      }
+        // Signal that the buffer is inactive. This has to happen even when the block above throws:
+        // the bit is what makes append() buffer instead of record, so a bit left set sends every
+        // later run() into the wait loop above forever, holding runLock and with it the scrape.
+        long expectedBufferSize = 0;
+        if (reset) {
+          for (AtomicLong observationCount : stripedObservationCounts) {
+            expectedBufferSize += observationCount.getAndSet(0) & ~bufferActiveBit;
+          }
+          reset = false;
+        } else {
+          for (AtomicLong observationCount : stripedObservationCounts) {
+            expectedBufferSize += observationCount.addAndGet(bufferActiveBit);
+          }
+        }
+        expectedBufferSize -= expectedCount;
 
-      buffer = observationBuffer;
-      bufferSize = bufferPos;
-      observationBuffer = new double[0];
-      bufferPos = 0;
+        appendLock.lock();
+        try {
+          while (bufferPos < expectedBufferSize) {
+            // Wait until all in-flight threads have added their observations to the buffer.
+            bufferFilled.await();
+          }
+        } finally {
+          appendLock.unlock();
+        }
+
+        buffer = observationBuffer;
+        bufferSize = bufferPos;
+        observationBuffer = new double[0];
+        bufferPos = 0;
+      }
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     } finally {
