@@ -1,5 +1,57 @@
 # Changelog
 
+## [1.9.0](https://github.com/prometheus/client_java/compare/v1.8.0...v1.9.0) (2026-09-03)
+
+
+### Features
+
+* support metric name filtering in OpenTelemetry exporter ([#2344](https://github.com/prometheus/client_java/issues/2344)) ([9b0ede8](https://github.com/prometheus/client_java/commit/9b0ede830fcf233fb9f9c4cb08ed91ef21fbd667))
+
+
+### Bug Fixes
+
+* avoid protobuf debug reflection in native images ([#2251](https://github.com/prometheus/client_java/issues/2251)) ([7f899e7](https://github.com/prometheus/client_java/commit/7f899e79ded325256bd0e444e33696b5f194700d))
+* bound HTTPServer request resources ([#2333](https://github.com/prometheus/client_java/issues/2333)) ([33ec556](https://github.com/prometheus/client_java/commit/33ec5565227ff60345496edf0186934fc39df25b))
+* bound scrape query parameters ([#2334](https://github.com/prometheus/client_java/issues/2334)) ([27e1912](https://github.com/prometheus/client_java/commit/27e19125668227fac1f39599a93efa2d60cb41a5))
+* **ci:** skip benchmark report for skipped runs ([#2422](https://github.com/prometheus/client_java/issues/2422)) ([40eddb0](https://github.com/prometheus/client_java/commit/40eddb060f21054a439bf07961cf55473cb35507))
+* clarify benchmark regression report verdicts ([#2394](https://github.com/prometheus/client_java/issues/2394)) ([e5fa067](https://github.com/prometheus/client_java/commit/e5fa067fec3e07270ebd273cb6903b1f819b1bc6))
+* **deps:** update dependency com.google.guava:guava to v33.7.0-jre ([#2387](https://github.com/prometheus/client_java/issues/2387)) ([bf0db49](https://github.com/prometheus/client_java/commit/bf0db49a9f921d1372edbe0eab554ec50743cd77))
+* **deps:** update dependency io.dropwizard.metrics5:metrics-core to v5.0.8 ([#2433](https://github.com/prometheus/client_java/issues/2433)) ([42f3c8a](https://github.com/prometheus/client_java/commit/42f3c8a0d11af4bc5afa84c79b4de7dc16d32e6e))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.29.0-alpha ([#2235](https://github.com/prometheus/client_java/issues/2235)) ([cf9f702](https://github.com/prometheus/client_java/commit/cf9f70219e103c6004d8c315fdcfab2cfd7c447d))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.30.0-alpha ([#2328](https://github.com/prometheus/client_java/issues/2328)) ([1ca2716](https://github.com/prometheus/client_java/commit/1ca27164b646266a10ead6ad1e2e6b5648567b2f))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.30.0-alpha ([#2330](https://github.com/prometheus/client_java/issues/2330)) ([07623c1](https://github.com/prometheus/client_java/commit/07623c14dedfeffed3eace5b8718127add250668))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.31.0-alpha ([#2401](https://github.com/prometheus/client_java/issues/2401)) ([6c26619](https://github.com/prometheus/client_java/commit/6c2661975277a04b6931e8063c3123ac0cf16a69))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.31.0-alpha ([#2402](https://github.com/prometheus/client_java/issues/2402)) ([ac0d68a](https://github.com/prometheus/client_java/commit/ac0d68a62886473ac4afd736602760e97024b528))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.31.1-alpha ([#2409](https://github.com/prometheus/client_java/issues/2409)) ([5eea652](https://github.com/prometheus/client_java/commit/5eea652d80b0c5fdfce1f7e071cdd55cc624ce01))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.31.1-alpha ([#2410](https://github.com/prometheus/client_java/issues/2410)) ([0bcef89](https://github.com/prometheus/client_java/commit/0bcef891b2ada3d684266b6cbaf5d373ece7cd84))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.23 ([#2241](https://github.com/prometheus/client_java/issues/2241)) ([a017f80](https://github.com/prometheus/client_java/commit/a017f80980d91a5fa8ffe930c820f836c3d1b2ff))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.24 ([#2294](https://github.com/prometheus/client_java/issues/2294)) ([63967bd](https://github.com/prometheus/client_java/commit/63967bd36ebc638234742ec58ad28f6098a92b3a))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.25 ([#2389](https://github.com/prometheus/client_java/issues/2389)) ([92f8344](https://github.com/prometheus/client_java/commit/92f834476837cab3d281d4b435937e11a2ff7729))
+* **deps:** update dependency org.springframework.boot:spring-boot-starter-parent to v4.1.1 ([#2399](https://github.com/prometheus/client_java/issues/2399)) ([a0b0880](https://github.com/prometheus/client_java/commit/a0b0880cecf00484d610b529a7ffbb5b2c98a65e))
+* **deps:** update jetty monorepo to v12.1.11 ([#2279](https://github.com/prometheus/client_java/issues/2279)) ([4dc54da](https://github.com/prometheus/client_java/commit/4dc54da0c5b768fd66710bd3736b95116df445c5))
+* **deps:** update jetty monorepo to v12.1.12 ([#2371](https://github.com/prometheus/client_java/issues/2371)) ([08967e0](https://github.com/prometheus/client_java/commit/08967e0aca1442935f2052f59f10df66c807ca0b))
+* **deps:** update junit-framework monorepo to v6.1.2 ([#2300](https://github.com/prometheus/client_java/issues/2300)) ([5966d1d](https://github.com/prometheus/client_java/commit/5966d1d4fdfc30e3a7eb09b0a88da5b2e9dc07c5))
+* **deps:** update junit-framework monorepo to v6.1.3 ([#2374](https://github.com/prometheus/client_java/issues/2374)) ([d1ade52](https://github.com/prometheus/client_java/commit/d1ade5280bdc613d3c7fc5f231ead1e2dca9882e))
+* **deps:** update otel.instrumentation.version ([#2236](https://github.com/prometheus/client_java/issues/2236)) ([158230d](https://github.com/prometheus/client_java/commit/158230d2418a0b6d1b80c590e8fc63c9e444072c))
+* **deps:** update protobuf ([#2400](https://github.com/prometheus/client_java/issues/2400)) ([e2db1ed](https://github.com/prometheus/client_java/commit/e2db1edadbfd87cf284ff72ab7c333d742866d9c))
+* **deps:** update protobuf to v4.35.1 ([#2221](https://github.com/prometheus/client_java/issues/2221)) ([cf17073](https://github.com/prometheus/client_java/commit/cf17073eebbdf67bc67dcbea2af30f27a0190079))
+* **exposition:** export internal package for OSGi resolution ([#2415](https://github.com/prometheus/client_java/issues/2415)) ([28b503d](https://github.com/prometheus/client_java/commit/28b503df2e9da44a4e26a09f97ed5dfcdca3b19b))
+* **httpserver:** make scrape error responses secure and configurable ([f6d9df5](https://github.com/prometheus/client_java/commit/f6d9df52bc022bfabaa82fd67375f529e4371038))
+* include license files in release source jars ([#2250](https://github.com/prometheus/client_java/issues/2250)) ([08cf925](https://github.com/prometheus/client_java/commit/08cf925b564247a497437e29e4a64ebb335cd328)), closes [#2216](https://github.com/prometheus/client_java/issues/2216)
+* keep PR title check required after rebases ([#2414](https://github.com/prometheus/client_java/issues/2414)) ([e3d4c3b](https://github.com/prometheus/client_java/commit/e3d4c3ba66b1e92078cd2f1c8ccc38a803ac3a07))
+* prevent buffer stripe index overflow ([#2331](https://github.com/prometheus/client_java/issues/2331)) ([b6cd000](https://github.com/prometheus/client_java/commit/b6cd000a39f9bbf78cf0ae1209c60910219c9cbf))
+* redact invalid configuration values ([#2335](https://github.com/prometheus/client_java/issues/2335)) ([7e7e533](https://github.com/prometheus/client_java/commit/7e7e53364496a1dd6d21d2c01c59219166d7826d))
+* stabilize OpenTelemetry exporter builder API ([#2257](https://github.com/prometheus/client_java/issues/2257)) ([09e6e2d](https://github.com/prometheus/client_java/commit/09e6e2de9261122b2e03620f9c6264f389f2fd25))
+* Summary quantiles collapsing for targeted quantiles with 2*epsilon &gt;= 1-quantile ([#2396](https://github.com/prometheus/client_java/issues/2396)) ([9c7479f](https://github.com/prometheus/client_java/commit/9c7479fd11beadd70a7c7ea76d40b70f1e3dcc8c))
+* update component-prefixed action tags ([#2419](https://github.com/prometheus/client_java/issues/2419)) ([4acf481](https://github.com/prometheus/client_java/commit/4acf48149bc5e7f1e7ade2d0dbe123a48765c7c1))
+
+
+### Documentation
+
+* add API design guideline to contributing docs ([#2350](https://github.com/prometheus/client_java/issues/2350)) ([23ae29a](https://github.com/prometheus/client_java/commit/23ae29aa71825c2a83abf249fc45cca2a46e3c8b))
+* document scrape query limits in request API ([#2391](https://github.com/prometheus/client_java/issues/2391)) ([ba8f5eb](https://github.com/prometheus/client_java/commit/ba8f5eb121cd4f68574c9657bf86cf42ae5edb93))
+* document semantic PR title guidance ([#2318](https://github.com/prometheus/client_java/issues/2318)) ([5e813a0](https://github.com/prometheus/client_java/commit/5e813a0a8cd488b678fcc55dca85bb8d5c84dbad))
+
 ## [1.8.0](https://github.com/prometheus/client_java/compare/v1.7.0...v1.8.0) (2026-06-11)
 
 
