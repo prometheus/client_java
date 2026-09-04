@@ -130,4 +130,25 @@ class CounterSnapshotTest {
     iterator.next();
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
+
+  @Test
+  void testNegativeValueIncludesMetricNameInMessage() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                CounterDataPointSnapshot.builder()
+                    .metricName("http_requests")
+                    .value(-2.0)
+                    .build())
+        .withMessageContaining("http_requests")
+        .withMessageContaining("-2.0")
+        .withMessageContaining("counters cannot have a negative value");
+  }
+
+  @Test
+  void testNegativeValueWithoutMetricNameKeepsLegacyMessage() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterDataPointSnapshot.builder().value(-1.0).build())
+        .withMessage("-1.0: counters cannot have a negative value");
+  }
 }

@@ -92,8 +92,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   @Override
   protected CounterSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
     List<CounterSnapshot.CounterDataPointSnapshot> data = new ArrayList<>(labels.size());
+    String metricName = metadata.getName();
     for (int i = 0; i < labels.size(); i++) {
-      data.add(metricData.get(i).collect(labels.get(i)));
+      data.add(metricData.get(i).collect(labels.get(i), metricName));
     }
     return new CounterSnapshot(metadata, data);
   }
@@ -199,7 +200,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       doubleValue.add(amount);
     }
 
-    private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
+    private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels, String metricName) {
       // Read the exemplar first. Otherwise, there is a race condition where you might
       // see an Exemplar for a value that's not counted yet.
       // If there are multiple Exemplars (by default it's just one), use the newest.
@@ -213,7 +214,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         }
       }
       return new CounterSnapshot.CounterDataPointSnapshot(
-          get(), labels, latestExemplar, createdTimeMillis);
+          get(), labels, latestExemplar, createdTimeMillis, metricName);
     }
   }
 
