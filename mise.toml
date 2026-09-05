@@ -11,21 +11,21 @@ actionlint = "1.7.12"
 "aqua:grafana/flint" = "0.22.11"
 "aqua:jonwiggins/xmloxide" = "v0.5.0"
 "aqua:owenlamont/ryl" = "0.21.0"
-biome = "2.5.8"
+biome = "2.5.12"
 checkstyle = "13.8.0"
-editorconfig-checker = "3.11.1"
+editorconfig-checker = "4.0.1"
 google-java-format = "1.36.1"
 lychee = "0.24.2"
 # @yarnpkg/libzip 3.2.2 is npm-signed and matches Yarn's release commit, but
 # was published without provenance; mise's no-downgrade policy otherwise rejects Renovate.
-"npm:renovate" = { version = "44.29.4", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
-ruff = "0.16.3"
-rumdl = "v0.2.55"
+"npm:renovate" = { version = "44.59.1", trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"] }
+ruff = "0.16.6"
+rumdl = "v0.2.66"
 shellcheck = "v0.11.0"
-shfmt = "3.13.1"
+shfmt = "3.14.0"
 taplo = "0.10.0"
-typos = "1.49.0"
-zizmor = "1.29.0"
+typos = "1.50.1"
+zizmor = "1.30.0"
 
 [env]
 FLINT_CONFIG_DIR = ".github/config"
