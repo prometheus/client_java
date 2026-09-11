@@ -3,10 +3,15 @@ package io.prometheus.metrics.benchmarks;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.BoundDoubleCounter;
+import io.opentelemetry.api.incubator.metrics.BoundLongCounter;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleCounter;
+import io.opentelemetry.api.incubator.metrics.ExtendedLongCounter;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.ExemplarFilter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemoryMetricReader;
@@ -94,6 +99,7 @@ public class CounterBenchmark {
           SdkMeterProvider.builder()
               .registerMetricReader(InMemoryMetricReader.create())
               .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
               .build();
       OpenTelemetry openTelemetry =
           OpenTelemetrySdk.builder().setMeterProvider(sdkMeterProvider).build();
@@ -108,6 +114,45 @@ public class CounterBenchmark {
           Attributes.of(
               AttributeKey.stringKey("path"), "/",
               AttributeKey.stringKey("status"), "200");
+    }
+  }
+
+  /**
+   * OpenTelemetry counter using the incubator "bound instrument" API, which pre-binds a set of
+   * attributes at initialization time to avoid a per-record attribute map lookup.
+   */
+  @State(Scope.Benchmark)
+  public static class OpenTelemetryBoundCounter {
+
+    final BoundLongCounter longCounter;
+    final BoundDoubleCounter doubleCounter;
+
+    public OpenTelemetryBoundCounter() {
+
+      SdkMeterProvider sdkMeterProvider =
+          SdkMeterProvider.builder()
+              .registerMetricReader(InMemoryMetricReader.create())
+              .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
+              .build();
+      OpenTelemetry openTelemetry =
+          OpenTelemetrySdk.builder().setMeterProvider(sdkMeterProvider).build();
+      Meter meter =
+          openTelemetry
+              .meterBuilder("instrumentation-library-name")
+              .setInstrumentationVersion("1.0.0")
+              .build();
+      Attributes attributes =
+          Attributes.of(
+              AttributeKey.stringKey("path"), "/",
+              AttributeKey.stringKey("status"), "200");
+      this.longCounter =
+          ((ExtendedLongCounter) meter.counterBuilder("test1").setDescription("test").build())
+              .bind(attributes);
+      this.doubleCounter =
+          ((ExtendedDoubleCounter)
+                  meter.counterBuilder("test2").ofDoubles().setDescription("test").build())
+              .bind(attributes);
     }
   }
 
@@ -150,6 +195,25 @@ public class CounterBenchmark {
   @Benchmark
   @Threads(4)
   public LongCounter openTelemetryIncNoLabels(OpenTelemetryCounter counter) {
+    for (int i = 0; i < 10 * 1024; i++) {
+      counter.longCounter.add(1);
+    }
+    return counter.longCounter;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public BoundDoubleCounter openTelemetryBoundAdd(
+      RandomNumbers randomNumbers, OpenTelemetryBoundCounter counter) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      counter.doubleCounter.add(randomNumbers.randomNumbers[i]);
+    }
+    return counter.doubleCounter;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public BoundLongCounter openTelemetryBoundInc(OpenTelemetryBoundCounter counter) {
     for (int i = 0; i < 10 * 1024; i++) {
       counter.longCounter.add(1);
     }

@@ -1,9 +1,14 @@
 package io.prometheus.metrics.benchmarks;
 
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.BoundDoubleHistogram;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.Aggregation;
+import io.opentelemetry.sdk.metrics.ExemplarFilter;
 import io.opentelemetry.sdk.metrics.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.View;
@@ -95,6 +100,7 @@ public class HistogramBenchmark {
           SdkMeterProvider.builder()
               .registerMetricReader(InMemoryMetricReader.create())
               .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
               .registerView(
                   InstrumentSelector.builder().setName("test").build(),
                   View.builder()
@@ -126,6 +132,7 @@ public class HistogramBenchmark {
           SdkMeterProvider.builder()
               .registerMetricReader(InMemoryMetricReader.create())
               .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
               .registerView(
                   InstrumentSelector.builder().setName("test").build(),
                   View.builder()
@@ -140,6 +147,87 @@ public class HistogramBenchmark {
               .setInstrumentationVersion("1.0.0")
               .build();
       this.histogram = meter.histogramBuilder("test").setDescription("test").build();
+    }
+  }
+
+  /**
+   * OpenTelemetry classic histogram using the incubator "bound instrument" API to pre-bind
+   * attributes at initialization time.
+   */
+  @State(Scope.Benchmark)
+  public static class OpenTelemetryBoundClassicHistogram {
+
+    final BoundDoubleHistogram histogram;
+
+    public OpenTelemetryBoundClassicHistogram() {
+      SdkMeterProvider sdkMeterProvider =
+          SdkMeterProvider.builder()
+              .registerMetricReader(InMemoryMetricReader.create())
+              .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
+              .registerView(
+                  InstrumentSelector.builder().setName("test").build(),
+                  View.builder()
+                      .setAggregation(
+                          Aggregation.explicitBucketHistogram(
+                              Arrays.asList(
+                                  .005, .01, .025, .05, .1, .25, .5, 1.0, 2.5, 5.0, 10.0)))
+                      .build())
+              .build();
+      OpenTelemetry openTelemetry =
+          OpenTelemetrySdk.builder().setMeterProvider(sdkMeterProvider).build();
+      Meter meter =
+          openTelemetry
+              .meterBuilder("instrumentation-library-name")
+              .setInstrumentationVersion("1.0.0")
+              .build();
+      Attributes attributes =
+          Attributes.of(
+              AttributeKey.stringKey("path"), "/",
+              AttributeKey.stringKey("status"), "200");
+      this.histogram =
+          ((ExtendedDoubleHistogram)
+                  meter.histogramBuilder("test").setDescription("test").build())
+              .bind(attributes);
+    }
+  }
+
+  /**
+   * OpenTelemetry exponential histogram using the incubator "bound instrument" API to pre-bind
+   * attributes at initialization time.
+   */
+  @State(Scope.Benchmark)
+  public static class OpenTelemetryBoundExponentialHistogram {
+
+    final BoundDoubleHistogram histogram;
+
+    public OpenTelemetryBoundExponentialHistogram() {
+      SdkMeterProvider sdkMeterProvider =
+          SdkMeterProvider.builder()
+              .registerMetricReader(InMemoryMetricReader.create())
+              .setResource(Resource.getDefault())
+              .setExemplarFilter(ExemplarFilter.alwaysOff())
+              .registerView(
+                  InstrumentSelector.builder().setName("test").build(),
+                  View.builder()
+                      .setAggregation(Aggregation.base2ExponentialBucketHistogram(10_000, 5))
+                      .build())
+              .build();
+      OpenTelemetry openTelemetry =
+          OpenTelemetrySdk.builder().setMeterProvider(sdkMeterProvider).build();
+      Meter meter =
+          openTelemetry
+              .meterBuilder("instrumentation-library-name")
+              .setInstrumentationVersion("1.0.0")
+              .build();
+      Attributes attributes =
+          Attributes.of(
+              AttributeKey.stringKey("path"), "/",
+              AttributeKey.stringKey("status"), "200");
+      this.histogram =
+          ((ExtendedDoubleHistogram)
+                  meter.histogramBuilder("test").setDescription("test").build())
+              .bind(attributes);
     }
   }
 
@@ -207,6 +295,26 @@ public class HistogramBenchmark {
   @Threads(4)
   public io.opentelemetry.api.metrics.DoubleHistogram openTelemetryExponential(
       RandomNumbers randomNumbers, OpenTelemetryExponentialHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      histogram.histogram.record(randomNumbers.randomNumbers[i]);
+    }
+    return histogram.histogram;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public BoundDoubleHistogram openTelemetryBoundClassic(
+      RandomNumbers randomNumbers, OpenTelemetryBoundClassicHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      histogram.histogram.record(randomNumbers.randomNumbers[i]);
+    }
+    return histogram.histogram;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public BoundDoubleHistogram openTelemetryBoundExponential(
+      RandomNumbers randomNumbers, OpenTelemetryBoundExponentialHistogram histogram) {
     for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
       histogram.histogram.record(randomNumbers.randomNumbers[i]);
     }
