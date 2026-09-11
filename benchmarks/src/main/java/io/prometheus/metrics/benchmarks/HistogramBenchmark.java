@@ -186,8 +186,7 @@ public class HistogramBenchmark {
               AttributeKey.stringKey("path"), "/",
               AttributeKey.stringKey("status"), "200");
       this.histogram =
-          ((ExtendedDoubleHistogram)
-                  meter.histogramBuilder("test").setDescription("test").build())
+          ((ExtendedDoubleHistogram) meter.histogramBuilder("test").setDescription("test").build())
               .bind(attributes);
     }
   }
@@ -225,8 +224,7 @@ public class HistogramBenchmark {
               AttributeKey.stringKey("path"), "/",
               AttributeKey.stringKey("status"), "200");
       this.histogram =
-          ((ExtendedDoubleHistogram)
-                  meter.histogramBuilder("test").setDescription("test").build())
+          ((ExtendedDoubleHistogram) meter.histogramBuilder("test").setDescription("test").build())
               .bind(attributes);
     }
   }
