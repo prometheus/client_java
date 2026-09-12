@@ -185,7 +185,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         return;
       }
       if (!buffer.append(value)) {
-        doObserve(value);
+        buffer.observeDirect(
+            () -> {
+              doObserve(value);
+              return null;
+            });
       }
       if (exemplarSampler != null) {
         exemplarSampler.observe(value);
@@ -198,7 +202,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         return;
       }
       if (!buffer.append(value)) {
-        doObserve(value);
+        buffer.observeDirect(
+            () -> {
+              doObserve(value);
+              return null;
+            });
       }
       if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
