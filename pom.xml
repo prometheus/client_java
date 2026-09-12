@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>client_java_parent</artifactId>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>1.9.0</version>
     <relativePath>prometheus-metrics-parent/pom.xml</relativePath>
   </parent>
 
@@ -120,7 +120,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.16.0</version>
+          <version>3.15.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -176,7 +176,7 @@
         <plugin>
           <groupId>com.github.siom79.japicmp</groupId>
           <artifactId>japicmp-maven-plugin</artifactId>
-          <version>0.26.2</version>
+          <version>0.26.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
