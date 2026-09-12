@@ -205,6 +205,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private final LongAdder nativeZeroCount = new LongAdder();
     private final LongAdder count = new LongAdder();
     private final DoubleAdder sum = new DoubleAdder();
+    @Nullable private final ClassicOnlyAccumulator classicOnlyAccumulator;
     private volatile int nativeSchema =
         nativeInitialSchema; // integer in [-4, 8] or CLASSIC_HISTOGRAM
     private volatile double nativeZeroThreshold = Histogram.this.nativeMinZeroThreshold;
@@ -223,16 +224,28 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       for (int i = 0; i < classicUpperBounds.length; i++) {
         classicBuckets[i] = new LongAdder();
       }
+      classicOnlyAccumulator =
+          isClassicOnly() ? new ClassicOnlyAccumulator(classicUpperBounds.length) : null;
       maybeScheduleNextReset();
     }
 
     @Override
     public double getSum() {
+      if (classicOnlyAccumulator != null) {
+        // A paused recorder may make this exact value temporarily stale. A later snapshot, after
+        // the intervening buffer rotation, retries its buffer rather than blocking the scrape.
+        return classicOnlyAccumulator.snapshot().sum;
+      }
       return sum.sum();
     }
 
     @Override
     public long getCount() {
+      if (classicOnlyAccumulator != null) {
+        // A paused recorder may make this exact value temporarily stale. A later snapshot, after
+        // the intervening buffer rotation, retries its buffer rather than blocking the scrape.
+        return classicOnlyAccumulator.snapshot().count;
+      }
       return count.sum();
     }
 
@@ -242,7 +255,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
         return;
       }
-      if (!buffer.append(value)) {
+      if (classicOnlyAccumulator != null) {
+        classicOnlyAccumulator.observe(findClassicBucket(value), value);
+      } else if (!buffer.append(value)) {
         doObserve(value, false);
       }
       if (exemplarSampler != null) {
@@ -256,7 +271,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
         return;
       }
-      if (!buffer.append(value)) {
+      if (classicOnlyAccumulator != null) {
+        classicOnlyAccumulator.observe(findClassicBucket(value), value);
+      } else if (!buffer.append(value)) {
         doObserve(value, false);
       }
       if (exemplarSampler != null) {
@@ -266,12 +283,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     private void doObserve(double value, boolean fromBuffer) {
       // classicUpperBounds is an empty array if this is a native histogram only.
-      for (int i = 0; i < classicUpperBounds.length; ++i) {
-        // The last bucket is +Inf, so we always increment.
-        if (value <= classicUpperBounds[i]) {
-          classicBuckets[i].add(1);
-          break;
-        }
+      if (classicUpperBounds.length > 0) {
+        classicBuckets[findClassicBucket(value)].add(1);
       }
       boolean nativeBucketCreated = false;
       if (Histogram.this.nativeInitialSchema != CLASSIC_HISTOGRAM) {
@@ -301,6 +314,17 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     private HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
       Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
+      if (classicOnlyAccumulator != null) {
+        // collect() is intentionally allowed to return a stale snapshot for a paused recorder; a
+        // later collection, after the intervening buffer rotation, retries its buffer.
+        ClassicOnlyAccumulator.Snapshot snapshot = classicOnlyAccumulator.snapshot();
+        return new HistogramSnapshot.HistogramDataPointSnapshot(
+            ClassicHistogramBuckets.of(classicUpperBounds, snapshot.buckets),
+            snapshot.sum,
+            labels,
+            exemplars,
+            createdTimeMillis);
+      }
       return buffer.run(
           expectedCount -> count.sum() == expectedCount,
           () -> {
@@ -340,6 +364,20 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             }
           },
           v -> doObserve(v, true));
+    }
+
+    private boolean isClassicOnly() {
+      return Histogram.this.nativeInitialSchema == CLASSIC_HISTOGRAM;
+    }
+
+    private int findClassicBucket(double value) {
+      for (int i = 0; i < classicUpperBounds.length; ++i) {
+        // The last bucket is +Inf, so we always return from this loop.
+        if (value <= classicUpperBounds[i]) {
+          return i;
+        }
+      }
+      throw new IllegalStateException("Classic histogram is missing the +Inf bucket.");
     }
 
     private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {
