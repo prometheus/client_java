@@ -205,25 +205,39 @@ public class TextFormatUtil {
   }
 
   static void writeName(Writer writer, String name, NameType nameType) throws IOException {
-    switch (nameType) {
-      case Metric:
-        if (PrometheusNaming.isValidLegacyMetricName(name)) {
-          writer.write(name);
-          return;
-        }
-        break;
-      case Label:
-        if (PrometheusNaming.isValidLegacyLabelName(name)) {
-          writer.write(name);
-          return;
-        }
-        break;
-      default:
-        throw new RuntimeException("Invalid name type requested: " + nameType);
+    writeName(writer, name, nameType, isValidLegacyName(name, nameType));
+  }
+
+  /**
+   * Variant of {@link #writeName(Writer, String, NameType)} for callers that already know whether
+   * {@code name} is a valid legacy name. The metric name is constant across all data points of a
+   * metric family, so a caller can scan it once per family (via {@link #isValidLegacyName}) and
+   * hoist the check out of the per-data-point loop instead of re-scanning the same string for every
+   * series.
+   */
+  static void writeName(Writer writer, String name, NameType nameType, boolean validLegacyName)
+      throws IOException {
+    if (validLegacyName) {
+      writer.write(name);
+      return;
+    }
+    if (nameType != NameType.Metric && nameType != NameType.Label) {
+      throw new RuntimeException("Invalid name type requested: " + nameType);
     }
     writer.write('"');
     writeEscapedString(writer, name);
     writer.write('"');
+  }
+
+  static boolean isValidLegacyName(String name, NameType nameType) {
+    switch (nameType) {
+      case Metric:
+        return PrometheusNaming.isValidLegacyMetricName(name);
+      case Label:
+        return PrometheusNaming.isValidLegacyLabelName(name);
+      default:
+        throw new RuntimeException("Invalid name type requested: " + nameType);
+    }
   }
 
   /**

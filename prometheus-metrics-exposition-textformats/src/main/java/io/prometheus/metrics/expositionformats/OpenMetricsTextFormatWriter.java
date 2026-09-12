@@ -146,12 +146,13 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     String counterName = resolveExpositionName(metadata, "_total", scheme);
     String baseName = resolveBaseName(counterName, "_total");
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(counterName);
     writeMetadataWithName(writer, baseName, "counter", metadata);
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
-      writeCreated(writer, baseName, data, scheme);
+      writeCreated(writer, baseName, data, scheme, nameValidLegacy);
     }
   }
 
@@ -160,8 +161,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "gauge", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getValue());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
@@ -197,6 +199,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     String bucketName = name + "_bucket";
     String countName = name + countSuffix;
     String sumName = name + sumSuffix;
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (HistogramSnapshot.HistogramDataPointSnapshot data : dataList) {
       ClassicHistogramBuckets buckets = getClassicBuckets(data);
       Exemplars exemplars = data.getExemplars();
@@ -204,7 +207,14 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       for (int i = 0; i < buckets.size(); i++) {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
-            writer, bucketName, null, data.getLabels(), scheme, "le", buckets.getUpperBound(i));
+            writer,
+            bucketName,
+            null,
+            data.getLabels(),
+            scheme,
+            "le",
+            buckets.getUpperBound(i),
+            nameValidLegacy);
         writeLong(writer, cumulativeCount);
         Exemplar exemplar;
         if (i == 0) {
@@ -216,9 +226,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       }
       // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
       if (data.hasCount() && data.hasSum()) {
-        writeCountAndSum(writer, countName, sumName, data, exemplars, scheme);
+        writeCountAndSum(writer, countName, sumName, data, exemplars, scheme, nameValidLegacy);
       }
-      writeCreated(writer, name, data, scheme);
+      writeCreated(writer, name, data, scheme, nameValidLegacy);
     }
   }
 
@@ -239,6 +249,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     String name = getMetadataName(metadata, scheme);
     String countName = name + "_count";
     String sumName = name + "_sum";
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
         continue;
@@ -256,7 +267,14 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       int exemplarIndex = 1;
       for (Quantile quantile : data.getQuantiles()) {
         writeNameAndLabels(
-            writer, name, null, data.getLabels(), scheme, "quantile", quantile.getQuantile());
+            writer,
+            name,
+            null,
+            data.getLabels(),
+            scheme,
+            "quantile",
+            quantile.getQuantile(),
+            nameValidLegacy);
         writeDouble(writer, quantile.getValue());
         if (exemplars.size() > 0 && exemplarsOnAllMetricTypesEnabled) {
           exemplarIndex = (exemplarIndex + 1) % exemplars.size();
@@ -266,8 +284,8 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         }
       }
       // Unlike histograms, summaries can have only a count or only a sum according to OpenMetrics.
-      writeCountAndSum(writer, countName, sumName, data, exemplars, scheme);
-      writeCreated(writer, name, data, scheme);
+      writeCountAndSum(writer, countName, sumName, data, exemplars, scheme, nameValidLegacy);
+      writeCreated(writer, name, data, scheme, nameValidLegacy);
     }
   }
 
@@ -276,9 +294,10 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     String infoName = resolveExpositionName(metadata, "_info", scheme);
     String baseName = resolveBaseName(infoName, "_info");
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(infoName);
     writeMetadataWithName(writer, baseName, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme, nameValidLegacy);
       writer.write("1");
       writeScrapeTimestampAndExemplar(writer, data, null, scheme);
     }
@@ -325,8 +344,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "unknown", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getValue());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, data.getExemplar(), scheme);
@@ -342,10 +362,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       String sumName,
       DistributionDataPointSnapshot data,
       Exemplars exemplars,
-      EscapingScheme scheme)
+      EscapingScheme scheme,
+      boolean nameValidLegacy)
       throws IOException {
     if (data.hasCount()) {
-      writeNameAndLabels(writer, countName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, countName, null, data.getLabels(), scheme, nameValidLegacy);
       writeLong(writer, data.getCount());
       if (exemplarsOnAllMetricTypesEnabled) {
         writeScrapeTimestampAndExemplar(writer, data, exemplars.getLatest(), scheme);
@@ -354,17 +375,21 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       }
     }
     if (data.hasSum()) {
-      writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getSum());
       writeScrapeTimestampAndExemplar(writer, data, null, scheme);
     }
   }
 
   private void writeCreated(
-      Writer writer, String baseName, DataPointSnapshot data, EscapingScheme scheme)
+      Writer writer,
+      String baseName,
+      DataPointSnapshot data,
+      EscapingScheme scheme,
+      boolean nameValidLegacy)
       throws IOException {
     if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-      writeNameAndLabels(writer, baseName, "_created", data.getLabels(), scheme);
+      writeNameAndLabels(writer, baseName, "_created", data.getLabels(), scheme, nameValidLegacy);
       writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
       if (data.hasScrapeTimestamp()) {
         writer.write(' ');
@@ -379,9 +404,10 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       String name,
       @Nullable String suffix,
       Labels labels,
-      EscapingScheme escapingScheme)
+      EscapingScheme escapingScheme,
+      boolean nameValidLegacy)
       throws IOException {
-    writeNameAndLabels(writer, name, suffix, labels, escapingScheme, null, 0.0);
+    writeNameAndLabels(writer, name, suffix, labels, escapingScheme, null, 0.0, nameValidLegacy);
   }
 
   private void writeNameAndLabels(
@@ -391,16 +417,19 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       Labels labels,
       EscapingScheme escapingScheme,
       @Nullable String additionalLabelName,
-      double additionalLabelValue)
+      double additionalLabelValue,
+      boolean nameValidLegacy)
       throws IOException {
     boolean metricInsideBraces = false;
-    // If the name does not pass the legacy validity check, we must put the
-    // metric name inside the braces.
-    if (!PrometheusNaming.isValidLegacyMetricName(name)) {
+    // If the name does not pass the legacy validity check, we must put the metric name inside the
+    // braces. Validity is scanned once per family by the caller (the metric name is constant across
+    // all data points), not re-scanned for every series. A suffix built from legacy characters
+    // (_total, _bucket, ...) does not change legacy validity, so the base-name check applies here.
+    if (!nameValidLegacy) {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric);
+    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric, nameValidLegacy);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer,
