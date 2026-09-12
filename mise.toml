@@ -4,7 +4,7 @@
 hugo = "0.165.0"
 java = "temurin-25.0.3+9.0.LTS"
 node = "24.20.0"
-protoc = "36.0"
+protoc = "36.1"
 
 # Linters
 actionlint = "1.7.12"
