@@ -67,10 +67,19 @@ class PrometheusClassicHistogram extends PrometheusData<HistogramPointData>
     return result;
   }
 
+  /**
+   * OpenTelemetry explicit bucket boundaries are finite: the {@code +Inf} bucket is implicit, so
+   * {@code counts} has one more entry than {@code boundaries}. The count of the {@code +Inf} bucket
+   * is kept as the last element of {@link #makeCounts(ClassicHistogramBuckets)}.
+   */
   private List<Double> makeBoundaries(ClassicHistogramBuckets buckets) {
     List<Double> result = new ArrayList<>(buckets.size());
     for (int i = 0; i < buckets.size(); i++) {
-      result.add(buckets.getUpperBound(i));
+      double upperBound = buckets.getUpperBound(i);
+      if (upperBound == Double.POSITIVE_INFINITY) {
+        continue;
+      }
+      result.add(upperBound);
     }
     return result;
   }
