@@ -126,7 +126,12 @@ final class CKMSQuantiles {
       samples.addFirst(new Sample(value, 0));
     } else {
       iterator.previous();
-      iterator.add(new Sample(value, f(r) - 1));
+      // delta is bounded by maxWidthNotCrossingTargets(r) in addition to the paper's f(r) - 1:
+      // for a targeted quantile with 2*epsilon >= 1-quantile, f(r) below the target is of order
+      // n-r, and a freshly inserted sample with such a delta has a possible-rank interval
+      // centered near rank n regardless of its position — indistinguishable in get() from a
+      // genuine sample near a target. See maxWidthNotCrossingTargets.
+      iterator.add(new Sample(value, effectiveMaxWidth(r) - 1));
       iterator.next();
     }
   }
@@ -147,25 +152,40 @@ final class CKMSQuantiles {
       return samples.getLast().value;
     }
 
+    // Return the value of the sample that minimizes the worst-case rank error. The true rank
+    // of samples.get(i) is somewhere in [r(i), r(i) + delta(i)] with
+    // r(i) = g(0) + ... + g(i), so if that sample is picked the rank error can be as large as
+    // max(|r(i) - desiredRank|, |r(i) + delta(i) - desiredRank|), which equals the distance
+    // of the interval's center from the desired rank plus half the interval's width. Wide
+    // samples are penalized by their width: a narrow sample slightly off-center beats a wide
+    // sample whose center happens to fall near the desired rank.
+    //
+    // Note that the previous implementation ("stop at the first sample with
+    // r + g + delta > desiredRank + f(desiredRank)/2 and return the value of the sample
+    // before it") is only correct if g + delta is small for all samples up to the target
+    // rank. With targeted quantiles the error function f() allows g + delta to be large at
+    // ranks far below a target quantile (for a target (q, epsilon) and rank r < q*n it
+    // allows 2*epsilon*(n-r)/(1-q)), and freshly inserted samples used to get
+    // delta = f(r) - 1 (and flush() above guarantees freshly inserted samples are present).
+    // Such a sample tripped the old stop condition long before the target rank, so get()
+    // returned a value from a far lower quantile than requested. For example, with
+    // quantiles {(0.9, 0.05), (0.99, 0.005)} get(0.99) returned the minimum observation.
+    // Sample widths are additionally bounded by maxWidthNotCrossingTargets at insert and
+    // merge time, so near a target quantile the possible-rank intervals are tight.
     int r = 0; // sum of g's left of the current sample
     int desiredRank = (int) Math.ceil(q * n);
-    int upperBound = desiredRank + f(desiredRank) / 2;
-
-    ListIterator<Sample> iterator = samples.listIterator();
-    while (iterator.hasNext()) {
-      Sample sample = iterator.next();
-      if (r + sample.g + sample.delta > upperBound) {
-        iterator.previous(); // roll back the item.next() above
-        if (iterator.hasPrevious()) {
-          Sample result = iterator.previous();
-          return result.value;
-        } else {
-          return sample.value;
-        }
+    double bestDistance = Double.MAX_VALUE;
+    Sample bestSample = samples.getFirst();
+    for (Sample sample : samples) {
+      double rankEstimate = r + sample.g + sample.delta / 2.0;
+      double distance = Math.abs(rankEstimate - desiredRank) + sample.delta / 2.0;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestSample = sample;
       }
       r += sample.g;
     }
-    return samples.getLast().value;
+    return bestSample.value;
   }
 
   /** Error function, as in definition 5 of the paper. */
@@ -192,6 +212,67 @@ final class CKMSQuantiles {
     return Math.max(minResult, 1);
   }
 
+  /**
+   * Maximum width (g + delta) of a sample whose predecessor has rank r such that the sample keeps
+   * enough resolution around the accuracy window [quantile*n - epsilon*n, quantile*n + epsilon*n]
+   * of every target quantile: below a window a sample may extend at most max(windowStart - r,
+   * 2*epsilon*n) — it can intrude into the window but never reach the window's end — and any sample
+   * overlapping a window has width at most the window's size 2*epsilon*n. So no single sample can
+   * span a whole window, and resolution around each target stays at the window scale: the center of
+   * a sample's possible-rank interval is within epsilon*n of any rank the sample covers inside the
+   * window.
+   *
+   * <p>This is needed in addition to the error function f(): for a target (quantile, epsilon) and
+   * rank r below the target, f() allows a width of 2*epsilon*(n-r)/(1-quantile). When 2*epsilon >=
+   * (1-quantile) — e.g. (0.9, 0.05) or (0.99, 0.005) — this is >= (n-r), i.e. a single sample may
+   * span all ranks from r to n. Two failure modes follow: compress() merges away all samples
+   * between r and n, permanently destroying the information needed to answer the quantile query
+   * (with quantiles {(0.9, 0.05), (0.99, 0.005)} the sample list collapsed to 3 samples regardless
+   * of how many values were inserted, and get() returned the minimum observation for every
+   * quantile), and insertBefore() assigns freshly inserted samples a delta of the same order, so
+   * their possible-rank intervals are centered near rank n and get() cannot tell them apart from
+   * genuine samples near a target. This bound is therefore applied both when merging in compress()
+   * and when assigning delta in insertBefore(). For configurations with 2*epsilon < (1-quantile)
+   * this bound is larger than f() near the target, so behavior is mostly unchanged.
+   *
+   * <p>The bound is anchored at the window's start rather than its end so that it does not
+   * degenerate for targets with quantile + epsilon >= 1 (e.g. (0.95, 0.05) or (0.99, 0.01)), where
+   * the window's end is rank n and "may not extend past the window's end" would be no constraint at
+   * all.
+   *
+   * <p>This is intentionally not part of the per-sample invariant (g + delta <= f(r)): the bound
+   * depends on n while a sample's delta is fixed at insert time, so it cannot be maintained as a
+   * static invariant — but enforcing it at insert and merge time is what matters, because those are
+   * the only operations that create sample widths.
+   */
+  int maxWidthNotCrossingTargets(int r) {
+    double min = Double.MAX_VALUE;
+    for (Quantile q : quantiles) {
+      if (q.quantile == 0 || q.quantile == 1) {
+        continue;
+      }
+      double windowStart = q.quantile * n - q.epsilon * n;
+      double windowEnd = q.quantile * n + q.epsilon * n;
+      if (r < windowEnd) {
+        min = Math.min(min, Math.max(windowStart - r, 2 * q.epsilon * n));
+      }
+    }
+    if (min == Double.MAX_VALUE) {
+      return Integer.MAX_VALUE;
+    }
+    return Math.max((int) (min + 0.00000000001), 1);
+  }
+
+  /**
+   * Effective maximum width (g + delta) of a sample whose predecessor has rank r: the error
+   * function f() additionally bounded by {@link #maxWidthNotCrossingTargets(int)}. Both places that
+   * create sample widths — merging in compress() and delta assignment in insertBefore() — must use
+   * this combined bound.
+   */
+  int effectiveMaxWidth(int r) {
+    return Math.min(f(r), maxWidthNotCrossingTargets(r));
+  }
+
   /** Merge pairs of consecutive samples if this doesn't violate the error function. */
   void compress() {
     if (samples.size() < 3) {
@@ -212,7 +293,7 @@ final class CKMSQuantiles {
         // The min sample must never be merged.
         break;
       }
-      if (left.g + right.g + right.delta < f(r)) {
+      if (left.g + right.g + right.delta < effectiveMaxWidth(r)) {
         right.g += left.g;
         descendingIterator.remove();
         left = right;

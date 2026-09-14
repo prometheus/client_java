@@ -157,7 +157,11 @@ abstract class ExporterIT extends ExporterTest {
     start("error");
     Response response = scrape("GET", "");
     assertThat(response.status).isEqualTo(500);
-    assertThat(response.stringBody()).contains("Simulating an error.");
+    assertErrorResponseBody(response.stringBody());
+  }
+
+  protected void assertErrorResponseBody(String body) {
+    assertThat(body).contains("Simulating an error.");
   }
 
   @Test

@@ -129,8 +129,7 @@
         "ubuntu"
       ],
       "regex": [
-        "micrometer-metrics/micrometer",
-        "zeitlinger/micrometer"
+        "micrometer-metrics/micrometer"
       ]
     },
     ".github/workflows/multi-version-test.yml": {
@@ -224,21 +223,6 @@
         "jdx/mise",
         "jdx/mise-action",
         "ubuntu"
-      ]
-    },
-    ".mise/envs/jmx-exporter/mise.toml": {
-      "mise": [
-        "java"
-      ]
-    },
-    ".mise/envs/micrometer/mise.toml": {
-      "mise": [
-        "java"
-      ]
-    },
-    ".mise/envs/native/mise.toml": {
-      "mise": [
-        "java"
       ]
     },
     ".mvn/wrapper/maven-wrapper.properties": {

@@ -25,6 +25,7 @@ import java.net.http.HttpResponse;
 import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,7 @@ class HTTPServerTest {
   }
 
   @Test
-  public void testSubjectDoAs() throws Exception {
+  void testSubjectDoAs() throws Exception {
     final String user = "joe";
     final Subject subject = new Subject();
     subject.getPrincipals().add(() -> user);
@@ -159,6 +160,22 @@ class HTTPServerTest {
   }
 
   @Test
+  void defaultExecutorHasBoundedQueueAndNonBlockingRejection() throws Exception {
+    HTTPServer server = HTTPServer.builder().port(0).buildAndStart();
+    try {
+      assertThat(server.executorService).isInstanceOf(ThreadPoolExecutor.class);
+      ThreadPoolExecutor executor = (ThreadPoolExecutor) server.executorService;
+      assertThat(executor.getCorePoolSize()).isEqualTo(10);
+      assertThat(executor.getMaximumPoolSize()).isEqualTo(10);
+      assertThat(executor.getQueue().remainingCapacity()).isEqualTo(100);
+      assertThat(executor.getRejectedExecutionHandler())
+          .isInstanceOf(ThreadPoolExecutor.AbortPolicy.class);
+    } finally {
+      server.stop();
+    }
+  }
+
+  @Test
   void registryThrows() throws Exception {
     HTTPServer server =
         HTTPServer.builder()
@@ -171,7 +188,7 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
+    run(server, "/metrics", 500, "An internal error occurred while scraping metrics");
   }
 
   @Test

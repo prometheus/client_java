@@ -90,7 +90,7 @@ If you're getting errors when running tests:
 ### Running native tests
 
 ```shell
-mise --cd .mise/envs/native run native-test
+mise run native-test
 ```
 
 ### Avoid failures while running tests

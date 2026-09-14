@@ -12,14 +12,13 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -38,6 +37,10 @@ import javax.security.auth.Subject;
  */
 @StableApi
 public class HTTPServer implements Closeable {
+
+  private static final int DEFAULT_MIN_THREADS = 10;
+  private static final int DEFAULT_MAX_THREADS = 10;
+  private static final int DEFAULT_QUEUE_SIZE = 100;
 
   static {
     if (!System.getProperties().containsKey("sun.net.httpserver.maxReqTime")) {
@@ -61,7 +64,8 @@ public class HTTPServer implements Closeable {
       @Nullable String authenticatedSubjectAttributeName,
       @Nullable HttpHandler defaultHandler,
       @Nullable String metricsHandlerPath,
-      @Nullable Boolean registerHealthHandler) {
+      @Nullable Boolean registerHealthHandler,
+      HttpErrorHandlingPolicy errorHandlingPolicy) {
     if (httpServer.getAddress() == null) {
       throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
     }
@@ -85,7 +89,7 @@ public class HTTPServer implements Closeable {
     }
     registerHandler(
         metricsPath,
-        new MetricsHandler(config, registry),
+        new MetricsHandler(config, registry, errorHandlingPolicy),
         authenticator,
         authenticatedSubjectAttributeName);
     if (registerHealthHandler == null || registerHealthHandler) {
@@ -153,20 +157,12 @@ public class HTTPServer implements Closeable {
             }
           }
         } else {
-          drainInputAndClose(exchange);
+          exchange.getRequestBody().close();
           exchange.sendResponseHeaders(403, -1);
+          exchange.close();
         }
       }
     };
-  }
-
-  private void drainInputAndClose(HttpExchange httpExchange) throws IOException {
-    InputStream inputStream = httpExchange.getRequestBody();
-    byte[] b = new byte[4096];
-    while (inputStream.read(b) != -1) {
-      // nop
-    }
-    inputStream.close();
   }
 
   /** Stop the HTTP server. Same as {@link #close()}. */
@@ -211,6 +207,7 @@ public class HTTPServer implements Closeable {
     @Nullable private HttpHandler defaultHandler = null;
     @Nullable private String metricsHandlerPath = null;
     @Nullable private Boolean registerHealthHandler = null;
+    private HttpErrorHandlingPolicy errorHandlingPolicy = HttpErrorHandlingPolicy.builder().build();
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -295,6 +292,20 @@ public class HTTPServer implements Closeable {
       return this;
     }
 
+    /**
+     * Configure how exceptions raised while scraping metrics are reported to the client and
+     * optionally to a caller-supplied diagnostic sink.
+     *
+     * <p>Default is {@code HttpErrorHandlingPolicy.builder().build()}.
+     */
+    public Builder errorHandlingPolicy(HttpErrorHandlingPolicy errorHandlingPolicy) {
+      if (errorHandlingPolicy == null) {
+        throw new NullPointerException("errorHandlingPolicy");
+      }
+      this.errorHandlingPolicy = errorHandlingPolicy;
+      return this;
+    }
+
     /** Build and start the HTTPServer. */
     public HTTPServer buildAndStart() throws IOException {
       if (registry == null) {
@@ -318,7 +329,8 @@ public class HTTPServer implements Closeable {
           authenticatedSubjectAttributeName,
           defaultHandler,
           metricsHandlerPath,
-          registerHealthHandler);
+          registerHealthHandler,
+          errorHandlingPolicy);
     }
 
     private InetSocketAddress makeInetSocketAddress() {
@@ -337,13 +349,12 @@ public class HTTPServer implements Closeable {
         return executorService;
       } else {
         return new ThreadPoolExecutor(
-            1,
-            10,
+            DEFAULT_MIN_THREADS,
+            DEFAULT_MAX_THREADS,
             120,
             TimeUnit.SECONDS,
-            new SynchronousQueue<>(true),
-            NamedDaemonThreadFactory.defaultThreadFactory(true),
-            new BlockingRejectedExecutionHandler());
+            new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE),
+            NamedDaemonThreadFactory.defaultThreadFactory(true));
       }
     }
 
