@@ -120,7 +120,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.15.0</version>
+          <version>3.16.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -149,7 +149,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.5.6</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
@@ -176,7 +176,7 @@
         <plugin>
           <groupId>com.github.siom79.japicmp</groupId>
           <artifactId>japicmp-maven-plugin</artifactId>
-          <version>0.26.1</version>
+          <version>0.26.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -258,7 +258,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>6.1.0</version>
+        <version>6.1.2</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -482,7 +482,7 @@
                 <path>
                   <groupId>com.uber.nullaway</groupId>
                   <artifactId>nullaway</artifactId>
-                  <version>0.14.0</version>
+                  <version>0.14.1</version>
                 </path>
               </annotationProcessorPaths>
             </configuration>
