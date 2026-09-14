@@ -243,7 +243,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         return;
       }
       if (!buffer.append(value)) {
-        doObserve(value, false);
+        boolean nativeBucketCreated = buffer.observeDirect(() -> doObserve(value));
+        maybeResetOrScaleDown(value, nativeBucketCreated);
       }
       if (exemplarSampler != null) {
         exemplarSampler.observe(value);
@@ -257,14 +258,15 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         return;
       }
       if (!buffer.append(value)) {
-        doObserve(value, false);
+        boolean nativeBucketCreated = buffer.observeDirect(() -> doObserve(value));
+        maybeResetOrScaleDown(value, nativeBucketCreated);
       }
       if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }
 
-    private void doObserve(double value, boolean fromBuffer) {
+    private boolean doObserve(double value) {
       // classicUpperBounds is an empty array if this is a native histogram only.
       for (int i = 0; i < classicUpperBounds.length; ++i) {
         // The last bucket is +Inf, so we always increment.
@@ -287,16 +289,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       count
           .increment(); // must be the last step, because count is used to signal that the operation
       // is complete.
-      if (!fromBuffer) {
-        // maybeResetOrScaleDown will switch to the buffer,
-        // which won't work if we are currently still processing observations from the buffer.
-        // The reason is that before switching to the buffer we wait for all pending observations to
-        // be counted.
-        // If we do this while still applying observations from the buffer, the pending observations
-        // from
-        // the buffer will never be counted, and the buffer.run() method will wait forever.
-        maybeResetOrScaleDown(value, nativeBucketCreated);
-      }
+      return nativeBucketCreated;
     }
 
     private HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
@@ -339,7 +332,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
                   createdTimeMillis);
             }
           },
-          v -> doObserve(v, true));
+          this::doObserve);
     }
 
     private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {
@@ -444,7 +437,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
               }
               return null;
             },
-            v -> doObserve(v, true));
+            this::doObserve,
+            false);
       } else if (nativeBucketCreated) {
         // If a new bucket was created we need to check if nativeMaxBuckets is exceeded
         // and scale down if so.
@@ -453,7 +447,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (wasReset.get()) {
         // We just discarded the newly observed value. Observe it again.
         if (!buffer.append(value)) {
-          doObserve(value, true);
+          buffer.observeDirect(
+              () -> {
+                doObserve(value);
+                return null;
+              });
         }
       }
     }
@@ -488,7 +486,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             doubleBucketWidth();
             return null;
           },
-          v -> doObserve(v, true));
+          this::doObserve,
+          false);
     }
 
     // maybeReset is called in the synchronized block while new observations go into the buffer.
