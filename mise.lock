@@ -93,43 +93,43 @@ url_api = "https://api.github.com/repos/grafana/flint/releases/assets/522531464"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
-version = "v1.2.0"
+version = "v1.3.0"
 backend = "aqua:grafana/gcx"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64"]
-checksum = "sha256:f4d37f632b176d3afeb01d147efe954195d8397e779cabda6e3f8f2b2e61134c"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181505"
+checksum = "sha256:87bb59227e92666dbe29e5b33f17689c3bf537128c572533a2600e501291273d"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022714"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64-musl"]
-checksum = "sha256:f4d37f632b176d3afeb01d147efe954195d8397e779cabda6e3f8f2b2e61134c"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181505"
+checksum = "sha256:87bb59227e92666dbe29e5b33f17689c3bf537128c572533a2600e501291273d"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022714"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64"]
-checksum = "sha256:3738abc3852e0aecd6220e065f6f6a0014597fbdaf09adbaf4aa99283e423012"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181462"
+checksum = "sha256:86f2a691bab958519a8f8c5824af492198294fab3d2dab293dd4d458600348cb"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022614"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64-musl"]
-checksum = "sha256:3738abc3852e0aecd6220e065f6f6a0014597fbdaf09adbaf4aa99283e423012"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181462"
+checksum = "sha256:86f2a691bab958519a8f8c5824af492198294fab3d2dab293dd4d458600348cb"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022614"
 
 [tools."aqua:grafana/gcx"."platforms.macos-arm64"]
-checksum = "sha256:264d6c56097d5f0768c991932283de9e2fd3805fd8ebf52476f94fcbbf5a0aaa"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181514"
+checksum = "sha256:de895bab2daf87755901dc8ddf369ca25d0b6086cb2d8c35a4efe08b75e10999"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022618"
 
 [tools."aqua:grafana/gcx"."platforms.macos-x64"]
-checksum = "sha256:52c9ae1483ec2d2b1605186777d2ad26c30f4a3856040b9fa544a195d4cee8e9"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181456"
+checksum = "sha256:70b0443846616a20fc7077e94afe96f13fac1bbe04effe463008a75bb6ee1544"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022615"
 
 [tools."aqua:grafana/gcx"."platforms.windows-x64"]
-checksum = "sha256:67290432094654ab3dd4a6c65022e63740500147cc58818e88ab9dbd60e21048"
-url = "https://github.com/grafana/gcx/releases/download/v1.2.0/gcx_1.2.0_windows_amd64.zip"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/529181461"
+checksum = "sha256:93b49d9e0f2ee00e8090f19aa715192da7c49b6564db303d50aa0254b1af1a6a"
+url = "https://github.com/grafana/gcx/releases/download/v1.3.0/gcx_1.3.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/563022717"
 
 [[tools."aqua:grafana/oats"]]
 version = "0.10.0"
