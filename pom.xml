@@ -20,7 +20,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
-    <protobuf-java.version>4.36.0</protobuf-java.version>
+    <protobuf-java.version>4.36.1</protobuf-java.version>
     <guava.version>33.7.1-jre</guava.version>
     <junit-pioneer.version>2.3.0</junit-pioneer.version>
     <awaitility.version>4.3.0</awaitility.version>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.18</version>
+      <version>2.0.19</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -124,7 +124,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.6</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
@@ -166,12 +166,12 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.6.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
-          <version>3.6.3</version>
+          <version>3.6.4</version>
         </plugin>
         <plugin>
           <groupId>com.github.siom79.japicmp</groupId>
@@ -291,7 +291,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.0</version>
         <configuration>
           <rulesUri>file://${project.basedir}/version-rules.xml</rulesUri>
         </configuration>
