@@ -19,12 +19,31 @@
     <jmh.version>1.37</jmh.version>
     <simpleclient.version>0.16.0</simpleclient.version>
     <codahale.version>3.0.2</codahale.version>
+    <!-- TODO: remove once opentelemetry-instrumentation-bom-alpha ships with otel 1.66.0. -->
+    <benchmark.otel.version>1.66.0</benchmark.otel.version>
     <coverage.skip>true</coverage.skip>
     <javadoc.skip>true</javadoc.skip>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- TODO: remove these two BOM imports once opentelemetry-instrumentation-bom-alpha
+           ships with otel 1.66.0. They must be listed before the instrumentation BOM so
+           their versions win. -->
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>${benchmark.otel.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom-alpha</artifactId>
+        <version>${benchmark.otel.version}-alpha</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>io.opentelemetry.instrumentation</groupId>
         <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
@@ -72,6 +91,10 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-testing</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api-incubator</artifactId>
     </dependency>
   </dependencies>
   <build>
