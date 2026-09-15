@@ -470,6 +470,60 @@ def generate_comparison_section(
     return md
 
 
+def allocation_score(result: dict) -> float | None:
+    """Read normalized GC allocation, accepting zero but not missing/invalid data."""
+    metric = result.get("secondaryMetrics", {}).get("gc.alloc.rate.norm", {})
+    if metric.get("scoreUnit") != "B/op":
+        return None
+    try:
+        score = float(metric.get("score"))
+    except (TypeError, ValueError):
+        return None
+    return score if math.isfinite(score) and score >= 0 else None
+
+
+def generate_allocation_section(results: list, baseline_results: list) -> list[str]:
+    """Show allocation separately from the throughput/latency regression verdict."""
+    baseline_by_name = {b.get("benchmark", ""): b for b in baseline_results}
+    rows = []
+    for head in sorted(results, key=lambda b: b.get("benchmark", "")):
+        name = head.get("benchmark", "")
+        baseline = baseline_by_name.get(name, {})
+        head_score = allocation_score(head)
+        base_score = allocation_score(baseline)
+        if head_score is None and base_score is None:
+            continue
+        head_text = "—" if head_score is None else f"{head_score:.3f}"
+        base_text = "—" if base_score is None else f"{base_score:.3f}"
+        change = "—"
+        if (
+            head_score is not None
+            and base_score is not None
+            and comparable_metadata(head, baseline)
+        ):
+            change = f"{head_score - base_score:+.3f}"
+        rows.append(
+            f"| {short_benchmark_name(name)} | {head_text} | {base_text} | {change} |"
+        )
+    if not rows:
+        return []
+    return [
+        "## Allocation per operation",
+        "",
+        "JMH GC profiler `gc.alloc.rate.norm`, in bytes per benchmark operation (lower is better).",
+        (
+            "Delta is PR minus base, shown only for matching benchmark configurations. "
+            "Values are descriptive, not statistical regression verdicts; "
+            "— means unavailable or not comparable. Each benchmark defines its own operation."
+        ),
+        "",
+        "| Benchmark | PR B/op | Base B/op | Delta B/op |",
+        "|:----------|--------:|----------:|-----------:|",
+        *rows,
+        "",
+    ]
+
+
 def generate_markdown(
     results: list,
     commit_sha: str,
@@ -488,7 +542,7 @@ def generate_markdown(
     first = results[0] if results else {}
     jdk_version = first.get("jdkVersion", "unknown")
     vm_name = first.get("vmName", "unknown")
-    threads = first.get("threads", "?")
+    threads = "/".join(sorted({str(b.get("threads", "?")) for b in results})) or "?"
     forks = first.get("forks", "?")
     warmup_iters = first.get("warmupIterations", "?")
     measure_iters = first.get("measurementIterations", "?")
@@ -619,9 +673,11 @@ def generate_markdown(
             )
         md.append("")
 
+    md.extend(generate_allocation_section(results, baseline_results or []))
+
     md.append("### Raw Results")
     md.append("")
-    md.append("```")
+    md.append("```text")
     md.append(
         f"{'Benchmark':<50} {'Mode':>6} {'Cnt':>4} {'Score':>14} {'Error':>12}  Units"
     )
@@ -680,8 +736,8 @@ def generate_markdown(
     md.append("| Benchmark | Description |")
     md.append("|:----------|:------------|")
     md.append(
-        "| **CounterBenchmark** | Counter increment performance: "
-        "Prometheus, OpenTelemetry, simpleclient, Codahale |"
+        "| **CounterBenchmark** | Counter updates and label-value lookup "
+        "(selected methods only) |"
     )
     md.append(
         "| **HistogramBenchmark** | Histogram observation performance "
