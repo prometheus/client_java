@@ -178,4 +178,65 @@ class TextFormatUtilTest {
     assertThat(merged.isGaugeHistogram()).isTrue();
     assertThat(merged.getDataPoints()).hasSize(2);
   }
+
+  @Test
+  void testMergeDuplicates_uniqueNames_returnsSameInstance() {
+    CounterSnapshot counter1 =
+        CounterSnapshot.builder()
+            .name("api_responses")
+            .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
+            .build();
+    CounterSnapshot counter2 =
+        CounterSnapshot.builder()
+            .name("api_errors")
+            .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(2).build())
+            .build();
+
+    MetricSnapshots snapshots = new MetricSnapshots(counter1, counter2);
+
+    // No duplicate prometheus names, so the fast path returns the input unchanged rather
+    // than rebuilding it. isSameAs pins that: an inverted condition would rebuild and fail here.
+    assertThat(TextFormatUtil.mergeDuplicates(snapshots)).isSameAs(snapshots);
+  }
+
+  @Test
+  void testMergeDuplicates_duplicateNotAtStart_merges() {
+    CounterSnapshot a =
+        CounterSnapshot.builder()
+            .name("a")
+            .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
+            .build();
+    CounterSnapshot m =
+        CounterSnapshot.builder()
+            .name("m")
+            .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
+            .build();
+    CounterSnapshot z1 =
+        CounterSnapshot.builder()
+            .name("z")
+            .dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(Labels.of("outcome", "SUCCESS"))
+                    .value(1)
+                    .build())
+            .build();
+    CounterSnapshot z2 =
+        CounterSnapshot.builder()
+            .name("z")
+            .dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(Labels.of("outcome", "FAILURE"))
+                    .value(2)
+                    .build())
+            .build();
+
+    // Sorted by prometheus name the duplicate "z" pair is last (indices 2 and 3), so
+    // detection must scan the whole range, not just the first pair.
+    MetricSnapshots snapshots = new MetricSnapshots(a, m, z1, z2);
+    MetricSnapshots result = TextFormatUtil.mergeDuplicates(snapshots);
+
+    assertThat(result).hasSize(3);
+    assertThat(result.get(2).getMetadata().getName()).isEqualTo("z");
+    assertThat(result.get(2).getDataPoints()).hasSize(2);
+  }
 }
