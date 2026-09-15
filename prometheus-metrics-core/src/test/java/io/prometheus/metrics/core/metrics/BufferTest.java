@@ -78,6 +78,45 @@ class BufferTest {
   }
 
   @Test
+  void failedSnapshotReplaysBufferedObservationsAndAllowsNextCollection() {
+    assertFailedSnapshotIsRecovered(new IllegalStateException("snapshot failed"));
+  }
+
+  @Test
+  void failedSnapshotWithErrorStillDeactivatesAndReplaysBuffer() {
+    assertFailedSnapshotIsRecovered(new AssertionError("snapshot failed"));
+  }
+
+  private void assertFailedSnapshotIsRecovered(Throwable failure) {
+    Buffer buffer = new Buffer();
+    List<Double> replayedObservations = new ArrayList<>();
+
+    assertThatExceptionOfType(failure.getClass())
+        .isThrownBy(
+            () ->
+                buffer.run(
+                    ignored -> true,
+                    () -> {
+                      assertThat(buffer.append(1.0)).isTrue();
+                      if (failure instanceof Error) {
+                        throw (Error) failure;
+                      }
+                      throw (RuntimeException) failure;
+                    },
+                    replayedObservations::add))
+        .isSameAs(failure);
+    assertThat(replayedObservations).containsExactly(1.0);
+    assertThat(buffer.append(2.0)).isFalse();
+    assertThat(
+            buffer.run(
+                ignored -> true,
+                () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
+                replayedObservations::add))
+        .isNotNull();
+    assertThat(replayedObservations).containsExactly(1.0);
+  }
+
+  @Test
   void fullBufferUnblocksAppenderWhenGenerationIsDeactivated() throws InterruptedException {
     CountDownLatch runStarted = new CountDownLatch(1);
     CountDownLatch secondAppenderEntered = new CountDownLatch(1);

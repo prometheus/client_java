@@ -41,6 +41,24 @@ public class TextFormatUtil {
       return metricSnapshots;
     }
 
+    // MetricSnapshots is sorted by prometheus name, so any duplicates are adjacent. Detect them in
+    // a single allocation-free pass; when there are none (the common case) return the input as-is
+    // rather than rebuilding it through a map, a list per group and a new MetricSnapshots.
+    boolean hasDuplicates = false;
+    for (int i = 1; i < metricSnapshots.size(); i++) {
+      if (metricSnapshots
+          .get(i)
+          .getMetadata()
+          .getPrometheusName()
+          .equals(metricSnapshots.get(i - 1).getMetadata().getPrometheusName())) {
+        hasDuplicates = true;
+        break;
+      }
+    }
+    if (!hasDuplicates) {
+      return metricSnapshots;
+    }
+
     Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
 
     for (MetricSnapshot snapshot : metricSnapshots) {
