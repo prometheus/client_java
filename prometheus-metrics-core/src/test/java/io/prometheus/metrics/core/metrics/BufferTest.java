@@ -223,15 +223,21 @@ class BufferTest {
 
   @Test
   void lateAppenderCountedByNextGenerationMustNotBeBufferedAgain() throws Exception {
-    assertLateAppenderHandoff(false);
+    assertLateAppenderHandoff(false, true);
   }
 
   @Test
   void lateAppenderHandoffUsesAbsoluteStripeCountsAfterReset() throws Exception {
-    assertLateAppenderHandoff(true);
+    assertLateAppenderHandoff(true, true);
   }
 
-  private static void assertLateAppenderHandoff(boolean reset) throws Exception {
+  @Test
+  void lateAppenderAfterGenerationReadMustNotBeBufferedAgain() throws Exception {
+    assertLateAppenderHandoff(false, false);
+  }
+
+  private static void assertLateAppenderHandoff(boolean reset, boolean pauseBeforeGenerationRead)
+      throws Exception {
     CountDownLatch firstSnapshotStarted = new CountDownLatch(1);
     CountDownLatch finishFirstSnapshot = new CountDownLatch(1);
     CountDownLatch observationCounted = new CountDownLatch(1);
@@ -240,16 +246,19 @@ class BufferTest {
     AtomicLong completedObservations = new AtomicLong();
     AtomicLong secondExpectedCount = new AtomicLong();
     AtomicBoolean pauseFirstAppender = new AtomicBoolean(true);
+    Runnable pauseHook =
+        () -> {
+          if (pauseFirstAppender.compareAndSet(true, false)) {
+            observationCounted.countDown();
+            awaitLatch(readGeneration);
+          }
+        };
     Buffer buffer =
         new Buffer(
             TimeUnit.SECONDS.toNanos(5),
             16,
-            () -> {
-              if (pauseFirstAppender.compareAndSet(true, false)) {
-                observationCounted.countDown();
-                awaitLatch(readGeneration);
-              }
-            });
+            pauseBeforeGenerationRead ? pauseHook : () -> {},
+            pauseBeforeGenerationRead ? () -> {} : pauseHook);
     if (reset) {
       assertThat(buffer.append(1.0)).isFalse();
       buffer.observeDirect(completedObservations::incrementAndGet);
@@ -329,8 +338,8 @@ class BufferTest {
       finishFirstSnapshot.countDown();
       readGeneration.countDown();
       executor.shutdownNow();
-      assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
     }
+    assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).as("executor terminated").isTrue();
   }
 
   private static void awaitLatch(CountDownLatch latch) {
