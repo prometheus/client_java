@@ -62,23 +62,34 @@ class Buffer {
   private final Condition bufferSpaceAvailable = appendLock.newCondition();
   private final long maxSpinWaitNanos;
   private final int maxBufferSize;
-  private final Runnable beforeAppendLock;
+  // These hooks are test seams only; production buffers use no-op callbacks.
+  private final Runnable beforeGenerationRead;
+  private final Runnable afterGenerationRead;
 
   Buffer() {
-    this(DEFAULT_MAX_SPIN_WAIT_NANOS, DEFAULT_MAX_BUFFER_SIZE, () -> {});
+    this(DEFAULT_MAX_SPIN_WAIT_NANOS, DEFAULT_MAX_BUFFER_SIZE, () -> {}, () -> {});
   }
 
   Buffer(long maxSpinWaitNanos) {
-    this(maxSpinWaitNanos, DEFAULT_MAX_BUFFER_SIZE, () -> {});
+    this(maxSpinWaitNanos, DEFAULT_MAX_BUFFER_SIZE, () -> {}, () -> {});
   }
 
-  Buffer(long maxSpinWaitNanos, int maxBufferSize, Runnable beforeAppendLock) {
+  Buffer(long maxSpinWaitNanos, int maxBufferSize, Runnable beforeGenerationRead) {
+    this(maxSpinWaitNanos, maxBufferSize, beforeGenerationRead, () -> {});
+  }
+
+  Buffer(
+      long maxSpinWaitNanos,
+      int maxBufferSize,
+      Runnable beforeGenerationRead,
+      Runnable afterGenerationRead) {
     if (maxBufferSize <= 0) {
       throw new IllegalArgumentException("maxBufferSize must be positive");
     }
     this.maxSpinWaitNanos = maxSpinWaitNanos;
     this.maxBufferSize = maxBufferSize;
-    this.beforeAppendLock = beforeAppendLock;
+    this.beforeGenerationRead = beforeGenerationRead;
+    this.afterGenerationRead = afterGenerationRead;
     stripedObservationCounts = new AtomicLong[Runtime.getRuntime().availableProcessors()];
     generationStartCounts = new long[stripedObservationCounts.length];
     for (int i = 0; i < stripedObservationCounts.length; i++) {
@@ -98,8 +109,9 @@ class Buffer {
       return false;
     }
     // Allow tests to pause between allocating an observation ticket and reading the generation.
-    beforeAppendLock.run();
+    beforeGenerationRead.run();
     Generation generation = activeGeneration;
+    afterGenerationRead.run();
     if (generation == null) {
       return false;
     }
@@ -193,7 +205,7 @@ class Buffer {
         long total = 0;
         for (int i = 0; i < stripedObservationCounts.length; i++) {
           long count = stripedObservationCounts[i].getAndAdd(BUFFER_ACTIVE_BIT);
-          generationStartCounts[i] = count;
+          generationStartCounts[i] = count & ~BUFFER_ACTIVE_BIT;
           total += count;
         }
         expectedCount = total - observationCountOffset;
