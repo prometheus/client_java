@@ -55,6 +55,48 @@ public class CounterBenchmark {
     }
   }
 
+  /** Pre-populated labels so lookup benchmarks measure hits, not data point creation. */
+  @State(Scope.Benchmark)
+  public static class PrometheusLabelLookup {
+    final Counter counter =
+        Counter.builder().name("lookup_test").labelNames("path", "status").build();
+    final String path = "/";
+    final String status = "200";
+    final CounterDataPoint cached = counter.labelValues(path, status);
+  }
+
+  // Each invocation performs one increment, so GC profiler B/op is per metric update. Keep the
+  // same work and shared counter in the lookup and cached variants; only label resolution differs.
+  @Benchmark
+  @Threads(1)
+  public CounterDataPoint prometheusLabelValuesIncSingleThread(PrometheusLabelLookup state) {
+    CounterDataPoint dataPoint = state.counter.labelValues(state.path, state.status);
+    dataPoint.inc();
+    return dataPoint;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public CounterDataPoint prometheusLabelValuesInc(PrometheusLabelLookup state) {
+    CounterDataPoint dataPoint = state.counter.labelValues(state.path, state.status);
+    dataPoint.inc();
+    return dataPoint;
+  }
+
+  @Benchmark
+  @Threads(1)
+  public CounterDataPoint prometheusCachedLabelValuesIncSingleThread(PrometheusLabelLookup state) {
+    state.cached.inc();
+    return state.cached;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public CounterDataPoint prometheusCachedLabelValuesInc(PrometheusLabelLookup state) {
+    state.cached.inc();
+    return state.cached;
+  }
+
   @State(Scope.Benchmark)
   public static class SimpleclientCounter {
 
