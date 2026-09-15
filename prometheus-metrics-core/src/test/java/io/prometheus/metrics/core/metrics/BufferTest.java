@@ -8,6 +8,9 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -180,83 +183,123 @@ class BufferTest {
   }
 
   @Test
-  void lateAppenderCannotBeAddedToTheNextGeneration() throws InterruptedException {
-    CountDownLatch firstRunStarted = new CountDownLatch(1);
-    CountDownLatch firstRunMayFinish = new CountDownLatch(1);
-    CountDownLatch stalled = new CountDownLatch(1);
-    CountDownLatch release = new CountDownLatch(1);
+  void lateAppenderCountedByNextGenerationMustNotBeBufferedAgain() throws Exception {
+    assertLateAppenderHandoff(false);
+  }
+
+  @Test
+  void lateAppenderHandoffUsesAbsoluteStripeCountsAfterReset() throws Exception {
+    assertLateAppenderHandoff(true);
+  }
+
+  private static void assertLateAppenderHandoff(boolean reset) throws Exception {
+    CountDownLatch firstSnapshotStarted = new CountDownLatch(1);
+    CountDownLatch finishFirstSnapshot = new CountDownLatch(1);
+    CountDownLatch observationCounted = new CountDownLatch(1);
+    CountDownLatch readGeneration = new CountDownLatch(1);
     CountDownLatch secondRunStarted = new CountDownLatch(1);
-    AtomicBoolean appended = new AtomicBoolean();
     AtomicLong completedObservations = new AtomicLong();
+    AtomicLong secondExpectedCount = new AtomicLong();
+    AtomicBoolean pauseFirstAppender = new AtomicBoolean(true);
     Buffer buffer =
         new Buffer(
-            TimeUnit.SECONDS.toNanos(1),
+            TimeUnit.SECONDS.toNanos(5),
             16,
             () -> {
-              stalled.countDown();
-              try {
-                release.await();
-              } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+              if (pauseFirstAppender.compareAndSet(true, false)) {
+                observationCounted.countDown();
+                awaitLatch(readGeneration);
               }
             });
-    Thread firstRun =
-        new Thread(
-            () ->
-                buffer.run(
-                    ignored -> {
-                      firstRunStarted.countDown();
-                      return firstRunMayFinish.getCount() == 0;
-                    },
-                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}),
-            "buffer-first-runner");
-    firstRun.setDaemon(true);
-    firstRun.start();
-    assertThat(firstRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
+    if (reset) {
+      assertThat(buffer.append(1.0)).isFalse();
+      buffer.observeDirect(completedObservations::incrementAndGet);
+    }
+    ExecutorService executor = Executors.newFixedThreadPool(2);
+    try {
+      Future<CounterSnapshot.CounterDataPointSnapshot> firstRun =
+          executor.submit(
+              () ->
+                  buffer.run(
+                      expectedCount -> completedObservations.get() == expectedCount,
+                      () -> {
+                        firstSnapshotStarted.countDown();
+                        awaitLatch(finishFirstSnapshot);
+                        CounterSnapshot.CounterDataPointSnapshot snapshot =
+                            new CounterSnapshot.CounterDataPointSnapshot(
+                                completedObservations.get(), Labels.EMPTY, null, 0);
+                        if (reset) {
+                          completedObservations.set(0);
+                          buffer.reset();
+                        }
+                        return snapshot;
+                      },
+                      ignored -> completedObservations.incrementAndGet()));
+      awaitLatch(firstSnapshotStarted);
 
-    Thread appender =
-        new Thread(
-            () -> {
-              appended.set(buffer.append(1.0));
-              if (!appended.get()) {
-                buffer.observeDirect(
-                    () -> {
-                      completedObservations.incrementAndGet();
-                      return null;
-                    });
-              }
-            },
-            "buffer-late-appender");
-    appender.setDaemon(true);
-    appender.start();
-    assertThat(stalled.await(5, TimeUnit.SECONDS)).isTrue();
+      // Increment while generation A is active, but do not read activeGeneration yet.
+      Future<Boolean> appender =
+          executor.submit(
+              () -> {
+                boolean appended = buffer.append(1.0);
+                if (!appended) {
+                  buffer.observeDirect(completedObservations::incrementAndGet);
+                }
+                return appended;
+              });
+      awaitLatch(observationCounted);
+      finishFirstSnapshot.countDown();
+      assertThat(firstRun.get(10, TimeUnit.SECONDS).getValue()).isEqualTo(reset ? 1 : 0);
 
-    firstRunMayFinish.countDown();
-    firstRun.join(5_000);
-    assertThat(firstRun.isAlive()).isFalse();
+      Future<CounterSnapshot.CounterDataPointSnapshot> secondRun =
+          executor.submit(
+              () ->
+                  buffer.run(
+                      expectedCount -> {
+                        secondExpectedCount.set(expectedCount);
+                        secondRunStarted.countDown();
+                        return completedObservations.get() == expectedCount;
+                      },
+                      () ->
+                          new CounterSnapshot.CounterDataPointSnapshot(
+                              completedObservations.get(), Labels.EMPTY, null, 0),
+                      ignored -> completedObservations.incrementAndGet()));
+      awaitLatch(secondRunStarted);
+      assertThat(secondExpectedCount).hasValue(1);
+      // An observation arriving after B's activation still belongs in B's buffer. It must not
+      // appear in B's snapshot and must be replayed exactly once before the following collection.
+      assertThat(buffer.append(1.0)).isTrue();
 
-    Thread secondRun =
-        new Thread(
-            () ->
-                buffer.run(
-                    expectedCount -> {
-                      secondRunStarted.countDown();
-                      return completedObservations.get() == expectedCount;
-                    },
-                    () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {}),
-            "buffer-second-runner");
-    secondRun.setDaemon(true);
-    secondRun.start();
-    assertThat(secondRunStarted.await(5, TimeUnit.SECONDS)).isTrue();
-    release.countDown();
-    appender.join(5_000);
-    secondRun.join(5_000);
+      // B includes the paused observation in expectedCount. Buffering it in B would make B wait
+      // until its own timeout/replay; it must instead complete via the direct observation path.
+      readGeneration.countDown();
+      assertThat(secondRun.get(10, TimeUnit.SECONDS).getValue()).isEqualTo(1);
+      assertThat(appender.get(10, TimeUnit.SECONDS)).isFalse();
+      assertThat(completedObservations).hasValue(2);
+      assertThat(
+              buffer
+                  .run(
+                      expectedCount -> completedObservations.get() == expectedCount,
+                      () ->
+                          new CounterSnapshot.CounterDataPointSnapshot(
+                              completedObservations.get(), Labels.EMPTY, null, 0),
+                      ignored -> completedObservations.incrementAndGet())
+                  .getValue())
+          .isEqualTo(2);
+    } finally {
+      finishFirstSnapshot.countDown();
+      readGeneration.countDown();
+      executor.shutdownNow();
+      assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
+    }
+  }
 
-    assertThat(appender.isAlive()).isFalse();
-    assertThat(secondRun.isAlive()).isFalse();
-    assertThat(appended).isFalse();
-    assertThat(completedObservations).hasValue(1);
+  private static void awaitLatch(CountDownLatch latch) {
+    try {
+      assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
+    }
   }
 }

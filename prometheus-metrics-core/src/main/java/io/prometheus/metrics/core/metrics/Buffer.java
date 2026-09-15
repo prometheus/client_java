@@ -49,6 +49,10 @@ class Buffer {
   // available processors. This is simpler than the striping used by LongAdder, so hot spots remain
   // possible when several recording threads resolve to the same stripe.
   private final AtomicLong[] stripedObservationCounts;
+  // Protected by appendLock. These are absolute per-stripe observation counts at activation, not
+  // the reset-adjusted count used by complete. Reused across generations to avoid scrape
+  // allocations.
+  private final long[] generationStartCounts;
   private final ReentrantLock observationLock = new ReentrantLock();
   private boolean reset;
   private long observationCountOffset;
@@ -76,31 +80,39 @@ class Buffer {
     this.maxBufferSize = maxBufferSize;
     this.beforeAppendLock = beforeAppendLock;
     stripedObservationCounts = new AtomicLong[Runtime.getRuntime().availableProcessors()];
+    generationStartCounts = new long[stripedObservationCounts.length];
     for (int i = 0; i < stripedObservationCounts.length; i++) {
       stripedObservationCounts[i] = new AtomicLong();
     }
   }
 
   boolean append(double value) {
-    AtomicLong counter =
-        stripedObservationCounts[
-            stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length)];
+    int stripe = stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length);
+    AtomicLong counter = stripedObservationCounts[stripe];
     long count = counter.incrementAndGet();
     // The active bit is the exact handoff decision. An observation either increments its stripe
     // before the collector's getAndAdd(BUFFER_ACTIVE_BIT) and takes the direct path, or sees the
-    // active bit and is buffered in the current generation.
+    // active bit and may be buffered. The stripe ticket below also checks that it was not counted
+    // by a later collection that started before this thread read activeGeneration.
     if ((count & BUFFER_ACTIVE_BIT) == 0) {
       return false;
     }
+    // Allow tests to pause between allocating an observation ticket and reading the generation.
+    beforeAppendLock.run();
     Generation generation = activeGeneration;
     if (generation == null) {
       return false;
     }
-    beforeAppendLock.run();
     appendLock.lock();
     try {
       Generation current = activeGeneration;
       if (current != generation || !generation.active) {
+        return false;
+      }
+      if ((count & ~BUFFER_ACTIVE_BIT) <= generationStartCounts[stripe]) {
+        // This observation incremented its stripe in an earlier generation. The current collector
+        // already includes it in expectedCount, so buffering it here would make the collector wait
+        // for an observation that is only replayed after that same wait finishes.
         return false;
       }
       while (generation.size >= maxBufferSize && generation.active) {
@@ -179,8 +191,10 @@ class Buffer {
       try {
         activeGeneration = generation;
         long total = 0;
-        for (AtomicLong counter : stripedObservationCounts) {
-          total += counter.getAndAdd(BUFFER_ACTIVE_BIT);
+        for (int i = 0; i < stripedObservationCounts.length; i++) {
+          long count = stripedObservationCounts[i].getAndAdd(BUFFER_ACTIVE_BIT);
+          generationStartCounts[i] = count;
+          total += count;
         }
         expectedCount = total - observationCountOffset;
       } finally {
