@@ -204,7 +204,7 @@ def get_commit_sha(provided_sha: str | None) -> str:
 def format_score(score) -> str:
     """Format score with appropriate precision."""
     if score is None:
-        return ""
+        return "—"
     try:
         val = float(score)
         if val >= 1_000_000:
@@ -340,14 +340,18 @@ def comparison_status(head: dict, baseline: dict) -> str:
         return "inconclusive"
 
     change = performance_change(head, baseline)
-    if change is None or head_interval is None or baseline_interval is None:
+    if change is None:
         return "inconclusive"
+    if head_interval is None or baseline_interval is None:
+        return "inconclusive (missing or invalid confidence interval)"
 
     head_low, head_high = head_interval
     baseline_low, baseline_high = baseline_interval
     intervals_overlap = head_low <= baseline_high and baseline_low <= head_high
-    if intervals_overlap or abs(change) < PRACTICAL_CHANGE_THRESHOLD:
-        return "within noise"
+    if intervals_overlap:
+        return "inconclusive (overlapping intervals)"
+    if abs(change) < PRACTICAL_CHANGE_THRESHOLD:
+        return f"below {PRACTICAL_CHANGE_THRESHOLD:g}% threshold"
 
     return "meaningful improvement" if change > 0 else "meaningful regression"
 
@@ -373,6 +377,16 @@ def format_change(change: float | None) -> str:
     if change is None:
         return ""
     return f"{change:+.1f}%"
+
+
+def format_score_with_interval(result: dict) -> str:
+    """Format a score together with its JMH confidence interval."""
+    score = metric_score(result)
+    interval = score_interval(result)
+    if score is None or interval is None:
+        return format_score(score)
+    low, high = interval
+    return f"{format_score(score)} [{format_score(low)}, {format_score(high)}]"
 
 
 def metric_direction_note(results: list) -> str:
@@ -420,6 +434,11 @@ def generate_comparison_section(
     md.append(f"- **Head:** {format_commit_link(commit_sha, repo)}")
     md.append(f"- **Base:** {format_commit_link(baseline_sha, baseline_repo)}")
     md.append(f"- **Metric direction:** {metric_direction_note(results)}")
+    md.append(
+        "- **Uncertainty:** values include JMH 99.9% confidence intervals; verdicts use "
+        "interval overlap and a practical-change threshold as a conservative heuristic, "
+        "not as a statistical significance test."
+    )
     if comparison_note:
         md.append(f"- **Note:** {comparison_note}")
     if baseline_system_info:
@@ -436,19 +455,19 @@ def generate_comparison_section(
         md.append("")
         return md
 
-    md.append("| Benchmark | PR | Base | Head vs base | Regression verdict |")
-    md.append("|:----------|---:|-----:|-------:|:-------|")
+    md.append(
+        "| Benchmark | PR (99.9% CI) | Base (99.9% CI) | Head vs base | Regression verdict |"
+    )
+    md.append("|:----------|--------------:|----------------:|-------:|:-------|")
 
     for name in common_names:
         head = by_name[name]
         baseline = baseline_by_name[name]
-        head_score = metric_score(head)
-        baseline_score = metric_score(baseline)
         md.append(
             "| "
             f"{short_benchmark_name(name)} | "
-            f"{format_score(head_score)} | "
-            f"{format_score(baseline_score)} | "
+            f"{format_score_with_interval(head)} | "
+            f"{format_score_with_interval(baseline)} | "
             f"{format_change(performance_change(head, baseline))} | "
             f"{comparison_status(head, baseline)} |"
         )
@@ -588,8 +607,8 @@ def generate_markdown(
 
         for b in sorted_benchmarks:
             name = b.get("benchmark", "").split(".")[-1]
-            score = b.get("primaryMetric", {}).get("score", 0)
-            error = b.get("primaryMetric", {}).get("scoreError", 0)
+            score = b.get("primaryMetric", {}).get("score")
+            error = b.get("primaryMetric", {}).get("scoreError")
             unit = b.get("primaryMetric", {}).get("scoreUnit", "ops/s")
 
             score_fmt = format_score(score)
@@ -611,8 +630,8 @@ def generate_markdown(
         md.append("|:----------|------:|------:|:------|")
         for b in sorted(head_only_results, key=lambda x: x.get("benchmark", "")):
             name = short_benchmark_name(b.get("benchmark", ""))
-            score = b.get("primaryMetric", {}).get("score", 0)
-            error = b.get("primaryMetric", {}).get("scoreError", 0)
+            score = b.get("primaryMetric", {}).get("score")
+            error = b.get("primaryMetric", {}).get("scoreError")
             unit = b.get("primaryMetric", {}).get("scoreUnit", "ops/s")
             md.append(
                 f"| {name} | {format_score(score)} | {format_error(error)} | {unit} |"
@@ -630,14 +649,14 @@ def generate_markdown(
         name = short_benchmark_name(b.get("benchmark", ""))
         mode = b.get("mode", "thrpt")
         cnt = b.get("measurementIterations", 0) * b.get("forks", 1)
-        score = b.get("primaryMetric", {}).get("score", 0)
-        error = b.get("primaryMetric", {}).get("scoreError", 0)
+        score = b.get("primaryMetric", {}).get("score")
+        error = b.get("primaryMetric", {}).get("scoreError")
         unit = b.get("primaryMetric", {}).get("scoreUnit", "ops/s")
 
         try:
             score_str = f"{float(score):.3f}"
         except (ValueError, TypeError):
-            score_str = str(score)
+            score_str = format_score(score)
 
         try:
             error_val = float(error)
@@ -667,7 +686,8 @@ def generate_markdown(
             "- **Regression verdict** requires comparable benchmark metadata, "
             "non-overlapping JMH confidence intervals, and a change of at least "
             f"{PRACTICAL_CHANGE_THRESHOLD:.0f}%; otherwise it is marked "
-            '"within noise" or "inconclusive".'
+            '"below the practical threshold" or "inconclusive". This is a '
+            "conservative heuristic, not a statistical significance test."
         )
     md.append(
         "- Scores for different benchmark methods are not ranked against one another; "
