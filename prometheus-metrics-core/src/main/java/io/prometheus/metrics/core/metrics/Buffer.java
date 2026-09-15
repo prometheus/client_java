@@ -98,6 +98,7 @@ class Buffer {
   }
 
   boolean append(double value) {
+    // Keep the uncontended hot path small enough for the JIT to inline into observations.
     int stripe = stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length);
     AtomicLong counter = stripedObservationCounts[stripe];
     long count = counter.incrementAndGet();
@@ -108,6 +109,10 @@ class Buffer {
     if ((count & BUFFER_ACTIVE_BIT) == 0) {
       return false;
     }
+    return appendToActiveGeneration(value, stripe, count);
+  }
+
+  private boolean appendToActiveGeneration(double value, int stripe, long count) {
     // Allow tests to pause between allocating an observation ticket and reading the generation.
     beforeGenerationRead.run();
     Generation generation = activeGeneration;
