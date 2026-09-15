@@ -49,6 +49,9 @@ public class CounterSnapshot extends MetricSnapshot {
     private final double value;
     @Nullable private final Exemplar exemplar;
 
+    /** Optional metric name used only in validation error messages. */
+    @Nullable private final String metricName;
+
     /**
      * To create a new {@link CounterDataPointSnapshot}, you can either call the constructor
      * directly or use the Builder with {@link CounterDataPointSnapshot#builder()}.
@@ -62,7 +65,7 @@ public class CounterSnapshot extends MetricSnapshot {
      */
     public CounterDataPointSnapshot(
         double value, Labels labels, @Nullable Exemplar exemplar, long createdTimestampMillis) {
-      this(value, labels, exemplar, createdTimestampMillis, 0);
+      this(value, labels, exemplar, createdTimestampMillis, 0, false, null);
     }
 
     /**
@@ -77,7 +80,7 @@ public class CounterSnapshot extends MetricSnapshot {
         @Nullable Exemplar exemplar,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
-      this(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis, false);
+      this(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis, false, null);
     }
 
     @SuppressWarnings("this-escape")
@@ -88,9 +91,22 @@ public class CounterSnapshot extends MetricSnapshot {
         long createdTimestampMillis,
         long scrapeTimestampMillis,
         boolean internal) {
+      this(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis, internal, null);
+    }
+
+    @SuppressWarnings("this-escape")
+    private CounterDataPointSnapshot(
+        double value,
+        Labels labels,
+        @Nullable Exemplar exemplar,
+        long createdTimestampMillis,
+        long scrapeTimestampMillis,
+        boolean internal,
+        @Nullable String metricName) {
       super(labels, createdTimestampMillis, scrapeTimestampMillis, internal);
       this.value = value;
       this.exemplar = exemplar;
+      this.metricName = metricName;
       if (!internal) {
         validate();
       }
@@ -107,7 +123,16 @@ public class CounterSnapshot extends MetricSnapshot {
 
     protected void validate() {
       if (value < 0.0) {
-        throw new IllegalArgumentException(value + ": counters cannot have a negative value");
+        StringBuilder message = new StringBuilder();
+        if (metricName != null && !metricName.isEmpty()) {
+          message.append(metricName).append('=');
+        }
+        message.append(value).append(": counters cannot have a negative value");
+        Labels labels = getLabels();
+        if (labels != null && !labels.isEmpty()) {
+          message.append(" (labels=").append(labels).append(')');
+        }
+        throw new IllegalArgumentException(message.toString());
       }
     }
 
@@ -119,7 +144,8 @@ public class CounterSnapshot extends MetricSnapshot {
           SnapshotEscaper.escapeExemplar(exemplar, escapingScheme),
           getCreatedTimestampMillis(),
           getScrapeTimestampMillis(),
-          true);
+          true,
+          metricName);
     }
 
     public static Builder builder() {
@@ -131,6 +157,7 @@ public class CounterSnapshot extends MetricSnapshot {
       @Nullable private Exemplar exemplar = null;
       @Nullable private Double value = null;
       private long createdTimestampMillis = 0L;
+      @Nullable private String metricName = null;
 
       private Builder() {}
 
@@ -150,12 +177,27 @@ public class CounterSnapshot extends MetricSnapshot {
         return this;
       }
 
+      /**
+       * Optional metric name included in the exception message when {@link #value(double)} is
+       * negative. Does not change the snapshot identity.
+       */
+      public Builder metricName(@Nullable String metricName) {
+        this.metricName = metricName;
+        return this;
+      }
+
       public CounterDataPointSnapshot build() {
         if (value == null) {
           throw new IllegalArgumentException("Missing required field: value is null.");
         }
         return new CounterDataPointSnapshot(
-            value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
+            value,
+            labels,
+            exemplar,
+            createdTimestampMillis,
+            scrapeTimestampMillis,
+            false,
+            metricName);
       }
 
       @Override

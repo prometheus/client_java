@@ -24,9 +24,9 @@ jobs:
       matrix:
         include:
           - topic: counter
-            pattern: CounterBenchmark
+            pattern: 'CounterBenchmark[.]prometheus.*'
           - topic: histogram
-            pattern: HistogramBenchmark
+            pattern: 'HistogramBenchmark[.]prometheus.*'
           - topic: exposition
             pattern: HistogramTextFormatBenchmark|TextFormatUtilBenchmark
     permissions:
