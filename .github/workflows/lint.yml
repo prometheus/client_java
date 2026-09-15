@@ -34,3 +34,9 @@ jobs:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
           PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: mise run lint
+
+      - name: Test benchmark tooling
+        run: |
+          for test_file in .mise/tasks/test_*.py; do
+            python3 -B "$test_file"
+          done

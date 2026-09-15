@@ -7,7 +7,9 @@ if here not in sys.path:
     sys.path.insert(0, here)
 
 from generate_benchmark_summary import (
+    allocation_score,
     comparison_status,
+    generate_allocation_section,
     generate_markdown,
 )
 
@@ -43,6 +45,63 @@ def result(
         "jdkVersion": "25.0.3",
         "primaryMetric": primary_metric,
     }
+
+
+def with_allocation(benchmark, score, unit="B/op"):
+    benchmark["secondaryMetrics"] = {
+        "gc.alloc.rate.norm": {"score": score, "scoreUnit": unit}
+    }
+    return benchmark
+
+
+class TestAllocationSummary(unittest.TestCase):
+    def test_zero_is_valid_but_missing_invalid_and_wrong_units_are_not(self):
+        self.assertEqual(allocation_score(with_allocation(result(), 0)), 0)
+        self.assertIsNone(allocation_score(result()))
+        self.assertIsNone(allocation_score(with_allocation(result(), 1, "MB/sec")))
+        for score in (None, "NaN", float("inf"), -1, "not a number"):
+            self.assertIsNone(allocation_score(with_allocation(result(), score)))
+
+    def test_allocation_delta_is_absolute_and_lower_is_better(self):
+        head = with_allocation(result(), 0)
+        base = with_allocation(result(), 16)
+        section = "\n".join(generate_allocation_section([head], [base]))
+        self.assertIn("| 0.000 | 16.000 | -16.000 |", section)
+        self.assertIn("not statistical regression verdicts", section)
+
+    def test_missing_or_incomparable_base_has_no_delta(self):
+        head = with_allocation(result(), 16)
+        for base in ([], [result()], [with_allocation(result(threads=1), 32)]):
+            section = "\n".join(generate_allocation_section([head], base))
+            self.assertTrue(section.rstrip().endswith("| — |"))
+        self.assertIn(
+            "| 16.000 | — | — |",
+            "\n".join(generate_allocation_section([head], [])),
+        )
+
+    def test_missing_head_allocation_is_not_reported_as_zero(self):
+        section = "\n".join(
+            generate_allocation_section([result()], [with_allocation(result(), 16)])
+        )
+        self.assertIn("| — | 16.000 | — |", section)
+
+    def test_no_gc_data_omits_allocation_section(self):
+        self.assertEqual(generate_allocation_section([result()], []), [])
+
+    def test_markdown_includes_head_only_allocations_and_mixed_threads(self):
+        base = result()
+        head = with_allocation(result(name="CounterBenchmark.newLookup", threads=1), 24)
+        markdown = generate_markdown(
+            [base, head],
+            "head",
+            "prometheus/client_java",
+            [base],
+            "base",
+            "prometheus/client_java",
+        )
+        self.assertIn("## Allocation per operation", markdown)
+        self.assertIn("| CounterBenchmark.newLookup | 24.000 | — | — |", markdown)
+        self.assertIn("1/4 threads", markdown)
 
 
 class TestBenchmarkComparison(unittest.TestCase):
