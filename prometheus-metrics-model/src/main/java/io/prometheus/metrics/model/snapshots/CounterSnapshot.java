@@ -48,6 +48,7 @@ public class CounterSnapshot extends MetricSnapshot {
 
     private final double value;
     @Nullable private final Exemplar exemplar;
+
     /** Optional metric name used only in validation error messages. */
     @Nullable private final String metricName;
 
@@ -64,20 +65,7 @@ public class CounterSnapshot extends MetricSnapshot {
      */
     public CounterDataPointSnapshot(
         double value, Labels labels, @Nullable Exemplar exemplar, long createdTimestampMillis) {
-      this(value, labels, exemplar, createdTimestampMillis, 0, null);
-    }
-
-    /**
-     * Same as {@link #CounterDataPointSnapshot(double, Labels, Exemplar, long)} with an optional
-     * metric name included in validation error messages when the value is negative.
-     */
-    public CounterDataPointSnapshot(
-        double value,
-        Labels labels,
-        @Nullable Exemplar exemplar,
-        long createdTimestampMillis,
-        @Nullable String metricName) {
-      this(value, labels, exemplar, createdTimestampMillis, 0, metricName);
+      this(value, labels, exemplar, createdTimestampMillis, 0, false, null);
     }
 
     /**
@@ -93,29 +81,6 @@ public class CounterSnapshot extends MetricSnapshot {
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
       this(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis, false, null);
-    }
-
-    /**
-     * Constructor with scrape timestamp and optional metric name for validation messages.
-     *
-     * @see #CounterDataPointSnapshot(double, Labels, Exemplar, long, long)
-     */
-    @SuppressWarnings("this-escape")
-    public CounterDataPointSnapshot(
-        double value,
-        Labels labels,
-        @Nullable Exemplar exemplar,
-        long createdTimestampMillis,
-        long scrapeTimestampMillis,
-        @Nullable String metricName) {
-      this(
-          value,
-          labels,
-          exemplar,
-          createdTimestampMillis,
-          scrapeTimestampMillis,
-          false,
-          metricName);
     }
 
     @SuppressWarnings("this-escape")
@@ -231,6 +196,7 @@ public class CounterSnapshot extends MetricSnapshot {
             exemplar,
             createdTimestampMillis,
             scrapeTimestampMillis,
+            false,
             metricName);
       }
 

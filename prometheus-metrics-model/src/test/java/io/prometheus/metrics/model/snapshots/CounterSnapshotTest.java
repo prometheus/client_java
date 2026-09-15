@@ -136,10 +136,7 @@ class CounterSnapshotTest {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
-                CounterDataPointSnapshot.builder()
-                    .metricName("http_requests")
-                    .value(-2.0)
-                    .build())
+                CounterDataPointSnapshot.builder().metricName("http_requests").value(-2.0).build())
         .withMessageContaining("http_requests")
         .withMessageContaining("-2.0")
         .withMessageContaining("counters cannot have a negative value");

@@ -213,8 +213,13 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
           }
         }
       }
-      return new CounterSnapshot.CounterDataPointSnapshot(
-          get(), labels, latestExemplar, createdTimeMillis, metricName);
+      return CounterSnapshot.CounterDataPointSnapshot.builder()
+          .value(get())
+          .labels(labels)
+          .exemplar(latestExemplar)
+          .createdTimestampMillis(createdTimeMillis)
+          .metricName(metricName)
+          .build();
     }
   }
 
