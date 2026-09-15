@@ -56,10 +56,31 @@ class TestBenchmarkComparison(unittest.TestCase):
             comparison_status(result(score=94), result()), "meaningful regression"
         )
 
-    def test_small_or_uncertain_change_is_within_noise(self):
+    def test_overlapping_intervals_are_inconclusive(self):
         self.assertEqual(
             comparison_status(result(score=102, error=5), result(error=5)),
-            "within noise",
+            "inconclusive (overlapping intervals)",
+        )
+
+    def test_overlapping_intervals_are_inconclusive_even_for_large_change(self):
+        head = result(score=9946.81, error=None)
+        base = result(score=7239.716, error=None)
+        head["primaryMetric"]["scoreConfidence"] = [8459.55, 11434.08]
+        base["primaryMetric"]["scoreConfidence"] = [5298.4, 9181.03]
+        self.assertEqual(
+            comparison_status(head, base), "inconclusive (overlapping intervals)"
+        )
+
+    def test_non_overlapping_change_below_threshold_is_below_threshold(self):
+        self.assertEqual(
+            comparison_status(result(score=103, error=0.1), result(error=0.1)),
+            "below 5% threshold",
+        )
+
+    def test_non_overlapping_change_is_meaningful(self):
+        self.assertEqual(
+            comparison_status(result(score=110, error=0.1), result(error=0.1)),
+            "meaningful improvement",
         )
 
     def test_mismatched_metadata_is_inconclusive(self):
@@ -104,11 +125,27 @@ class TestBenchmarkComparison(unittest.TestCase):
         for error in (float("inf"), float("-inf"), -1.0):
             head = result(error=error)
             head["primaryMetric"].pop("scoreConfidence")
-            self.assertEqual(comparison_status(head, result()), "inconclusive", error)
+            self.assertEqual(
+                comparison_status(head, result()),
+                "inconclusive (missing or invalid confidence interval)",
+                error,
+            )
 
     def test_missing_confidence_interval_is_inconclusive(self):
         head = result(score=106, error=None)
-        self.assertEqual(comparison_status(head, result()), "inconclusive")
+        self.assertEqual(
+            comparison_status(head, result()),
+            "inconclusive (missing or invalid confidence interval)",
+        )
+
+    def test_invalid_confidence_interval_is_inconclusive(self):
+        head = result(score=106, error=1)
+        head["primaryMetric"]["scoreConfidence"] = [0, float("nan")]
+        head["primaryMetric"].pop("scoreError")
+        self.assertEqual(
+            comparison_status(head, result()),
+            "inconclusive (missing or invalid confidence interval)",
+        )
 
 
 class TestBenchmarkMarkdown(unittest.TestCase):
@@ -128,13 +165,60 @@ class TestBenchmarkMarkdown(unittest.TestCase):
         )
 
         self.assertIn(
-            "| Benchmark | PR | Base | Head vs base | Regression verdict |", markdown
+            "| Benchmark | PR (99.9% CI) | Base (99.9% CI) | Head vs base | Regression verdict |",
+            markdown,
         )
         self.assertIn("## New benchmarks in PR head", markdown)
         self.assertIn("no base counterpart", markdown)
         self.assertIn("Throughput scores are higher-is-better", markdown)
         self.assertNotIn("Within run", markdown)
         self.assertNotIn("x slower", markdown)
+
+    def test_comparison_table_shows_confidence_intervals_and_uncertainty_note(self):
+        markdown = generate_markdown(
+            [result(score=110, error=1)],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[result(score=100, error=1)],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("110.00 [109.00, 111.00]", markdown)
+        self.assertIn("100.00 [99.00, 101.00]", markdown)
+        self.assertIn("not as a statistical significance test", markdown)
+
+    def test_real_overlapping_example_is_rendered_with_intervals(self):
+        head = result(score=9946.81, error=None)
+        base = result(score=7239.716, error=None)
+        head["primaryMetric"]["scoreConfidence"] = [8459.55, 11434.08]
+        base["primaryMetric"]["scoreConfidence"] = [5298.4, 9181.03]
+        markdown = generate_markdown(
+            [head],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[base],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("9.95K [8.46K, 11.43K]", markdown)
+        self.assertIn("7.24K [5.30K, 9.18K]", markdown)
+        self.assertIn("inconclusive (overlapping intervals)", markdown)
+
+    def test_missing_values_are_not_rendered_as_zero(self):
+        missing_interval = result(score=106, error=None)
+        missing_score = result(score=100)
+        missing_score["primaryMetric"].pop("score")
+        markdown = generate_markdown(
+            [missing_interval, missing_score],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[result(), result()],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("106.00 |", markdown)
+        self.assertIn("— |", markdown)
+        self.assertNotIn("| 0.00 |", markdown)
 
     def test_latency_note_is_mode_aware(self):
         base = result()
