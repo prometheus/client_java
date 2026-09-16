@@ -44,6 +44,36 @@ the benchmarks before merging the release PR:
 mise run update-benchmarks
 ```
 
+## Retrying a Failed Maven Central Deployment
+
+A GitHub release and a Maven Central publication are separate operations.
+An immutable GitHub release does not prevent publishing artifacts from its
+existing tag. Do not move the tag or rebuild the release from newer source.
+
+Before retrying, check the failed job's full log and the Sonatype Central
+Deployments page. Maven reactor `SUCCESS` entries can mean artifacts were
+only staged locally; look for an uploaded bundle and deployment ID. If a
+deployment is already pending, inspect it before submitting another one.
+Already published Maven Central versions cannot be overwritten.
+
+For a workflow-only fix, merge the correction to `main`, then dispatch the
+updated workflow with the original release tag:
+
+```shell
+gh workflow run release.yml --repo prometheus/client_java --ref main -f tag=v1.9.0
+```
+
+Replace `v1.9.0` with the tag being recovered. The workflow comes from `main`,
+but its checkout uses the supplied tag. Rerunning the original failed job
+instead uses its original workflow and repeats the same configuration error.
+Changes to scripts or POMs on `main` are not picked up by that tagged checkout;
+those require a separate recovery plan or a new release.
+
+Keep the deployment profile selection aligned with `mise run build-release`:
+examples, benchmarks, and integration tests must not enter the release reactor.
+The Test Build Release workflow checks this configuration before building.
+This check does not validate signing credentials or Sonatype availability.
+
 ## If the Sonatype Central Token is Invalid
 
 The release workflow verifies the token before deploy. If it fails:

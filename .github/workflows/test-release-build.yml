@@ -27,6 +27,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - name: Check release deployment configuration
+        run: python3 .mise/tasks/test_release_configuration.py
       - name: Build GitHub Pages
         run: mise run build-gh-pages
         env:
