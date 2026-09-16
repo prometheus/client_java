@@ -4,5 +4,5 @@
 
 set -euo pipefail
 
-mvn -B package -P 'release,!default,!examples-and-integration-tests' \
+./mvnw -B package -P 'release,!default,!examples-and-integration-tests' \
 	-Dmaven.test.skip=true -Dgpg.skip=true
