@@ -55,6 +55,35 @@ JMH parameter reference:
 
 ## Results
 
+### Pull request benchmarks
+
+The `benchmark` label runs the PR head and base on the same runner for each topic.
+PR runs select only client_java counter and histogram methods (`prometheus*`), plus
+the exposition benchmarks. OpenTelemetry, Codahale, and legacy simpleclient methods
+are excluded from PR runs, but remain available in the full/local and nightly suites.
+OpenMetrics exposition remains included: it is a client_java output format.
+
+The `CounterBenchmark.prometheusLabelValuesInc*` methods repeatedly look up an
+existing label combination and increment it. The matching
+`prometheusCachedLabelValuesInc*` methods increment a cached data point instead.
+Both have one-thread and four-thread variants sharing a counter. Each invocation
+performs one metric update, so throughput and GC profiler allocation in B/op are
+per update, unlike older benchmarks that batch updates in a loop.
+
+Run just the lookup and cached variants with allocation profiling:
+
+```shell
+./mvnw -pl benchmarks -am package -DskipTests
+java -jar benchmarks/target/benchmarks.jar \
+  'CounterBenchmark[.]prometheus(Cached)?LabelValuesInc.*' \
+  -f 3 -wi 3 -i 5 -prof gc
+```
+
+The PR report shows allocation separately from throughput. Allocation deltas are
+descriptive, not statistical verdicts, and require matching base/head configurations.
+New benchmarks initially have head-only results. To evaluate a production change,
+run the same benchmark source and JVM configuration against both implementations.
+
 See Javadoc of the benchmark classes:
 
 - [CounterBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java)

@@ -74,18 +74,18 @@ jobs:
 
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
-          version: v2026.8.11
-          sha256: 3d825b8341925abb398fba6fd8dcd7d6e92ade6820d892da62992e0765638e66
+          version: v2026.9.7
+          sha256: d479d7c0df37652ddfd6d1887ef92a67a17effc7ec4ac612f46845099f814c6f
           cache: false
 
       - name: Build release version
         run: mise run build-release
 
       - name: Set up Apache Maven Central
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
         with:
           distribution: "temurin"
-          java-version: "21"
+          java-version: "25.0.4+101.0.LTS"
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
@@ -93,7 +93,9 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Publish to Apache Maven Central
-        run: mvn deploy -P 'release,!default' -Dmaven.test.skip=true
+        run: >-
+          ./mvnw -B deploy -P 'release,!default,!examples-and-integration-tests'
+          -Dmaven.test.skip=true
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_PASSWORD }}
