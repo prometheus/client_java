@@ -93,6 +93,7 @@ public class HistogramBenchmark {
   public static class OpenTelemetryClassicHistogram {
 
     final io.opentelemetry.api.metrics.DoubleHistogram histogram;
+    final Attributes attributes;
 
     public OpenTelemetryClassicHistogram() {
 
@@ -118,6 +119,10 @@ public class HistogramBenchmark {
               .setInstrumentationVersion("1.0.0")
               .build();
       this.histogram = meter.histogramBuilder("test").setDescription("test").build();
+      this.attributes =
+          Attributes.of(
+              AttributeKey.stringKey("path"), "/",
+              AttributeKey.stringKey("status"), "200");
     }
   }
 
@@ -125,6 +130,7 @@ public class HistogramBenchmark {
   public static class OpenTelemetryExponentialHistogram {
 
     final io.opentelemetry.api.metrics.DoubleHistogram histogram;
+    final Attributes attributes;
 
     public OpenTelemetryExponentialHistogram() {
 
@@ -147,6 +153,10 @@ public class HistogramBenchmark {
               .setInstrumentationVersion("1.0.0")
               .build();
       this.histogram = meter.histogramBuilder("test").setDescription("test").build();
+      this.attributes =
+          Attributes.of(
+              AttributeKey.stringKey("path"), "/",
+              AttributeKey.stringKey("status"), "200");
     }
   }
 
@@ -284,7 +294,7 @@ public class HistogramBenchmark {
   public io.opentelemetry.api.metrics.DoubleHistogram openTelemetryClassic(
       RandomNumbers randomNumbers, OpenTelemetryClassicHistogram histogram) {
     for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
-      histogram.histogram.record(randomNumbers.randomNumbers[i]);
+      histogram.histogram.record(randomNumbers.randomNumbers[i], histogram.attributes);
     }
     return histogram.histogram;
   }
@@ -294,7 +304,7 @@ public class HistogramBenchmark {
   public io.opentelemetry.api.metrics.DoubleHistogram openTelemetryExponential(
       RandomNumbers randomNumbers, OpenTelemetryExponentialHistogram histogram) {
     for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
-      histogram.histogram.record(randomNumbers.randomNumbers[i]);
+      histogram.histogram.record(randomNumbers.randomNumbers[i], histogram.attributes);
     }
     return histogram.histogram;
   }
