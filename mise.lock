@@ -564,43 +564,43 @@ backend = "npm:renovate"
 trust_policy_excludes = '["@yarnpkg/libzip@3.2.2"]'
 
 [[tools.protoc]]
-version = "36.1"
+version = "36.2"
 backend = "aqua:protocolbuffers/protobuf/protoc"
 
 [tools.protoc."platforms.linux-arm64"]
-checksum = "sha256:237a68856edf1bd28b6204bddd0596c1cf46d298bc29c620012540b2e44c73e7"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-linux-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583148"
+checksum = "sha256:8b8f18bd2b30346efbc698dd5a73dd7c805f3ef8380f6dfc95c768f3f1852f6a"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-linux-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742403"
 
 [tools.protoc."platforms.linux-arm64-musl"]
-checksum = "sha256:237a68856edf1bd28b6204bddd0596c1cf46d298bc29c620012540b2e44c73e7"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-linux-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583148"
+checksum = "sha256:8b8f18bd2b30346efbc698dd5a73dd7c805f3ef8380f6dfc95c768f3f1852f6a"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-linux-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742403"
 
 [tools.protoc."platforms.linux-x64"]
-checksum = "sha256:c4bc672d9d49214dc8cafdceadf4df92182d6ca8e3ec65a56b2d7de5602669b4"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-linux-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583183"
+checksum = "sha256:121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-linux-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742434"
 
 [tools.protoc."platforms.linux-x64-musl"]
-checksum = "sha256:c4bc672d9d49214dc8cafdceadf4df92182d6ca8e3ec65a56b2d7de5602669b4"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-linux-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583183"
+checksum = "sha256:121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-linux-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742434"
 
 [tools.protoc."platforms.macos-arm64"]
-checksum = "sha256:de56d57afe30c5d191b11d24ff93dd4025728d7fb43b773886b2d3613e0bdbb2"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-osx-aarch_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583189"
+checksum = "sha256:9cd98a532c5c5e0c4161314de0225de27e4c8a323917b6ea7b1b714d3ae23466"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-osx-aarch_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742436"
 
 [tools.protoc."platforms.macos-x64"]
-checksum = "sha256:ee2c5496e4af0aa6a224894bc0f7025145260e004d890487d510725ce8b473eb"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-osx-x86_64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583191"
+checksum = "sha256:228cc7add4616cc14ca5e80dee83209d44449a7aee95a914ae748fa374efb078"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-osx-x86_64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742448"
 
 [tools.protoc."platforms.windows-x64"]
-checksum = "sha256:390e515cb456e6a978553bdb57baf087b054885077fd6da7f7ff0160279c07d6"
-url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.1/protoc-36.1-win64.zip"
-url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/538583199"
+checksum = "sha256:f0c128dc0d8492eceece83bb459a4c0e316764b929ffbf1aa416357fd644edd3"
+url = "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protoc-36.2-win64.zip"
+url_api = "https://api.github.com/repos/protocolbuffers/protobuf/releases/assets/570742465"
 
 [[tools.ruff]]
 version = "0.16.7"
