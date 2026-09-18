@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.1](https://github.com/prometheus/client_java/compare/v1.9.0...v1.9.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* exclude non-release modules from Maven deployment ([#2481](https://github.com/prometheus/client_java/issues/2481)) ([f27baf4](https://github.com/prometheus/client_java/commit/f27baf4196aea08304df67124e84af4d7e102bab))
+
+
+### Performance Improvements
+
+* update otel benchmark dependencies, add otel bound instrument scenarios ([#2451](https://github.com/prometheus/client_java/issues/2451)) ([fd343a2](https://github.com/prometheus/client_java/commit/fd343a2b42a34011fb67fddbca279067e94fb2ab))
+
 ## [1.9.0](https://github.com/prometheus/client_java/compare/v1.8.0...v1.9.0) (2026-09-16)
 
 
