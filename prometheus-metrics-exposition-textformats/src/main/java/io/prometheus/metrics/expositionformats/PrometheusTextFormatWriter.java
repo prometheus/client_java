@@ -168,13 +168,14 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     if (snapshot instanceof CounterSnapshot) {
       baseName = resolveBaseName(resolveExpositionName(metadata, "_total", scheme), "_total");
     }
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(baseName);
     for (DataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.hasCreatedTimestamp()) {
         if (!metadataWritten) {
           writeMetadataWithFullName(writer, baseName + "_created", "gauge", metadata);
           metadataWritten = true;
         }
-        writeNameAndLabels(writer, baseName, "_created", data.getLabels(), scheme);
+        writeNameAndLabels(writer, baseName, "_created", data.getLabels(), scheme, nameValidLegacy);
         writePrometheusTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -186,9 +187,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     if (!snapshot.getDataPoints().isEmpty()) {
       MetricMetadata metadata = snapshot.getMetadata();
       String counterName = resolveExpositionName(metadata, "_total", scheme);
+      boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(counterName);
       writeMetadataWithFullName(writer, counterName, "counter", metadata);
       for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
-        writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme);
+        writeNameAndLabels(writer, counterName, null, data.getLabels(), scheme, nameValidLegacy);
         writeDouble(writer, data.getValue());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -200,9 +202,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     String gaugeName = getLegacyGaugeName(metadata, rawOriginalName, scheme);
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(gaugeName);
     writeMetadataWithFullName(writer, gaugeName, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, gaugeName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, gaugeName, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -216,24 +219,32 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     String bucketName = name + "_bucket";
     String countName = name + "_count";
     String sumName = name + "_sum";
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       ClassicHistogramBuckets buckets = getClassicBuckets(data);
       long cumulativeCount = 0;
       for (int i = 0; i < buckets.size(); i++) {
         cumulativeCount += buckets.getCount(i);
         writeNameAndLabels(
-            writer, bucketName, null, data.getLabels(), scheme, "le", buckets.getUpperBound(i));
+            writer,
+            bucketName,
+            null,
+            data.getLabels(),
+            scheme,
+            "le",
+            buckets.getUpperBound(i),
+            nameValidLegacy);
         writeLong(writer, cumulativeCount);
         writeScrapeTimestampAndNewline(writer, data);
       }
       if (!snapshot.isGaugeHistogram()) {
         if (data.hasCount()) {
-          writeNameAndLabels(writer, countName, null, data.getLabels(), scheme);
+          writeNameAndLabels(writer, countName, null, data.getLabels(), scheme, nameValidLegacy);
           writeLong(writer, data.getCount());
           writeScrapeTimestampAndNewline(writer, data);
         }
         if (data.hasSum()) {
-          writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme);
+          writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme, nameValidLegacy);
           writeDouble(writer, data.getSum());
           writeScrapeTimestampAndNewline(writer, data);
         }
@@ -262,6 +273,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     String baseName = getMetadataName(metadata, scheme);
     String gaugeCountName = baseName + "_gcount";
     String gaugeSumName = baseName + "_gsum";
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(baseName);
     boolean metadataWritten = false;
     for (HistogramSnapshot.HistogramDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.hasCount()) {
@@ -269,7 +281,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           writeMetadata(writer, "_gcount", "gauge", metadata, scheme);
           metadataWritten = true;
         }
-        writeNameAndLabels(writer, gaugeCountName, null, data.getLabels(), scheme);
+        writeNameAndLabels(writer, gaugeCountName, null, data.getLabels(), scheme, nameValidLegacy);
         writeLong(writer, data.getCount());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -281,7 +293,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           writeMetadata(writer, "_gsum", "gauge", metadata, scheme);
           metadataWritten = true;
         }
-        writeNameAndLabels(writer, gaugeSumName, null, data.getLabels(), scheme);
+        writeNameAndLabels(writer, gaugeSumName, null, data.getLabels(), scheme, nameValidLegacy);
         writeDouble(writer, data.getSum());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -295,6 +307,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     String name = getMetadataName(metadata, scheme);
     String countName = name + "_count";
     String sumName = name + "_sum";
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
         continue;
@@ -305,17 +318,24 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       }
       for (Quantile quantile : data.getQuantiles()) {
         writeNameAndLabels(
-            writer, name, null, data.getLabels(), scheme, "quantile", quantile.getQuantile());
+            writer,
+            name,
+            null,
+            data.getLabels(),
+            scheme,
+            "quantile",
+            quantile.getQuantile(),
+            nameValidLegacy);
         writeDouble(writer, quantile.getValue());
         writeScrapeTimestampAndNewline(writer, data);
       }
       if (data.hasCount()) {
-        writeNameAndLabels(writer, countName, null, data.getLabels(), scheme);
+        writeNameAndLabels(writer, countName, null, data.getLabels(), scheme, nameValidLegacy);
         writeLong(writer, data.getCount());
         writeScrapeTimestampAndNewline(writer, data);
       }
       if (data.hasSum()) {
-        writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme);
+        writeNameAndLabels(writer, sumName, null, data.getLabels(), scheme, nameValidLegacy);
         writeDouble(writer, data.getSum());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -326,9 +346,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     String infoName = resolveExpositionName(metadata, "_info", scheme);
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(infoName);
     writeMetadataWithFullName(writer, infoName, "gauge", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, infoName, null, data.getLabels(), scheme, nameValidLegacy);
       writer.write("1");
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -374,8 +395,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, null, "untyped", metadata, scheme);
     String name = getMetadataName(metadata, scheme);
+    boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
-      writeNameAndLabels(writer, name, null, data.getLabels(), scheme);
+      writeNameAndLabels(writer, name, null, data.getLabels(), scheme, nameValidLegacy);
       writeDouble(writer, data.getValue());
       writeScrapeTimestampAndNewline(writer, data);
     }
@@ -386,9 +408,10 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       String name,
       @Nullable String suffix,
       Labels labels,
-      EscapingScheme escapingScheme)
+      EscapingScheme escapingScheme,
+      boolean nameValidLegacy)
       throws IOException {
-    writeNameAndLabels(writer, name, suffix, labels, escapingScheme, null, 0.0);
+    writeNameAndLabels(writer, name, suffix, labels, escapingScheme, null, 0.0, nameValidLegacy);
   }
 
   private void writeNameAndLabels(
@@ -398,16 +421,20 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       Labels labels,
       EscapingScheme scheme,
       @Nullable String additionalLabelName,
-      double additionalLabelValue)
+      double additionalLabelValue,
+      boolean nameValidLegacy)
       throws IOException {
     boolean metricInsideBraces = false;
     // If the name does not pass the legacy validity check, we must put the
-    // metric name inside the braces.
-    if (!PrometheusNaming.isValidLegacyMetricName(name)) {
+    // metric name inside the braces. Validity is scanned once per family by the caller (the metric
+    // name is constant across all data points), not re-scanned for every series here. Appending a
+    // suffix built from legacy characters (_total, _bucket, ...) does not change legacy validity,
+    // so the caller's check of the base name applies to the suffixed name too.
+    if (!nameValidLegacy) {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric);
+    writeName(writer, suffix != null ? name + suffix : name, NameType.Metric, nameValidLegacy);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces, scheme);
