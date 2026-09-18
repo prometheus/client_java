@@ -18,7 +18,7 @@ defaults:
 jobs:
   benchmark:
     if: github.event.label.name == 'benchmark'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +101,7 @@ jobs:
 
   summarize:
     if: github.event.label.name == 'benchmark'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: benchmark
     permissions:
       contents: read # checkout only

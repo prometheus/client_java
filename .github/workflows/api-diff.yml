@@ -22,7 +22,7 @@ permissions:
 jobs:
   api-diff:
     if: ${{ !startsWith(github.head_ref, 'release-please--branches--') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       # Empty unless overridden via workflow_dispatch; the api-diff task then
       # falls back to <api.diff.baseline.version> in pom.xml.
