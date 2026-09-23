@@ -312,9 +312,9 @@ url_api = "https://api.github.com/repos/biomejs/biome/releases/assets/554847315"
 provenance = "github-attestations"
 
 [[tools."cargo:https://github.com/grafana/flint"]]
-version = "rev:46b0a07a513a0627d4c2b4422fcba144d35186cd"
+version = "rev:9ebaad382cecf28b7302d1dcef61d6e88e70b9d1"
 backend = "cargo:https://github.com/grafana/flint"
-specifiers = ["rev:46b0a07a513a0627d4c2b4422fcba144d35186cd"]
+specifiers = ["rev:9ebaad382cecf28b7302d1dcef61d6e88e70b9d1"]
 
 [[tools.checkstyle]]
 version = "13.8.0"
