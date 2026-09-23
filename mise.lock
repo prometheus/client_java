@@ -499,60 +499,6 @@ url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0
 checksum = "sha256:709312cd0420296d9b9de917fe6e28a5b979e875ee5ab91783fb79bcd5857235"
 url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.3%2B9/OpenJDK25U-jdk_x64_windows_hotspot_25.0.3_9.zip"
 
-[[tools.java]]
-version = "temurin-21.0.12+101.0.LTS"
-backend = "core:java"
-specifiers = ["temurin-21"]
-
-[tools.java."platforms.linux-arm64"]
-checksum = "sha256:23e37e026f12f3e706f18938ff611db3032d075b09d0879a25d06718c773e223"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.linux-arm64-musl"]
-checksum = "sha256:8242627927adc90ac2561d0812dd39890ebc21ef09b550bc2e8b93640b8af4f8"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_alpine-linux_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.linux-x64"]
-checksum = "sha256:ce79869e1307ed8ee1e2baa86a412b1eb5b75d10a01006d788a6f968bcfaee94"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_linux_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.linux-x64-musl"]
-checksum = "sha256:bd8824214e42b33333c7f55a039ea078ad6ea6be20d7c5b011c801fb2bdb44f0"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_alpine-linux_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.macos-arm64"]
-checksum = "sha256:3623232f33a9c3baadf304480b2535f9a3cba8a58d42ecbb438ba267315d9998"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.macos-x64"]
-checksum = "sha256:44db0f08196daf19a47f90d13388b0c943b67663cb537f998fe29e836fa842ce"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_mac_hotspot_21.0.12.1_1.tar.gz"
-
-[tools.java."platforms.windows-x64"]
-checksum = "sha256:f9d6e191ab098c0d416e7d588a24420a8621cd2f4720dab2459b8b7b2d2d8b4e"
-url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12.1_1.zip"
-
-[[tools.java]]
-version = "oracle-graalvm-25.0.4.1.1"
-backend = "core:java"
-specifiers = ["oracle-graalvm-25"]
-
-[tools.java."platforms.linux-arm64"]
-checksum = "sha256:479a762a33b96921fce5cb39e0656833a36fc9f3add422cfffabb55f4119dd3b"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_linux-aarch64_bin.tar.gz"
-
-[tools.java."platforms.linux-x64"]
-checksum = "sha256:b923080f922a8be2a5742b6dadc8b149357c5b2365822e33f94ef68b7df94884"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_linux-x64_bin.tar.gz"
-
-[tools.java."platforms.macos-arm64"]
-checksum = "sha256:e14dbe0dac6451c170c8b9403b04993bc8ae22e24f8b6c2a5b15e1803824e97c"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_macos-aarch64_bin.tar.gz"
-
-[tools.java."platforms.windows-x64"]
-checksum = "sha256:72a79765541c2c83ccc918dd1f2a3f565760aaab519ef2cf44d36b6ad39728bf"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_windows-x64_bin.zip"
-
 [[tools.lychee]]
 version = "0.24.2"
 backend = "aqua:lycheeverse/lychee"
