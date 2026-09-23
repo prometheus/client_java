@@ -2,8 +2,8 @@
 "aqua:grafana/gcx" = "latest"
 "aqua:grafana/oats" = "latest"
 hugo = "latest"
-java = "lts"
-node = "tls"
+java = "temurin-25"
+node = "lts"
 protoc = "latest"
 
 # Linters

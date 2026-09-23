@@ -490,9 +490,9 @@ version = "0.24.2"
 backend = "aqua:lycheeverse/lychee"
 
 [tools.lychee."platforms.linux-arm64"]
-checksum = "sha256:5d0b0e3aeab240f41920c633a6eaf97599be6eedda034b36e858ede7dba5e535"
-url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409958602"
+checksum = "sha256:91a7bd65685da41b90ccb9bc867a3d649a7818042dae04ff405e55a25bddee4c"
+url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409959442"
 
 [tools.lychee."platforms.linux-arm64-musl"]
 checksum = "sha256:5d0b0e3aeab240f41920c633a6eaf97599be6eedda034b36e858ede7dba5e535"
@@ -500,9 +500,9 @@ url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/ly
 url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409958602"
 
 [tools.lychee."platforms.linux-x64"]
-checksum = "sha256:73657a111819a30c47c08352896796f23d64e4eb2b3ed39b6d32149241566fc5"
-url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409959271"
+checksum = "sha256:1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a"
+url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409959156"
 
 [tools.lychee."platforms.linux-x64-musl"]
 checksum = "sha256:73657a111819a30c47c08352896796f23d64e4eb2b3ed39b6d32149241566fc5"
