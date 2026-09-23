@@ -16,6 +16,9 @@
   labels: [
     'dependencies',
   ],
+  mise: {
+    'updatePinnedDependencies': false
+  },
   packageRules: [
     {
       description: 'Update component-prefixed shared-workflow action tags',
@@ -54,23 +57,6 @@
       ],
       groupName: 'java graalvm',
       additionalBranchPrefix: 'graalvm-',
-    },
-    {
-      description: 'Compat tests pin an LTS JDK the upstream release supports; block major JDK bumps that would break those builds',
-      matchFileNames: [
-        'mise.toml',
-      ],
-      matchDepNames: [
-        'java',
-      ],
-      matchDepTypes: [
-        'task-jmx-exporter:compat-test-tools',
-        'task-micrometer:compat-test-tools',
-      ],
-      matchUpdateTypes: [
-        'major',
-      ],
-      enabled: false,
     },
     {
       matchPackageNames: [
