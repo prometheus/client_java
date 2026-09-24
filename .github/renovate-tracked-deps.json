@@ -279,12 +279,12 @@
     "mise.toml": {
       "mise": [
         "actionlint",
+        "aqua:grafana/flint",
         "aqua:grafana/gcx",
         "aqua:grafana/oats",
         "aqua:jonwiggins/xmloxide",
         "aqua:owenlamont/ryl",
         "biome",
-        "cargo:https://github.com/grafana/flint",
         "checkstyle",
         "editorconfig-checker",
         "google-java-format",

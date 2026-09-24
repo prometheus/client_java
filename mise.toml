@@ -8,10 +8,10 @@ protoc = "latest"
 
 # Linters
 actionlint = "latest"
+"aqua:grafana/flint" = "0.22.13"
 "aqua:jonwiggins/xmloxide" = "latest"
 "aqua:owenlamont/ryl" = "latest"
 biome = "latest"
-"cargo:https://github.com/grafana/flint" = "rev:e3e810091b55f8714641ae3b6dc8fa9e4a0b99cb"
 checkstyle = "latest"
 editorconfig-checker = "latest"
 google-java-format = "latest"
