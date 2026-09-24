@@ -8,7 +8,7 @@ protoc = "latest"
 
 # Linters
 actionlint = "latest"
-"aqua:grafana/flint" = "0.22.13"
+"aqua:grafana/flint" = "latest"
 "aqua:jonwiggins/xmloxide" = "latest"
 "aqua:owenlamont/ryl" = "latest"
 biome = "latest"
