@@ -225,6 +225,11 @@
         "ubuntu"
       ]
     },
+    ".mise/locks/npm-renovate/44.82.0~026f02c4/package.json": {
+      "npm": [
+        "renovate"
+      ]
+    },
     ".mvn/wrapper/maven-wrapper.properties": {
       "maven-wrapper": [
         "maven"
