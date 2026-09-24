@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   generate:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # checkout + read-only `git fetch origin main` for the verify step
     steps:
@@ -63,7 +63,7 @@ jobs:
           retention-days: 5
 
   publish:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: generate
     permissions:
       contents: write # push regenerated sources back to the renovate branch
