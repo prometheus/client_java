@@ -244,7 +244,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       }
       if (!buffer.append(value)) {
         boolean nativeBucketCreated = buffer.observeDirect(() -> doObserve(value));
-        maybeResetOrScaleDown(value, nativeBucketCreated);
+        maybeResetOrScaleDown(value, 1L, nativeBucketCreated);
       }
       if (exemplarSampler != null) {
         exemplarSampler.observe(value);
@@ -259,7 +259,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       }
       if (!buffer.append(value)) {
         boolean nativeBucketCreated = buffer.observeDirect(() -> doObserve(value));
-        maybeResetOrScaleDown(value, nativeBucketCreated);
+        maybeResetOrScaleDown(value, 1L, nativeBucketCreated);
       }
       if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
@@ -267,27 +267,37 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     }
 
     private boolean doObserve(double value) {
+      return doObserve(value, 1L);
+    }
+
+    /**
+     * Records {@code n} identical observations of {@code value}. All of them land in the same
+     * classic bucket and the same native bucket, so the bucket lookups happen once and the cost
+     * does not depend on {@code n}.
+     */
+    private boolean doObserve(double value, long n) {
       // classicUpperBounds is an empty array if this is a native histogram only.
       for (int i = 0; i < classicUpperBounds.length; ++i) {
         // The last bucket is +Inf, so we always increment.
         if (value <= classicUpperBounds[i]) {
-          classicBuckets[i].add(1);
+          classicBuckets[i].add(n);
           break;
         }
       }
       boolean nativeBucketCreated = false;
       if (Histogram.this.nativeInitialSchema != CLASSIC_HISTOGRAM) {
         if (value > nativeZeroThreshold) {
-          nativeBucketCreated = addToNativeBucket(value, nativeBucketsForPositiveValues);
+          nativeBucketCreated = addToNativeBucket(value, nativeBucketsForPositiveValues, n);
         } else if (value < -nativeZeroThreshold) {
-          nativeBucketCreated = addToNativeBucket(-value, nativeBucketsForNegativeValues);
+          nativeBucketCreated = addToNativeBucket(-value, nativeBucketsForNegativeValues, n);
         } else {
-          nativeZeroCount.add(1);
+          nativeZeroCount.add(n);
         }
       }
-      sum.add(value);
-      count
-          .increment(); // must be the last step, because count is used to signal that the operation
+      // The product is the correctly rounded exact sum of the batch. Multiplying by 1 is exact, so
+      // single observations add precisely value, as before.
+      sum.add(value * n);
+      count.add(n); // must be the last step, because count is used to signal that the operation
       // is complete.
       return nativeBucketCreated;
     }
@@ -335,7 +345,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
           this::doObserve);
     }
 
-    private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {
+    private boolean addToNativeBucket(
+        double value, ConcurrentHashMap<Integer, LongAdder> buckets, long n) {
       boolean newBucketCreated = false;
       int bucketIndex;
       if (Double.isInfinite(value)) {
@@ -354,7 +365,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
           bucketCount = existingBucketCount;
         }
       }
-      bucketCount.increment();
+      bucketCount.add(n);
       return newBucketCreated;
     }
 
@@ -424,7 +435,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
      *       scale down
      * </ul>
      */
-    private void maybeResetOrScaleDown(double value, boolean nativeBucketCreated) {
+    private void maybeResetOrScaleDown(double value, long n, boolean nativeBucketCreated) {
       AtomicBoolean wasReset = new AtomicBoolean(false);
       if (resetDurationExpired && nativeSchema < nativeInitialSchema) {
         // If nativeSchema < initialNativeSchema the histogram has been scaled down.
@@ -445,11 +456,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         maybeScaleDown(wasReset);
       }
       if (wasReset.get()) {
-        // We just discarded the newly observed value. Observe it again.
-        if (!buffer.append(value)) {
+        // We just discarded the newly observed value(s). Observe them again.
+        if (!buffer.append(value, n)) {
           buffer.observeDirect(
               () -> {
-                doObserve(value);
+                doObserve(value, n);
                 return null;
               });
         }

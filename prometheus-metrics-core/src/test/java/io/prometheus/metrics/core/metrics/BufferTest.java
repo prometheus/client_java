@@ -43,7 +43,7 @@ class BufferTest {
                       return false;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    replayedObservations::add);
+                    (value, weight) -> replayedObservations.add(value));
               } catch (IllegalStateException expected) {
                 timedOut.set(true);
               }
@@ -73,7 +73,7 @@ class BufferTest {
                     () -> {
                       throw new AssertionError("snapshot should not be created");
                     },
-                    ignored -> {}))
+                    (value, weight) -> {}))
         .withMessage("Timed out while waiting for in-flight observations.");
   }
 
@@ -103,7 +103,7 @@ class BufferTest {
                       }
                       throw (RuntimeException) failure;
                     },
-                    replayedObservations::add))
+                    (value, weight) -> replayedObservations.add(value)))
         .isSameAs(failure);
     assertThat(replayedObservations).containsExactly(1.0);
     assertThat(buffer.append(2.0)).isFalse();
@@ -111,7 +111,7 @@ class BufferTest {
             buffer.run(
                 ignored -> true,
                 () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                replayedObservations::add))
+                (value, weight) -> replayedObservations.add(value)))
         .isNotNull();
     assertThat(replayedObservations).containsExactly(1.0);
   }
@@ -142,7 +142,7 @@ class BufferTest {
                       return false;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {});
+                    (value, weight) -> {});
               } catch (IllegalStateException expected) {
                 timedOut.set(true);
               }
@@ -191,7 +191,7 @@ class BufferTest {
                       return false;
                     },
                     () -> new CounterSnapshot.CounterDataPointSnapshot(0, Labels.EMPTY, null, 0),
-                    ignored -> {});
+                    (value, weight) -> {});
               } catch (IllegalStateException expected) {
                 // The runner is only used to hold the generation open for this test.
               }
@@ -282,7 +282,7 @@ class BufferTest {
                         }
                         return snapshot;
                       },
-                      ignored -> completedObservations.incrementAndGet()));
+                      (value, weight) -> completedObservations.addAndGet(weight)));
       awaitLatch(firstSnapshotStarted);
 
       // Increment while generation A is active, but do not read activeGeneration yet.
@@ -311,7 +311,7 @@ class BufferTest {
                       () ->
                           new CounterSnapshot.CounterDataPointSnapshot(
                               completedObservations.get(), Labels.EMPTY, null, 0),
-                      ignored -> completedObservations.incrementAndGet()));
+                      (value, weight) -> completedObservations.addAndGet(weight)));
       awaitLatch(secondRunStarted);
       assertThat(secondExpectedCount).hasValue(1);
       // An observation arriving after B's activation still belongs in B's buffer. It must not
@@ -331,7 +331,7 @@ class BufferTest {
                       () ->
                           new CounterSnapshot.CounterDataPointSnapshot(
                               completedObservations.get(), Labels.EMPTY, null, 0),
-                      ignored -> completedObservations.incrementAndGet())
+                      (value, weight) -> completedObservations.addAndGet(weight))
                   .getValue())
           .isEqualTo(2);
     } finally {

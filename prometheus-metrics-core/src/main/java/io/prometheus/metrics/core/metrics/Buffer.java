@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -22,8 +21,13 @@ import javax.annotation.Nullable;
  * observations into the live metric state.
  *
  * <p>The default collection wait is five seconds. A generation is capped at one million buffered
- * observations (about eight MiB of double storage) to keep a stalled collection from growing
- * without bound; the cap applies backpressure rather than dropping observations.
+ * entries (about eight MiB of double storage, plus eight MiB of weights once a batched observation
+ * has been buffered) to keep a stalled collection from growing without bound; the cap applies
+ * backpressure rather than dropping observations.
+ *
+ * <p>Batched observations ({@code weight} identical values recorded as one operation) are tracked
+ * with the same ticket protocol: one atomic add claims the whole ticket range of the batch, so a
+ * batch is either entirely inside a collection's expected count or entirely outside it.
  */
 class Buffer {
   private static final long BUFFER_ACTIVE_BIT = 1L << 63;
@@ -39,8 +43,16 @@ class Buffer {
   /** Observations buffered during one collection cycle. */
   private static final class Generation {
     private double[] values = EMPTY_BUFFER;
+    // Multiplicity of each buffered value. Allocated on the first weighted append only; null means
+    // every buffered value has weight 1, which keeps single observations free of the extra array.
+    @Nullable private long[] weights;
     private int size;
     private boolean active = true;
+  }
+
+  /** Replays one buffered entry, {@code value} observed {@code weight} times, into the metric. */
+  interface WeightedObserver {
+    void observe(double value, long weight);
   }
 
   // Tracking observation counts requires an AtomicLong for coordination between recording and
@@ -109,10 +121,29 @@ class Buffer {
     if ((count & BUFFER_ACTIVE_BIT) == 0) {
       return false;
     }
-    return appendToActiveGeneration(value, stripe, count);
+    return appendToActiveGeneration(value, 1L, stripe, count);
   }
 
-  private boolean appendToActiveGeneration(double value, int stripe, long count) {
+  /**
+   * Like {@link #append(double)}, for {@code weight} identical observations of {@code value}
+   * recorded as one operation.
+   *
+   * <p>The batch claims its ticket range {@code (count - weight, count]} with a single atomic add,
+   * so it cannot straddle a collector's activation: either all of its tickets predate the
+   * activation and the batch is included in that collection's expected count (direct path), or none
+   * do and the batch is buffered for replay after the snapshot.
+   */
+  boolean append(double value, long weight) {
+    int stripe = stripeIndex(Thread.currentThread().getId(), stripedObservationCounts.length);
+    AtomicLong counter = stripedObservationCounts[stripe];
+    long count = counter.addAndGet(weight);
+    if ((count & BUFFER_ACTIVE_BIT) == 0) {
+      return false;
+    }
+    return appendToActiveGeneration(value, weight, stripe, count);
+  }
+
+  private boolean appendToActiveGeneration(double value, long weight, int stripe, long count) {
     // Allow tests to pause between allocating an observation ticket and reading the generation.
     beforeGenerationRead.run();
     Generation generation = activeGeneration;
@@ -126,10 +157,11 @@ class Buffer {
       if (current != generation || !generation.active) {
         return false;
       }
-      if ((count & ~BUFFER_ACTIVE_BIT) <= generationStartCounts[stripe]) {
-        // This observation incremented its stripe in an earlier generation. The current collector
-        // already includes it in expectedCount, so buffering it here would make the collector wait
-        // for an observation that is only replayed after that same wait finishes.
+      if ((count & ~BUFFER_ACTIVE_BIT) - weight < generationStartCounts[stripe]) {
+        // This observation claimed its tickets in an earlier generation (for weight 1 this is the
+        // familiar count <= generationStartCounts[stripe]). The current collector already includes
+        // it in expectedCount, so buffering it here would make the collector wait for an
+        // observation that is only replayed after that same wait finishes.
         return false;
       }
       while (generation.size >= maxBufferSize && generation.active) {
@@ -148,9 +180,18 @@ class Buffer {
             generation.values.length > maxBufferSize / 2
                 ? maxBufferSize
                 : generation.values.length * 2;
-        generation.values =
-            Arrays.copyOf(
-                generation.values, Math.min(maxBufferSize, Math.max(INITIAL_BUFFER_SIZE, doubled)));
+        int newLength = Math.min(maxBufferSize, Math.max(INITIAL_BUFFER_SIZE, doubled));
+        generation.values = Arrays.copyOf(generation.values, newLength);
+        if (generation.weights != null) {
+          generation.weights = Arrays.copyOf(generation.weights, newLength);
+        }
+      }
+      if (weight != 1L && generation.weights == null) {
+        generation.weights = new long[generation.values.length];
+        Arrays.fill(generation.weights, 0, generation.size, 1L);
+      }
+      if (generation.weights != null) {
+        generation.weights[generation.size] = weight;
       }
       generation.values[generation.size++] = value;
       return true;
@@ -185,7 +226,7 @@ class Buffer {
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
-      Consumer<Double> observeFunction) {
+      WeightedObserver observeFunction) {
     return requireNonNull(run(complete, createResult, observeFunction, true));
   }
 
@@ -194,10 +235,11 @@ class Buffer {
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
-      Consumer<Double> observeFunction,
+      WeightedObserver observeFunction,
       boolean failOnTimeout) {
     Generation generation = new Generation();
     double[] buffer;
+    long[] weights;
     int bufferSize;
     boolean timedOut = false;
     T result = null;
@@ -241,15 +283,17 @@ class Buffer {
               reset = false;
             }
             buffer = generation.values;
+            weights = generation.weights;
             bufferSize = generation.size;
             generation.values = EMPTY_BUFFER;
+            generation.weights = null;
             generation.size = 0;
             bufferSpaceAvailable.signalAll();
           } finally {
             appendLock.unlock();
           }
           for (int i = 0; i < bufferSize; i++) {
-            observeFunction.accept(buffer[i]);
+            observeFunction.observe(buffer[i], weights == null ? 1L : weights[i]);
           }
           // Keep the inactive generation visible until replay completes. An appender that loses the
           // generation race must take observationLock before observing directly.

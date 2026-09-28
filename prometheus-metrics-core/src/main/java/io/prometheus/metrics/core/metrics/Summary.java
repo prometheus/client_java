@@ -214,13 +214,21 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     }
 
     private void doObserve(double amount) {
-      sum.add(amount);
+      doObserve(amount, 1L);
+    }
+
+    private void doObserve(double amount, long n) {
+      sum.add(amount * n);
       if (quantileValues != null) {
-        quantileValues.observe(amount);
+        // The quantile sketch has no weighted insert, so this part of a batch costs one insert per
+        // observation. count and sum are still updated in constant time.
+        for (long i = 0; i < n; i++) {
+          quantileValues.observe(amount);
+        }
       }
       // count must be incremented last, because in collect() the count
       // indicates the number of completed observations.
-      count.increment();
+      count.add(n);
     }
 
     private SummarySnapshot.SummaryDataPointSnapshot collect(Labels labels) {
