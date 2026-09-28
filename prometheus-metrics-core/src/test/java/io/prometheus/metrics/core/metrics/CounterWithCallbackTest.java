@@ -43,4 +43,17 @@ class CounterWithCallbackTest {
         .isThrownBy(
             () -> CounterWithCallback.builder().name("counter").labelNames("l1", "l2").build());
   }
+
+  @Test
+  void testNegativeValueIncludesMetricName() {
+    CounterWithCallback counter =
+        CounterWithCallback.builder()
+            .name("negative_counter")
+            .callback(callback -> callback.call(-1.0))
+            .build();
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(counter::collect)
+        .withMessage("negative_counter=-1.0: counters cannot have a negative value");
+  }
 }

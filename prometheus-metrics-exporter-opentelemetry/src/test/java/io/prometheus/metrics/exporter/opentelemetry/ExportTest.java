@@ -134,7 +134,7 @@ class ExportTest {
                                   assertThat(p.getEpochNanos()).isPositive();
                                 })
                             .hasExemplars()
-                            .hasBucketBoundaries(1, 2, 3, Double.POSITIVE_INFINITY)
+                            .hasBucketBoundaries(1, 2, 3)
                             .hasBucketCounts(1, 0, 0, 0)));
   }
 

@@ -7,7 +7,9 @@ if here not in sys.path:
     sys.path.insert(0, here)
 
 from generate_benchmark_summary import (
+    allocation_score,
     comparison_status,
+    generate_allocation_section,
     generate_markdown,
 )
 
@@ -45,6 +47,63 @@ def result(
     }
 
 
+def with_allocation(benchmark, score, unit="B/op"):
+    benchmark["secondaryMetrics"] = {
+        "gc.alloc.rate.norm": {"score": score, "scoreUnit": unit}
+    }
+    return benchmark
+
+
+class TestAllocationSummary(unittest.TestCase):
+    def test_zero_is_valid_but_missing_invalid_and_wrong_units_are_not(self):
+        self.assertEqual(allocation_score(with_allocation(result(), 0)), 0)
+        self.assertIsNone(allocation_score(result()))
+        self.assertIsNone(allocation_score(with_allocation(result(), 1, "MB/sec")))
+        for score in (None, "NaN", float("inf"), -1, "not a number"):
+            self.assertIsNone(allocation_score(with_allocation(result(), score)))
+
+    def test_allocation_delta_is_absolute_and_lower_is_better(self):
+        head = with_allocation(result(), 0)
+        base = with_allocation(result(), 16)
+        section = "\n".join(generate_allocation_section([head], [base]))
+        self.assertIn("| 0.000 | 16.000 | -16.000 |", section)
+        self.assertIn("not statistical regression verdicts", section)
+
+    def test_missing_or_incomparable_base_has_no_delta(self):
+        head = with_allocation(result(), 16)
+        for base in ([], [result()], [with_allocation(result(threads=1), 32)]):
+            section = "\n".join(generate_allocation_section([head], base))
+            self.assertTrue(section.rstrip().endswith("| — |"))
+        self.assertIn(
+            "| 16.000 | — | — |",
+            "\n".join(generate_allocation_section([head], [])),
+        )
+
+    def test_missing_head_allocation_is_not_reported_as_zero(self):
+        section = "\n".join(
+            generate_allocation_section([result()], [with_allocation(result(), 16)])
+        )
+        self.assertIn("| — | 16.000 | — |", section)
+
+    def test_no_gc_data_omits_allocation_section(self):
+        self.assertEqual(generate_allocation_section([result()], []), [])
+
+    def test_markdown_includes_head_only_allocations_and_mixed_threads(self):
+        base = result()
+        head = with_allocation(result(name="CounterBenchmark.newLookup", threads=1), 24)
+        markdown = generate_markdown(
+            [base, head],
+            "head",
+            "prometheus/client_java",
+            [base],
+            "base",
+            "prometheus/client_java",
+        )
+        self.assertIn("## Allocation per operation", markdown)
+        self.assertIn("| CounterBenchmark.newLookup | 24.000 | — | — |", markdown)
+        self.assertIn("1/4 threads", markdown)
+
+
 class TestBenchmarkComparison(unittest.TestCase):
     def test_meaningful_improvement_requires_threshold_and_separation(self):
         self.assertEqual(
@@ -56,10 +115,31 @@ class TestBenchmarkComparison(unittest.TestCase):
             comparison_status(result(score=94), result()), "meaningful regression"
         )
 
-    def test_small_or_uncertain_change_is_within_noise(self):
+    def test_overlapping_intervals_are_inconclusive(self):
         self.assertEqual(
             comparison_status(result(score=102, error=5), result(error=5)),
-            "within noise",
+            "inconclusive (overlapping intervals)",
+        )
+
+    def test_overlapping_intervals_are_inconclusive_even_for_large_change(self):
+        head = result(score=9946.81, error=None)
+        base = result(score=7239.716, error=None)
+        head["primaryMetric"]["scoreConfidence"] = [8459.55, 11434.08]
+        base["primaryMetric"]["scoreConfidence"] = [5298.4, 9181.03]
+        self.assertEqual(
+            comparison_status(head, base), "inconclusive (overlapping intervals)"
+        )
+
+    def test_non_overlapping_change_below_threshold_is_below_threshold(self):
+        self.assertEqual(
+            comparison_status(result(score=103, error=0.1), result(error=0.1)),
+            "below 5% threshold",
+        )
+
+    def test_non_overlapping_change_is_meaningful(self):
+        self.assertEqual(
+            comparison_status(result(score=110, error=0.1), result(error=0.1)),
+            "meaningful improvement",
         )
 
     def test_mismatched_metadata_is_inconclusive(self):
@@ -104,11 +184,27 @@ class TestBenchmarkComparison(unittest.TestCase):
         for error in (float("inf"), float("-inf"), -1.0):
             head = result(error=error)
             head["primaryMetric"].pop("scoreConfidence")
-            self.assertEqual(comparison_status(head, result()), "inconclusive", error)
+            self.assertEqual(
+                comparison_status(head, result()),
+                "inconclusive (missing or invalid confidence interval)",
+                error,
+            )
 
     def test_missing_confidence_interval_is_inconclusive(self):
         head = result(score=106, error=None)
-        self.assertEqual(comparison_status(head, result()), "inconclusive")
+        self.assertEqual(
+            comparison_status(head, result()),
+            "inconclusive (missing or invalid confidence interval)",
+        )
+
+    def test_invalid_confidence_interval_is_inconclusive(self):
+        head = result(score=106, error=1)
+        head["primaryMetric"]["scoreConfidence"] = [0, float("nan")]
+        head["primaryMetric"].pop("scoreError")
+        self.assertEqual(
+            comparison_status(head, result()),
+            "inconclusive (missing or invalid confidence interval)",
+        )
 
 
 class TestBenchmarkMarkdown(unittest.TestCase):
@@ -128,13 +224,60 @@ class TestBenchmarkMarkdown(unittest.TestCase):
         )
 
         self.assertIn(
-            "| Benchmark | PR | Base | Head vs base | Regression verdict |", markdown
+            "| Benchmark | PR (99.9% CI) | Base (99.9% CI) | Head vs base | Regression verdict |",
+            markdown,
         )
         self.assertIn("## New benchmarks in PR head", markdown)
         self.assertIn("no base counterpart", markdown)
         self.assertIn("Throughput scores are higher-is-better", markdown)
         self.assertNotIn("Within run", markdown)
         self.assertNotIn("x slower", markdown)
+
+    def test_comparison_table_shows_confidence_intervals_and_uncertainty_note(self):
+        markdown = generate_markdown(
+            [result(score=110, error=1)],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[result(score=100, error=1)],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("110.00 [109.00, 111.00]", markdown)
+        self.assertIn("100.00 [99.00, 101.00]", markdown)
+        self.assertIn("not as a statistical significance test", markdown)
+
+    def test_real_overlapping_example_is_rendered_with_intervals(self):
+        head = result(score=9946.81, error=None)
+        base = result(score=7239.716, error=None)
+        head["primaryMetric"]["scoreConfidence"] = [8459.55, 11434.08]
+        base["primaryMetric"]["scoreConfidence"] = [5298.4, 9181.03]
+        markdown = generate_markdown(
+            [head],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[base],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("9.95K [8.46K, 11.43K]", markdown)
+        self.assertIn("7.24K [5.30K, 9.18K]", markdown)
+        self.assertIn("inconclusive (overlapping intervals)", markdown)
+
+    def test_missing_values_are_not_rendered_as_zero(self):
+        missing_interval = result(score=106, error=None)
+        missing_score = result(score=100)
+        missing_score["primaryMetric"].pop("score")
+        markdown = generate_markdown(
+            [missing_interval, missing_score],
+            "head",
+            "prometheus/client_java",
+            baseline_results=[result(), result()],
+            baseline_sha="base",
+            baseline_repo="prometheus/client_java",
+        )
+        self.assertIn("106.00 |", markdown)
+        self.assertIn("— |", markdown)
+        self.assertNotIn("| 0.00 |", markdown)
 
     def test_latency_note_is_mode_aware(self):
         base = result()

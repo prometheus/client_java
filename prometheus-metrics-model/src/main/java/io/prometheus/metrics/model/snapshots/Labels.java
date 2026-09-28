@@ -40,9 +40,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     this.values = values;
   }
 
-  @SuppressWarnings("ReferenceEquality")
   public boolean isEmpty() {
-    return this == EMPTY || this.equals(EMPTY);
+    return this.equals(EMPTY);
   }
 
   /**

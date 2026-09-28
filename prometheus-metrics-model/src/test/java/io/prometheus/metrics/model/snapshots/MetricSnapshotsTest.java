@@ -39,6 +39,29 @@ class MetricSnapshotsTest {
   }
 
   @Test
+  void testSortIsByPrometheusName() {
+    // Pins the sort key to getPrometheusName(): TextFormatUtil.mergeDuplicates relies on
+    // same-family snapshots being adjacent, which only holds under that key. "foo.bar" has
+    // prometheusName "foo_bar"; "fooZbar" is already legacy-valid. In ASCII '.'(46) < 'Z'(90)
+    // < '_'(95), so sorting by prometheusName orders "fooZbar" before "foo_bar" - the opposite
+    // of sorting by name (or expositionBaseName, which equals name here). So this test fails if
+    // the sort key is changed to name or expositionBaseName, which would silently break merging.
+    GaugeSnapshot fooDotBar =
+        GaugeSnapshot.builder()
+            .name("foo.bar")
+            .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(1.0).build())
+            .build();
+    GaugeSnapshot fooZBar =
+        GaugeSnapshot.builder()
+            .name("fooZbar")
+            .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(1.0).build())
+            .build();
+    MetricSnapshots snapshots = new MetricSnapshots(fooDotBar, fooZBar);
+    assertThat(snapshots.get(0).getMetadata().getPrometheusName()).isEqualTo("fooZbar");
+    assertThat(snapshots.get(1).getMetadata().getPrometheusName()).isEqualTo("foo_bar");
+  }
+
+  @Test
   void testDuplicateName() {
     // Q: What if you have a counter named "foo" and a gauge named "foo"?
     // A: Great question. You might think this is a valid scenario, because the counter will produce

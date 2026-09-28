@@ -153,6 +153,9 @@ def run_gradle_test(
     cmd = [
         "./gradlew",
         "--no-daemon",
+        # micrometer wires in a remote build cache into settings.gradle.
+        # compatibility tests have no use for upstream's cache
+        "--no-build-cache",
         "-I",
         str(init_script),
         ":micrometer-registry-prometheus:test",

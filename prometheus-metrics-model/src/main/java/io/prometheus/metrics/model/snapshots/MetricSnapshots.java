@@ -36,6 +36,9 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
+    // Sort by prometheus name so snapshots that share a prometheus name (i.e. the same exposed
+    // family) are adjacent. TextFormatUtil.mergeDuplicates depends on this ordering to detect
+    // duplicates in a single linear pass; if this sort key changes, update that fast path too.
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
 
     // Validate no conflicting metric types
