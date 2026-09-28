@@ -196,6 +196,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     getNoLabels().observeWithExemplar(amount, labels);
   }
 
+  @Override
+  public void observe(double amount, long count) {
+    getNoLabels().observe(amount, count);
+  }
+
   public class DataPoint implements DistributionDataPoint {
     private final LongAdder[] classicBuckets;
     private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues =
@@ -247,6 +252,26 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         maybeResetOrScaleDown(value, 1L, nativeBucketCreated);
       }
       if (exemplarSampler != null) {
+        exemplarSampler.observe(value);
+      }
+    }
+
+    @Override
+    public void observe(double value, long count) {
+      if (count < 0) {
+        throw new IllegalArgumentException(
+            "Negative count " + count + " is illegal for Histogram metrics.");
+      }
+      if (count == 0 || Double.isNaN(value)) {
+        // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
+        return;
+      }
+      if (!buffer.append(value, count)) {
+        boolean nativeBucketCreated = buffer.observeDirect(() -> doObserve(value, count));
+        maybeResetOrScaleDown(value, count, nativeBucketCreated);
+      }
+      if (exemplarSampler != null) {
+        // One exemplar candidate per batch: a batch has one value and one current span context.
         exemplarSampler.observe(value);
       }
     }
