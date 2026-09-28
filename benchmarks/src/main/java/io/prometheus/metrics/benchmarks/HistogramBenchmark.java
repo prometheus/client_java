@@ -280,6 +280,79 @@ public class HistogramBenchmark {
   }
 
   @Benchmark
+  @Threads(1)
+  public Histogram prometheusNativeSingleThread(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i]);
+    }
+    return histogram.noLabels;
+  }
+
+  /**
+   * Batched observation: the same 10240 observations recorded as runs of identical values. LoopN
+   * records each run with N calls to observe(value), BatchN with one observe(value, N). The ratio
+   * between a LoopN and the matching BatchN is the speedup; comparing Batch1024 with Batch1M shows
+   * whether the cost of a call depends on the count.
+   */
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusNativeLoop16(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length / 16; i++) {
+      double value = randomNumbers.randomNumbers[i];
+      for (int k = 0; k < 16; k++) {
+        histogram.noLabels.observe(value);
+      }
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusNativeBatch16(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length / 16; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i], 16);
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusNativeLoop1024(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length / 1024; i++) {
+      double value = randomNumbers.randomNumbers[i];
+      for (int k = 0; k < 1024; k++) {
+        histogram.noLabels.observe(value);
+      }
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusNativeBatch1024(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    for (int i = 0; i < randomNumbers.randomNumbers.length / 1024; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i], 1024);
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
+  @Threads(4)
+  public Histogram prometheusNativeBatch1M(
+      RandomNumbers randomNumbers, PrometheusNativeHistogram histogram) {
+    // Ten batches of a million: the whole op is ten calls, so the per-observation cost is ~0.
+    for (int i = 0; i < 10; i++) {
+      histogram.noLabels.observe(randomNumbers.randomNumbers[i], 1_000_000);
+    }
+    return histogram.noLabels;
+  }
+
+  @Benchmark
   @Threads(4)
   public io.prometheus.client.Histogram simpleclient(
       RandomNumbers randomNumbers, SimpleclientHistogram histogram) {
