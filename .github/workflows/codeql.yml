@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   analyze:
     name: Analyze Java
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       actions: read # required for github/codeql-action/init to get workflow details
       contents: read
