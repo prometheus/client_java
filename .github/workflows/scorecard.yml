@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   analysis:
     name: Scorecard analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     # Prevents fork runs from failing due to missing write permissions or secrets.
     if: ${{ github.repository == 'prometheus/client_java' }}
     permissions:
