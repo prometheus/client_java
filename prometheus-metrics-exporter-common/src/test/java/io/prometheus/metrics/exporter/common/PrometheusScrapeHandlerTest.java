@@ -2,6 +2,7 @@ package io.prometheus.metrics.exporter.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.ByteArrayOutputStream;
@@ -192,6 +193,51 @@ class PrometheusScrapeHandlerTest {
 
     assertThat(exchange.getResponseCode()).isEqualTo(400);
     assertThat(exchange.getResponseBody()).isEqualTo("Invalid query parameters");
+  }
+
+  @Test
+  void testOpenMetrics2DoesNotEscapeUtf8NamesByDefault() throws IOException {
+    for (boolean contentNegotiation : new boolean[] {true, false}) {
+      String body =
+          scrapeUtf8Counter(contentNegotiation, "application/openmetrics-text;version=2.0.0");
+      assertThat(body).contains("\"my.counter\"").doesNotContain("my_counter");
+    }
+  }
+
+  @Test
+  void testOpenMetrics2ExplicitEscapingWins() throws IOException {
+    String body =
+        scrapeUtf8Counter(true, "application/openmetrics-text;version=2.0.0;escaping=underscores");
+    assertThat(body).contains("my_counter").doesNotContain("my.counter");
+  }
+
+  @Test
+  void testUnderscoreEscapingStaysDefaultForOtherFormats() throws IOException {
+    for (boolean contentNegotiation : new boolean[] {true, false}) {
+      for (String accept :
+          new String[] {
+            "application/openmetrics-text;version=1.0.0",
+            "application/openmetrics-text",
+            "text/plain;version=0.0.4"
+          }) {
+        String body = scrapeUtf8Counter(contentNegotiation, accept);
+        assertThat(body).as(accept).contains("my_counter").doesNotContain("my.counter");
+      }
+    }
+  }
+
+  private static String scrapeUtf8Counter(boolean contentNegotiation, String accept)
+      throws IOException {
+    PrometheusRegistry utf8Registry = new PrometheusRegistry();
+    Counter.builder().name("my.counter").help("UTF-8 counter").register(utf8Registry).inc();
+    PrometheusProperties config =
+        PrometheusProperties.builder()
+            .enableOpenMetrics2(om2 -> om2.contentNegotiation(contentNegotiation))
+            .build();
+    TestHttpExchange exchange = new TestHttpExchange("GET", null).withHeader("Accept", accept);
+    new PrometheusScrapeHandler(config, utf8Registry).handleRequest(exchange);
+    assertThat(exchange.getResponseCode()).isEqualTo(200);
+    return exchange.getResponseBody();
   }
 
   /** Test implementation of PrometheusHttpExchange for testing. */
