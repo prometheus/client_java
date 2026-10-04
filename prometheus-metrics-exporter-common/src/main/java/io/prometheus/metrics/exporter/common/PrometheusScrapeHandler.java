@@ -6,6 +6,7 @@ import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
+import io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -71,11 +72,14 @@ public class PrometheusScrapeHandler {
       }
       MetricSnapshots snapshots = scrape(request, includedNames);
       String acceptHeader = request.getHeader("Accept");
-      EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
-      if (writeDebugResponse(snapshots, escapingScheme, debugParam, exchange)) {
+      if (writeDebugResponse(
+          snapshots, EscapingScheme.fromAcceptHeader(acceptHeader), debugParam, exchange)) {
         return;
       }
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
+      EscapingScheme escapingScheme =
+          EscapingScheme.fromAcceptHeader(
+              acceptHeader, defaultEscapingScheme(writer, acceptHeader));
       PrometheusHttpResponse response = exchange.getResponse();
       response.setHeader("Content-Type", writer.getContentType());
 
@@ -112,6 +116,39 @@ public class PrometheusScrapeHandler {
     } finally {
       exchange.close();
     }
+  }
+
+  /**
+   * OpenMetrics 2.0 supports UTF-8 names and has no escaping parameter, so names are not escaped
+   * unless the scraper asks for it. With contentNegotiation=false the OM2 writer also serves OM 1.0
+   * and unversioned requests, so 2.0.0 must have been requested explicitly.
+   */
+  private EscapingScheme defaultEscapingScheme(
+      ExpositionFormatWriter writer, @Nullable String acceptHeader) {
+    if (writer instanceof OpenMetrics2TextFormatWriter
+        && "2.0.0".equals(parseOpenMetricsVersion(acceptHeader))) {
+      return EscapingScheme.ALLOW_UTF8;
+    }
+    return EscapingScheme.DEFAULT;
+  }
+
+  @Nullable
+  private static String parseOpenMetricsVersion(@Nullable String acceptHeader) {
+    if (acceptHeader == null) {
+      return null;
+    }
+    for (String mediaType : acceptHeader.split(",")) {
+      if (mediaType.contains("application/openmetrics-text")) {
+        for (String param : mediaType.split(";")) {
+          String[] tokens = param.split("=");
+          if (tokens.length == 2 && tokens[0].trim().equals("version")) {
+            return tokens[1].trim();
+          }
+        }
+        return null;
+      }
+    }
+    return null;
   }
 
   @Nullable

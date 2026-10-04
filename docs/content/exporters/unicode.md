@@ -26,6 +26,10 @@ When `escaping=allow-utf-8` is passed, add valid UTF-8 characters to the metric 
 without replacing them. This allows you to use dots in metric and label names, as well as
 other UTF-8 characters, without any replacements.
 
+OpenMetrics 2.0 supports UTF-8 names natively, so when the OpenMetrics 2.0 writer serves a request
+that explicitly asks for `version=2.0.0`, names are not escaped unless the request also contains an
+`escaping` parameter.
+
 ## PushGateway
 
 When using the [Pushgateway]({{< relref "pushgateway.md" >}}), Unicode support has to be enabled
