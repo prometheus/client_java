@@ -58,6 +58,7 @@
         "actions/checkout",
         "actions/setup-java",
         "github/codeql-action",
+        "java-jdk",
         "ubuntu"
       ]
     },
@@ -137,6 +138,7 @@
         "actions/cache",
         "actions/checkout",
         "actions/setup-java",
+        "java-jdk",
         "ubuntu"
       ]
     },
@@ -202,6 +204,7 @@
       "github-actions": [
         "actions/checkout",
         "actions/setup-java",
+        "java-jdk",
         "jdx/mise",
         "jdx/mise-action",
         "ubuntu"
