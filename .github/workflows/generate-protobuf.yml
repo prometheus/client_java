@@ -33,15 +33,33 @@ jobs:
         run: |
           git fetch origin main
           DIFF_POM=$(git diff origin/main -- pom.xml)
-          DIFF_MISE=$(git diff origin/main -- mise.toml)
           if ! echo "$DIFF_POM" | grep -q 'protobuf-java.version'; then
             echo "::error::protobuf-java not updated in pom.xml"
             exit 1
           fi
-          if ! echo "$DIFF_MISE" | grep -q 'protoc'; then
-            echo "::error::protoc not updated in mise.toml"
-            exit 1
-          fi
+          python3 - <<'PY'
+          import subprocess
+          import tomllib
+
+          def protoc_version(text):
+              return tomllib.loads(text)["tools"]["protoc"][0]["version"]
+
+          base_lock = subprocess.run(
+              ["git", "show", "origin/main:mise.lock"],
+              check=True,
+              capture_output=True,
+              text=True,
+          ).stdout
+          with open("mise.lock", "rb") as lock_file:
+              current_lock = tomllib.load(lock_file)
+          base_version = protoc_version(base_lock)
+          current_version = current_lock["tools"]["protoc"][0]["version"]
+          if base_version == current_version:
+              raise SystemExit(
+                  f"protoc version unchanged in mise.lock ({current_version})"
+              )
+          print(f"protoc updated: {base_version} -> {current_version}")
+          PY
       - name: Generate protobuf sources
         run: mise run generate
       - name: Validate and export generated sources as a patch
