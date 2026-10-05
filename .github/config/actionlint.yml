@@ -1,0 +1,5 @@
+# actionlint 1.7.12 does not yet include the ubuntu-26.04 hosted runner label.
+# Keep runner-label validation enabled while this repository uses that image.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
