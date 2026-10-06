@@ -32,4 +32,20 @@ class EscapingSchemeTest {
     assertThat(EscapingScheme.fromAcceptHeader("application/json"))
         .isEqualTo(EscapingScheme.DEFAULT);
   }
+
+  @Test
+  void fromAcceptHeaderWithFallback() {
+    assertThat(EscapingScheme.fromAcceptHeader("application/json", EscapingScheme.ALLOW_UTF8))
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(EscapingScheme.fromAcceptHeader(null, EscapingScheme.ALLOW_UTF8))
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(
+            EscapingScheme.fromAcceptHeader(
+                "application/json; escaping=unknown", EscapingScheme.ALLOW_UTF8))
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(
+            EscapingScheme.fromAcceptHeader(
+                "application/json; escaping=underscores", EscapingScheme.ALLOW_UTF8))
+        .isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
+  }
 }
