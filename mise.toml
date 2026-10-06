@@ -34,7 +34,7 @@ trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"]
 [env]
 FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION = "0.35.0"
+LGTM_VERSION = "0.33.1"
 # Latest JMX Exporter release; used as the default ref for the compatibility job.
 # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
 DEFAULT_JMX_EXPORTER_VERSION = "v1.6.0"
