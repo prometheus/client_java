@@ -45,6 +45,15 @@ public enum EscapingScheme {
    * exists, that will be used. Otherwise, the global default will be returned.
    */
   public static EscapingScheme fromAcceptHeader(@Nullable String acceptHeader) {
+    return fromAcceptHeader(acceptHeader, DEFAULT);
+  }
+
+  /**
+   * Like {@link #fromAcceptHeader(String)}, but returns {@code fallback} instead of {@link
+   * #DEFAULT} if the header has no valid "escaping" term.
+   */
+  public static EscapingScheme fromAcceptHeader(
+      @Nullable String acceptHeader, EscapingScheme fallback) {
     if (acceptHeader != null) {
       for (String p : acceptHeader.split(";")) {
         String[] toks = p.split("=");
@@ -58,12 +67,12 @@ public enum EscapingScheme {
             return EscapingScheme.forString(value);
           } catch (IllegalArgumentException e) {
             // If the escaping parameter is unknown, ignore it.
-            return DEFAULT;
+            return fallback;
           }
         }
       }
     }
-    return DEFAULT;
+    return fallback;
   }
 
   static EscapingScheme forString(String value) {
