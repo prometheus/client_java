@@ -17,6 +17,21 @@ import org.junit.jupiter.api.Test;
 class OpenMetrics2TextFormatWriterTest {
 
   @Test
+  void suffixesAreEnabledByDefault() throws IOException {
+    Counter counter = Counter.builder().name("requests").unit(Unit.BYTES).build();
+    counter.inc();
+
+    String output =
+        writeWithWriter(
+            MetricSnapshots.of(counter.collect()), OpenMetrics2TextFormatWriter.create());
+
+    assertThat(output)
+        .contains("# TYPE requests_bytes_total counter\n")
+        .contains("# UNIT requests_bytes_total bytes\n")
+        .containsPattern("(?m)^requests_bytes_total 1\\.0 st@\\d+\\.\\d{3}$");
+  }
+
+  @Test
   void counterPreservesOriginalNameWhenUnitIsConfigured() throws IOException {
     Counter counter =
         Counter.builder()
@@ -93,23 +108,27 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   private String writeWithOM1(MetricSnapshots snapshots) throws IOException {
-    return write(snapshots, OpenMetricsTextFormatWriter.create());
+    return writeWithWriter(snapshots, OpenMetricsTextFormatWriter.create());
   }
 
   private String writeWithOM2(MetricSnapshots snapshots) throws IOException {
-    return write(snapshots, OpenMetrics2TextFormatWriter.create());
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+            .build();
+    return writeWithWriter(snapshots, writer);
   }
 
   private String writeWithNativeHistograms(MetricSnapshots snapshots) throws IOException {
     OpenMetrics2TextFormatWriter writer =
         OpenMetrics2TextFormatWriter.builder()
             .setOpenMetrics2Properties(
-                OpenMetrics2Properties.builder().nativeHistograms(true).build())
+                OpenMetrics2Properties.builder().nativeHistograms(true).suffixes(false).build())
             .build();
-    return write(snapshots, writer);
+    return writeWithWriter(snapshots, writer);
   }
 
-  private String write(MetricSnapshots snapshots, ExpositionFormatWriter writer)
+  private String writeWithWriter(MetricSnapshots snapshots, ExpositionFormatWriter writer)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);

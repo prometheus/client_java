@@ -146,10 +146,11 @@ This works for all Metrics properties.
 | io.prometheus.openmetrics2.composite_values    | [OpenMetrics2Properties.getCompositeValues()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getCompositeValues()>)       | (1)  |
 | io.prometheus.openmetrics2.exemplar_compliance | [OpenMetrics2Properties.getExemplarCompliance()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getExemplarCompliance()>) | (1)  |
 | io.prometheus.openmetrics2.native_histograms   | [OpenMetrics2Properties.getNativeHistograms()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getNativeHistograms()>)     | (1)  |
+| io.prometheus.openmetrics2.suffixes            | [OpenMetrics2Properties.getSuffixes()](</client_java/api/io/prometheus/metrics/config/OpenMetrics2Properties.html#getSuffixes()>)                       | (1)  |
 
 (1) Boolean value, `true` or `false`. `enabled=true` switches OpenMetrics responses to the OM2
-writer, preserving metric names as written by the application. The other OM2 properties remain
-opt-in. All OpenMetrics 2.0 flags are experimental and default to `false`.
+writer. The `suffixes` property defaults to `true` to preserve OM1 series names. The other OM2
+properties remain opt-in and default to `false`. All OpenMetrics 2.0 flags are experimental.
 
 ## Exporter Filter Properties
 
