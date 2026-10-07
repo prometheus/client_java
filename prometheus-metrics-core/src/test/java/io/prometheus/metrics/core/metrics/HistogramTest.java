@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
@@ -1596,6 +1597,117 @@ class HistogramTest {
     assertThat(nThreads * 10_000).isEqualTo(getBucket(histogram, 2.5, "status", "200").getCount());
     executor.shutdown();
     assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+  }
+
+  @Test
+  void testClassicOnlyCollectWhileObserversAreRunning() throws Exception {
+    Histogram histogram = Histogram.builder().name("test").classicOnly().build();
+    DistributionDataPoint dataPoint = histogram.labelValues();
+    int observerCount = 8;
+    int observationsPerThread = 25_000;
+    ExecutorService executor = Executors.newFixedThreadPool(observerCount + 1);
+    CountDownLatch ready = new CountDownLatch(observerCount);
+    CountDownLatch start = new CountDownLatch(1);
+    AtomicBoolean observersFinished = new AtomicBoolean();
+    List<Future<?>> observers = new ArrayList<>();
+
+    for (int i = 0; i < observerCount; i++) {
+      observers.add(
+          executor.submit(
+              () -> {
+                ready.countDown();
+                start.await();
+                for (int observation = 0; observation < observationsPerThread; observation++) {
+                  dataPoint.observe(1.25);
+                }
+                return null;
+              }));
+    }
+
+    Future<?> collector =
+        executor.submit(
+            () -> {
+              long previousCount = 0;
+              start.await();
+              while (!observersFinished.get()) {
+                HistogramSnapshot.HistogramDataPointSnapshot snapshot =
+                    histogram.collect().getDataPoints().get(0);
+                assertClassicOnlySnapshotIsCoherent(snapshot, previousCount);
+                previousCount = snapshot.getCount();
+              }
+              return null;
+            });
+
+    assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+    start.countDown();
+    for (Future<?> observer : observers) {
+      observer.get(10, TimeUnit.SECONDS);
+    }
+    observersFinished.set(true);
+    collector.get(10, TimeUnit.SECONDS);
+
+    HistogramSnapshot.HistogramDataPointSnapshot snapshot =
+        histogram.collect().getDataPoints().get(0);
+    assertClassicOnlySnapshotIsCoherent(snapshot, observerCount * observationsPerThread);
+    assertThat(dataPoint.getCount()).isEqualTo(observerCount * observationsPerThread);
+    assertThat(dataPoint.getSum())
+        .isCloseTo(observerCount * observationsPerThread * 1.25, offset(0.000_001));
+
+    executor.shutdown();
+    assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+  }
+
+  @Test
+  void testClassicOnlyRetainsShortLivedThreadCellsAndClearCreatesFreshDataPoint() throws Exception {
+    Histogram histogram =
+        Histogram.builder().name("test").classicOnly().labelNames("status").build();
+    DistributionDataPoint oldDataPoint = histogram.labelValues("200");
+    int threadCount = 100;
+    ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+    CountDownLatch start = new CountDownLatch(1);
+    List<Future<?>> observations = new ArrayList<>();
+    for (int i = 0; i < threadCount; i++) {
+      observations.add(
+          executor.submit(
+              () -> {
+                start.await();
+                oldDataPoint.observe(2.0);
+                return null;
+              }));
+    }
+    start.countDown();
+    for (Future<?> observation : observations) {
+      observation.get(5, TimeUnit.SECONDS);
+    }
+    executor.shutdown();
+    assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+
+    assertThat(oldDataPoint.getCount()).isEqualTo(threadCount);
+    assertThat(oldDataPoint.getSum()).isEqualTo(threadCount * 2.0);
+    assertThat(getBucket(histogram, 2.5, "status", "200").getCount()).isEqualTo(threadCount);
+
+    histogram.clear();
+    DistributionDataPoint newDataPoint = histogram.labelValues("200");
+    assertThat(newDataPoint).isNotSameAs(oldDataPoint);
+    assertThat(newDataPoint.getCount()).isZero();
+    assertThat(newDataPoint.getSum()).isZero();
+
+    newDataPoint.observe(3.0);
+    assertThat(newDataPoint.getCount()).isOne();
+    assertThat(newDataPoint.getSum()).isEqualTo(3.0);
+    assertThat(oldDataPoint.getCount()).isEqualTo(threadCount);
+    assertThat(oldDataPoint.getSum()).isEqualTo(threadCount * 2.0);
+  }
+
+  private static void assertClassicOnlySnapshotIsCoherent(
+      HistogramSnapshot.HistogramDataPointSnapshot snapshot, long minimumCount) {
+    assertThat(snapshot.getCount()).isGreaterThanOrEqualTo(minimumCount);
+    assertThat(snapshot.getSum()).isCloseTo(snapshot.getCount() * 1.25, offset(0.000_001));
+    long bucketTotal = 0;
+    for (ClassicHistogramBucket bucket : snapshot.getClassicBuckets()) {
+      bucketTotal += bucket.getCount();
+    }
+    assertThat(bucketTotal).isEqualTo(snapshot.getCount());
   }
 
   @Test
