@@ -41,9 +41,9 @@ For the default OpenMetrics 1.0 and Prometheus text formats, counters are expose
 `_total` suffix. You can name a counter either `service_time_seconds` or
 `service_time_seconds_total`; the exposed name will be `service_time_seconds_total` in both cases.
 
-The experimental OpenMetrics 2.0 writer behaves differently: It preserves metric names instead of
-appending `_total` or unit suffixes automatically. In OpenMetrics 2.0, `_total` is recommended for
-counters, but not enforced by the Java client.
+The experimental OpenMetrics 2.0 writer appends `_total` and unit suffixes by default so that
+switching from OpenMetrics 1.0 does not rename existing series. Set
+`io.prometheus.openmetrics2.suffixes=false` to preserve metric names exactly as written instead.
 
 ## Gauge
 

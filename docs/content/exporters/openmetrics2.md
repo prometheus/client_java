@@ -35,7 +35,7 @@ only need to configure the sub-flags you want.
 With `enabled=true` alone:
 
 - OpenMetrics requests use the OM2 writer.
-- Metric names are preserved as written by the application.
+- Counter and unit suffixes are appended so that series names remain compatible with OM1.
 - Optional OM2 features such as `composite_values`, `exemplar_compliance`, and
   `native_histograms` remain off.
 
@@ -56,37 +56,43 @@ PrometheusProperties properties = PrometheusProperties.builder()
 
 ## Naming Behavior
 
-OpenMetrics 2.0 removes OM1 suffix rewriting.
+By default, the OpenMetrics 2.0 writer keeps OM1 suffix behavior so that switching formats does not
+rename existing series:
 
-- Counters do not get `_total` appended automatically.
-- Units do not get appended automatically.
-- Info metrics still end in `_info` because that is required by the spec.
+- Counters get `_total` appended when it is missing.
+- Unit suffixes are appended when they are missing.
+- Existing suffixes are not duplicated.
+- Info metrics end in `_info` because that is required by the spec.
 
 Examples:
 
-| Metric builder input               | OM1 output        | OM2 output     |
-| ---------------------------------- | ----------------- | -------------- |
-| `Counter("events")`                | `events_total`    | `events`       |
-| `Counter("events_total")`          | `events_total`    | `events_total` |
-| `Counter("req").unit(BYTES)`       | `req_bytes_total` | `req`          |
-| `Counter("req_bytes").unit(BYTES)` | `req_bytes_total` | `req_bytes`    |
-| `Info("target")`                   | `target_info`     | `target_info`  |
+| Metric builder input               | OM1 and default OM2 output | OM2 with `suffixes=false` |
+| ---------------------------------- | -------------------------- | ------------------------- |
+| `Counter("events")`                | `events_total`             | `events`                  |
+| `Counter("events_total")`          | `events_total`             | `events_total`            |
+| `Counter("req").unit(BYTES)`       | `req_bytes_total`          | `req`                     |
+| `Counter("req_bytes").unit(BYTES)` | `req_bytes_total`          | `req_bytes`               |
+| `Info("target")`                   | `target_info`              | `target_info`             |
 
-This means OpenMetrics 2.0 does not apply OM1 suffix behavior such as appending `_total` or unit
-suffixes, while the legacy OpenMetrics 1.0 and Prometheus text formats keep that existing suffix
-behavior.
+To emit metric names exactly as written by the application, set:
+
+```properties
+io.prometheus.openmetrics2.suffixes=false
+```
 
 ## Feature Flags
 
-All OpenMetrics 2.0 flags default to `false`.
+OpenMetrics 2.0 feature flags default to `false`, except `suffixes`, which defaults to `true` to
+preserve series names when migrating from OM1.
 
 | Property                                         | Effect                                                                                 |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| `io.prometheus.openmetrics2.enabled`             | Metric names are preserved as written by the application.                              |
+| `io.prometheus.openmetrics2.enabled`             | Enable the OpenMetrics 2.0 writer.                                                      |
 | `io.prometheus.openmetrics2.content_negotiation` | Apply OM2 behavior only when the scraper requests `version=2.0.0`.                     |
 | `io.prometheus.openmetrics2.composite_values`    | Emit histograms, summaries, and gauge histograms as single composite lines with `st@`. |
 | `io.prometheus.openmetrics2.exemplar_compliance` | Emit only OM2-compliant exemplars with timestamps.                                     |
 | `io.prometheus.openmetrics2.native_histograms`   | Emit OM2 native histogram text fields.                                                 |
+| `io.prometheus.openmetrics2.suffixes`            | Append counter and unit suffixes to preserve OM1 series names.                         |
 
 Enable all flags at once:
 
@@ -104,6 +110,7 @@ io.prometheus.openmetrics2.content_negotiation=true
 io.prometheus.openmetrics2.composite_values=true
 io.prometheus.openmetrics2.exemplar_compliance=true
 io.prometheus.openmetrics2.native_histograms=true
+io.prometheus.openmetrics2.suffixes=true
 ```
 
 ## Content Negotiation

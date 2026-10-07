@@ -24,12 +24,15 @@ class OpenMetrics2PropertiesTest {
                     "io.prometheus.openmetrics2.exemplar_compliance",
                     "true",
                     "io.prometheus.openmetrics2.native_histograms",
-                    "true")));
+                    "true",
+                    "io.prometheus.openmetrics2.suffixes",
+                    "false")));
     assertThat(properties.getEnabled()).isTrue();
     assertThat(properties.getContentNegotiation()).isTrue();
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isTrue();
+    assertThat(properties.getSuffixes()).isFalse();
   }
 
   @Test
@@ -68,6 +71,10 @@ class OpenMetrics2PropertiesTest {
                     new HashMap<>(
                         Map.of("io.prometheus.openmetrics2.native_histograms", "invalid"))))
         .withMessage("io.prometheus.openmetrics2.native_histograms: Expecting 'true' or 'false'.");
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () -> load(new HashMap<>(Map.of("io.prometheus.openmetrics2.suffixes", "invalid"))))
+        .withMessage("io.prometheus.openmetrics2.suffixes: Expecting 'true' or 'false'.");
   }
 
   private static OpenMetrics2Properties load(Map<String, String> map) {
@@ -85,12 +92,14 @@ class OpenMetrics2PropertiesTest {
             .compositeValues(false)
             .exemplarCompliance(true)
             .nativeHistograms(false)
+            .suffixes(false)
             .build();
     assertThat(properties.getEnabled()).isTrue();
     assertThat(properties.getContentNegotiation()).isTrue();
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isFalse();
+    assertThat(properties.getSuffixes()).isFalse();
   }
 
   @Test
@@ -101,6 +110,7 @@ class OpenMetrics2PropertiesTest {
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isTrue();
     assertThat(properties.getNativeHistograms()).isTrue();
+    assertThat(properties.getSuffixes()).isTrue();
   }
 
   @Test
@@ -111,6 +121,7 @@ class OpenMetrics2PropertiesTest {
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();
+    assertThat(properties.getSuffixes()).isTrue();
   }
 
   @Test
@@ -121,5 +132,6 @@ class OpenMetrics2PropertiesTest {
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();
+    assertThat(properties.getSuffixes()).isTrue();
   }
 }

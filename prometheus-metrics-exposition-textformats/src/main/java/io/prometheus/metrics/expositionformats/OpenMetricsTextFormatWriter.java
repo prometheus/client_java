@@ -234,9 +234,14 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
       throws IOException {
+    writeSummary(writer, snapshot, scheme, getMetadataName(snapshot.getMetadata(), scheme));
+  }
+
+  void writeSummary(
+      Writer writer, SummarySnapshot snapshot, EscapingScheme scheme, String name)
+      throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
-    String name = getMetadataName(metadata, scheme);
     String countName = name + "_count";
     String sumName = name + "_sum";
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -244,7 +249,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         continue;
       }
       if (!metadataWritten) {
-        writeMetadata(writer, "summary", metadata, scheme);
+        writeMetadataWithName(writer, name, "summary", metadata);
         metadataWritten = true;
       }
       Exemplars exemplars = data.getExemplars();

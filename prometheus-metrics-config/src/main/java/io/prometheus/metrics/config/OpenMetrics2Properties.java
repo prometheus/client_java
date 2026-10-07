@@ -16,24 +16,28 @@ public class OpenMetrics2Properties {
   private static final String COMPOSITE_VALUES = "composite_values";
   private static final String EXEMPLAR_COMPLIANCE = "exemplar_compliance";
   private static final String NATIVE_HISTOGRAMS = "native_histograms";
+  private static final String SUFFIXES = "suffixes";
 
   @Nullable private final Boolean enabled;
   @Nullable private final Boolean contentNegotiation;
   @Nullable private final Boolean compositeValues;
   @Nullable private final Boolean exemplarCompliance;
   @Nullable private final Boolean nativeHistograms;
+  @Nullable private final Boolean suffixes;
 
   private OpenMetrics2Properties(
       @Nullable Boolean enabled,
       @Nullable Boolean contentNegotiation,
       @Nullable Boolean compositeValues,
       @Nullable Boolean exemplarCompliance,
-      @Nullable Boolean nativeHistograms) {
+      @Nullable Boolean nativeHistograms,
+      @Nullable Boolean suffixes) {
     this.enabled = enabled;
     this.contentNegotiation = contentNegotiation;
     this.compositeValues = compositeValues;
     this.exemplarCompliance = exemplarCompliance;
     this.nativeHistograms = nativeHistograms;
+    this.suffixes = suffixes;
   }
 
   /**
@@ -64,6 +68,11 @@ public class OpenMetrics2Properties {
     return nativeHistograms != null && nativeHistograms;
   }
 
+  /** Append unit and type suffixes to metric names. Default is {@code true}. */
+  public boolean getSuffixes() {
+    return suffixes == null || suffixes;
+  }
+
   /**
    * Note that this will remove entries from {@code propertySource}. This is because we want to know
    * if there are unused properties remaining after all properties have been loaded.
@@ -75,8 +84,14 @@ public class OpenMetrics2Properties {
     Boolean compositeValues = Util.loadBoolean(PREFIX, COMPOSITE_VALUES, propertySource);
     Boolean exemplarCompliance = Util.loadBoolean(PREFIX, EXEMPLAR_COMPLIANCE, propertySource);
     Boolean nativeHistograms = Util.loadBoolean(PREFIX, NATIVE_HISTOGRAMS, propertySource);
+    Boolean suffixes = Util.loadBoolean(PREFIX, SUFFIXES, propertySource);
     return new OpenMetrics2Properties(
-        enabled, contentNegotiation, compositeValues, exemplarCompliance, nativeHistograms);
+        enabled,
+        contentNegotiation,
+        compositeValues,
+        exemplarCompliance,
+        nativeHistograms,
+        suffixes);
   }
 
   public static Builder builder() {
@@ -90,6 +105,7 @@ public class OpenMetrics2Properties {
     @Nullable private Boolean compositeValues;
     @Nullable private Boolean exemplarCompliance;
     @Nullable private Boolean nativeHistograms;
+    @Nullable private Boolean suffixes;
 
     private Builder() {}
 
@@ -123,6 +139,12 @@ public class OpenMetrics2Properties {
       return this;
     }
 
+    /** See {@link #getSuffixes()} */
+    public Builder suffixes(boolean suffixes) {
+      this.suffixes = suffixes;
+      return this;
+    }
+
     /** Enable all OpenMetrics 2.0 features */
     public Builder enableAll() {
       this.enabled = true;
@@ -130,12 +152,18 @@ public class OpenMetrics2Properties {
       this.compositeValues = true;
       this.exemplarCompliance = true;
       this.nativeHistograms = true;
+      this.suffixes = true;
       return this;
     }
 
     public OpenMetrics2Properties build() {
       return new OpenMetrics2Properties(
-          enabled, contentNegotiation, compositeValues, exemplarCompliance, nativeHistograms);
+          enabled,
+          contentNegotiation,
+          compositeValues,
+          exemplarCompliance,
+          nativeHistograms,
+          suffixes);
     }
   }
 }
