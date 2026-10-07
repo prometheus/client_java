@@ -200,7 +200,7 @@ class PrometheusScrapeHandlerTest {
     for (boolean contentNegotiation : new boolean[] {true, false}) {
       String body =
           scrapeUtf8Counter(contentNegotiation, "application/openmetrics-text;version=2.0.0");
-      assertThat(body).contains("\"my.counter\"").doesNotContain("my_counter");
+      assertThat(body).contains("\"my.counter_total\"").doesNotContain("my_counter");
     }
   }
 

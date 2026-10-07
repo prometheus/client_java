@@ -123,10 +123,7 @@ class OpenMetrics2TextFormatWriterTest {
     OpenMetrics2TextFormatWriter writer =
         OpenMetrics2TextFormatWriter.builder()
             .setOpenMetrics2Properties(
-                OpenMetrics2Properties.builder()
-                    .nativeHistograms(true)
-                    .suffixes(false)
-                    .build())
+                OpenMetrics2Properties.builder().nativeHistograms(true).suffixes(false).build())
             .build();
     return writeWithWriter(snapshots, writer);
   }

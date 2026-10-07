@@ -237,8 +237,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     writeSummary(writer, snapshot, scheme, getMetadataName(snapshot.getMetadata(), scheme));
   }
 
-  void writeSummary(
-      Writer writer, SummarySnapshot snapshot, EscapingScheme scheme, String name)
+  void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme, String name)
       throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
