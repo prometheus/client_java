@@ -134,10 +134,14 @@ def quick_test_images(
         if override:
             images[var] = override
             continue
-        match = re.search(rf'^\s*export\s+{var}="([^"]+)"', script, re.MULTILINE)
+        match = re.search(
+            rf'^\s*export\s+{var}=(?:"([^"]+)"|([^\s#]+))',
+            script,
+            re.MULTILINE,
+        )
         if not match:
             raise RuntimeError(f"could not find {var} in {script_path}")
-        images[var] = match.group(1)
+        images[var] = match.group(1) or match.group(2)
     return images
 
 
