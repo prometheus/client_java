@@ -41,10 +41,10 @@ import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 
 /**
- * Write the OpenMetrics 2.0 text format. By default, this writer appends unit and type suffixes so
- * that series names remain compatible with OM1. This can be disabled to emit metric names exactly
- * as provided by the user. The {@code _info} suffix is always enforced per the OM2 spec (MUST).
- * This is experimental and subject to change as the <a
+ * Write the OpenMetrics 2.0 text format. By default, this writer preserves metric names as provided
+ * by the user. Unit and type suffixes can be appended for OM1 compatibility. The {@code _info}
+ * suffix is always enforced per the OM2 spec (MUST). This is experimental and subject to change as
+ * the <a
  * href="https://github.com/prometheus/docs/blob/main/docs/specs/om/open_metrics_spec_2_0.md">OpenMetrics
  * 2.0 specification</a> evolves.
  */

@@ -121,7 +121,7 @@ class OpenMetrics2PropertiesTest {
     assertThat(properties.getCompositeValues()).isFalse();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();
-    assertThat(properties.getSuffixes()).isTrue();
+    assertThat(properties.getSuffixes()).isFalse();
   }
 
   @Test
@@ -132,6 +132,6 @@ class OpenMetrics2PropertiesTest {
     assertThat(properties.getCompositeValues()).isTrue();
     assertThat(properties.getExemplarCompliance()).isFalse();
     assertThat(properties.getNativeHistograms()).isFalse();
-    assertThat(properties.getSuffixes()).isTrue();
+    assertThat(properties.getSuffixes()).isFalse();
   }
 }

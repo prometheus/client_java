@@ -275,12 +275,12 @@ class OpenMetrics2TextFormatWriterTest {
 
     String om2Output = write(snapshots, OpenMetrics2TextFormatWriter.create());
 
-    // OM2 appends _total by default and emits the start timestamp inline.
+    // OM2 preserves the registered name by default and emits the start timestamp inline.
     assertThat(om2Output)
         .isEqualTo(
-            "# TYPE my_counter_total counter\n"
-                + "# HELP my_counter_total Test counter\n"
-                + "my_counter_total 42.0 st@1672850385.800\n"
+            "# TYPE my_counter counter\n"
+                + "# HELP my_counter Test counter\n"
+                + "my_counter 42.0 st@1672850385.800\n"
                 + "# EOF\n");
   }
 

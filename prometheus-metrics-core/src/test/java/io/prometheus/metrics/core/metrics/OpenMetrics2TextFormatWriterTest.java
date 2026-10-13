@@ -17,13 +17,30 @@ import org.junit.jupiter.api.Test;
 class OpenMetrics2TextFormatWriterTest {
 
   @Test
-  void suffixesAreEnabledByDefault() throws IOException {
+  void preservesNamesByDefault() throws IOException {
     Counter counter = Counter.builder().name("requests").unit(Unit.BYTES).build();
     counter.inc();
 
     String output =
         writeWithWriter(
             MetricSnapshots.of(counter.collect()), OpenMetrics2TextFormatWriter.create());
+
+    assertThat(output)
+        .contains("# TYPE requests counter\n")
+        .contains("# UNIT requests bytes\n")
+        .containsPattern("(?m)^requests 1\\.0 st@\\d+\\.\\d{3}$");
+  }
+
+  @Test
+  void suffixesCanBeEnabledForOm1Compatibility() throws IOException {
+    Counter counter = Counter.builder().name("requests").unit(Unit.BYTES).build();
+    counter.inc();
+
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(true).build())
+            .build();
+    String output = writeWithWriter(MetricSnapshots.of(counter.collect()), writer);
 
     assertThat(output)
         .contains("# TYPE requests_bytes_total counter\n")

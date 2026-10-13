@@ -68,9 +68,9 @@ public class OpenMetrics2Properties {
     return nativeHistograms != null && nativeHistograms;
   }
 
-  /** Append unit and type suffixes to metric names. Default is {@code true}. */
+  /** Append unit and type suffixes to metric names. Default is {@code false}. */
   public boolean getSuffixes() {
-    return suffixes == null || suffixes;
+    return suffixes != null && suffixes;
   }
 
   /**
