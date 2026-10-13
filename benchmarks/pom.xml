@@ -20,7 +20,7 @@
     <simpleclient.version>0.16.0</simpleclient.version>
     <codahale.version>3.0.2</codahale.version>
     <!-- TODO: remove once opentelemetry-instrumentation-bom-alpha ships with otel 1.66.0. -->
-    <benchmark.otel.version>1.66.0</benchmark.otel.version>
+    <benchmark.otel.version>1.67.0</benchmark.otel.version>
     <coverage.skip>true</coverage.skip>
     <javadoc.skip>true</javadoc.skip>
   </properties>
