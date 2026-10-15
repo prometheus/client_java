@@ -181,10 +181,12 @@ class PrometheusPropertiesTest {
     properties.put("io.prometheus.openmetrics2.composite_values", "false");
     properties.put("io.prometheus.openmetrics2.exemplar_compliance", "true");
     properties.put("io.prometheus.openmetrics2.native_histograms", "false");
+    properties.put("io.prometheus.openmetrics2.suffixes", "false");
     PrometheusProperties config = PrometheusPropertiesLoader.load(properties);
     assertThat(config.getOpenMetrics2Properties().getContentNegotiation()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getCompositeValues()).isFalse();
     assertThat(config.getOpenMetrics2Properties().getExemplarCompliance()).isTrue();
     assertThat(config.getOpenMetrics2Properties().getNativeHistograms()).isFalse();
+    assertThat(config.getOpenMetrics2Properties().getSuffixes()).isFalse();
   }
 }

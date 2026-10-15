@@ -196,11 +196,14 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  void testOpenMetrics2DoesNotEscapeUtf8NamesByDefault() throws IOException {
+  void testOpenMetrics2PreservesNamesAndDoesNotEscapeUtf8ByDefault() throws IOException {
     for (boolean contentNegotiation : new boolean[] {true, false}) {
       String body =
           scrapeUtf8Counter(contentNegotiation, "application/openmetrics-text;version=2.0.0");
-      assertThat(body).contains("\"my.counter\"").doesNotContain("my_counter");
+      assertThat(body)
+          .contains("\"my.counter\"")
+          .doesNotContain("my.counter_total")
+          .doesNotContain("my_counter");
     }
   }
 
