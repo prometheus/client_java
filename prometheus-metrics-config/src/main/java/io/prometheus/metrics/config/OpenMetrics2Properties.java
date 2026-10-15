@@ -152,7 +152,6 @@ public class OpenMetrics2Properties {
       this.compositeValues = true;
       this.exemplarCompliance = true;
       this.nativeHistograms = true;
-      this.suffixes = true;
       return this;
     }
 
