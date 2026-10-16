@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.10.0](https://github.com/prometheus/client_java/compare/v1.9.0...v1.10.0) (2026-10-16)
+
+
+### Features
+
+* preserve metric suffixes in OpenMetrics 2.0 ([#2529](https://github.com/prometheus/client_java/issues/2529)) ([b1aa8b3](https://github.com/prometheus/client_java/commit/b1aa8b38be304b7c935da77014afb02267ed01a6))
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.0 ([#2493](https://github.com/prometheus/client_java/issues/2493)) ([5bf31dc](https://github.com/prometheus/client_java/commit/5bf31dc287edac5eb052f57a561b61b8a3309133))
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.1 ([#2548](https://github.com/prometheus/client_java/issues/2548)) ([72afa41](https://github.com/prometheus/client_java/commit/72afa4199731ef18b251ccba8ff6d270baf1c0c5))
+* **deps:** update dependency com.google.guava:guava to v33.7.2-jre ([#2510](https://github.com/prometheus/client_java/issues/2510)) ([78820b0](https://github.com/prometheus/client_java/commit/78820b069d07909c40a329922d99a2768959a9b4))
+* **deps:** update dependency io.opentelemetry:opentelemetry-bom to v1.67.0 ([#2547](https://github.com/prometheus/client_java/issues/2547)) ([4c9bf78](https://github.com/prometheus/client_java/commit/4c9bf78055019b5d460a5f1a4e1899cfb6fca275))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.32.0-alpha ([#2523](https://github.com/prometheus/client_java/issues/2523)) ([933c38b](https://github.com/prometheus/client_java/commit/933c38b32853bacd8001db10a4c6511fc483b0e6))
+* **deps:** update dependency io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha to v2.32.0-alpha ([#2524](https://github.com/prometheus/client_java/issues/2524)) ([d7c3286](https://github.com/prometheus/client_java/commit/d7c3286f0967ae390ecf0611243c16f3d4ceab17))
+* **deps:** update dependency org.apache.tomcat.embed:tomcat-embed-core to v11.0.27 ([#2543](https://github.com/prometheus/client_java/issues/2543)) ([48c768a](https://github.com/prometheus/client_java/commit/48c768aee1a3d79cc482acfc030c2ce32ce23d1a))
+* **deps:** update dependency renovate to v44.149.1 ([#2549](https://github.com/prometheus/client_java/issues/2549)) ([2edf838](https://github.com/prometheus/client_java/commit/2edf838fa0f734b74beda1e228861bde6018468c))
+* **deps:** update dependency renovate to v44.150.1 ([#2555](https://github.com/prometheus/client_java/issues/2555)) ([7eaa0bd](https://github.com/prometheus/client_java/commit/7eaa0bdfd902a4b6bcd538de0f0da81d97cf53dd))
+* **deps:** update dependency renovate to v44.151.5 ([#2558](https://github.com/prometheus/client_java/issues/2558)) ([52e07ad](https://github.com/prometheus/client_java/commit/52e07ad457afdbb9b2731699e270286454f4f6c1))
+* **deps:** update dependency renovate to v44.153.1 ([#2559](https://github.com/prometheus/client_java/issues/2559)) ([daa9f3a](https://github.com/prometheus/client_java/commit/daa9f3a829bd77edb376081b722b7032f6baad42))
+* **deps:** update dependency renovate to v44.154.0 ([#2560](https://github.com/prometheus/client_java/issues/2560)) ([068ad4e](https://github.com/prometheus/client_java/commit/068ad4e355e97e9183cda5a529dd9a7f0b3c7b20))
+* **deps:** update jetty monorepo to v12.1.14 ([#2527](https://github.com/prometheus/client_java/issues/2527)) ([3fb8ccc](https://github.com/prometheus/client_java/commit/3fb8ccca65cdc176e3015f6038f41a425e481216))
+* don't escape UTF-8 names by default for OpenMetrics 2.0 ([#2519](https://github.com/prometheus/client_java/issues/2519)) ([513a2d7](https://github.com/prometheus/client_java/commit/513a2d79b17ec0438e823e9bce15f8635f029ca3))
+* exclude non-release modules from Maven deployment ([#2481](https://github.com/prometheus/client_java/issues/2481)) ([f27baf4](https://github.com/prometheus/client_java/commit/f27baf4196aea08304df67124e84af4d7e102bab))
+* mark tracer initializer OSGi import optional ([#2528](https://github.com/prometheus/client_java/issues/2528)) ([fc5d0ba](https://github.com/prometheus/client_java/commit/fc5d0ba6fad6c9cb26e455139accd446d250ac08))
+
+
+### Performance Improvements
+
+* scan metric name validity once per metric family ([#2443](https://github.com/prometheus/client_java/issues/2443)) ([5d36228](https://github.com/prometheus/client_java/commit/5d36228aeddfbd7d9160fe7398fa07121431d20c))
+* update otel benchmark dependencies, add otel bound instrument scenarios ([#2451](https://github.com/prometheus/client_java/issues/2451)) ([fd343a2](https://github.com/prometheus/client_java/commit/fd343a2b42a34011fb67fddbca279067e94fb2ab))
+
 ## [1.9.0](https://github.com/prometheus/client_java/compare/v1.8.0...v1.9.0) (2026-09-16)
 
 
