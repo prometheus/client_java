@@ -4,7 +4,57 @@
   "pull-request-footer": "> [!IMPORTANT]\n> Close and reopen this PR to trigger CI checks.",
   "packages": {
     ".": {
-      "release-type": "maven"
+      "release-type": "maven",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance Improvements"
+        },
+        {
+          "type": "deps",
+          "section": "Dependencies"
+        },
+        {
+          "type": "docs",
+          "section": "Internal"
+        },
+        {
+          "type": "style",
+          "section": "Internal"
+        },
+        {
+          "type": "chore",
+          "section": "Internal"
+        },
+        {
+          "type": "refactor",
+          "section": "Internal"
+        },
+        {
+          "type": "test",
+          "section": "Internal"
+        },
+        {
+          "type": "build",
+          "section": "Internal"
+        },
+        {
+          "type": "ci",
+          "section": "Internal"
+        },
+        {
+          "type": "revert",
+          "section": "Internal"
+        }
+      ]
     }
   }
 }
