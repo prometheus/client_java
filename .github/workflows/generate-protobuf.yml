@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   generate:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read # checkout + read-only `git fetch origin main` for the verify step
     steps:
@@ -18,10 +18,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
           persist-credentials: false
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
-          version: v2026.9.12
-          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
+          version: v2026.10.2
+          sha256: 8f5f6660336f572830e33cd9b378d3131e529a0d4c4f0c553776be90a1ba302a
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -33,15 +33,33 @@ jobs:
         run: |
           git fetch origin main
           DIFF_POM=$(git diff origin/main -- pom.xml)
-          DIFF_MISE=$(git diff origin/main -- mise.toml)
           if ! echo "$DIFF_POM" | grep -q 'protobuf-java.version'; then
             echo "::error::protobuf-java not updated in pom.xml"
             exit 1
           fi
-          if ! echo "$DIFF_MISE" | grep -q 'protoc'; then
-            echo "::error::protoc not updated in mise.toml"
-            exit 1
-          fi
+          python3 - <<'PY'
+          import subprocess
+          import tomllib
+
+          def protoc_version(text):
+              return tomllib.loads(text)["tools"]["protoc"][0]["version"]
+
+          base_lock = subprocess.run(
+              ["git", "show", "origin/main:mise.lock"],
+              check=True,
+              capture_output=True,
+              text=True,
+          ).stdout
+          with open("mise.lock", "rb") as lock_file:
+              current_lock = tomllib.load(lock_file)
+          base_version = protoc_version(base_lock)
+          current_version = current_lock["tools"]["protoc"][0]["version"]
+          if base_version == current_version:
+              raise SystemExit(
+                  f"protoc version unchanged in mise.lock ({current_version})"
+              )
+          print(f"protoc updated: {base_version} -> {current_version}")
+          PY
       - name: Generate protobuf sources
         run: mise run generate
       - name: Validate and export generated sources as a patch
@@ -56,14 +74,14 @@ jobs:
           git add -A -- '*.java'
           git diff --cached --binary > /tmp/protobuf-sources.patch
       - name: Upload generated patch
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: protobuf-sources-patch
           path: /tmp/protobuf-sources.patch
           retention-days: 5
 
   publish:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: generate
     permissions:
       contents: write # push regenerated sources back to the renovate branch
@@ -74,7 +92,7 @@ jobs:
           # zizmor: ignore[artipacked] -- needs credentials to push
           persist-credentials: true
       - name: Download generated patch
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: protobuf-sources-patch
           path: /tmp/patch

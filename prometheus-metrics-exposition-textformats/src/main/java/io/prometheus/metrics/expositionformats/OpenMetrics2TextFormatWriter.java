@@ -6,6 +6,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getExpositionBaseMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getOriginalMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
@@ -40,9 +41,10 @@ import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 
 /**
- * Write the OpenMetrics 2.0 text format. Unlike the OM1 writer, this writer outputs metric names as
- * provided by the user, without appending {@code _total} or unit suffixes. The {@code _info} suffix
- * is enforced per the OM2 spec (MUST). This is experimental and subject to change as the <a
+ * Write the OpenMetrics 2.0 text format. By default, this writer preserves metric names as provided
+ * by the user. Unit and type suffixes can be appended for OM1 compatibility. The {@code _info}
+ * suffix is always enforced per the OM2 spec (MUST). This is experimental and subject to change as
+ * the <a
  * href="https://github.com/prometheus/docs/blob/main/docs/specs/om/open_metrics_spec_2_0.md">OpenMetrics
  * 2.0 specification</a> evolves.
  */
@@ -174,8 +176,10 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeCounter(Writer writer, CounterSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    // OM2: use the original name, no _total or unit suffix appending.
-    String counterName = getOriginalMetadataName(metadata, scheme);
+    String counterName = getMetricName(metadata, scheme);
+    if (openMetrics2Properties.getSuffixes()) {
+      counterName = ensureSuffix(counterName, "_total");
+    }
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(counterName);
     writeMetadataWithName(writer, counterName, "counter", metadata);
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -197,7 +201,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeGauge(Writer writer, GaugeSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    String name = getOriginalMetadataName(metadata, scheme);
+    String name = getMetricName(metadata, scheme);
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     writeMetadataWithName(writer, name, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -216,7 +220,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     boolean compositeHistogram =
         openMetrics2Properties.getCompositeValues() || openMetrics2Properties.getNativeHistograms();
     MetricMetadata metadata = snapshot.getMetadata();
-    String name = getOriginalMetadataName(metadata, scheme);
+    String name = getMetricName(metadata, scheme);
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     if (!compositeHistogram && !openMetrics2Properties.getExemplarCompliance()) {
       writeClassicHistogram(writer, name, snapshot, scheme, nameValidLegacy);
@@ -504,15 +508,15 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
 
   private void writeSummary(Writer writer, SummarySnapshot snapshot, EscapingScheme scheme)
       throws IOException {
+    MetricMetadata metadata = snapshot.getMetadata();
+    String name = getMetricName(metadata, scheme);
     if (!openMetrics2Properties.getCompositeValues()
         && !openMetrics2Properties.getExemplarCompliance()) {
-      om1Writer.writeSummary(writer, snapshot, scheme);
+      om1Writer.writeSummary(writer, snapshot, scheme, name);
       return;
     }
-    boolean metadataWritten = false;
-    MetricMetadata metadata = snapshot.getMetadata();
-    String name = getOriginalMetadataName(metadata, scheme);
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
+    boolean metadataWritten = false;
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
       if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
         continue;
@@ -580,7 +584,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
     MetricMetadata metadata = snapshot.getMetadata();
     // OM2 spec: Info MetricFamily name MUST end in _info.
     // In OM2, TYPE/HELP use the same name as the data lines.
-    String infoName = ensureSuffix(getOriginalMetadataName(metadata, scheme), "_info");
+    String infoName = ensureSuffix(getMetricName(metadata, scheme), "_info");
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(infoName);
     writeMetadataWithName(writer, infoName, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -593,7 +597,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeStateSet(Writer writer, StateSetSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    String name = getOriginalMetadataName(metadata, scheme);
+    String name = getMetricName(metadata, scheme);
     writeMetadataWithName(writer, name, "stateset", metadata);
     for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getDataPoints()) {
       for (int i = 0; i < data.size(); i++) {
@@ -629,7 +633,7 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   private void writeUnknown(Writer writer, UnknownSnapshot snapshot, EscapingScheme scheme)
       throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
-    String name = getOriginalMetadataName(metadata, scheme);
+    String name = getMetricName(metadata, scheme);
     boolean nameValidLegacy = PrometheusNaming.isValidLegacyMetricName(name);
     writeMetadataWithName(writer, name, "unknown", metadata);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -746,6 +750,13 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       writeEscapedString(writer, metadata.getHelp());
       writer.write('\n');
     }
+  }
+
+  private String getMetricName(MetricMetadata metadata, EscapingScheme scheme) {
+    if (openMetrics2Properties.getSuffixes()) {
+      return getExpositionBaseMetadataName(metadata, scheme);
+    }
+    return getOriginalMetadataName(metadata, scheme);
   }
 
   private static String ensureSuffix(String name, String suffix) {

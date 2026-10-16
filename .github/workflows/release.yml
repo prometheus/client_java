@@ -14,7 +14,7 @@ jobs:
   deploy:
     if: ${{ github.repository == 'prometheus/client_java' }}
     environment: release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       # Artifact releases pair a focused tool allowlist with cache: false.
       MISE_ENABLE_TOOLS: java
@@ -72,17 +72,17 @@ jobs:
           ref: ${{ inputs.tag }}
           persist-credentials: false
 
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
-          version: v2026.9.12
-          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
+          version: v2026.10.2
+          sha256: 8f5f6660336f572830e33cd9b378d3131e529a0d4c4f0c553776be90a1ba302a
           cache: false
 
       - name: Build release version
         run: mise run build-release
 
       - name: Set up Apache Maven Central
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
         with:
           distribution: "temurin"
           java-version: "25.0.4+101.0.LTS"

@@ -273,9 +273,9 @@ class OpenMetrics2TextFormatWriterTest {
                         .build())
                 .build());
 
-    String om2Output = writeWithOM2(snapshots);
+    String om2Output = write(snapshots, OpenMetrics2TextFormatWriter.create());
 
-    // OM2: no _total, start timestamp uses st@ inline.
+    // OM2 preserves the registered name by default and emits the start timestamp inline.
     assertThat(om2Output)
         .isEqualTo(
             "# TYPE my_counter counter\n"
@@ -834,7 +834,10 @@ class OpenMetrics2TextFormatWriterTest {
   }
 
   private String writeWithOM2(MetricSnapshots snapshots) throws IOException {
-    OpenMetrics2TextFormatWriter writer = OpenMetrics2TextFormatWriter.create();
+    OpenMetrics2TextFormatWriter writer =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+            .build();
     return write(snapshots, writer);
   }
 

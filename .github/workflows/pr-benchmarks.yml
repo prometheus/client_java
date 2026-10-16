@@ -18,7 +18,7 @@ defaults:
 jobs:
   benchmark:
     if: github.event.label.name == 'benchmark'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -45,10 +45,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup mise
-        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
         with:
-          version: v2026.9.12
-          sha256: e79ae57945034903aee8aa2ea66b4c7ca9cd4f4edd5a8a78a589cbae6d0f428a
+          version: v2026.10.2
+          sha256: 8f5f6660336f572830e33cd9b378d3131e529a0d4c4f0c553776be90a1ba302a
 
       - name: Cache local Maven repository
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -90,7 +90,7 @@ jobs:
         run: mv benchmark-results.json /tmp/head-results.json
 
       - name: Upload ${{ matrix.topic }} benchmark results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pr-benchmark-topic-${{ matrix.topic }}-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: |
@@ -101,7 +101,7 @@ jobs:
 
   summarize:
     if: github.event.label.name == 'benchmark'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: benchmark
     permissions:
       contents: read # checkout only
@@ -118,7 +118,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download topic benchmark results
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: pr-benchmark-topic-*-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: /tmp/topic-benchmark-results
@@ -162,14 +162,14 @@ jobs:
           cp benchmark-results/README.md pr-benchmark-comment.md
 
       - name: Upload PR benchmark results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pr-benchmark-results-pr-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: benchmark-results
           retention-days: 5
 
       - name: Upload PR benchmark comment
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pr-benchmark-comment-pr-${{ env.PR_NUMBER }}-${{ env.HEAD_SHA }}
           path: pr-benchmark-comment.md

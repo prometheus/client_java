@@ -69,4 +69,31 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <configuration>
+          <instructions>
+            <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+            <!-- Micrometer excludes this artifact and supplies its own supplier.
+                 The import must not be required for the bundle to resolve. -->
+            <Import-Package>
+              io.prometheus.metrics.tracer.initializer;resolution:=optional,*
+            </Import-Package>
+          </instructions>
+        </configuration>
+        <executions>
+          <execution>
+            <!-- Write MANIFEST.MF in process-classes for OSGi header tests. -->
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

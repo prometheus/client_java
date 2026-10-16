@@ -18,7 +18,7 @@ permissions: {}
 jobs:
   detect-api-changes:
     if: github.repository == 'prometheus/client_java'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       issues: write
       pull-requests: write
