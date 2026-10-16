@@ -86,10 +86,16 @@ def prepare_repo(
             ["git", "remote", "set-url", remote, repository_url],
             cwd=jmx_exporter_dir,
         )
-        run_cmd(["git", "fetch", remote, ref], cwd=jmx_exporter_dir)
     else:
-        run_cmd(["git", "clone", repository_url, str(jmx_exporter_dir)])
-        run_cmd(["git", "fetch", remote, ref], cwd=jmx_exporter_dir)
+        jmx_exporter_dir.mkdir(parents=True, exist_ok=True)
+        run_cmd(["git", "init"], cwd=jmx_exporter_dir)
+        run_cmd(
+            ["git", "remote", "add", remote, repository_url],
+            cwd=jmx_exporter_dir,
+        )
+    # Fetch only the requested ref: a full clone of the default branch followed by
+    # another fetch transfers unnecessary history on every fresh CI runner.
+    run_cmd(["git", "fetch", "--depth=1", remote, ref], cwd=jmx_exporter_dir)
     run_cmd(
         ["git", "checkout", "-B", "jmx-exporter-compat", "FETCH_HEAD"],
         cwd=jmx_exporter_dir,
