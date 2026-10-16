@@ -6,6 +6,8 @@
     'github>grafana/flint#v0.22.14',
   ],
   platformCommit: 'enabled',
+  semanticCommits: 'enabled',
+  semanticCommitType: 'deps',
   automerge: true,
   ignorePaths: [
     '**/simpleclient-archive/**',
