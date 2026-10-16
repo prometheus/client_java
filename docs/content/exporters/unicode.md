@@ -26,6 +26,19 @@ When `escaping=allow-utf-8` is passed, add valid UTF-8 characters to the metric 
 without replacing them. This allows you to use dots in metric and label names, as well as
 other UTF-8 characters, without any replacements.
 
+Names outside the legacy character set must use the quoted syntax in the Prometheus and
+OpenMetrics 1.0 text formats. A quoted metric name is written inside braces, followed by its
+labels. For example, a counter named `test_我喜欢茶` with a `test` label is exposed as:
+
+```text
+# TYPE "test_我喜欢茶" counter
+{"test_我喜欢茶_total",test="test_我喜欢茶"} 1.0
+```
+
+The braces do not turn the metric name into a label. They are the required text-format notation
+for a quoted metric name. See the [Prometheus exposition
+format](https://prometheus.io/docs/instrumenting/exposition_formats/) for the complete syntax.
+
 OpenMetrics 2.0 supports UTF-8 names natively, so when the OpenMetrics 2.0 writer serves a request
 that explicitly asks for `version=2.0.0`, names are not escaped unless the request also contains an
 `escaping` parameter.
