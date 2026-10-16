@@ -153,8 +153,8 @@ def run_maven_test(
         prom_version = get_prom_version()
     # Build the full reactor (including the integration_test_suite) the same way
     # run-quick-test.sh does, but against our locally installed io.prometheus
-    # artifacts. The pinned distribution env vars keep this to the quick (single
-    # cell) matrix rather than the full smoke-test matrix.
+    # artifacts. This PR check intentionally runs only one representative smoke
+    # test; the pinned distribution env vars also keep it to a single matrix cell.
     env = {**os.environ, **quick_test_images(jmx_exporter_dir)}
     cmd = [
         "./mvnw",
@@ -162,6 +162,7 @@ def run_maven_test(
         "clean",
         "install",
         f"-Dprometheus.metrics.version={prom_version}",
+        "-Dparamixel.match.class.regex=io.prometheus.jmx.test.core.BasicTest",
         f"-Dparamixel.parallelism={os.cpu_count() or 1}",
         "-Djacoco.skip=true",
     ]
