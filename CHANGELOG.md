@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.10.1](https://github.com/prometheus/client_java/compare/v1.10.0...v1.10.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency renovate to v44.155.2 ([#2566](https://github.com/prometheus/client_java/issues/2566)) ([eadfb6d](https://github.com/prometheus/client_java/commit/eadfb6d550809340c24ed2a78b33ce30587a0364))
+
+
+### Internal
+
+* **deps:** update dependency grafana/docker-otel-lgtm to v0.37.0 ([#2564](https://github.com/prometheus/client_java/issues/2564)) ([c01a2c0](https://github.com/prometheus/client_java/commit/c01a2c0f9e251c27f9d2d08a6f8e3900a09ecd0e))
+* **deps:** update jdx/mise-action action to v5.2.0 ([#2568](https://github.com/prometheus/client_java/issues/2568)) ([ad8cdfe](https://github.com/prometheus/client_java/commit/ad8cdfe0429c22b289c9b50c1e5f9f81769b0b3c))
+* **main:** release 1.10.1-SNAPSHOT ([#2562](https://github.com/prometheus/client_java/issues/2562)) ([e1529cf](https://github.com/prometheus/client_java/commit/e1529cfe450e0033b9adaf0b7641fe0f5f133f28))
+* separate dependency release notes ([#2563](https://github.com/prometheus/client_java/issues/2563)) ([bbf119f](https://github.com/prometheus/client_java/commit/bbf119f3e7348ac49301702df69c315d32e74bae))
+
 ## [1.10.0](https://github.com/prometheus/client_java/compare/v1.9.0...v1.10.0) (2026-10-16)
 
 
