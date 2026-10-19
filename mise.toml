@@ -74,10 +74,10 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks.native-test]
 description = "Run GraalVM native tests"
-depends = "build"
 tools.java = "oracle-graalvm-25"
 # Native Test uses Surefire, so explicitly select the Failsafe-named test class.
 run = '''
+./mvnw -pl integration-tests/it-spring-boot-smoke-test -am install -DskipTests -Dcoverage.skip=true
 cd "$MISE_CONFIG_ROOT/integration-tests/it-spring-boot-smoke-test"
 "$MISE_CONFIG_ROOT/mvnw" test -PnativeTest -Dtest=ApplicationIT
 '''
