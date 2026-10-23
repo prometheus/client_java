@@ -18,7 +18,7 @@ jobs:
           - name: upstream
             repository: micrometer-metrics/micrometer
             # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
-            ref: v1.17.1
+            ref: v1.17.2
           - name: upstream-main
             # Track upstream main until the typed-descriptor change is included
             # in a Micrometer release.
