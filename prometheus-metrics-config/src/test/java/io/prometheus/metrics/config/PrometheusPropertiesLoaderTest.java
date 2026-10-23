@@ -57,6 +57,22 @@ class PrometheusPropertiesLoaderTest {
   }
 
   @Test
+  void metricSpecificPropertiesShouldKeepMetricNameCase() {
+    Properties properties = new Properties();
+    properties.setProperty(
+        "io.prometheus.metrics.myLatency.histogram_classic_upper_bounds", ".005, .01, .015");
+    properties.setProperty("io.prometheus.metrics.HTTP_duration.histogramNativeOnly", "true");
+
+    PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load(properties);
+    assertThat(
+            prometheusProperties.getMetricProperties("myLatency").getHistogramClassicUpperBounds())
+        .containsExactly(0.005, 0.01, 0.015);
+    assertThat(prometheusProperties.getMetricProperties("HTTP_duration").getHistogramNativeOnly())
+        .isTrue();
+    assertThat(prometheusProperties.getMetricProperties("my_latency")).isNull();
+  }
+
+  @Test
   void environmentVariablesShouldConfigureMetrics() {
     // Simulate environment variables as they would be loaded
     Map<Object, Object> envVarProperties = new HashMap<>();
@@ -160,6 +176,10 @@ class PrometheusPropertiesLoaderTest {
             PrometheusPropertiesLoader.normalizePropertyKey(
                 "io.prometheus.exporter.openTelemetry.serviceName"))
         .isEqualTo("io.prometheus.exporter.open_telemetry.service_name");
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.metrics.myLatency.histogramNativeOnly"))
+        .isEqualTo("io.prometheus.metrics.myLatency.histogram_native_only");
 
     // Test that snake_case keys remain unchanged
     assertThat(

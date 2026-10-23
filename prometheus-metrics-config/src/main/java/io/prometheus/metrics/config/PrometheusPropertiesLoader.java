@@ -210,10 +210,18 @@ public class PrometheusPropertiesLoader {
    * <p>For example: exemplarsEnabled → exemplars_enabled exemplars_enabled → exemplars_enabled
    * (unchanged)
    *
+   * <p>In metric-specific keys like {@code io.prometheus.metrics.<metric>.<property>} only the
+   * property name is normalized, because metric names are case-sensitive.
+   *
    * @param key the property key
    * @return the normalized property key
    */
   static String normalizePropertyKey(String key) {
+    String metricsPrefix = "io.prometheus.metrics.";
+    int lastDot = key.lastIndexOf('.');
+    if (key.startsWith(metricsPrefix) && lastDot >= metricsPrefix.length()) {
+      return key.substring(0, lastDot + 1) + normalizePropertyKey(key.substring(lastDot + 1));
+    }
     // Insert underscores before uppercase letters to convert camelCase to snake_case
     String withUnderscores = key.replaceAll("([a-z])([A-Z])", "$1_$2");
     return withUnderscores.toLowerCase(java.util.Locale.ROOT);
