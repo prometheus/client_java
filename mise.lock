@@ -467,7 +467,7 @@ url = "https://github.com/gohugoio/hugo/releases/download/v0.168.0/hugo_0.168.0_
 url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/637728720"
 
 [[tools.java]]
-version = "temurin-25.0.4+101.0.LTS"
+version = "temurin-25.0.5+8.0.LTS"
 backend = "core:java"
 specifiers = ["temurin-25"]
 
@@ -480,16 +480,16 @@ checksum = "sha256:8d19373d427017d86ac87cf6a47ba49746be864832f60b52b7e3b1531c6b2
 url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_aarch64_alpine-linux_hotspot_25.0.4.1_1.tar.gz"
 
 [tools.java."platforms.linux-x64"]
-checksum = "sha256:dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e"
-url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz"
+checksum = "sha256:68982529869257d0ee6b824ec5aa270ff8b118bb438670da0b97ebdab178d7fb"
+url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5%2B8/OpenJDK25U-jdk_x64_linux_hotspot_25.0.5_8.tar.gz"
 
 [tools.java."platforms.linux-x64-musl"]
-checksum = "sha256:f18648ee5ce45261f50dc9493fdae7ddebaa2a7a857cafda3e2a448a79c03dee"
-url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_alpine-linux_hotspot_25.0.4.1_1.tar.gz"
+checksum = "sha256:efc86581260b73c340c313e7577c4c85d6a8a899edc3748d78bee5238fe44a4e"
+url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5%2B8/OpenJDK25U-jdk_x64_alpine-linux_hotspot_25.0.5_8.tar.gz"
 
 [tools.java."platforms.macos-arm64"]
-checksum = "sha256:61979887f7506a24a57439ff99adb8b3a7fc89977d9cfe3b8984f58a981b7b9d"
-url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_aarch64_mac_hotspot_25.0.4.1_1.tar.gz"
+checksum = "sha256:36dc14d797aaff6d89aab302cd053fdba6207dfdcf772052fa7b023a94b0e857"
+url = "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5%2B8/OpenJDK25U-jdk_aarch64_mac_hotspot_25.0.5_8.tar.gz"
 
 [tools.java."platforms.macos-x64"]
 checksum = "sha256:e6229d9504f7922053ab31821b9e6bee8761daf7b026a3476d1a027563009880"
@@ -533,25 +533,25 @@ checksum = "sha256:f9d6e191ab098c0d416e7d588a24420a8621cd2f4720dab2459b8b7b2d2d8
 url = "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12.1_1.zip"
 
 [[tools.java]]
-version = "oracle-graalvm-25.0.4.1.1"
+version = "oracle-graalvm-25.0.5"
 backend = "core:java"
 specifiers = ["oracle-graalvm-25"]
 
 [tools.java."platforms.linux-arm64"]
-checksum = "sha256:479a762a33b96921fce5cb39e0656833a36fc9f3add422cfffabb55f4119dd3b"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_linux-aarch64_bin.tar.gz"
+checksum = "sha256:53975795fb5d669e7cbbf89620e38c7430e69e2be199c2c8ea4e5b371a927674"
+url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.5_linux-aarch64_bin.tar.gz"
 
 [tools.java."platforms.linux-x64"]
-checksum = "sha256:b923080f922a8be2a5742b6dadc8b149357c5b2365822e33f94ef68b7df94884"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_linux-x64_bin.tar.gz"
+checksum = "sha256:2ae8b03dfcb0a5bbcb55ffd122e8ffee24e3afce04bccc82932789acd005d1e1"
+url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.5_linux-x64_bin.tar.gz"
 
 [tools.java."platforms.macos-arm64"]
-checksum = "sha256:e14dbe0dac6451c170c8b9403b04993bc8ae22e24f8b6c2a5b15e1803824e97c"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_macos-aarch64_bin.tar.gz"
+checksum = "sha256:1ac6422ba93abef7d872490245c7186a6812e173965236bee80fc68a738e05ae"
+url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.5_macos-aarch64_bin.tar.gz"
 
 [tools.java."platforms.windows-x64"]
-checksum = "sha256:72a79765541c2c83ccc918dd1f2a3f565760aaab519ef2cf44d36b6ad39728bf"
-url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.4.1.1_windows-x64_bin.zip"
+checksum = "sha256:192d0328f9ce9c19f1e73278d638c06635e2d5ff744f11ba1c37b23f5db402d2"
+url = "https://gds.oracle.com/download/graal/25/archive/graalvm-jdk-25.0.5_windows-x64_bin.zip"
 
 [[tools.lychee]]
 version = "0.24.2"
