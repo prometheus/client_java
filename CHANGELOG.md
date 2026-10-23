@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.10.1](https://github.com/prometheus/client_java/compare/v1.10.0...v1.10.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* **config:** keep metric name case in metric-specific properties ([#2588](https://github.com/prometheus/client_java/issues/2588)) ([e319d3b](https://github.com/prometheus/client_java/commit/e319d3bea875fd218ffcac2f2d8a2020e9854dc6))
+* **deps:** update dependency org.springframework.boot:spring-boot-starter-parent to v4.1.2 ([#2596](https://github.com/prometheus/client_java/issues/2596)) ([b347b8d](https://github.com/prometheus/client_java/commit/b347b8d258b51673e6669daed0cf6a0ab6e6b229))
+* **deps:** update dependency renovate to v44.155.2 ([#2566](https://github.com/prometheus/client_java/issues/2566)) ([eadfb6d](https://github.com/prometheus/client_java/commit/eadfb6d550809340c24ed2a78b33ce30587a0364))
+* **deps:** update dependency renovate to v44.155.4 ([#2570](https://github.com/prometheus/client_java/issues/2570)) ([3788feb](https://github.com/prometheus/client_java/commit/3788feb9e64df6aa60947945bb5ee7520a31e171))
+* **deps:** update dependency renovate to v44.164.10 ([#2577](https://github.com/prometheus/client_java/issues/2577)) ([16ee497](https://github.com/prometheus/client_java/commit/16ee4972d1e960a6bcd7a868bc337e6943fd8c00))
+* **deps:** update dependency renovate to v44.166.0 ([#2578](https://github.com/prometheus/client_java/issues/2578)) ([95d2ec2](https://github.com/prometheus/client_java/commit/95d2ec2ac93b2cef20e1006716e75eb23ea0dd83))
+* **deps:** update dependency renovate to v44.167.1 ([#2583](https://github.com/prometheus/client_java/issues/2583)) ([fe74098](https://github.com/prometheus/client_java/commit/fe740982bed6669582ca7420556f77b9e6d6d579))
+* **deps:** update dependency renovate to v44.171.1 ([#2598](https://github.com/prometheus/client_java/issues/2598)) ([533375f](https://github.com/prometheus/client_java/commit/533375f65bc9130d9ea88ca139784bfb966b04f7))
+
+
+### Internal
+
+* **deps:** update dependency aqua:grafana/gcx to latest ([#2585](https://github.com/prometheus/client_java/issues/2585)) ([47addcd](https://github.com/prometheus/client_java/commit/47addcd64ea343c14d648ea41efcc996aaa21821))
+* **deps:** update dependency com.github.siom79.japicmp:japicmp-maven-plugin to v0.26.5 ([#2572](https://github.com/prometheus/client_java/issues/2572)) ([09778a0](https://github.com/prometheus/client_java/commit/09778a0f547a9185bb3f7e5ba351f6ba9a6f0ac1))
+* **deps:** update dependency com.uber.nullaway:nullaway to v0.14.3 ([#2592](https://github.com/prometheus/client_java/issues/2592)) ([73c0f8e](https://github.com/prometheus/client_java/commit/73c0f8ec6193d30a6ecff1e74231dcacadeb0baf))
+* **deps:** update dependency grafana/docker-otel-lgtm to v0.37.0 ([#2564](https://github.com/prometheus/client_java/issues/2564)) ([c01a2c0](https://github.com/prometheus/client_java/commit/c01a2c0f9e251c27f9d2d08a6f8e3900a09ecd0e))
+* **deps:** update dependency java to temurin-25 ([#2593](https://github.com/prometheus/client_java/issues/2593)) ([edc6a7f](https://github.com/prometheus/client_java/commit/edc6a7f4eee3815253cf4a77fdd87006add11854))
+* **deps:** update dependency java-jdk to v25.0.5+8.0.lts ([#2594](https://github.com/prometheus/client_java/issues/2594)) ([ec8f77b](https://github.com/prometheus/client_java/commit/ec8f77be4fde2997cba9ce40fd523f8805bd1f0a))
+* **deps:** update dependency jdx/mise to v2026.10.14 ([#2575](https://github.com/prometheus/client_java/issues/2575)) ([e1b4ad2](https://github.com/prometheus/client_java/commit/e1b4ad2c47ff4e16988ade345b3ec752d6dd04fc))
+* **deps:** update dependency micrometer-metrics/micrometer to v1.17.2 ([#2595](https://github.com/prometheus/client_java/issues/2595)) ([67b4d95](https://github.com/prometheus/client_java/commit/67b4d95eec8a26e76e23ee0cc2aeb3ac46b45d75))
+* **deps:** update dependency org.mock-server:mockserver-netty-no-dependencies to v9.1.0 ([#2579](https://github.com/prometheus/client_java/issues/2579)) ([eace5ad](https://github.com/prometheus/client_java/commit/eace5ad016f5fa42323d9b1613c4d4c3bed19132))
+* **deps:** update github/codeql-action action to v4.39.1 ([#2584](https://github.com/prometheus/client_java/issues/2584)) ([4abaf15](https://github.com/prometheus/client_java/commit/4abaf156a10a1952a86d9b3ec3b75d30b08c3dd4))
+* **deps:** update grafana/tempo docker tag to v3.1.1 ([#2586](https://github.com/prometheus/client_java/issues/2586)) ([0ba19db](https://github.com/prometheus/client_java/commit/0ba19db41b1740807ff17008cf9e072be869557a))
+* **deps:** update jdx/mise-action action to v5.2.0 ([#2568](https://github.com/prometheus/client_java/issues/2568)) ([ad8cdfe](https://github.com/prometheus/client_java/commit/ad8cdfe0429c22b289c9b50c1e5f9f81769b0b3c))
+* **deps:** update jdx/mise-action action to v5.2.1 ([#2576](https://github.com/prometheus/client_java/issues/2576)) ([cbc983d](https://github.com/prometheus/client_java/commit/cbc983d6dab9fa972b148d10bce1ea40e9138543))
+* **deps:** update jdx/mise-action action to v5.2.2 ([#2580](https://github.com/prometheus/client_java/issues/2580)) ([ec63f9b](https://github.com/prometheus/client_java/commit/ec63f9be83f5f079424be2a29f319f7175f54c9e))
+* **deps:** update micrometer-metrics/micrometer digest to 29cfb5c ([#2574](https://github.com/prometheus/client_java/issues/2574)) ([d9babf1](https://github.com/prometheus/client_java/commit/d9babf193374331f5e7d9ea73e6b97f1b2c9891d))
+* **deps:** update node.js to lts ([#2581](https://github.com/prometheus/client_java/issues/2581)) ([1337691](https://github.com/prometheus/client_java/commit/13376918f1c7144c098c204482fece486c0d3c75))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.163.1 ([#2573](https://github.com/prometheus/client_java/issues/2573)) ([7d79d30](https://github.com/prometheus/client_java/commit/7d79d30e711acb3ab401eff16e050f4caa268aa0))
+* **deps:** update otel/opentelemetry-collector-contrib docker tag to v0.163.2 ([#2587](https://github.com/prometheus/client_java/issues/2587)) ([7795ab6](https://github.com/prometheus/client_java/commit/7795ab6cc743b9bac7d459333eecc9a7450777e9))
+* **deps:** update prom/prometheus docker tag to v3.15.1 ([#2582](https://github.com/prometheus/client_java/issues/2582)) ([1469fe5](https://github.com/prometheus/client_java/commit/1469fe5d7de1bc38f648f8bf6525d6c65af0a8b5))
+* explain quoted Unicode metric names ([#2571](https://github.com/prometheus/client_java/issues/2571)) ([7f0e5bc](https://github.com/prometheus/client_java/commit/7f0e5bc818cfb277fc9047e59626ea8ada2065b1))
+* **main:** release 1.10.1-SNAPSHOT ([#2562](https://github.com/prometheus/client_java/issues/2562)) ([e1529cf](https://github.com/prometheus/client_java/commit/e1529cfe450e0033b9adaf0b7641fe0f5f133f28))
+* separate dependency release notes ([#2563](https://github.com/prometheus/client_java/issues/2563)) ([bbf119f](https://github.com/prometheus/client_java/commit/bbf119f3e7348ac49301702df69c315d32e74bae))
+* speed up PR compatibility checks ([#2567](https://github.com/prometheus/client_java/issues/2567)) ([59f50f1](https://github.com/prometheus/client_java/commit/59f50f197ad113bc8ba236fca6fae86aa308598e))
+
 ## [1.10.0](https://github.com/prometheus/client_java/compare/v1.9.0...v1.10.0) (2026-10-16)
 
 
