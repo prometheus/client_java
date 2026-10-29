@@ -50,50 +50,50 @@ url_api = "https://api.github.com/repos/rhysd/actionlint/releases/assets/3849249
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/flint"]]
-version = "0.22.14"
+version = "0.22.15"
 backend = "aqua:grafana/flint"
-specifiers = ["latest"]
+specifiers = ["0.22.15"]
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64"]
-checksum = "sha256:f3f88892b1b129bd56f61e1a38e784e625284b37636155b5752b58585d7ac7c4"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586350611"
+checksum = "sha256:1a266d19a688bf4a67c75a8c8af9928459d8c6aace907a17afcdb39938a4254b"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685572288"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64-musl"]
-checksum = "sha256:486d1cb4f619cd41a893db4bc1789510ae67112ebab1e071d3bd06d0c543883d"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-aarch64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586351210"
+checksum = "sha256:b20b30e0b998fb951e6e88fc26e823720ebf0cec7be178bc34eccc2185e85abc"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-aarch64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685571455"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64"]
-checksum = "sha256:37cf209f7a3d49bac222d7aebd12c4b623de7f7cfcb9f5bd8c0725733ddc6d39"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586350080"
+checksum = "sha256:fa3cb260778fa5a3ddebb3a8f789adee04b8fcc56cc4c38b49fcdb396d7854f4"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685571223"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.linux-x64-musl"]
-checksum = "sha256:d3bc50adf5f40a91b26cceb8ee0ab86420622baccc334b23f3accea9dbffe2c4"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-x86_64-unknown-linux-musl.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586351062"
+checksum = "sha256:55e3cf091d0b812507e3a6a4d9b355d16f44fc98e3a58973872eb8e873e3b87f"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685573386"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-arm64"]
-checksum = "sha256:d777718c94102cdc55df6065081bc0d2e5a98d3d8965fc96cf6c316c08bc0eef"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586351724"
+checksum = "sha256:70a54889a9ddda5368a8e304154a396ebcfeb3acb28bdf94281b1efe7b6b6b04"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685572125"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.macos-x64"]
-checksum = "sha256:5e860f846517a40559db4a6792fbe8b3422bc03c92c1684621e8be1cbc5437fd"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-x86_64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586360754"
+checksum = "sha256:d4d1cdf652899c8aa5d8fec30ab4913b636c0e5b791a61d24a05ec73646abd50"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685584239"
 provenance = "github-attestations"
 
 [tools."aqua:grafana/flint"."platforms.windows-x64"]
-checksum = "sha256:1e0010f102da4714aa11859de05bad09d2025697485321a9285b7ce04c7c6bc8"
-url = "https://github.com/grafana/flint/releases/download/v0.22.14/flint-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/grafana/flint/releases/assets/586353820"
+checksum = "sha256:f2071f4512e98be3fd08beb9717365124eaa0f967c79e90434a1d9c3f0967cfd"
+url = "https://github.com/grafana/flint/releases/download/v0.22.15/flint-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685577805"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
