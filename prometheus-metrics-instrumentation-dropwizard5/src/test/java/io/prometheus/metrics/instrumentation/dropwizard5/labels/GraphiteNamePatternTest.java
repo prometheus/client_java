@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -130,6 +131,19 @@ class GraphiteNamePatternTest {
     pattern = new GraphiteNamePattern("*.test.controller.*.status.*");
     Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
         .isEqualTo(expected);
+  }
+
+  @Test
+  void extractParameters_WHEN_DefaultLocaleHasNonAsciiDigits_THEN_ShouldUseAsciiKeys() {
+    Locale defaultLocale = Locale.getDefault();
+    Locale.setDefault(Locale.forLanguageTag("ar-EG"));
+    try {
+      GraphiteNamePattern pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
+      Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
+          .containsOnlyKeys("${0}", "${1}");
+    } finally {
+      Locale.setDefault(defaultLocale);
+    }
   }
 
   @Test
