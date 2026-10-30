@@ -75,6 +75,6 @@ public final class Unit {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return 31 + Objects.hashCode(name);
   }
 }
