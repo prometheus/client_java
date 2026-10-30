@@ -117,6 +117,7 @@ BASELINE_OVERRIDE="${API_DIFF_BASELINE_VERSION:+-Dapi.diff.baseline.version=${AP
 description = "Run all lints"
 depends = ["lint:bom"]
 raw_args = true
+tools.node = "24.22.2"
 run = "flint run"
 
 [tasks."lint:fix"]
