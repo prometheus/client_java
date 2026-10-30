@@ -1,3 +1,6 @@
+[settings]
+locked = true
+
 [tools]
 "aqua:grafana/gcx" = "latest"
 "aqua:grafana/oats" = "latest"
