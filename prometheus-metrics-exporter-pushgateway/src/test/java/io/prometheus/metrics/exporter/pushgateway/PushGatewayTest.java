@@ -233,6 +233,25 @@ class PushGatewayTest {
   }
 
   @Test
+  void testPushWithDotSegmentJobAndGroupingKey() throws IOException {
+    mockServerClient
+        .when(
+            request()
+                .withMethod("PUT")
+                .withPath("/metrics/job@base64/Li4=/l@base64/Lg==/l2@base64/Li4="))
+        .respond(response().withStatusCode(202));
+    PushGateway pg =
+        PushGateway.builder()
+            .address("localhost:" + mockServerClient.getPort())
+            .registry(registry)
+            .job("..")
+            .groupingKey("l", ".")
+            .groupingKey("l2", "..")
+            .build();
+    pg.push();
+  }
+
+  @Test
   void testPushCollectorWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v"))
