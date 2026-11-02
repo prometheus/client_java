@@ -52,7 +52,7 @@ provenance = "github-attestations"
 [[tools."aqua:grafana/flint"]]
 version = "0.22.15"
 backend = "aqua:grafana/flint"
-specifiers = ["0.22.15"]
+specifiers = ["latest"]
 
 [tools."aqua:grafana/flint"."platforms.linux-arm64"]
 checksum = "sha256:1a266d19a688bf4a67c75a8c8af9928459d8c6aace907a17afcdb39938a4254b"
