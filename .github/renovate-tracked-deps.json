@@ -307,8 +307,7 @@
         "shellcheck",
         "shfmt",
         "taplo",
-        "typos",
-        "zizmor"
+        "typos"
       ],
       "regex": [
         "grafana/docker-otel-lgtm",

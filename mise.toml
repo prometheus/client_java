@@ -25,7 +25,6 @@ shellcheck = "latest"
 shfmt = "latest"
 taplo = "latest"
 typos = "latest"
-zizmor = "latest"
 
 [tools."npm:renovate"]
 version = "latest"
