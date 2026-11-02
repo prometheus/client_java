@@ -23,7 +23,7 @@
   },
   packageRules: [
     {
-      description: 'Disable major Node.js updates through mise while allowing minor and patch updates',
+      description: 'Block Node.js major updates because Node 26 fails the Renovate dependency lint in Flint',
       matchManagers: [
         'mise',
       ],
