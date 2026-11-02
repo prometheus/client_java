@@ -23,6 +23,22 @@
   },
   packageRules: [
     {
+      description: 'Disable major Node.js updates through mise while allowing minor and patch updates',
+      matchManagers: [
+        'mise',
+      ],
+      matchDatasources: [
+        'node-version',
+      ],
+      matchDepNames: [
+        'node',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
       description: 'Update component-prefixed shared-workflow action tags',
       matchManagers: [
         'github-actions',
