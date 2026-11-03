@@ -1,2 +1,12 @@
 Comparing source compatibility of prometheus-metrics-exposition-textformats-1.10.1-SNAPSHOT.jar against prometheus-metrics-exposition-textformats-1.10.0.jar
-No changes.
+***  MODIFIED CLASS: PUBLIC io.prometheus.metrics.expositionformats.ExpositionFormats  (not serializable)
+	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.expositionformats.ExpositionFormatWriterWithEscaping findWriterWithEscaping(java.lang.String)
++++  NEW CLASS: PUBLIC(+) FINAL(+) io.prometheus.metrics.expositionformats.ExpositionFormatWriterWithEscaping  (not serializable)
+	+++  CLASS FILE FORMAT VERSION: 52.0 <- n.a.
+	+++  NEW SUPERCLASS: java.lang.Object
+	+++  NEW METHOD: PUBLIC(+) java.lang.String getContentType()
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.config.EscapingScheme getEscapingScheme()
+	+++  NEW METHOD: PUBLIC(+) java.lang.String toDebugString(io.prometheus.metrics.model.snapshots.MetricSnapshots)
+	+++  NEW METHOD: PUBLIC(+) void write(java.io.OutputStream, io.prometheus.metrics.model.snapshots.MetricSnapshots)
+		+++  NEW EXCEPTION: java.io.IOException
