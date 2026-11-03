@@ -31,8 +31,15 @@ mkdir -p "$out_dir"
 for report in "${reports[@]}"; do
 	# report path: <repo>/<module path>/target/japicmp/api-diff.diff
 	module="$(basename "$(dirname "$(dirname "$(dirname "$report")")")")"
+	# Japicmp emits a trailing blank line, which flint rejects in committed reports.
 	grep -vE '^(WARNING: You are using the option|Semantic versioning suggestion)' \
-		"$report" >"$out_dir/$module.txt"
+		"$report" | awk '
+			NF { last = NR }
+			{ lines[NR] = $0 }
+			END {
+				for (i = 1; i <= last; i++) print lines[i]
+			}
+		' >"$out_dir/$module.txt"
 done
 
 echo "Wrote ${#reports[@]} API diff report(s) to docs/apidiffs/current_vs_latest/."
