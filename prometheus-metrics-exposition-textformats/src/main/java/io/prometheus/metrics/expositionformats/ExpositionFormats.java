@@ -1,6 +1,7 @@
 package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.annotations.StableApi;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterProperties;
 import io.prometheus.metrics.config.OpenMetrics2Properties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -60,6 +61,11 @@ public class ExpositionFormats {
     return init(PrometheusProperties.builder().exporterProperties(properties).build());
   }
 
+  /**
+   * Finds the exposition format writer for the given Accept header.
+   *
+   * @see #findWriterWithEscaping(String) to select a format and bind its escaping scheme together
+   */
   public ExpositionFormatWriter findWriter(@Nullable String acceptHeader) {
     if (prometheusProtobufWriter.accepts(acceptHeader)) {
       return prometheusProtobufWriter;
@@ -83,6 +89,33 @@ public class ExpositionFormats {
     }
 
     return prometheusTextFormatWriter;
+  }
+
+  /**
+   * Finds the exposition format writer and escaping scheme negotiated by the given Accept header.
+   *
+   * <p>Use this method when writing a scrape response to ensure the selected format and escaping
+   * scheme come from the same header. The returned writer's content type is the format's standard
+   * content type; as with {@link #findWriter(String)}, it does not include an escaping parameter.
+   *
+   * <pre>{@code
+   * ExpositionFormats.init().findWriterWithEscaping(acceptHeader).write(out, registry.scrape());
+   * }</pre>
+   *
+   * @see #findWriter(String) the legacy API for selecting only a format writer
+   */
+  public ExpositionFormatWriterWithEscaping findWriterWithEscaping(@Nullable String acceptHeader) {
+    ExpositionFormatWriter writer = findWriter(acceptHeader);
+    EscapingScheme fallback = EscapingScheme.DEFAULT;
+    // OpenMetrics 2.0 has no escaping parameter and permits UTF-8 names. Only an explicit request
+    // for version 2.0.0 selects unescaped names; the OM2 writer may also serve OM1/unversioned
+    // requests when content negotiation is disabled.
+    if (writer instanceof OpenMetrics2TextFormatWriter
+        && "2.0.0".equals(parseOpenMetricsVersion(acceptHeader))) {
+      fallback = EscapingScheme.ALLOW_UTF8;
+    }
+    return new ExpositionFormatWriterWithEscaping(
+        writer, EscapingScheme.fromAcceptHeader(acceptHeader, fallback));
   }
 
   private boolean isOpenMetrics2Enabled() {

@@ -2,6 +2,10 @@ package io.prometheus.metrics.expositionformats;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.OpenMetrics2Properties;
@@ -270,6 +274,136 @@ class ExpositionFormatsTest {
     assertThat(writer1).isInstanceOf(OpenMetrics2TextFormatWriter.class);
     assertThat(writer2).isInstanceOf(OpenMetrics2TextFormatWriter.class);
     assertThat(writer3).isInstanceOf(OpenMetrics2TextFormatWriter.class);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "allow-utf-8, ALLOW_UTF8",
+    "underscores, UNDERSCORE_ESCAPING",
+    "dots, DOTS_ESCAPING",
+    "values, VALUE_ENCODING_ESCAPING"
+  })
+  void testNegotiatedWriterBindsEscapingScheme(String escaping, EscapingScheme expected)
+      throws IOException {
+    ExpositionFormats formats = ExpositionFormats.init();
+    ExpositionFormatWriterWithEscaping negotiated =
+        formats.findWriterWithEscaping("text/plain; escaping=" + escaping);
+    MetricSnapshots snapshots =
+        MetricSnapshots.of(
+            GaugeSnapshot.builder()
+                .name("legacy.name")
+                .dataPoint(GaugeDataPointSnapshot.builder().value(1).build())
+                .build());
+
+    assertThat(negotiated.getEscapingScheme()).isEqualTo(expected);
+    assertThat(negotiated.getContentType())
+        .isEqualTo(formats.getPrometheusTextFormatWriter().getContentType());
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    negotiated.write(out, snapshots);
+    assertThat(out.toString(UTF_8))
+        .isEqualTo(formats.getPrometheusTextFormatWriter().toDebugString(snapshots, expected));
+
+    // Negotiation binds a scheme to this wrapper without changing the cached format writer.
+    assertThat(formats.findWriterWithEscaping("text/plain").getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+  }
+
+  @Test
+  void testNegotiatedWriterDefaultsForUnknownEscapingAndOpenMetricsVersion() {
+    ExpositionFormats formats =
+        ExpositionFormats.init(
+            PrometheusProperties.builder()
+                .openMetrics2Properties(
+                    OpenMetrics2Properties.builder().enabled(true).contentNegotiation(true).build())
+                .build());
+
+    assertThat(formats.findWriterWithEscaping(null).getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+    assertThat(formats.findWriterWithEscaping("text/plain; escaping=unknown").getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+    assertThat(
+            formats
+                .findWriterWithEscaping("application/openmetrics-text; version=2.0.0")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(
+            formats
+                .findWriterWithEscaping(
+                    "application/openmetrics-text; version=2.0.0; escaping=underscores")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(
+            formats
+                .findWriterWithEscaping(
+                    "application/openmetrics-text; version=2.0.0; escaping=unknown")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(formats.findWriterWithEscaping("application/openmetrics-text").getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+    assertThat(
+            formats
+                .findWriterWithEscaping("application/openmetrics-text; version=1.0.0")
+                .getContentType())
+        .isEqualTo(formats.getOpenMetricsTextFormatWriter().getContentType());
+  }
+
+  @Test
+  void testNegotiatedWriterUsesOpenMetrics2DefaultWhenContentNegotiationIsDisabled() {
+    ExpositionFormats formats =
+        ExpositionFormats.init(
+            PrometheusProperties.builder()
+                .openMetrics2Properties(
+                    OpenMetrics2Properties.builder()
+                        .enabled(true)
+                        .contentNegotiation(false)
+                        .build())
+                .build());
+
+    assertThat(
+            formats
+                .findWriterWithEscaping("application/openmetrics-text; version=2.0.0")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
+    assertThat(formats.findWriterWithEscaping("application/openmetrics-text").getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+    assertThat(
+            formats
+                .findWriterWithEscaping("application/openmetrics-text; version=1.0.0")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.DEFAULT);
+  }
+
+  @Test
+  void testNegotiatedWriterUsesOpenMetrics1WhenOpenMetrics2IsDisabled() {
+    ExpositionFormats formats = ExpositionFormats.init();
+    ExpositionFormatWriterWithEscaping negotiated =
+        formats.findWriterWithEscaping("application/openmetrics-text; version=2.0.0");
+
+    assertThat(negotiated.getContentType())
+        .isEqualTo(formats.getOpenMetricsTextFormatWriter().getContentType());
+    assertThat(negotiated.getEscapingScheme()).isEqualTo(EscapingScheme.DEFAULT);
+  }
+
+  @Test
+  void testNegotiatedWriterSelectsProtobuf() {
+    ExpositionFormatWriterWithEscaping negotiated =
+        ExpositionFormats.init()
+            .findWriterWithEscaping(
+                "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily");
+    assertThat(negotiated.getContentType()).contains("application/vnd.google.protobuf");
+    assertThat(negotiated.getEscapingScheme()).isEqualTo(EscapingScheme.DEFAULT);
+  }
+
+  @Test
+  void testNegotiatedDebugStringDelegatesToFormatWriter() {
+    ExpositionFormatWriter writer = mock(ExpositionFormatWriter.class);
+    when(writer.toDebugString(any(), any())).thenReturn("format-specific debug output");
+    MetricSnapshots snapshots = MetricSnapshots.of();
+    ExpositionFormatWriterWithEscaping negotiated =
+        new ExpositionFormatWriterWithEscaping(writer, EscapingScheme.VALUE_ENCODING_ESCAPING);
+
+    assertThat(negotiated.toDebugString(snapshots)).isEqualTo("format-specific debug output");
+    verify(writer).toDebugString(snapshots, EscapingScheme.VALUE_ENCODING_ESCAPING);
   }
 
   @Test
