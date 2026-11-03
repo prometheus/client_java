@@ -46,6 +46,54 @@ class DropwizardExportsTest {
   }
 
   @Test
+  void testTimerTotalSuffixIsSanitizedByDefault() {
+    metricRegistry.timer("foo.total").update(1, TimeUnit.SECONDS);
+
+    assertThat(convertToOpenMetricsFormat()).contains("# TYPE foo summary");
+    assertThat(convertToOpenMetricsFormat()).doesNotContain("# TYPE foo_total summary");
+    SummarySnapshot snapshot =
+        (SummarySnapshot) new DropwizardExports(metricRegistry).collect().get(0);
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("foo");
+    assertThat(snapshot.getMetadata().getOriginalName()).isEqualTo("foo.total");
+    assertThat(snapshot.getMetadata().getExpositionBaseName()).isEqualTo("foo.total");
+  }
+
+  @Test
+  void testTimersWithTotalSuffixAreDistinctWhenEnabled() {
+    MetricRegistry sourceRegistry = new MetricRegistry();
+    sourceRegistry.timer("foo").update(1, TimeUnit.SECONDS);
+    sourceRegistry.timer("foo.total").update(2, TimeUnit.SECONDS);
+    sourceRegistry.timer("foo.count").update(3, TimeUnit.SECONDS);
+    sourceRegistry.histogram("hist").update(1);
+    sourceRegistry.histogram("hist.total").update(2);
+    sourceRegistry.counter("counter.total").inc();
+    sourceRegistry.meter("meter.total").mark();
+    PrometheusRegistry targetRegistry = new PrometheusRegistry();
+    DropwizardExports.builder()
+        .dropwizardRegistry(sourceRegistry)
+        .metricFilter(MetricFilter.ALL)
+        .preserveTimerAndHistogramNames(true)
+        .register(targetRegistry);
+
+    String output = convertToOpenMetricsFormat(targetRegistry);
+
+    assertThat(output)
+        .contains("# TYPE foo summary", "# TYPE foo_total summary", "# TYPE foo_count summary")
+        .contains("# TYPE hist summary", "# TYPE hist_total summary")
+        .contains("counter_total 1.0", "meter_total 1.0")
+        .doesNotContain("counter_total_total", "meter_total_total");
+  }
+
+  @Test
+  void testDefaultTimerCollisionStillFailsInLegacyFormat() {
+    metricRegistry.timer("foo").update(1, TimeUnit.SECONDS);
+    metricRegistry.timer("foo.total").update(2, TimeUnit.SECONDS);
+
+    assertThatThrownBy(this::convertToOpenMetricsFormat)
+        .isInstanceOf(io.prometheus.metrics.model.snapshots.DuplicateLabelsException.class);
+  }
+
+  @Test
   void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
