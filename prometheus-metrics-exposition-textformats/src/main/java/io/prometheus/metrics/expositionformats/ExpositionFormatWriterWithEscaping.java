@@ -9,8 +9,8 @@ import java.io.OutputStream;
 /**
  * An exposition format writer paired with the escaping scheme selected from an Accept header.
  *
- * <p>Instances are immutable and delegate to the underlying format writer. The content type is
- * the format's standard content type and does not include an escaping parameter.
+ * <p>Instances are immutable and delegate to the underlying format writer. The content type is the
+ * format's standard content type and does not include an escaping parameter.
  */
 @StableApi
 public final class ExpositionFormatWriterWithEscaping {
