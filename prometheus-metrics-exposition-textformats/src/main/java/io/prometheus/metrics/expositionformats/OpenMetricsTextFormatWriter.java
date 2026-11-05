@@ -179,11 +179,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     if (snapshot.isGaugeHistogram()) {
       writeMetadata(writer, "gaugehistogram", metadata, scheme);
       writeClassicHistogramBuckets(
-          writer, metadata, "_gcount", "_gsum", snapshot.getDataPoints(), scheme);
+          writer, metadata, "_gcount", "_gsum", true, snapshot.getDataPoints(), scheme);
     } else {
       writeMetadata(writer, "histogram", metadata, scheme);
       writeClassicHistogramBuckets(
-          writer, metadata, "_count", "_sum", snapshot.getDataPoints(), scheme);
+          writer, metadata, "_count", "_sum", false, snapshot.getDataPoints(), scheme);
     }
   }
 
@@ -192,6 +192,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       MetricMetadata metadata,
       String countSuffix,
       String sumSuffix,
+      boolean gaugeHistogram,
       List<HistogramSnapshot.HistogramDataPointSnapshot> dataList,
       EscapingScheme scheme)
       throws IOException {
@@ -225,7 +226,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         writeScrapeTimestampAndExemplar(writer, data, exemplar, scheme);
       }
       // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
-      if (data.hasCount() && data.hasSum()) {
+      // Negative threshold buckets preclude a sum for histograms, but not gauge histograms.
+      boolean hasNegativeBuckets = buckets.getUpperBound(0) < 0;
+      if (data.hasCount() && data.hasSum() && (gaugeHistogram || !hasNegativeBuckets)) {
         writeCountAndSum(writer, countName, sumName, data, exemplars, scheme, nameValidLegacy);
       }
       writeCreated(writer, name, data, scheme, nameValidLegacy);
