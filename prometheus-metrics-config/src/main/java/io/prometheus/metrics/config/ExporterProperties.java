@@ -3,7 +3,14 @@ package io.prometheus.metrics.config;
 import io.prometheus.metrics.annotations.StableApi;
 import javax.annotation.Nullable;
 
-/** Properties starting with io.prometheus.exporter */
+/**
+ * Configuration for common exporter behavior.
+ *
+ * <p>Properties use the {@code io.prometheus.exporter} prefix. Supported options are {@code
+ * include_created_timestamps}, {@code prometheus_timestamps_in_ms}, and {@code
+ * exemplars_on_all_metric_types}. Use {@link PrometheusPropertiesLoader} to load these options from
+ * configuration sources, or {@link #builder()} to create an instance directly.
+ */
 @StableApi
 public class ExporterProperties {
 
