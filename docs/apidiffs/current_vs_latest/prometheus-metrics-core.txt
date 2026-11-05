@@ -1,2 +1,5 @@
 Comparing source compatibility of prometheus-metrics-core-1.10.1-SNAPSHOT.jar against prometheus-metrics-core-1.10.0.jar
-No changes.
+***  MODIFIED CLASS: PUBLIC STATIC io.prometheus.metrics.core.metrics.StateSet$Builder  (not serializable)
+	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.core.metrics.StateSet$Builder unit(io.prometheus.metrics.model.snapshots.Unit)
+
