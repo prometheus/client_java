@@ -1,7 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
@@ -431,20 +431,12 @@ class CKMSQuantilesTest {
 
   @Test
   void testIllegalArgumentException() {
-    try {
-      new Quantile(-1, 0);
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo("Quantile must be between 0 and 1");
-    } catch (Exception e) {
-      fail("Wrong exception thrown" + e);
-    }
-    try {
-      new Quantile(0.95, 2);
-    } catch (IllegalArgumentException e) {
-      assertThat(e.getMessage()).isEqualTo("Epsilon must be between 0 and 1");
-    } catch (Exception e) {
-      fail("Wrong exception thrown" + e);
-    }
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new Quantile(-1, 0))
+        .withMessage("Quantile must be between 0 and 1");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new Quantile(0.95, 2))
+        .withMessage("Epsilon must be between 0 and 1");
   }
 
   private List<Double> shuffledValues(int n, Random random) {
