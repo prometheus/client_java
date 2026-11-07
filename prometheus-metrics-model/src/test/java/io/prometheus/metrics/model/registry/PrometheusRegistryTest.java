@@ -1214,6 +1214,139 @@ class PrometheusRegistryTest {
   }
 
   @Test
+  void register_duplicate_preservesExpositionNamesUntilUnregistered() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    Collector counter = collectorWithDescriptor(MetricFamilyDescriptor.counter("events").build());
+    registry.register(counter);
+
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.counter("events").build())))
+        .hasMessageContaining("duplicate metric name with identical label schema");
+    assertExpositionNameReserved(registry, "events_total");
+    assertExpositionNameReserved(registry, "events_created");
+
+    registry.unregister(counter);
+    assertThatCode(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.gauge("events_total").build())))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void register_conflictingMetadata_preservesExpositionNames() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(
+        collectorWithDescriptor(
+            MetricFamilyDescriptor.counter("events").help("Events").labelName("path").build()));
+
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(
+                        MetricFamilyDescriptor.counter("events")
+                            .help("Other events")
+                            .labelName("status")
+                            .build())))
+        .hasMessageContaining("Conflicting help strings");
+    assertExpositionNameReserved(registry, "events_total");
+    registry.register(
+        collectorWithDescriptor(
+            MetricFamilyDescriptor.counter("events").help("Events").labelName("status").build()));
+  }
+
+  @Test
+  void register_conflictingType_releasesOnlyNewExpositionNames() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collectorWithDescriptor(MetricFamilyDescriptor.counter("events").build()));
+
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.histogram("events").build())))
+        .hasMessageContaining("Conflicting metric types");
+    assertExpositionNameReserved(registry, "events_created");
+    for (String name : asList("events_bucket", "events_count", "events_sum")) {
+      registry.register(collectorWithDescriptor(MetricFamilyDescriptor.gauge(name).build()));
+    }
+  }
+
+  @Test
+  void register_expositionCollision_releasesOnlyNewExpositionNames() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collectorWithDescriptor(MetricFamilyDescriptor.counter("events").build()));
+    registry.register(
+        collectorWithDescriptor(MetricFamilyDescriptor.gauge("events_count").build()));
+
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.histogram("events").build())))
+        .hasMessageContaining("conflicting exposition name");
+    assertExpositionNameReserved(registry, "events_created");
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.gauge("events_count").build())))
+        .hasMessageContaining("duplicate metric name with identical label schema");
+    for (String name : asList("events_bucket", "events_sum")) {
+      registry.register(collectorWithDescriptor(MetricFamilyDescriptor.gauge(name).build()));
+    }
+  }
+
+  @Test
+  void register_failedMultiCollector_preservesExistingExpositionNames() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collectorWithDescriptor(MetricFamilyDescriptor.counter("events").build()));
+    MultiCollector multi =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            throw new AssertionError("Registration must not collect metrics");
+          }
+
+          @Override
+          public List<MetricFamilyDescriptor> getMetricFamilyDescriptors() {
+            return asList(
+                MetricFamilyDescriptor.counter("requests").build(),
+                MetricFamilyDescriptor.counter("events").build());
+          }
+        };
+
+    assertThatThrownBy(() -> registry.register(multi))
+        .hasMessageContaining("duplicate metric name with identical label schema");
+    assertExpositionNameReserved(registry, "events_total");
+    for (String name : asList("requests_total", "requests_created")) {
+      registry.register(collectorWithDescriptor(MetricFamilyDescriptor.gauge(name).build()));
+    }
+  }
+
+  private static Collector collectorWithDescriptor(MetricFamilyDescriptor descriptor) {
+    return new Collector() {
+      @Override
+      public MetricSnapshot collect() {
+        throw new AssertionError("Registration must not collect metrics");
+      }
+
+      @Override
+      public MetricFamilyDescriptor getMetricFamilyDescriptor() {
+        return descriptor;
+      }
+    };
+  }
+
+  private static void assertExpositionNameReserved(PrometheusRegistry registry, String name) {
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    collectorWithDescriptor(MetricFamilyDescriptor.gauge(name).build())))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("conflicting exposition name");
+  }
+
+  @Test
   void register_gaugeWithCountSuffix_andHistogram_collisionDetected() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
