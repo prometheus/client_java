@@ -85,9 +85,13 @@ public class PrometheusScrapeHandler {
 
       if (shouldUseCompression(request)) {
         response.setHeader("Content-Encoding", "gzip");
-        try (GZIPOutputStream gzipOutputStream =
-            new GZIPOutputStream(response.sendHeadersAndGetBody(200, 0))) {
-          writer.write(gzipOutputStream, snapshots, escapingScheme);
+        if (request.getMethod().equals("HEAD")) {
+          response.sendHeadersAndGetBody(200, -1);
+        } else {
+          try (GZIPOutputStream gzipOutputStream =
+              new GZIPOutputStream(response.sendHeadersAndGetBody(200, 0))) {
+            writer.write(gzipOutputStream, snapshots, escapingScheme);
+          }
         }
       } else {
         ByteArrayOutputStream responseBuffer =
