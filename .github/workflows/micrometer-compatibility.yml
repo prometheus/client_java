@@ -25,7 +25,7 @@ jobs:
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
             repository: micrometer-metrics/micrometer
             # renovate: datasource=git-refs depName=micrometer-metrics/micrometer packageName=https://github.com/micrometer-metrics/micrometer currentValue=main
-            ref: 1c3f37f4fdceb5cd8758cee862a74829be0d3adc
+            ref: 500bba18ba8c35d62ad4016c71e4a9d95c030ba3
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
