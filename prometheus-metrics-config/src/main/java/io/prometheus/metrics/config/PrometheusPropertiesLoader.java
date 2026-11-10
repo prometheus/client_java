@@ -11,12 +11,20 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * The Properties Loader is early stages.
+ * Loads Prometheus client configuration from supported property sources.
  *
- * <p>It would be great to implement a subset of <a
- * href="https://docs.spring.io/spring-boot/docs/3.1.x/reference/html/features.html#features.external-config">Spring
- * Boot's Externalized Configuration</a>, like support for YAML, Properties, and env vars, or
- * support for Spring's naming conventions for properties.
+ * <p>Configuration is read from a classpath {@code prometheus.properties} file, an optional
+ * properties file selected by {@code prometheus.config} or {@code PROMETHEUS_CONFIG}, Java system
+ * properties, {@code IO_PROMETHEUS_*} environment variables, and properties supplied explicitly to
+ * {@link #load(Map)}. Precedence is explicit properties, environment variables, system properties,
+ * the selected file, then the classpath file. {@code PROMETHEUS_CONFIG}, when set, takes precedence
+ * over the {@code prometheus.config} system property when selecting the optional file. Property
+ * names use dot-separated keys such as {@code io.prometheus.exporter.include_created_timestamps};
+ * environment variable names use underscores, such as {@code
+ * IO_PROMETHEUS_EXPORTER_INCLUDE_CREATED_TIMESTAMPS}.
+ *
+ * <p>Unrecognized properties under the {@code io.prometheus} or {@code io_prometheus} prefixes
+ * cause configuration loading to fail, which can help identify misspelled property names.
  */
 @StableApi
 public class PrometheusPropertiesLoader {
@@ -26,6 +34,16 @@ public class PrometheusPropertiesLoader {
     return load(new Properties());
   }
 
+  /**
+   * Loads configuration, using the supplied properties in addition to the standard property
+   * sources. Values in {@code externalProperties} take precedence over environment variables,
+   * system properties, and properties files.
+   *
+   * @param externalProperties properties supplied by the caller
+   * @return the loaded configuration
+   * @throws PrometheusPropertiesException if the selected properties file cannot be read or the
+   *     configuration contains an invalid or unrecognized property
+   */
   public static PrometheusProperties load(Map<Object, Object> externalProperties)
       throws PrometheusPropertiesException {
     PropertySource propertySource = loadProperties(externalProperties);

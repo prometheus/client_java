@@ -508,7 +508,7 @@ public class PushGateway {
       StringBuilder url =
           new StringBuilder(getScheme(properties) + "://" + getAddress(properties) + "/metrics/");
       String job = getJob(properties);
-      if (job.contains("/")) {
+      if (needsBase64(job)) {
         url.append("job@base64/").append(base64url(job));
       } else {
         url.append("job/").append(URLEncoder.encode(job, "UTF-8"));
@@ -518,7 +518,7 @@ public class PushGateway {
           url.append("/")
               .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
               .append("@base64/=");
-        } else if (entry.getValue().contains("/")) {
+        } else if (needsBase64(entry.getValue())) {
           url.append("/")
               .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
               .append("@base64/")
@@ -531,6 +531,12 @@ public class PushGateway {
         }
       }
       return URI.create(url.toString()).normalize().toURL();
+    }
+
+    // "/" would split the value into several path segments, and "." and ".." are dot segments
+    // that normalize() would remove from the path, sending the request to a different group.
+    private boolean needsBase64(String v) {
+      return v.contains("/") || v.equals(".") || v.equals("..");
     }
 
     private String base64url(String v) {

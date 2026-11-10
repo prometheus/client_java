@@ -23,6 +23,22 @@
   },
   packageRules: [
     {
+      description: 'Block Node.js major updates because Node 26 fails the Renovate dependency lint in Flint',
+      matchManagers: [
+        'mise',
+      ],
+      matchDatasources: [
+        'node-version',
+      ],
+      matchDepNames: [
+        'node',
+      ],
+      matchUpdateTypes: [
+        'major',
+      ],
+      enabled: false,
+    },
+    {
       description: 'Update component-prefixed shared-workflow action tags',
       matchManagers: [
         'github-actions',

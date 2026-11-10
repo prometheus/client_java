@@ -1,3 +1,6 @@
+[settings]
+locked = true
+
 [tools]
 "aqua:grafana/gcx" = "latest"
 "aqua:grafana/oats" = "latest"
@@ -34,7 +37,7 @@ trust_policy_excludes = ["@yarnpkg/libzip@3.2.2"]
 [env]
 FLINT_CONFIG_DIR = ".github/config"
 # renovate: datasource=github-releases depName=grafana/docker-otel-lgtm
-LGTM_VERSION = "0.39.0"
+LGTM_VERSION = "0.40.0"
 # Latest JMX Exporter release; used as the default ref for the compatibility job.
 # renovate: datasource=github-tags depName=prometheus/jmx_exporter versioning=semver-coerced
 DEFAULT_JMX_EXPORTER_VERSION = "1.7.0"

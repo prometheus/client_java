@@ -21,7 +21,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
     <protobuf-java.version>4.36.2</protobuf-java.version>
-    <guava.version>33.7.2-jre</guava.version>
+    <guava.version>33.8.0-jre</guava.version>
     <junit-pioneer.version>2.3.0</junit-pioneer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <wiremock.version>3.13.2</wiremock.version>
@@ -161,12 +161,12 @@
         </plugin>
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.3</version>
+          <version>3.7.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>3.6.2</version>
+          <version>3.7.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -176,7 +176,7 @@
         <plugin>
           <groupId>com.github.siom79.japicmp</groupId>
           <artifactId>japicmp-maven-plugin</artifactId>
-          <version>0.26.5</version>
+          <version>0.27.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -291,7 +291,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.23.0</version>
+        <version>2.24.0</version>
         <configuration>
           <rulesUri>file://${project.basedir}/version-rules.xml</rulesUri>
         </configuration>

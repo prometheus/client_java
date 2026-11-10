@@ -211,3 +211,15 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9400"]
 ```
+
+## Library version
+
+Get the Maven version of the Prometheus Java Metrics Library's core artifact with
+`PrometheusMetricsVersion.getVersion()`:
+
+```java
+String version = io.prometheus.metrics.core.PrometheusMetricsVersion.getVersion();
+```
+
+The result matches the `prometheus-metrics-core` artifact version, including a `-SNAPSHOT` suffix
+when present. It is not the Prometheus server version.
