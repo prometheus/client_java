@@ -73,7 +73,7 @@ public class ExpositionFormats {
 
     if (isOpenMetrics2Enabled() && openMetrics2TextFormatWriter.accepts(acceptHeader)) {
       if (openMetrics2TextFormatWriter.getOpenMetrics2Properties().getContentNegotiation()) {
-        String version = parseOpenMetricsVersion(acceptHeader);
+        String version = parseOpenMetricsVersion(findOpenMetricsMediaType(acceptHeader));
         if ("2.0.0".equals(version)) {
           return openMetrics2TextFormatWriter;
         }
@@ -94,28 +94,58 @@ public class ExpositionFormats {
   /**
    * Finds the exposition format writer and escaping scheme negotiated by the given Accept header.
    *
-   * <p>Use this method when writing a scrape response to ensure the selected format and escaping
-   * scheme come from the same header. The returned writer's content type is the format's standard
-   * content type; as with {@link #findWriter(String)}, it does not include an escaping parameter.
+   * <p>Use this method when writing a scrape response to select the format and its escaping scheme
+   * from the same {@code Accept} header. Only parameters on the media range accepted by the
+   * selected format affect the escaping scheme. The returned writer's content type is the format's
+   * standard content type; as with {@link #findWriter(String)}, it does not include an escaping
+   * parameter.
    *
    * <pre>{@code
    * ExpositionFormats.init().findWriterWithEscaping(acceptHeader).write(out, registry.scrape());
    * }</pre>
    *
-   * @see #findWriter(String) the legacy API for selecting only a format writer
+   * @see #findWriter(String) to select only the format writer
    */
   public ExpositionFormatWriterWithEscaping findWriterWithEscaping(@Nullable String acceptHeader) {
     ExpositionFormatWriter writer = findWriter(acceptHeader);
+    String mediaType = findMatchingMediaType(writer, acceptHeader);
     EscapingScheme fallback = EscapingScheme.DEFAULT;
     // OpenMetrics 2.0 has no escaping parameter and permits UTF-8 names. Only an explicit request
     // for version 2.0.0 selects unescaped names; the OM2 writer may also serve OM1/unversioned
     // requests when content negotiation is disabled.
     if (writer instanceof OpenMetrics2TextFormatWriter
-        && "2.0.0".equals(parseOpenMetricsVersion(acceptHeader))) {
+        && "2.0.0".equals(parseOpenMetricsVersion(mediaType))) {
       fallback = EscapingScheme.ALLOW_UTF8;
     }
     return new ExpositionFormatWriterWithEscaping(
-        writer, EscapingScheme.fromAcceptHeader(acceptHeader, fallback));
+        writer, EscapingScheme.fromAcceptHeader(mediaType, fallback));
+  }
+
+  @Nullable
+  private static String findMatchingMediaType(
+      ExpositionFormatWriter writer, @Nullable String acceptHeader) {
+    if (acceptHeader == null) {
+      return null;
+    }
+    for (String mediaType : acceptHeader.split(",")) {
+      if (writer.accepts(mediaType)) {
+        return mediaType;
+      }
+    }
+    return null;
+  }
+
+  @Nullable
+  private static String findOpenMetricsMediaType(@Nullable String acceptHeader) {
+    if (acceptHeader == null) {
+      return null;
+    }
+    for (String mediaType : acceptHeader.split(",")) {
+      if (mediaType.contains("application/openmetrics-text")) {
+        return mediaType;
+      }
+    }
+    return null;
   }
 
   private boolean isOpenMetrics2Enabled() {
@@ -139,23 +169,18 @@ public class ExpositionFormats {
   }
 
   @Nullable
-  private static String parseOpenMetricsVersion(@Nullable String acceptHeader) {
-    if (acceptHeader == null) {
+  private static String parseOpenMetricsVersion(@Nullable String mediaType) {
+    if (mediaType == null) {
       return null;
     }
-    for (String mediaType : acceptHeader.split(",")) {
-      if (mediaType.contains("application/openmetrics-text")) {
-        for (String param : mediaType.split(";")) {
-          String[] tokens = param.split("=");
-          if (tokens.length == 2) {
-            String key = tokens[0].trim();
-            String value = tokens[1].trim();
-            if (key.equals("version")) {
-              return value;
-            }
-          }
+    for (String param : mediaType.split(";")) {
+      String[] tokens = param.split("=");
+      if (tokens.length == 2) {
+        String key = tokens[0].trim();
+        String value = tokens[1].trim();
+        if (key.equals("version")) {
+          return value;
         }
-        return null;
       }
     }
     return null;

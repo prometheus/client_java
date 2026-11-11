@@ -286,6 +286,7 @@ class ExpositionFormatsTest {
   void testNegotiatedWriterBindsEscapingScheme(String escaping, EscapingScheme expected)
       throws IOException {
     ExpositionFormats formats = ExpositionFormats.init();
+    ExpositionFormatWriter cachedWriter = formats.findWriter("text/plain");
     ExpositionFormatWriterWithEscaping negotiated =
         formats.findWriterWithEscaping("text/plain; escaping=" + escaping);
     MetricSnapshots snapshots =
@@ -306,6 +307,26 @@ class ExpositionFormatsTest {
     // Negotiation binds a scheme to this wrapper without changing the cached format writer.
     assertThat(formats.findWriterWithEscaping("text/plain").getEscapingScheme())
         .isEqualTo(EscapingScheme.DEFAULT);
+    assertThat(formats.findWriter("text/plain")).isSameAs(cachedWriter);
+  }
+
+  @Test
+  void testNegotiatedEscapingComesFromSelectedMediaType() {
+    ExpositionFormats formats = ExpositionFormats.init();
+
+    assertThat(
+            formats
+                .findWriterWithEscaping(
+                    "text/plain; escaping=values, application/openmetrics-text; escaping=dots")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.DOTS_ESCAPING);
+    assertThat(
+            formats
+                .findWriterWithEscaping(
+                    "text/plain; escaping=dots, application/vnd.google.protobuf; "
+                        + "proto=io.prometheus.client.MetricFamily; escaping=values")
+                .getEscapingScheme())
+        .isEqualTo(EscapingScheme.VALUE_ENCODING_ESCAPING);
   }
 
   @Test
