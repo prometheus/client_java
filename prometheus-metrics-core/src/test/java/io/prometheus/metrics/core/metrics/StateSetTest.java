@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
@@ -70,6 +71,14 @@ class StateSetTest {
         .withMessage(
             "Label name state1 is illegal (can't use the metric name as label name in state set"
                 + " metrics)");
+  }
+
+  @Test
+  void unit() {
+    assertThatExceptionOfType(UnsupportedOperationException.class)
+        .isThrownBy(
+            () -> StateSet.builder().name("test").states("a", "b").unit(Unit.SECONDS).build())
+        .withMessage("StateSet metrics cannot have a unit.");
   }
 
   private StateSetSnapshot.StateSetDataPointSnapshot getData(StateSet stateSet, String... labels) {
