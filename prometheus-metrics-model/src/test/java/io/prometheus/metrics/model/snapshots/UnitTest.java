@@ -43,4 +43,13 @@ class UnitTest {
 
     assertThat(unit1).isEqualTo(unit2);
   }
+
+  @Test
+  void testEqualUnitsHaveEqualHashCodes() {
+    Unit unit1 = new Unit(" bytes ");
+    Unit unit2 = new Unit("bytes");
+
+    assertThat(unit1).isEqualTo(unit2);
+    assertThat(unit1.hashCode()).isEqualTo(unit2.hashCode());
+  }
 }
