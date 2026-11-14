@@ -42,7 +42,7 @@ public class DropwizardExports
    * @param registry a metric registry to export in prometheus.
    */
   public DropwizardExports(MetricRegistry registry) {
-    this(registry, MetricFilter.ALL, null, InvalidMetricHandler.ALWAYS_THROW);
+    this(registry, MetricFilter.ALL, null, InvalidMetricHandler.ALWAYS_THROW, false);
   }
 
   /**
@@ -52,7 +52,7 @@ public class DropwizardExports
    * @param metricFilter a custom metric filter.
    */
   public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
-    this(registry, metricFilter, null, InvalidMetricHandler.ALWAYS_THROW);
+    this(registry, metricFilter, null, InvalidMetricHandler.ALWAYS_THROW, false);
   }
 
   /**
@@ -62,7 +62,7 @@ public class DropwizardExports
    */
   public DropwizardExports(
       MetricRegistry registry, MetricFilter metricFilter, @Nullable CustomLabelMapper labelMapper) {
-    this(registry, metricFilter, labelMapper, InvalidMetricHandler.ALWAYS_THROW);
+    this(registry, metricFilter, labelMapper, InvalidMetricHandler.ALWAYS_THROW, false);
   }
 
   /**
@@ -75,8 +75,10 @@ public class DropwizardExports
       MetricRegistry registry,
       MetricFilter metricFilter,
       @Nullable CustomLabelMapper labelMapper,
-      InvalidMetricHandler invalidMetricHandler) {
-    super(registry, metricFilter, labelMapper, invalidMetricHandler);
+      InvalidMetricHandler invalidMetricHandler,
+      boolean preserveTimerAndHistogramNames) {
+    super(
+        registry, metricFilter, labelMapper, invalidMetricHandler, preserveTimerAndHistogramNames);
   }
 
   @Override
@@ -189,6 +191,7 @@ public class DropwizardExports
     private MetricFilter metricFilter;
     @Nullable private CustomLabelMapper labelMapper;
     private InvalidMetricHandler invalidMetricHandler;
+    private boolean preserveTimerAndHistogramNames;
 
     private Builder() {
       this.metricFilter = MetricFilter.ALL;
@@ -215,11 +218,36 @@ public class DropwizardExports
       return this;
     }
 
+    /**
+     * Preserve imported timer and histogram names in legacy Prometheus exposition formats.
+     *
+     * <p>By default, legacy formats continue stripping reserved suffixes such as {@code .total} for
+     * backwards compatibility. OpenMetrics 2.0 preserves the original names by default.
+     *
+     * <pre>{@code
+     * DropwizardExports.builder()
+     *     .dropwizardRegistry(metricRegistry)
+     *     .preserveTimerAndHistogramNames(true)
+     *     .register(prometheusRegistry);
+     * }</pre>
+     *
+     * @param preserveTimerAndHistogramNames whether to keep reserved suffixes in legacy formats
+     */
+    public Builder preserveTimerAndHistogramNames(boolean preserveTimerAndHistogramNames) {
+      this.preserveTimerAndHistogramNames = preserveTimerAndHistogramNames;
+      return this;
+    }
+
     DropwizardExports build() {
       if (registry == null) {
         throw new IllegalArgumentException("MetricRegistry must be set");
       }
-      return new DropwizardExports(registry, metricFilter, labelMapper, invalidMetricHandler);
+      return new DropwizardExports(
+          registry,
+          metricFilter,
+          labelMapper,
+          invalidMetricHandler,
+          preserveTimerAndHistogramNames);
     }
 
     public void register() {

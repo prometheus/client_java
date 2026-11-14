@@ -1,2 +1,4 @@
 Comparing source compatibility of prometheus-metrics-instrumentation-dropwizard5-1.10.1-SNAPSHOT.jar against prometheus-metrics-instrumentation-dropwizard5-1.10.0.jar
-No changes.
+***  MODIFIED CLASS: PUBLIC STATIC io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder  (not serializable)
+	===  CLASS FILE FORMAT VERSION: 52.0 <- 52.0
+	+++  NEW METHOD: PUBLIC(+) io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports$Builder preserveTimerAndHistogramNames(boolean)
