@@ -26,7 +26,9 @@ import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics;
 import io.opentelemetry.proto.metrics.v1.Metric;
 import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -74,7 +76,11 @@ class ExemplarTest {
   @SuppressWarnings("try")
   public void sampledExemplarIsForwarded() {
     try (SdkTracerProvider sdkTracerProvider =
-        SdkTracerProvider.builder().setSampler(Sampler.alwaysOn()).build()) {
+        SdkTracerProvider.builder()
+            .setSampler(Sampler.alwaysOn())
+            // SDK >= 1.67 returns a no-op tracer if no span processor is registered
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
 
       Tracer test = sdkTracerProvider.get(INSTRUMENTATION_SCOPE_NAME);
       Span span = test.spanBuilder(SPAN_NAME).startSpan();
@@ -100,7 +106,11 @@ class ExemplarTest {
   @SuppressWarnings("try")
   public void notSampledExemplarIsNotForwarded() {
     try (SdkTracerProvider sdkTracerProvider =
-        SdkTracerProvider.builder().setSampler(Sampler.alwaysOff()).build()) {
+        SdkTracerProvider.builder()
+            .setSampler(Sampler.alwaysOff())
+            // SDK >= 1.67 returns a no-op tracer if no span processor is registered
+            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+            .build()) {
 
       Tracer test = sdkTracerProvider.get(INSTRUMENTATION_SCOPE_NAME);
       Span span = test.spanBuilder(SPAN_NAME).startSpan();
