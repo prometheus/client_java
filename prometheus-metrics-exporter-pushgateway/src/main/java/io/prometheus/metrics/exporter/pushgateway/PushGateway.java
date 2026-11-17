@@ -32,6 +32,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.annotation.Nullable;
@@ -456,7 +457,7 @@ public class PushGateway {
 
     private Scheme getScheme(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getScheme() != null) {
-        return Scheme.valueOf(properties.getScheme());
+        return Scheme.fromString(properties.getScheme().toLowerCase(Locale.ROOT));
       } else if (this.scheme != null) {
         return this.scheme;
       } else {
