@@ -91,9 +91,12 @@ class HistogramTest {
           histogram.observe(observation);
         }
       }
-      Metrics.MetricFamily protobufData =
+      Metrics.MetricFamily.Builder protobufData =
           new PrometheusProtobufWriterImpl()
-              .convert(histogram.collect(), EscapingScheme.ALLOW_UTF8);
+              .convert(histogram.collect(), EscapingScheme.ALLOW_UTF8).toBuilder();
+      // The client_golang test cases don't include the created timestamp.
+      assertThat(protobufData.getMetric(0).getHistogram().hasCreatedTimestamp()).isTrue();
+      protobufData.getMetricBuilder(0).getHistogramBuilder().clearCreatedTimestamp();
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
       assertThat(ProtobufUtil.shortDebugString(protobufData))
@@ -978,8 +981,11 @@ class HistogramTest {
         """;
 
     // protobuf
-    Metrics.MetricFamily protobufData =
-        new PrometheusProtobufWriterImpl().convert(snapshot, EscapingScheme.ALLOW_UTF8);
+    Metrics.MetricFamily.Builder protobufData =
+        new PrometheusProtobufWriterImpl().convert(snapshot, EscapingScheme.ALLOW_UTF8).toBuilder();
+    assertThat(protobufData.getMetric(0).getHistogram().getCreatedTimestamp().getSeconds())
+        .isEqualTo(snapshot.getDataPoints().get(0).getCreatedTimestampMillis() / 1000);
+    protobufData.getMetricBuilder(0).getHistogramBuilder().clearCreatedTimestamp();
     assertThat(ProtobufUtil.shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text

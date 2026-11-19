@@ -220,6 +220,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     if (data.hasSum()) {
       histogramBuilder.setSampleSum(data.getSum());
     }
+    if (data.hasCreatedTimestamp()) {
+      histogramBuilder.setCreatedTimestamp(
+          ProtobufUtil.timestampFromMillis(data.getCreatedTimestampMillis()));
+    }
     metricBuilder.setHistogram(histogramBuilder.build());
     return metricBuilder;
   }
@@ -240,6 +244,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
               .setQuantile(quantiles.get(i).getQuantile())
               .setValue(quantiles.get(i).getValue())
               .build());
+    }
+    if (data.hasCreatedTimestamp()) {
+      summaryBuilder.setCreatedTimestamp(
+          ProtobufUtil.timestampFromMillis(data.getCreatedTimestampMillis()));
     }
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     addLabels(metricBuilder, data.getLabels(), scheme);
