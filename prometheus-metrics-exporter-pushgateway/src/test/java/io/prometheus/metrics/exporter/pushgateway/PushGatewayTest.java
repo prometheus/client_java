@@ -6,6 +6,8 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import io.prometheus.metrics.config.EscapingScheme;
+import io.prometheus.metrics.config.ExporterPushgatewayProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -64,6 +66,32 @@ class PushGatewayTest {
         PushGateway.builder().address("example.com:1234/context///path//").job("test").build();
     assertThat(getUrl(pushGateway))
         .hasToString("http://example.com:1234/context/path/metrics/job/test");
+  }
+
+  @Test
+  void testSchemeFromProperties() throws NoSuchFieldException, IllegalAccessException {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .pushgatewayProperties(ExporterPushgatewayProperties.builder().scheme("https").build())
+            .build();
+
+    PushGateway pushGateway =
+        PushGateway.builder(properties).address("example.com:1234").job("test").build();
+
+    assertThat(getUrl(pushGateway)).hasToString("https://example.com:1234/metrics/job/test");
+  }
+
+  @Test
+  void testUpperCaseSchemeFromProperties() throws NoSuchFieldException, IllegalAccessException {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .pushgatewayProperties(ExporterPushgatewayProperties.builder().scheme("HTTPS").build())
+            .build();
+
+    PushGateway pushGateway =
+        PushGateway.builder(properties).address("example.com:1234").job("test").build();
+
+    assertThat(getUrl(pushGateway)).hasToString("https://example.com:1234/metrics/job/test");
   }
 
   private URL getUrl(PushGateway pushGateway) throws IllegalAccessException, NoSuchFieldException {

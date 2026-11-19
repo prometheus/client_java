@@ -97,50 +97,50 @@ url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685577805"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
-version = "v1.7.1"
+version = "v1.8.0"
 backend = "aqua:grafana/gcx"
 specifiers = ["latest"]
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64"]
-checksum = "sha256:1d8284557e66dd5c6e4d5b37a651afca98bea42729df7b4aa8720464360b2f54"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320575"
+checksum = "sha256:78d4d03a3b2fea6cfde5aceae0d464b5ac7cc3a2b59269437120e0708b56f438"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418678"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64-musl"]
-checksum = "sha256:1d8284557e66dd5c6e4d5b37a651afca98bea42729df7b4aa8720464360b2f54"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320575"
+checksum = "sha256:78d4d03a3b2fea6cfde5aceae0d464b5ac7cc3a2b59269437120e0708b56f438"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418678"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64"]
-checksum = "sha256:5f1601feac13d850017064a9b556f11983de6def2986ba0bee402a947659c3e9"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320576"
+checksum = "sha256:85e21eeecae4ed2f21a40934bb127f0ec3bc2461f024404a709bf6e448b0e975"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418548"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64-musl"]
-checksum = "sha256:5f1601feac13d850017064a9b556f11983de6def2986ba0bee402a947659c3e9"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320576"
+checksum = "sha256:85e21eeecae4ed2f21a40934bb127f0ec3bc2461f024404a709bf6e448b0e975"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418548"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.macos-arm64"]
-checksum = "sha256:61b0f912d21abf7d8e22bdcc0199b56403dcf19f29bef73d74119d53782f479d"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320581"
+checksum = "sha256:002f7b0f06b0f29e5ed5fed2f327af6b6eda838f5f2b935c5286a6b5b2c00861"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418553"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.macos-x64"]
-checksum = "sha256:a4b220526381f632f8b2bd578c52f8a687717633fcff4e9dc4e2407b2d1b3c3e"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320574"
+checksum = "sha256:1919578d6dca8872dc315b7fca921dba5e11e8456b5908ebfbfd7053a15e52db"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418552"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.windows-x64"]
-checksum = "sha256:a4c3e70261011b6d71fffcd0b44755d0642f91dde4da9f0970b87d9739d0e7ae"
-url = "https://github.com/grafana/gcx/releases/download/v1.7.1/gcx_1.7.1_windows_amd64.zip"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/662320674"
+checksum = "sha256:915d8e7dbb688265b90a0c0b01f3dcc5c463779edd3d9cd7fbce10d68cc16685"
+url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418685"
 provenance = "cosign"
 
 [[tools."aqua:grafana/oats"]]
@@ -441,54 +441,54 @@ url = "https://github.com/google/google-java-format/releases/download/v1.37.0/go
 url_api = "https://api.github.com/repos/google/google-java-format/releases/assets/603148681"
 
 [[tools.hugo]]
-version = "0.169.0"
+version = "0.170.1"
 backend = "aqua:gohugoio/hugo"
 specifiers = ["latest"]
 
 [tools.hugo."platforms.linux-arm64"]
-checksum = "sha256:ddadaaccbf437e3d39c33140b80c2180c4f46d027d16b7716c1282ea2e14e00c"
+checksum = "sha256:6f57f13bc47c000c0d36c7f5a446d6c06f7956d8e102cc2a13735e0c0225b2d2"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125062"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871399"
 
 [tools.hugo."platforms.linux-arm64-musl"]
-checksum = "sha256:ddadaaccbf437e3d39c33140b80c2180c4f46d027d16b7716c1282ea2e14e00c"
+checksum = "sha256:6f57f13bc47c000c0d36c7f5a446d6c06f7956d8e102cc2a13735e0c0225b2d2"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125062"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871399"
 
 [tools.hugo."platforms.linux-x64"]
-checksum = "sha256:2d2f0bfe357d8cb4cec02f6bb28a3bff34978c8dda44b618029c5eb9d66765a7"
+checksum = "sha256:841a5462853aefc9942e4de1e8a5d75584b6a5181941e6ad3f1d745190e03cd8"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125058"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871396"
 
 [tools.hugo."platforms.linux-x64-musl"]
-checksum = "sha256:2d2f0bfe357d8cb4cec02f6bb28a3bff34978c8dda44b618029c5eb9d66765a7"
+checksum = "sha256:841a5462853aefc9942e4de1e8a5d75584b6a5181941e6ad3f1d745190e03cd8"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125058"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871396"
 
 [tools.hugo."platforms.macos-arm64"]
-checksum = "sha256:9b1170c439b5444e31d4731dd0071fc2b380b8d58050e6cdae80e3e179b4bf52"
+checksum = "sha256:f7672f5e47f13c488ecd9ae96450ed9d2044629d60fe23570312e896c1918d73"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_darwin-universal.pkg"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125236"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_darwin-universal.pkg"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871553"
 
 [tools.hugo."platforms.macos-x64"]
-checksum = "sha256:9b1170c439b5444e31d4731dd0071fc2b380b8d58050e6cdae80e3e179b4bf52"
+checksum = "sha256:f7672f5e47f13c488ecd9ae96450ed9d2044629d60fe23570312e896c1918d73"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_darwin-universal.pkg"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125236"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_darwin-universal.pkg"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871553"
 
 [tools.hugo."platforms.windows-x64"]
-checksum = "sha256:d1ea8b32bdc2d3d5d4b56178efedf0925c027d2063e6779b5e8df6f406b09948"
+checksum = "sha256:e4a8bec642b5d18f451452fafb318bbb6b7f09e5208f3dca76a204c888c9e072"
 checksum_source = "mise-versions"
-url = "https://github.com/gohugoio/hugo/releases/download/v0.169.0/hugo_0.169.0_windows-amd64.zip"
-url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/682125269"
+url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_windows-amd64.zip"
+url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871573"
 
 [[tools.java]]
-version = "temurin-25.0.5+8.0.LTS"
+version = "temurin-25.0.5+100000002.0.LTS"
 backend = "core:java"
 specifiers = ["temurin-25"]
 
@@ -615,37 +615,37 @@ url = "https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/ly
 url_api = "https://api.github.com/repos/lycheeverse/lychee/releases/assets/409959491"
 
 [[tools.node]]
-version = "24.22.2"
+version = "24.22.3"
 backend = "core:node"
 specifiers = ["lts"]
 
 [tools.node."platforms.linux-arm64"]
-checksum = "sha256:95c264150aceb7f3437a29fd6984924f5f8d1511ea3cbd6c508b83f6c555dae2"
-url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-linux-arm64.tar.gz"
+checksum = "sha256:261af2af250dfd7e9f25cf151d1b2713a0adf8f10a9ad116c4947f68627affe8"
+url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-arm64.tar.gz"
 
 [tools.node."platforms.linux-arm64-musl"]
-checksum = "sha256:70afd250a927fbc32f3d95a58597efdf14aa8ad194e894268f9b8309a2dab84e"
-url = "https://unofficial-builds.nodejs.org/download/release/v24.22.2/node-v24.22.2-linux-arm64-musl.tar.gz"
+checksum = "sha256:248c96a84f6c8338646b9fd73bf125124678f8fb08db5f23023f462055e0eedc"
+url = "https://unofficial-builds.nodejs.org/download/release/v24.22.3/node-v24.22.3-linux-arm64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64"]
-checksum = "sha256:361718c444e49af2ca5a110c83ba6a8901143f23ab285ebbef0341f391f482a9"
-url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-linux-x64.tar.gz"
+checksum = "sha256:061ec3e3062115705b56b51fa9cc330ab50d34b6969387d4e4b1a50c6809acc2"
+url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:867e322d67294e9c405f10cae5d70ed2e4940bb367fa47dbcb5151c9899d7c04"
-url = "https://unofficial-builds.nodejs.org/download/release/v24.22.2/node-v24.22.2-linux-x64-musl.tar.gz"
+checksum = "sha256:2db4f8a40abe5f5b5d119964223fedc9c4c7c5e7c632901ae860af522c7844b2"
+url = "https://unofficial-builds.nodejs.org/download/release/v24.22.3/node-v24.22.3-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
-checksum = "sha256:aa9549349e47dffaa42dcf95d6e06ade8c4bdafc980979883b88767670df385a"
-url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-darwin-arm64.tar.gz"
+checksum = "sha256:ff6e17d4874b76d272212b908cc020d6e815fba5a6c7eaaa06add725840307fd"
+url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-darwin-arm64.tar.gz"
 
 [tools.node."platforms.macos-x64"]
-checksum = "sha256:d5e336d588c45be0c37dbd52cc29895593009ca4997a77a1fd02815131ed0e52"
-url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-darwin-x64.tar.gz"
+checksum = "sha256:977614af0504c81045e7fd85596dbca0e5f951b96681516dadafedcca8c447f7"
+url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-darwin-x64.tar.gz"
 
 [tools.node."platforms.windows-x64"]
-checksum = "sha256:ca1bff5d8ead13c9f2ea404a176db46bd430704d5b5113734049fa365e7799e2"
-url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-win-x64.zip"
+checksum = "sha256:e612af99f626ab415ea225af6bce5c971feb448cb5cae250bb1c3fa50c5f7d9f"
+url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-win-x64.zip"
 
 [[tools."npm:renovate"]]
 version = "44.82.0"
