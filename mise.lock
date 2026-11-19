@@ -488,7 +488,7 @@ url = "https://github.com/gohugoio/hugo/releases/download/v0.170.1/hugo_0.170.1_
 url_api = "https://api.github.com/repos/gohugoio/hugo/releases/assets/759871573"
 
 [[tools.java]]
-version = "temurin-25.0.5+8.0.LTS"
+version = "temurin-25.0.5+100000002.0.LTS"
 backend = "core:java"
 specifiers = ["temurin-25"]
 
