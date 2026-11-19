@@ -33,7 +33,7 @@ jobs:
         with:
           ref: ${{ env.SNAPSHOT_BRANCH }}
           persist-credentials: true
-      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
           version: v2026.11.7
           sha256: 8f5426d9971eaf713b37509749174ca69cf2f08b8b25e389168dcfcab9cd1a4d
