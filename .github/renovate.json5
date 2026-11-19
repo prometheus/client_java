@@ -14,6 +14,8 @@
     // old projects
     // agent resources packages an OTel API that is the minimum required API version
     '**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml',
+    // Mise generates these npm sidecars; update them with the mise manager, not independently.
+    '.mise/locks/**',
   ],
   labels: [
     'dependencies',
@@ -113,6 +115,21 @@
       schedule: [
         'on sunday',
       ],
+    },
+    {
+      description: 'Update the Renovate CLI weekly and keep its mise lock artifacts in sync',
+      matchManagers: [
+        'mise',
+      ],
+      matchDepNames: [
+        'npm:renovate',
+      ],
+      updatePinnedDependencies: true,
+      schedule: [
+        '* 0-3 * * 1',
+      ],
+      timezone: 'UTC',
+      updateNotScheduled: false,
     },
   ],
   customManagers: [

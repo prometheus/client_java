@@ -27,7 +27,7 @@ taplo = "latest"
 typos = "latest"
 
 [tools."npm:renovate"]
-version = "latest"
+version = "44.252.0"
 allow_builds = ["re2"]
 # @yarnpkg/libzip 3.2.2 is npm-signed and matches Yarn's release commit, but
 # was published without provenance; mise's no-downgrade policy otherwise rejects Renovate.
