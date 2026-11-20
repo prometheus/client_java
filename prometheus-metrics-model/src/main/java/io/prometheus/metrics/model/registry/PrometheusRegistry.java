@@ -222,19 +222,17 @@ public class PrometheusRegistry {
     final String helpForValidation = help;
     final Unit unitForValidation = unit;
 
-    Set<String> expositionNames = computeExpositionNames(prometheusName, type);
-    String claimError = claimExpositionNames(expositionNames, prometheusName);
-    if (claimError != null) {
-      throw new IllegalArgumentException(claimError);
-    }
-
-    boolean success = false;
-    try {
-      registered.compute(
-          prometheusName,
-          (n, existingInfo) -> {
+    // Keep claims and their rollback under the same per-name lock as registration/unregistration.
+    registered.compute(
+        prometheusName,
+        (n, existingInfo) -> {
+          Set<String> newClaims =
+              claimExpositionNames(computeExpositionNames(prometheusName, type), prometheusName);
+          boolean success = false;
+          try {
+            RegistrationInfo result;
             if (existingInfo == null) {
-              return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
+              result = RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
             } else {
               if (existingInfo.getType() != type) {
                 throw new IllegalArgumentException(
@@ -258,37 +256,42 @@ public class PrometheusRegistry {
                 existingInfo.removeLabelSet(names);
                 throw e;
               }
-              return existingInfo;
+              result = existingInfo;
             }
-          });
-      success = true;
-    } finally {
-      if (!success) {
-        releaseExpositionNames(expositionNames, prometheusName);
-      }
-    }
+            success = true;
+            return result;
+          } finally {
+            if (!success) {
+              releaseExpositionNames(newClaims, prometheusName);
+            }
+          }
+        });
   }
 
   /**
-   * Atomically claims exposition names for the given metric. Returns null on success, or an error
-   * message on conflict. Rolls back any partially claimed names on failure.
+   * Claims exposition names for the given metric, returning only the names newly reserved by this
+   * attempt. Only these names may be rolled back; reservations for existing label schemas must be
+   * preserved. On conflict, releases the new claims and throws.
    */
-  @Nullable
-  private String claimExpositionNames(Set<String> expositionNames, String prometheusName) {
+  private Set<String> claimExpositionNames(Set<String> expositionNames, String prometheusName) {
+    Set<String> newClaims = new HashSet<>();
     for (String expositionName : expositionNames) {
       String existingOwner = expositionNameOwners.putIfAbsent(expositionName, prometheusName);
-      if (existingOwner != null && !existingOwner.equals(prometheusName)) {
-        releaseExpositionNames(expositionNames, prometheusName);
-        return "'"
-            + prometheusName
-            + "' and '"
-            + existingOwner
-            + "' have conflicting exposition name: '"
-            + expositionName
-            + "'";
+      if (existingOwner == null) {
+        newClaims.add(expositionName);
+      } else if (!existingOwner.equals(prometheusName)) {
+        releaseExpositionNames(newClaims, prometheusName);
+        throw new IllegalArgumentException(
+            "'"
+                + prometheusName
+                + "' and '"
+                + existingOwner
+                + "' have conflicting exposition name: '"
+                + expositionName
+                + "'");
       }
     }
-    return null;
+    return newClaims;
   }
 
   private void releaseExpositionNames(Set<String> expositionNames, String owner) {
