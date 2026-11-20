@@ -93,13 +93,29 @@ class PrometheusScrapeHandlerTest {
 
   @Test
   void testHeadRequest() throws IOException {
-    TestHttpExchange exchange = new TestHttpExchange("HEAD", null);
+    TestHttpExchange exchange =
+        new TestHttpExchange("HEAD", null).withHeader("Accept-Encoding", "identity");
     handler.handleRequest(exchange);
 
     assertThat(exchange.getResponseCode()).isEqualTo(200);
     assertThat(exchange.getResponseHeaders().get("Content-Length")).isNotNull();
+    assertThat(exchange.getResponseHeaders()).doesNotContainKey("Content-Encoding");
     // For HEAD requests, body should be empty even though Content-Length is set
     assertThat(exchange.rawResponseBody.size()).isEqualTo(0);
+    assertThat(exchange.response.contentLength).isEqualTo(-1);
+  }
+
+  @Test
+  void testHeadRequestWithGzip() throws IOException {
+    TestHttpExchange exchange =
+        new TestHttpExchange("HEAD", null).withHeader("Accept-Encoding", "gzip");
+    handler.handleRequest(exchange);
+
+    assertThat(exchange.getResponseCode()).isEqualTo(200);
+    assertThat(exchange.getResponseHeaders().get("Content-Encoding")).isEqualTo("gzip");
+    assertThat(exchange.getResponseHeaders().get("Content-Type")).contains("text/plain");
+    assertThat(exchange.rawResponseBody.size()).isZero();
+    assertThat(exchange.response.contentLength).isEqualTo(-1);
   }
 
   @Test
@@ -362,6 +378,7 @@ class PrometheusScrapeHandlerTest {
     private final Map<String, String> headers = new HashMap<>();
     private final ByteArrayOutputStream outputStream;
     private int statusCode;
+    private int contentLength;
 
     TestHttpResponse(ByteArrayOutputStream outputStream) {
       this.outputStream = outputStream;
@@ -376,6 +393,7 @@ class PrometheusScrapeHandlerTest {
     public OutputStream sendHeadersAndGetBody(int statusCode, int contentLength)
         throws IOException {
       this.statusCode = statusCode;
+      this.contentLength = contentLength;
       return outputStream;
     }
   }
