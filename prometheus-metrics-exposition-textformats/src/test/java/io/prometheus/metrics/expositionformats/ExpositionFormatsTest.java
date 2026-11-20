@@ -2925,6 +2925,21 @@ class ExpositionFormatsTest {
             + "my_special_thing_bytes{env=\"prod\"} 0.7 "
             + scrapeTimestamp2s
             + "\n";
+    String prometheusProtobuf =
+        // @formatter:off
+        "name: \"my_special_thing_bytes\" "
+            + "help: \"help message\" "
+            + "type: UNTYPED "
+            + "metric { "
+            + "label { name: \"env\" value: \"dev\" } "
+            + "untyped { value: 0.2 } "
+            + "timestamp_ms: 1672850685829 "
+            + "} metric { "
+            + "label { name: \"env\" value: \"prod\" } "
+            + "untyped { value: 0.7 } "
+            + "timestamp_ms: 1672850585820 "
+            + "}";
+    // @formatter:on
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name("my_special_thing_bytes")
@@ -2951,6 +2966,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheus, unknown);
     assertOpenMetricsTextWithoutCreated(openMetrics, unknown);
     assertPrometheusTextWithoutCreated(prometheus, unknown);
+    assertPrometheusProtobuf(prometheusProtobuf, unknown);
   }
 
   @Test

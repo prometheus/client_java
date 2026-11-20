@@ -283,6 +283,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     untypedBuilder.setValue(data.getValue());
     addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setUntyped(untypedBuilder);
+    setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
   }
 
