@@ -76,6 +76,30 @@ class StatefulMetricTest {
   }
 
   @Test
+  void testRemoveNoLabels() {
+    Counter counter = Counter.builder().name("test").build();
+    counter.inc();
+    counter.remove();
+
+    // Making inc() works correctly after remove()
+    counter.inc();
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(1.0);
+  }
+
+  @Test
+  void testRemoveIfNoLabels() {
+    Counter counter = Counter.builder().name("test").build();
+    counter.inc();
+    counter.removeIf(labelValues -> true);
+
+    // Making inc() works correctly after removeIf()
+    counter.inc();
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(1.0);
+  }
+
+  @Test
   void testClearNoLabels() {
     Counter counter = Counter.builder().name("test").build();
     counter.inc();
