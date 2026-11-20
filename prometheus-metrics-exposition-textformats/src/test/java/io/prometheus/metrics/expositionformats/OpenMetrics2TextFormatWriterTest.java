@@ -12,6 +12,7 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
@@ -23,6 +24,160 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class OpenMetrics2TextFormatWriterTest {
+
+  @Test
+  void mergeUsesRenderedOriginalNamesAndSuffixes() throws IOException {
+    CounterSnapshot first =
+        new CounterSnapshot(
+            MetricMetadata.builder()
+                .name("legacy_a")
+                .originalName("raw.foo")
+                .expositionBaseName("raw.foo")
+                .build(),
+            java.util.Collections.singletonList(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .value(1)
+                    .labels(Labels.of("id", "first"))
+                    .build()));
+    CounterSnapshot second =
+        new CounterSnapshot(
+            MetricMetadata.builder()
+                .name("legacy_b")
+                .originalName("raw.foo_total")
+                .expositionBaseName("raw.foo_total")
+                .build(),
+            java.util.Collections.singletonList(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .value(2)
+                    .labels(Labels.of("id", "second"))
+                    .build()));
+    MetricSnapshots snapshots = MetricSnapshots.of(first, second);
+
+    OpenMetrics2TextFormatWriter noSuffixes =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+            .build();
+    assertThat(write(snapshots, noSuffixes))
+        .contains("{\"raw.foo\",id=\"first\"} 1.0", "{\"raw.foo_total\",id=\"second\"} 2.0");
+    for (EscapingScheme scheme :
+        new EscapingScheme[] {
+          EscapingScheme.UNDERSCORE_ESCAPING,
+          EscapingScheme.DOTS_ESCAPING,
+          EscapingScheme.VALUE_ENCODING_ESCAPING
+        }) {
+      assertThat(writeWithScheme(snapshots, noSuffixes, scheme).split("# TYPE ")).hasSize(3);
+    }
+
+    OpenMetrics2TextFormatWriter suffixes =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(true).build())
+            .build();
+    String output = write(snapshots, suffixes);
+    assertThat(output).containsOnlyOnce("# TYPE \"raw.foo_total\" counter");
+    assertThat(output)
+        .contains("{\"raw.foo_total\",id=\"first\"} 1.0", "{\"raw.foo_total\",id=\"second\"} 2.0");
+  }
+
+  @Test
+  void mergeUsesRenderedNamesWhenTheyAreNotAdjacentInLegacyOrder() throws IOException {
+    CounterSnapshot first = counterWithNames("legacy_a", "same", "first");
+    CounterSnapshot middle = counterWithNames("legacy_b", "other", "middle");
+    CounterSnapshot last = counterWithNames("legacy_c", "same", "last");
+
+    String output =
+        write(
+            MetricSnapshots.of(first, middle, last),
+            OpenMetrics2TextFormatWriter.builder()
+                .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+                .build());
+
+    assertThat(output).containsOnlyOnce("# TYPE same counter");
+    assertThat(output).contains("same{id=\"first\"}", "same{id=\"last\"}", "# TYPE other counter");
+  }
+
+  @Test
+  void suffixAndInfoFamilyNamesAreEscapedBeforeMerging() throws IOException {
+    CounterSnapshot first = counterWithEscapingLabel("legacy_a", "raw.foo", "first");
+    CounterSnapshot second = counterWithEscapingLabel("legacy_b", "raw.foo_total", "second");
+    OpenMetrics2TextFormatWriter suffixes =
+        OpenMetrics2TextFormatWriter.builder()
+            .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(true).build())
+            .build();
+
+    String dotsOutput =
+        writeWithScheme(MetricSnapshots.of(first, second), suffixes, EscapingScheme.DOTS_ESCAPING);
+    assertThat(dotsOutput)
+        .contains("# TYPE raw_dot_foo_total counter", "# TYPE raw_dot_foo__total counter");
+    String valuesOutput =
+        writeWithScheme(
+            MetricSnapshots.of(first, second), suffixes, EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(valuesOutput)
+        .contains("# TYPE U__raw_2e_foo_total counter", "# TYPE U__raw_2e_foo__total counter");
+
+    InfoSnapshot firstInfo = infoWithEscapingLabel("legacy_c", "a-b", "first");
+    InfoSnapshot secondInfo = infoWithEscapingLabel("legacy_d", "a b", "second");
+    String infoOutput =
+        writeWithScheme(
+            MetricSnapshots.of(firstInfo, secondInfo),
+            OpenMetrics2TextFormatWriter.builder()
+                .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+                .build(),
+            EscapingScheme.DOTS_ESCAPING);
+    assertThat(infoOutput).containsOnlyOnce("# TYPE a__b_info info");
+    assertThat(infoOutput).contains("id=\"first\"", "id=\"second\"");
+  }
+
+  @Test
+  void infoSuffixAliasesMergeWhenSuffixesAreDisabled() throws IOException {
+    InfoSnapshot first = infoWithEscapingLabel("legacy_a", "build", "first");
+    InfoSnapshot second = infoWithEscapingLabel("legacy_b", "build_info", "second");
+    String output =
+        writeWithScheme(
+            MetricSnapshots.of(first, second),
+            OpenMetrics2TextFormatWriter.builder()
+                .setOpenMetrics2Properties(OpenMetrics2Properties.builder().suffixes(false).build())
+                .build(),
+            EscapingScheme.ALLOW_UTF8);
+
+    assertThat(output).containsOnlyOnce("# TYPE build_info info");
+    assertThat(output).contains("id=\"first\"", "id=\"second\"");
+  }
+
+  private CounterSnapshot counterWithNames(String legacyName, String originalName, String id) {
+    return new CounterSnapshot(
+        MetricMetadata.builder()
+            .name(legacyName)
+            .originalName(originalName)
+            .expositionBaseName(originalName)
+            .build(),
+        java.util.Collections.singletonList(
+            CounterSnapshot.CounterDataPointSnapshot.builder()
+                .value(1)
+                .labels(Labels.of("id", id))
+                .build()));
+  }
+
+  private CounterSnapshot counterWithEscapingLabel(
+      String legacyName, String originalName, String id) {
+    return new CounterSnapshot(
+        MetricMetadata.builder()
+            .name(legacyName)
+            .originalName(originalName)
+            .expositionBaseName(originalName)
+            .build(),
+        java.util.Collections.singletonList(
+            CounterSnapshot.CounterDataPointSnapshot.builder()
+                .value(1)
+                .labels(Labels.of("id", id, "label.name", "value"))
+                .build()));
+  }
+
+  private InfoSnapshot infoWithEscapingLabel(String legacyName, String originalName, String id) {
+    return new InfoSnapshot(
+        MetricMetadata.builder().name(legacyName).originalName(originalName).build(),
+        java.util.Collections.singletonList(
+            new InfoSnapshot.InfoDataPointSnapshot(Labels.of("id", id, "label.name", "value"))));
+  }
 
   @Test
   void testContentTypeWithContentNegotiationDisabled() {
@@ -843,8 +998,14 @@ class OpenMetrics2TextFormatWriterTest {
 
   private String write(MetricSnapshots snapshots, ExpositionFormatWriter writer)
       throws IOException {
+    return writeWithScheme(snapshots, writer, EscapingScheme.ALLOW_UTF8);
+  }
+
+  private String writeWithScheme(
+      MetricSnapshots snapshots, ExpositionFormatWriter writer, EscapingScheme scheme)
+      throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
+    writer.write(out, snapshots, scheme);
     return out.toString(StandardCharsets.UTF_8.name());
   }
 }
