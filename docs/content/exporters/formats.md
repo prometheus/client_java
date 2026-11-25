@@ -23,6 +23,31 @@ Prometheus server will scrape OpenMetrics text format with gzip encoding. If the
 is started with `--enable-feature=native-histograms`, it will scrape Prometheus protobuf format
 instead.
 
+## Writing a negotiated response
+
+Applications that write exposition responses themselves can use `findWriterWithEscaping` to select
+the format and escaping scheme together from one `Accept` header. Create and reuse an
+`ExpositionFormats` instance instead of initializing it for each response:
+
+```java
+import io.prometheus.metrics.expositionformats.ExpositionFormatWriterWithEscaping;
+import io.prometheus.metrics.expositionformats.ExpositionFormats;
+
+ExpositionFormats formats = ExpositionFormats.init(); // Create once and reuse.
+
+// In response-writing code, acceptHeader, registry, and outputStream are supplied by the app.
+ExpositionFormatWriterWithEscaping writer = formats.findWriterWithEscaping(acceptHeader);
+String contentType = writer.getContentType(); // Set the response header before writing the body.
+writer.write(outputStream, registry.scrape());
+```
+
+The returned writer binds the negotiated format and escaping scheme, so there is no need to parse
+the `Accept` header again when writing. `getContentType()` returns the selected format's standard
+content type; it does not append an escaping parameter. The existing `findWriter` and writer methods
+remain available when you need to choose the escaping scheme explicitly. For details, see the
+[Unicode escaping documentation]({{< relref "./unicode.md" >}}) and
+[OpenMetrics 2.0 preview]({{< relref "./openmetrics2.md" >}}).
+
 ## Viewing with a Web Browser
 
 If you view the `/metrics` endpoint with your Web browser you will see Prometheus text format. For
