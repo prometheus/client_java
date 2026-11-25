@@ -18,19 +18,19 @@ jobs:
           - name: upstream
             repository: micrometer-metrics/micrometer
             # renovate: datasource=github-releases depName=micrometer-metrics/micrometer packageName=micrometer-metrics/micrometer
-            ref: v1.17.2
+            ref: v1.18.0
           - name: upstream-main
             # Track upstream main until the typed-descriptor change is included
             # in a Micrometer release.
             # Follow-up: https://github.com/prometheus/client_java/issues/2182
             repository: micrometer-metrics/micrometer
             # renovate: datasource=git-refs depName=micrometer-metrics/micrometer packageName=https://github.com/micrometer-metrics/micrometer currentValue=main
-            ref: 500bba18ba8c35d62ad4016c71e4a9d95c030ba3
+            ref: 58749c38dde4ad5cf05e03dd1650f8e426f956d0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+      - uses: jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78 # v5.3.0
         with:
           version: v2026.11.7
           sha256: 8f5426d9971eaf713b37509749174ca69cf2f08b8b25e389168dcfcab9cd1a4d
