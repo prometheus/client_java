@@ -1,7 +1,7 @@
 version: "3"
 services:
   example-application:
-    image: eclipse-temurin:25.0.5_8-jre@sha256:945247f9d092703e0c6be92243ef3c51640229e23ab34d353c8dcdc73e6cd4e6
+    image: eclipse-temurin:25.0.5.1_2-jre@sha256:4ed132f6832e9804b123e89a849a7b4502756ae64a4ee08ebab939d9d5d0a9fa
     network_mode: host
     volumes:
       - ./target/example-native-histogram.jar:/example-native-histogram.jar
@@ -18,7 +18,7 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yml
   grafana:
-    image: grafana/grafana:13.3.1@sha256:0615ec4fbd4072004b7d86b46ded63013a74b7d6eb1119273dd89e8fa25c13cf
+    image: grafana/grafana:13.3.2@sha256:81556409ba48b2b922e0adb69a2511337d8ba7578f11962eefa6149a2d815101
     network_mode: host
     volumes:
       - ./docker-compose/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/grafana-datasources.yaml
