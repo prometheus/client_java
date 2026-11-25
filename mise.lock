@@ -648,10 +648,10 @@ checksum = "sha256:e612af99f626ab415ea225af6bce5c971feb448cb5cae250bb1c3fa50c5f7
 url = "https://nodejs.org/dist/v24.22.3/node-v24.22.3-win-x64.zip"
 
 [[tools."npm:renovate"]]
-version = "44.82.0"
-aube = { path = ".mise/locks/npm-renovate/44.82.0~026f02c4", digest = "sha256:07b3b5d8f170cfc1797e639fcc1f270b498c0b283ad72db728a51d40d11d53ae" }
+version = "44.252.0"
+aube = { path = ".mise/locks/npm-renovate/44.252.0~026f02c4", digest = "sha256:dcf298d9ccad1439c8ff13ef7327fbda2e1ad5fdd4adcda9748efd31d7fbac1b" }
 backend = "npm:renovate"
-specifiers = ["latest"]
+specifiers = ["44.252.0"]
 
 [tools."npm:renovate".options]
 allow_builds = '["re2"]'
