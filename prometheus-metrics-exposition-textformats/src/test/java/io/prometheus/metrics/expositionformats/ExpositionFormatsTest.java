@@ -1169,6 +1169,7 @@ class ExpositionFormatsTest {
             + "quantile { quantile: 0.5 value: 225.3 } "
             + "quantile { quantile: 0.9 value: 240.7 } "
             + "quantile { quantile: 0.95 value: 245.1 } "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
             + "} "
             + "timestamp_ms: 1672850685829 "
             + "} metric { "
@@ -1179,6 +1180,7 @@ class ExpositionFormatsTest {
             + "quantile { quantile: 0.5 value: 225.3 } "
             + "quantile { quantile: 0.9 value: 240.7 } "
             + "quantile { quantile: 0.95 value: 245.1 } "
+            + "created_timestamp { seconds: 1672850285 } "
             + "} "
             + "timestamp_ms: 1672850585820 "
             + "}";
@@ -1742,6 +1744,7 @@ class ExpositionFormatsTest {
             + exemplar2protoString
             + " "
             + "} "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
             + "} "
             + "} metric { "
             + "label { name: \"status\" value: \"500\" } "
@@ -1763,6 +1766,7 @@ class ExpositionFormatsTest {
             + exemplar2protoString
             + " "
             + "} "
+            + "created_timestamp { seconds: 1672850285 } "
             + "} "
             + "}";
     // @formatter:on
@@ -2171,6 +2175,7 @@ class ExpositionFormatsTest {
             + exemplar2protoString
             + " "
             + "} "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
             + "} "
             + "} metric { "
             + "label { name: \"db\" value: \"options\" } "
@@ -2189,6 +2194,7 @@ class ExpositionFormatsTest {
             + exemplar2protoString
             + " "
             + "} "
+            + "created_timestamp { seconds: 1672850285 } "
             + "} "
             + "}";
     // @formatter:on
@@ -2590,6 +2596,7 @@ class ExpositionFormatsTest {
             + "zero_count: 0 "
             + "positive_span { offset: 0 length: 1 } "
             + "positive_delta: 2 "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
             + "} "
             + "} metric { "
             + "label { name: \"status\" value: \"500\" } "
@@ -2655,7 +2662,8 @@ class ExpositionFormatsTest {
             + // index 46, count 2
             "positive_delta: -1 "
             + // index 47, count 1
-            "} "
+            "created_timestamp { seconds: 1672850285 } "
+            + "} "
             + "}";
     // @formatter:on
     HistogramSnapshot nativeHistogram =
