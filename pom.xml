@@ -42,6 +42,7 @@
     <module>prometheus-metrics-annotations</module>
     <module>prometheus-metrics-bom</module>
     <module>prometheus-metrics-core</module>
+    <module>prometheus-metrics-jcstress</module>
     <module>prometheus-metrics-config</module>
     <module>prometheus-metrics-model</module>
     <module>prometheus-metrics-tracer</module>
