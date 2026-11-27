@@ -43,16 +43,27 @@ public abstract class AbstractDropwizardExports<R, F, C, G, H, T, M, B, S>
   protected final F metricFilter;
   @Nullable protected final CustomLabelMapper labelMapper;
   protected final InvalidMetricHandler invalidMetricHandler;
+  private final boolean preserveTimerAndHistogramNames;
 
   protected AbstractDropwizardExports(
       R registry,
       F metricFilter,
       @Nullable CustomLabelMapper labelMapper,
       InvalidMetricHandler invalidMetricHandler) {
+    this(registry, metricFilter, labelMapper, invalidMetricHandler, false);
+  }
+
+  protected AbstractDropwizardExports(
+      R registry,
+      F metricFilter,
+      @Nullable CustomLabelMapper labelMapper,
+      InvalidMetricHandler invalidMetricHandler,
+      boolean preserveTimerAndHistogramNames) {
     this.registry = registry;
     this.metricFilter = metricFilter;
     this.labelMapper = labelMapper;
     this.invalidMetricHandler = invalidMetricHandler;
+    this.preserveTimerAndHistogramNames = preserveTimerAndHistogramNames;
   }
 
   protected static String getHelpMessage(String metricName, Object metric) {
@@ -134,8 +145,17 @@ public abstract class AbstractDropwizardExports<R, F, C, G, H, T, M, B, S>
             .build();
 
     String name = labelMapper != null ? labelMapper.getName(dropwizardName) : dropwizardName;
+    String sanitizedName =
+        preserveTimerAndHistogramNames
+            ? PrometheusNaming.normalizeMetricName(name)
+            : PrometheusNaming.sanitizeMetricName(name);
     MetricMetadata metadata =
-        new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), helpMessage);
+        MetricMetadata.builder()
+            .name(sanitizedName)
+            .expositionBaseName(name)
+            .originalName(name)
+            .help(helpMessage)
+            .build();
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
         SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
     if (labelMapper != null) {

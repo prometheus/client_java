@@ -6,7 +6,10 @@ import static org.assertj.core.data.Offset.offset;
 
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.config.EscapingScheme;
+import io.prometheus.metrics.expositionformats.OpenMetrics2TextFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
+import io.prometheus.metrics.instrumentation.dropwizard5.labels.MapperConfig;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Quantiles;
@@ -14,6 +17,7 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +31,98 @@ class DropwizardExportsTest {
   void setUp() {
     metricRegistry = new MetricRegistry();
     DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(registry);
+  }
+
+  @Test
+  void testTimerTotalSuffixIsSanitizedByDefault() {
+    metricRegistry.timer("foo.total").update(1, TimeUnit.SECONDS);
+
+    assertThat(convertToOpenMetricsFormat()).contains("# TYPE foo summary");
+    assertThat(convertToOpenMetricsFormat()).doesNotContain("# TYPE foo_total summary");
+    SummarySnapshot snapshot = (SummarySnapshot) metricRegistrySnapshots().get(0);
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("foo");
+    assertThat(snapshot.getMetadata().getOriginalName()).isEqualTo("foo.total");
+    assertThat(snapshot.getMetadata().getExpositionBaseName()).isEqualTo("foo.total");
+  }
+
+  @Test
+  void testTimersWithTotalSuffixAreDistinctWhenEnabled() {
+    MetricRegistry sourceRegistry = new MetricRegistry();
+    sourceRegistry.timer("foo").update(1, TimeUnit.SECONDS);
+    sourceRegistry.timer("foo.total").update(2, TimeUnit.SECONDS);
+    sourceRegistry.timer("foo.count").update(3, TimeUnit.SECONDS);
+    sourceRegistry.histogram("hist").update(1);
+    sourceRegistry.histogram("hist.total").update(2);
+    sourceRegistry.counter("counter.total").inc();
+    sourceRegistry.meter("meter.total").mark();
+    PrometheusRegistry targetRegistry = new PrometheusRegistry();
+    DropwizardExports.builder()
+        .dropwizardRegistry(sourceRegistry)
+        .preserveTimerAndHistogramNames(true)
+        .register(targetRegistry);
+
+    String output = convertToOpenMetricsFormat(targetRegistry);
+
+    assertThat(output)
+        .contains("# TYPE foo summary", "# TYPE foo_total summary", "# TYPE foo_count summary")
+        .contains("# TYPE hist summary", "# TYPE hist_total summary")
+        .contains("counter_total 1.0", "meter_total 1.0")
+        .doesNotContain("counter_total_total", "meter_total_total");
+  }
+
+  @Test
+  void testCustomLabelMapperNameIsPreservedForTimer() throws IOException {
+    MetricRegistry sourceRegistry = new MetricRegistry();
+    sourceRegistry.timer("source.total").update(1, TimeUnit.SECONDS);
+    CustomLabelMapper mapper =
+        new CustomLabelMapper(
+            Collections.singletonList(
+                new MapperConfig("source.total", "mapped.total", Collections.emptyMap())));
+    PrometheusRegistry targetRegistry = new PrometheusRegistry();
+    DropwizardExports.builder()
+        .dropwizardRegistry(sourceRegistry)
+        .customLabelMapper(mapper)
+        .preserveTimerAndHistogramNames(true)
+        .register(targetRegistry);
+
+    SummarySnapshot snapshot = (SummarySnapshot) targetRegistry.scrape().get(0);
+    String output = convertToOpenMetricsFormat(targetRegistry);
+    String om2Output = convertToOpenMetrics2Format(targetRegistry, EscapingScheme.ALLOW_UTF8);
+
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("mapped.total");
+    assertThat(snapshot.getMetadata().getOriginalName()).isEqualTo("mapped.total");
+    assertThat(output).contains("# TYPE mapped_total summary").doesNotContain("source_total");
+    assertThat(om2Output)
+        .contains("# TYPE \"mapped.total\" summary", "{\"mapped.total\",quantile=\"0.5\"}");
+  }
+
+  @Test
+  void testDefaultTimerCollisionStillFailsInLegacyFormat() {
+    metricRegistry.timer("foo").update(1, TimeUnit.SECONDS);
+    metricRegistry.timer("foo.total").update(2, TimeUnit.SECONDS);
+
+    assertThatThrownBy(this::convertToOpenMetricsFormat)
+        .isInstanceOf(io.prometheus.metrics.model.snapshots.DuplicateLabelsException.class);
+  }
+
+  @Test
+  void testOpenMetrics2UsesOriginalTimerNamesByDefault() throws IOException {
+    MetricRegistry sourceRegistry = new MetricRegistry();
+    sourceRegistry.timer("foo").update(1, TimeUnit.SECONDS);
+    sourceRegistry.timer("foo.total").update(2, TimeUnit.SECONDS);
+    PrometheusRegistry targetRegistry = new PrometheusRegistry();
+    DropwizardExports.builder().dropwizardRegistry(sourceRegistry).register(targetRegistry);
+
+    String utf8Output = convertToOpenMetrics2Format(targetRegistry, EscapingScheme.ALLOW_UTF8);
+    String underscoreOutput =
+        convertToOpenMetrics2Format(targetRegistry, EscapingScheme.UNDERSCORE_ESCAPING);
+
+    assertThat(utf8Output).contains("# TYPE foo summary", "# TYPE \"foo.total\" summary");
+    assertThat(underscoreOutput).contains("# TYPE foo summary", "# TYPE foo_total summary");
+  }
+
+  private MetricSnapshots metricRegistrySnapshots() {
+    return new DropwizardExports(metricRegistry).collect();
   }
 
   @Test
@@ -359,5 +455,13 @@ my_application_namedCounter2_total 10.0
 
   private String convertToOpenMetricsFormat() {
     return convertToOpenMetricsFormat(registry);
+  }
+
+  private String convertToOpenMetrics2Format(PrometheusRegistry _registry, EscapingScheme scheme)
+      throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    OpenMetrics2TextFormatWriter writer = OpenMetrics2TextFormatWriter.create();
+    writer.write(out, _registry.scrape(), scheme);
+    return out.toString(StandardCharsets.UTF_8);
   }
 }

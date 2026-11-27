@@ -148,7 +148,9 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
   public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme scheme)
       throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-    MetricSnapshots merged = TextFormatUtil.mergeDuplicates(metricSnapshots);
+    MetricSnapshots merged =
+        TextFormatUtil.mergeDuplicates(
+            metricSnapshots, snapshot -> getFamilyName(snapshot, scheme));
     for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, scheme);
       if (!snapshot.getDataPoints().isEmpty()) {
@@ -757,6 +759,22 @@ public class OpenMetrics2TextFormatWriter implements ExpositionFormatWriter {
       return getExpositionBaseMetadataName(metadata, scheme);
     }
     return getOriginalMetadataName(metadata, scheme);
+  }
+
+  private String getFamilyName(MetricSnapshot snapshot, EscapingScheme scheme) {
+    MetricMetadata metadata = snapshot.getMetadata();
+    String rawName =
+        openMetrics2Properties.getSuffixes()
+            ? metadata.getExpositionBaseName()
+            : metadata.getOriginalName();
+    String name = PrometheusNaming.escapeName(rawName, scheme);
+    if (snapshot instanceof CounterSnapshot && openMetrics2Properties.getSuffixes()) {
+      return ensureSuffix(name, "_total");
+    }
+    if (snapshot instanceof InfoSnapshot) {
+      return ensureSuffix(name, "_info");
+    }
+    return name;
   }
 
   private static String ensureSuffix(String name, String suffix) {

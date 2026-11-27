@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
@@ -81,6 +82,51 @@ public class TextFormatUtil {
       }
     }
 
+    return builder.build();
+  }
+
+  /** Merges snapshots using the family name rendered by a format writer. */
+  static MetricSnapshots mergeDuplicates(
+      MetricSnapshots metricSnapshots, Function<MetricSnapshot, String> familyName) {
+    if (metricSnapshots.size() <= 1) {
+      return metricSnapshots;
+    }
+
+    String previousName = familyName.apply(metricSnapshots.get(0));
+    boolean renderedNamesAreStrictlyIncreasing = true;
+    for (int i = 1; i < metricSnapshots.size(); i++) {
+      String name = familyName.apply(metricSnapshots.get(i));
+      if (previousName.compareTo(name) >= 0) {
+        renderedNamesAreStrictlyIncreasing = false;
+        break;
+      }
+      previousName = name;
+    }
+    if (renderedNamesAreStrictlyIncreasing) {
+      return metricSnapshots;
+    }
+
+    Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
+    boolean hasDuplicates = false;
+    for (MetricSnapshot snapshot : metricSnapshots) {
+      String key = familyName.apply(snapshot);
+      List<MetricSnapshot> group = grouped.get(key);
+      if (group == null) {
+        group = new ArrayList<>();
+        grouped.put(key, group);
+      } else {
+        hasDuplicates = true;
+      }
+      group.add(snapshot);
+    }
+    if (!hasDuplicates) {
+      return metricSnapshots;
+    }
+
+    MetricSnapshots.Builder builder = MetricSnapshots.builder();
+    for (List<MetricSnapshot> group : grouped.values()) {
+      builder.metricSnapshot(group.size() == 1 ? group.get(0) : mergeSnapshots(group, true));
+    }
     return builder.build();
   }
 
@@ -261,8 +307,13 @@ public class TextFormatUtil {
   /**
    * Merges multiple snapshots of the same type into a single snapshot with combined data points.
    */
-  @SuppressWarnings("unchecked")
   private static MetricSnapshot mergeSnapshots(List<MetricSnapshot> snapshots) {
+    return mergeSnapshots(snapshots, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static MetricSnapshot mergeSnapshots(
+      List<MetricSnapshot> snapshots, boolean renderedNameIsConsistent) {
     MetricSnapshot first = snapshots.get(0);
 
     int totalDataPoints = 0;
@@ -283,8 +334,10 @@ public class TextFormatUtil {
         }
       }
       // Validate metadata consistency so we don't silently pick one help/unit when they differ.
-      if (!Objects.equals(
-          first.getMetadata().getPrometheusName(), snapshot.getMetadata().getPrometheusName())) {
+      if (!renderedNameIsConsistent
+          && !Objects.equals(
+              first.getMetadata().getPrometheusName(),
+              snapshot.getMetadata().getPrometheusName())) {
         throw new IllegalArgumentException("Cannot merge snapshots: inconsistent metric name");
       }
       if (!Objects.equals(first.getMetadata().getUnit(), snapshot.getMetadata().getUnit())) {
