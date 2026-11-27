@@ -97,50 +97,50 @@ url_api = "https://api.github.com/repos/grafana/flint/releases/assets/685577805"
 provenance = "github-attestations"
 
 [[tools."aqua:grafana/gcx"]]
-version = "v1.8.0"
+version = "v1.9.1"
 backend = "aqua:grafana/gcx"
 specifiers = ["latest"]
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64"]
-checksum = "sha256:78d4d03a3b2fea6cfde5aceae0d464b5ac7cc3a2b59269437120e0708b56f438"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418678"
+checksum = "sha256:e5e1e096e863adcbede30cea1b3fff1da170a7bb81d5b4f67a66a7bd452b8f7e"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419724"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-arm64-musl"]
-checksum = "sha256:78d4d03a3b2fea6cfde5aceae0d464b5ac7cc3a2b59269437120e0708b56f438"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418678"
+checksum = "sha256:e5e1e096e863adcbede30cea1b3fff1da170a7bb81d5b4f67a66a7bd452b8f7e"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419724"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64"]
-checksum = "sha256:85e21eeecae4ed2f21a40934bb127f0ec3bc2461f024404a709bf6e448b0e975"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418548"
+checksum = "sha256:c40c250d10df7e7955dc276d1c47f329560a68c3774aa8e2fb4ed10308b57651"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419518"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.linux-x64-musl"]
-checksum = "sha256:85e21eeecae4ed2f21a40934bb127f0ec3bc2461f024404a709bf6e448b0e975"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418548"
+checksum = "sha256:c40c250d10df7e7955dc276d1c47f329560a68c3774aa8e2fb4ed10308b57651"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419518"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.macos-arm64"]
-checksum = "sha256:002f7b0f06b0f29e5ed5fed2f327af6b6eda838f5f2b935c5286a6b5b2c00861"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_darwin_arm64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418553"
+checksum = "sha256:2991b2217abd397c4a4126effa006ca5845b210bd0e9079d3d83c54cbdee3c98"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_darwin_arm64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419731"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.macos-x64"]
-checksum = "sha256:1919578d6dca8872dc315b7fca921dba5e11e8456b5908ebfbfd7053a15e52db"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_darwin_amd64.tar.gz"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418552"
+checksum = "sha256:a32c73a889ea128e9250af1f38d42a38362b324d580405bef8e48057ab0256a5"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419532"
 provenance = "cosign"
 
 [tools."aqua:grafana/gcx"."platforms.windows-x64"]
-checksum = "sha256:915d8e7dbb688265b90a0c0b01f3dcc5c463779edd3d9cd7fbce10d68cc16685"
-url = "https://github.com/grafana/gcx/releases/download/v1.8.0/gcx_1.8.0_windows_amd64.zip"
-url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/758418685"
+checksum = "sha256:f28cf277362e15a7fc0880095e7e4ac58a90b430a9a6d1b999300feb96eb0475"
+url = "https://github.com/grafana/gcx/releases/download/v1.9.1/gcx_1.9.1_windows_amd64.zip"
+url_api = "https://api.github.com/repos/grafana/gcx/releases/assets/796419527"
 provenance = "cosign"
 
 [[tools."aqua:grafana/oats"]]
