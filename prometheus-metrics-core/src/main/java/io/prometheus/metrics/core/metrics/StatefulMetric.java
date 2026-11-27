@@ -138,11 +138,15 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
    */
   public void remove(String... labelValues) {
     data.remove(Arrays.asList(labelValues));
+    if (labelValues.length == 0) {
+      noLabels = null;
+    }
   }
 
   /** Remove the data points when the given function. */
   public void removeIf(Function<List<String>, Boolean> f) {
     data.entrySet().removeIf(entry -> f.apply(Collections.unmodifiableList(entry.getKey())));
+    noLabels = null;
   }
 
   /** Reset the metric (remove all data points). */
