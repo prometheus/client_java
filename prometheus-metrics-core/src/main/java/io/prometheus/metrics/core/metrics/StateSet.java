@@ -8,6 +8,7 @@ import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -167,6 +168,17 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         throw new IllegalArgumentException("states cannot be empty");
       }
       this.names = Stream.of(stateNames).distinct().sorted().toArray(String[]::new);
+      return this;
+    }
+
+    /**
+     * Throws an {@link UnsupportedOperationException} because StateSet metrics cannot have a unit.
+     */
+    @Override
+    public Builder unit(@Nullable Unit unit) {
+      if (unit != null) {
+        throw new UnsupportedOperationException("StateSet metrics cannot have a unit.");
+      }
       return this;
     }
 
